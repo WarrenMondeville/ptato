@@ -1,1 +1,202 @@
-<h1>hello</h1>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ptato · 个人主页</title>
+<meta name="description" content="ptato 的个人站点：读书笔记、图解教程与一些随手做的东西。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥔</text></svg>">
+<style>
+  :root{
+    --bg:#f6f8fb; --card:#ffffff; --ink:#1e293b; --ink2:#475569; --ink3:#94a3b8;
+    --line:#e2e8f0; --line2:#cbd5e1;
+    --blue:#3b5bdb; --blue-bg:#eef2ff;
+    --amber:#b45309; --amber-bg:#fffbeb;
+    --teal:#0d9488; --teal-bg:#ecfdf5;
+    --violet:#6d28d9; --violet-bg:#f5f3ff;
+    --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px -12px rgba(15,23,42,.14);
+    --shadow-lift:0 2px 4px rgba(15,23,42,.06),0 16px 36px -16px rgba(15,23,42,.20);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:16px; line-height:1.85; -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--blue);text-decoration:none}
+  .wrap{max-width:920px;margin:0 auto;padding:0 20px}
+
+  /* ---------- nav ---------- */
+  nav{
+    position:sticky;top:0;z-index:50;background:rgba(246,248,251,.82);
+    backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line);
+  }
+  nav .inner{max-width:920px;margin:0 auto;padding:0 20px;height:58px;display:flex;align-items:center;gap:22px}
+  nav .brand{display:flex;align-items:center;gap:9px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+  nav .brand .dot{width:26px;height:26px;border-radius:9px;background:var(--amber-bg);border:1px solid #f6e3bf;
+                  display:flex;align-items:center;justify-content:center;font-size:14px}
+  nav .links{display:flex;gap:18px;margin-left:auto;font-size:14.5px}
+  nav .links a{color:var(--ink2)}
+  nav .links a:hover{color:var(--blue)}
+
+  /* ---------- hero ---------- */
+  .hero{padding:78px 0 56px;text-align:center}
+  .kicker{
+    display:inline-block;font-size:12.5px;letter-spacing:.14em;color:var(--amber);
+    background:var(--amber-bg);border:1px solid #f6e3bf;border-radius:999px;padding:5px 14px;margin-bottom:22px;
+  }
+  .hero h1{font-size:clamp(32px,6vw,54px);line-height:1.2;margin:0 0 18px;letter-spacing:-.03em}
+  .hero h1 em{font-style:normal;color:var(--blue)}
+  .hero p.sub{color:var(--ink2);font-size:17.5px;margin:0 auto;max-width:620px}
+  .cta{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:32px}
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:12px;font-size:15px;font-weight:600;
+    border:1px solid transparent;transition:transform .12s ease,box-shadow .12s ease;
+  }
+  .btn:hover{transform:translateY(-1px)}
+  .btn.primary{background:var(--blue);color:#fff;box-shadow:0 8px 20px -10px rgba(59,91,219,.8)}
+  .btn.ghost{background:#fff;color:var(--ink);border-color:var(--line);box-shadow:var(--shadow)}
+
+  /* ---------- section ---------- */
+  section{margin-top:64px;scroll-margin-top:70px}
+  .sec-head{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+  .sec-head h2{font-size:22px;margin:0;letter-spacing:-.01em}
+  .sec-head .en{font-size:13px;color:var(--ink3);font-weight:500}
+  .sec-head .line{flex:1;height:1px;background:var(--line)}
+
+  /* ---------- post list ---------- */
+  .posts{display:grid;gap:14px}
+  .post{
+    display:block;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;
+    box-shadow:var(--shadow);transition:transform .14s ease,box-shadow .14s ease,border-color .14s ease;
+  }
+  .post:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift);border-color:#cfd9ff}
+  .post .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+  .post h3{margin:0;font-size:18.5px;letter-spacing:-.01em;color:var(--ink);flex:1;min-width:200px}
+  .post h3 .arw{color:var(--ink3);font-weight:400;margin-left:4px;transition:margin .14s ease}
+  .post:hover h3 .arw{margin-left:9px;color:var(--blue)}
+  .post p{margin:0;color:var(--ink2);font-size:14.8px;line-height:1.75}
+  .post .meta{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .tag{font-size:12px;padding:2px 9px;border-radius:999px;border:1px solid;line-height:1.7}
+  .tag.b{background:var(--blue-bg);color:var(--blue);border-color:#dbe3ff}
+  .tag.t{background:var(--teal-bg);color:var(--teal);border-color:#c9f0e6}
+  .tag.a{background:var(--amber-bg);color:var(--amber);border-color:#f6e3bf}
+  .tag.v{background:var(--violet-bg);color:var(--violet);border-color:#ddd3fb}
+  .date{font-size:13px;color:var(--ink3);margin-left:auto;font-variant-numeric:tabular-nums}
+
+  /* ---------- cards ---------- */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow)}
+  .card .ico{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:10px}
+  .card h4{margin:0 0 6px;font-size:16px}
+  .card p{margin:0;color:var(--ink2);font-size:14.3px;line-height:1.7}
+
+  .empty{
+    background:var(--card);border:1px dashed var(--line2);border-radius:16px;padding:26px;text-align:center;
+    color:var(--ink3);font-size:14.5px;
+  }
+
+  /* ---------- footer ---------- */
+  footer{margin-top:80px;border-top:1px solid var(--line);padding:26px 0 60px;color:var(--ink3);font-size:13.5px;
+         display:flex;flex-wrap:wrap;gap:10px;justify-content:center;text-align:center}
+  footer a{color:var(--ink2)}
+
+  @media (max-width:600px){
+    .hero{padding:52px 0 40px}
+    .hero p.sub{font-size:16px}
+    .post{padding:18px}
+    .post .date{margin-left:0;width:100%}
+    nav .links{gap:14px;font-size:14px}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="inner">
+    <a class="brand" href="#"><span class="dot">🥔</span>ptato</a>
+    <div class="links">
+      <a href="#posts">文章</a>
+      <a href="#now">在做什么</a>
+      <a href="#about">关于</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <!-- ============ HERO ============ -->
+  <header class="hero">
+    <div class="kicker">PERSONAL SITE</div>
+    <h1>没事我白话</h1>
+    <p class="sub">这里放我的读书笔记、图解教程，以及一些做着玩的小东西。写得慢，但尽量写清楚。</p>
+    <div class="cta">
+      <a class="btn primary" href="#posts">读文章 →</a>
+      <a class="btn ghost" href="https://github.com/ptato" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </header>
+
+  <!-- ============ POSTS ============ -->
+  <section id="posts">
+    <div class="sec-head"><h2>文章</h2><span class="en">Writing</span><div class="line"></div></div>
+
+    <div class="posts">
+      <!-- 新增文章：复制下面这个 <a class="post"> 块，改标题/简介/日期/链接即可 -->
+      <a class="post" href="ai/AI-Agent-图解教程.html">
+        <div class="top">
+          <h3>AI Agent 图解教程：把《深入理解 AI Agent》讲成大白话<span class="arw">→</span></h3>
+        </div>
+        <p>310 页的书压成 20 张图。从「Agent = LLM + 上下文 + 工具」这一个公式出发，讲清 ReAct 循环、上下文工程、工具设计、评估与多 Agent 协作。</p>
+        <div class="meta">
+          <span class="tag b">AI</span>
+          <span class="tag v">图解</span>
+          <span class="tag t">读书笔记</span>
+          <span class="date">2026-09-17 · 约 25 分钟</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="empty" style="margin-top:14px">更多文章还在写 —— 有想法会先丢在这里</div>
+  </section>
+
+  <!-- ============ NOW ============ -->
+  <section id="now">
+    <div class="sec-head"><h2>在做什么</h2><span class="en">Now</span><div class="line"></div></div>
+    <div class="grid">
+      <div class="card">
+        <div class="ico" style="background:var(--violet-bg)">🎮</div>
+        <h4>游戏开发</h4>
+        <p>Unity / C#，横版动作方向。折腾动画系统和 UI 适配居多。</p>
+      </div>
+      <div class="card">
+        <div class="ico" style="background:var(--blue-bg)">🤖</div>
+        <h4>AI 应用</h4>
+        <p>Agent 工程实践，顺手把读到的东西整理成图解教程。</p>
+      </div>
+      <div class="card">
+        <div class="ico" style="background:var(--teal-bg)">🌱</div>
+        <h4>这个站</h4>
+        <p>纯静态、零构建。想到什么写什么，慢慢长。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ABOUT ============ -->
+  <section id="about">
+    <div class="sec-head"><h2>关于</h2><span class="en">About</span><div class="line"></div></div>
+    <div class="card">
+      <p style="margin-top:0">我是 ptato，写代码、做游戏，业余读点书。<br>
+      这个站没有主题、没有评论、没有统计，只有内容和链接 —— 我想让它保持这个样子。</p>
+      <p style="margin-bottom:0">想聊点什么，<a href="https://github.com/ptato" target="_blank" rel="noopener">GitHub</a> 上找我最快。</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>© 2026 ptato</span><span>·</span>
+    <span>用 <a href="https://pages.github.com/" target="_blank" rel="noopener">GitHub Pages</a> 托管</span>
+  </footer>
+
+</div>
+</body>
+</html>
