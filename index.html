@@ -68,9 +68,16 @@
   /* ---------- post list ---------- */
   .posts{display:grid;gap:14px}
   .post{
-    display:block;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;
+    display:flex;gap:18px;align-items:flex-start;
+    background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;
     box-shadow:var(--shadow);transition:transform .14s ease,box-shadow .14s ease,border-color .14s ease;
   }
+  .post .thumb{
+    width:176px;height:75px;flex:0 0 auto;border-radius:10px;border:1px solid var(--line);
+    object-fit:cover;background:var(--bg);transition:border-color .14s ease;
+  }
+  .post:hover .thumb{border-color:#cfd9ff}
+  .post .body{flex:1;min-width:0}
   .post:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift);border-color:#cfd9ff}
   .post .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
   .post h3{margin:0;font-size:18.5px;letter-spacing:-.01em;color:var(--ink);flex:1;min-width:200px}
@@ -105,7 +112,8 @@
   @media (max-width:600px){
     .hero{padding:52px 0 40px}
     .hero p.sub{font-size:16px}
-    .post{padding:18px}
+    .post{padding:18px;flex-direction:column;gap:14px}
+    .post .thumb{width:100%;height:auto;aspect-ratio:900/383}
     .post .date{margin-left:0;width:100%}
     nav .links{gap:14px;font-size:14px}
   }
@@ -142,8 +150,10 @@
     <div class="sec-head"><h2>文章</h2><span class="en">Writing</span><div class="line"></div></div>
 
     <div class="posts">
-      <!-- 新增文章：复制下面这个 <a class="post"> 块，改标题/简介/日期/链接即可 -->
+      <!-- 新增文章：复制下面这个 <a class="post"> 块，改封面图 src / 标题 / 简介 / 日期 / 链接即可 -->
       <a class="post" href="ai/高效执行4原则2.0-图解教程.html">
+        <img class="thumb" src="covers/cover-4dx.png" alt="《高效执行4原则 2.0》图解教程封面" width="900" height="383" loading="lazy">
+        <div class="body">
         <div class="top">
           <h3>《高效执行4原则 2.0》图解教程：旋风里怎么把目标打穿<span class="arw">→</span></h3>
         </div>
@@ -154,9 +164,12 @@
           <span class="tag t">读书笔记</span>
           <span class="date">2026-09-18 · 约 20 分钟</span>
         </div>
+        </div>
       </a>
 
       <a class="post" href="ai/斯特朗线性代数-图解教程.html">
+        <img class="thumb" src="covers/cover-linear-algebra.png" alt="斯特朗《线性代数》图解教程封面" width="900" height="383" loading="lazy">
+        <div class="body">
         <div class="top">
           <h3>斯特朗《线性代数》图解教程：四个子空间与五个分解<span class="arw">→</span></h3>
         </div>
@@ -167,9 +180,12 @@
           <span class="tag t">读书笔记</span>
           <span class="date">2026-09-18 · 约 35 分钟</span>
         </div>
+        </div>
       </a>
 
       <a class="post" href="ai/游戏物理引擎开发-图解教程.html">
+        <img class="thumb" src="covers/cover-game-physics.png" alt="游戏物理引擎开发图解教程封面" width="900" height="383" loading="lazy">
+        <div class="body">
         <div class="top">
           <h3>游戏物理引擎开发：从一颗粒子到能撑起游戏的引擎<span class="arw">→</span></h3>
         </div>
@@ -180,9 +196,12 @@
           <span class="tag t">读书笔记</span>
           <span class="date">2026-09-17 · 约 45 分钟</span>
         </div>
+        </div>
       </a>
 
       <a class="post" href="ai/AI-Agent-图解教程.html">
+        <img class="thumb" src="covers/cover-ai-agent.png" alt="AI Agent 图解教程封面" width="900" height="383" loading="lazy">
+        <div class="body">
         <div class="top">
           <h3>AI Agent 图解教程：把《深入理解 AI Agent》讲成大白话<span class="arw">→</span></h3>
         </div>
@@ -192,6 +211,7 @@
           <span class="tag v">图解</span>
           <span class="tag t">读书笔记</span>
           <span class="date">2026-09-17 · 约 25 分钟</span>
+        </div>
         </div>
       </a>
     </div>
