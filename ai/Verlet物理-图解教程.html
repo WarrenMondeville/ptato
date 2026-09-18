@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verlet 物理 · 图解教程｜从三行积分到绳子、布料与布娃娃</title>
+<meta name="description" content="Verlet 积分与位置约束（PBD / Jakobsen 松弛）图解教程：公式推导、隐式速度、距离约束松弛、布料三类约束、碰撞投影、substep 与 XPBD，附 3 个可交互演示。">
+<style>
+:root{
+  --bg:#f6f8fb; --card:#fff; --ink:#1e293b; --ink2:#475569; --ink3:#94a3b8;
+  --line:#e2e8f0; --line2:#cbd5e1;
+  --blue:#3b5bdb; --amber:#b45309; --teal:#0d9488; --violet:#6d28d9; --rose:#be123c; --green:#15803d;
+  --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px -12px rgba(15,23,42,.14);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",sans-serif;
+  font-size:16px; line-height:1.85; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:920px;margin:0 auto;padding:0 20px 80px}
+a{color:var(--blue);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ---------- hero ---------- */
+.hero{
+  background:linear-gradient(160deg,#fff 0%,#f3f6ff 55%,#eef4ff 100%);
+  border:1px solid var(--line); border-radius:20px; padding:44px 38px; margin:28px 0 26px;
+  box-shadow:var(--shadow); position:relative; overflow:hidden;
+}
+.hero::after{
+  content:""; position:absolute; right:-70px; top:-70px; width:260px; height:260px; border-radius:50%;
+  background:radial-gradient(circle,rgba(59,91,219,.10),transparent 70%);
+}
+.kicker{font-size:13px;letter-spacing:.16em;color:var(--blue);font-weight:700;margin-bottom:14px}
+.hero h1{font-size:33px;line-height:1.3;margin:0 0 12px;letter-spacing:-.01em}
+.hero .sub{font-size:16.5px;color:var(--ink2);margin:0 0 22px;max-width:660px}
+.hero .meta{display:flex;flex-wrap:wrap;gap:10px}
+.chip{background:#fff;border:1px solid var(--line2);border-radius:999px;padding:5px 14px;font-size:12.5px;color:var(--ink2)}
+.chip b{color:var(--ink);font-weight:600}
+
+/* ---------- 目录 ---------- */
+.toc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-bottom:30px;box-shadow:var(--shadow)}
+.toc h2{font-size:15px;margin:0 0 16px;color:var(--ink3);font-weight:700;letter-spacing:.08em}
+.tocgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:6px 26px}
+.toc a{display:block;padding:5px 0;font-size:14.5px;color:var(--ink2);border-bottom:1px dashed transparent}
+.toc a:hover{color:var(--blue);border-bottom-color:var(--line2);text-decoration:none}
+.toc .part{grid-column:1/-1;font-size:12px;color:var(--ink3);font-weight:700;margin-top:12px;letter-spacing:.05em}
+
+/* ---------- 章节 ---------- */
+section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:34px 38px;margin-bottom:26px;box-shadow:var(--shadow)}
+section>h2{font-size:24px;margin:0 0 6px;letter-spacing:-.01em;scroll-margin-top:20px}
+section>h2 .num{color:var(--line2);font-weight:800;margin-right:10px;font-size:20px}
+.lead{color:var(--ink2);font-size:15.5px;margin:0 0 22px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+h3{font-size:18px;margin:32px 0 10px;color:var(--ink)}
+h3:first-of-type{margin-top:8px}
+h4{font-size:15px;margin:22px 0 8px;color:var(--ink2)}
+p{margin:0 0 14px}
+ul,ol{margin:0 0 16px;padding-left:22px}
+li{margin-bottom:7px}
+strong{font-weight:650;color:var(--ink)}
+code{
+  font-family:"SFMono-Regular",Menlo,Consolas,monospace;font-size:13px;
+  background:#f1f5f9;border:1px solid var(--line);border-radius:5px;padding:1px 5px;color:#0f172a;
+}
+.small{font-size:13.5px;color:var(--ink3)}
+
+/* ---------- 图 ---------- */
+.diagram{background:linear-gradient(180deg,#fdfefe,#f8fafc);border:1px solid var(--line);border-radius:14px;padding:22px 18px;margin:22px 0}
+.cap{font-size:12.5px;color:var(--ink3);text-align:center;margin-top:12px;line-height:1.6}
+.diagram svg{display:block;width:100%;height:auto}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;justify-content:center;gap:8px}
+.box{background:#fff;border:1.5px solid var(--line2);border-radius:11px;padding:10px 14px;font-size:13.5px;text-align:center;line-height:1.5}
+.box b{display:block;font-size:13.5px;font-weight:700;color:var(--ink)}
+.box span{font-size:11.5px;color:var(--ink3)}
+.box.blue{border-color:#a8b8f5;background:#f3f6ff}
+.box.teal{border-color:#8fd3cb;background:#f0fbf9}
+.box.amber{border-color:#f0c48a;background:#fffaf0}
+.box.rose{border-color:#f2aab8;background:#fff5f7}
+.box.violet{border-color:#c4b0f5;background:#f8f5ff}
+.box.green{border-color:#9bd3a4;background:#f2fbf4}
+.box.dark{border-color:#94a3b8;background:#f1f5f9}
+.arw{align-self:center;color:#94a3b8;font-size:17px;font-weight:700}
+.arw.dn{display:block;text-align:center;margin:6px auto;color:#94a3b8;font-size:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:680px){.grid2,.grid3{grid-template-columns:1fr}}
+
+/* ---------- 高亮框 ---------- */
+.callout{border-radius:12px;padding:16px 18px;margin:20px 0;font-size:14.5px;border:1px solid;line-height:1.75}
+.callout .hd{font-weight:700;font-size:13px;letter-spacing:.05em;margin-bottom:6px;display:block}
+.callout p:last-child{margin-bottom:0}
+.callout ul:last-child{margin-bottom:0}
+.co-blue{background:#f3f6ff;border-color:#c7d2fe;color:#1e3a8a}
+.co-blue .hd{color:var(--blue)}
+.co-teal{background:#f0fbf9;border-color:#99e6d9;color:#134e4a}
+.co-teal .hd{color:var(--teal)}
+.co-amber{background:#fffaf0;border-color:#fcd9a5;color:#78350f}
+.co-amber .hd{color:var(--amber)}
+.co-rose{background:#fff5f7;border-color:#f8c2cd;color:#831843}
+.co-rose .hd{color:var(--rose)}
+.co-violet{background:#f8f5ff;border-color:#ddd0fb;color:#4c1d95}
+.co-violet .hd{color:var(--violet)}
+
+/* ---------- 表格 ---------- */
+.tblwrap{overflow-x:auto;margin:20px 0;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13.5px;background:#fff}
+th{background:#f8fafc;text-align:left;padding:10px 13px;font-weight:700;color:var(--ink2);border-bottom:1px solid var(--line);white-space:nowrap;font-size:13px}
+td{padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#fcfdff}
+
+/* ---------- 公式 ---------- */
+.formula{
+  background:#f8fafc;border:1px solid var(--line);border-left:3px solid var(--blue);
+  border-radius:0 10px 10px 0;padding:12px 16px;margin:16px 0;
+  font-family:"SFMono-Regular",Menlo,Consolas,monospace;font-size:13.5px;line-height:2;color:#0f172a;
+  overflow-x:auto;white-space:pre;
+}
+.formula .c{color:var(--ink3)}
+
+/* ---------- 代码 ---------- */
+pre{
+  background:#0f172a;color:#e2e8f0;border-radius:12px;padding:16px 18px;overflow-x:auto;
+  font-family:"SFMono-Regular",Menlo,Consolas,monospace;font-size:12.8px;line-height:1.75;margin:18px 0;
+}
+pre .k{color:#93c5fd}
+pre .t{color:#86efac}
+pre .cm{color:#94a3b8}
+pre .n{color:#fcd34d}
+
+/* ---------- 交互演示 ---------- */
+.stage{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:22px 0;background:#fff}
+.stage canvas{display:block;width:100%;touch-action:none;cursor:crosshair}
+.ctrl{
+  display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;
+  padding:11px 14px;border-top:1px solid var(--line);background:#fcfdff;font-size:13px;color:var(--ink2);
+}
+.ctrl label{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.ctrl input[type=range]{width:104px;accent-color:var(--blue)}
+button{
+  font:inherit;font-size:12.5px;padding:5px 12px;border-radius:8px;border:1px solid var(--line2);
+  background:#fff;color:var(--ink2);cursor:pointer;line-height:1.6;
+}
+button:hover{border-color:var(--blue);color:var(--blue)}
+button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+button.on:hover{color:#fff}
+.readout{font-variant-numeric:tabular-nums;color:var(--ink3);font-size:12.5px;margin-left:auto}
+.hint{font-size:12.5px;color:var(--ink3);padding:0 14px 11px;background:#fcfdff;margin:0}
+
+/* ---------- 其他 ---------- */
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0}
+.tag{font-size:11.5px;background:#f1f5f9;border:1px solid var(--line);border-radius:6px;padding:2px 9px;color:var(--ink2)}
+.q{border-left:3px solid var(--line2);padding:2px 0 2px 16px;color:var(--ink2);font-size:14.5px;margin:16px 0}
+footer{text-align:center;color:var(--ink3);font-size:13px;padding:30px 20px 0;line-height:1.9}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hero">
+  <div class="kicker">图 解 教 程 · 游 戏 物 理</div>
+  <h1>Verlet 物理：三行代码，写一条不会炸的绳子</h1>
+  <p class="sub">不用存速度、不用调弹簧刚度、不用怕数值爆炸。Verlet 积分 + 位置约束（Jakobsen 松弛）是游戏里绳子、布料、头发、布娃娃的标准解法 —— 这篇把它从公式一路讲到能跑的完整实现。</p>
+  <div class="meta">
+    <span class="chip">核心公式 <b>1 个</b></span>
+    <span class="chip">约束求解 <b>迭代投影</b></span>
+    <span class="chip">交互演示 <b>3 个（原生 canvas）</b></span>
+    <span class="chip">阅读时长 <b>约 30 分钟</b></span>
+    <span class="chip">图表 <b>20+ 张</b></span>
+  </div>
+</div>
+
+<div class="toc">
+  <h2>目 录</h2>
+  <div class="tocgrid">
+    <div class="part">第一部分 · 积分器</div>
+    <a href="#ch0">0 · Verlet 到底是什么</a>
+    <a href="#ch1">1 · 欧拉的困境：能量从哪来</a>
+    <a href="#ch2">2 · 位置 Verlet：公式与三行代码</a>
+    <a href="#ch3">3 · 隐式速度：稳定性从哪来</a>
+    <div class="part">第二部分 · 约束</div>
+    <a href="#ch4">4 · 距离约束与 Jakobsen 松弛</a>
+    <a href="#ch5">5 · 迭代次数决定刚性</a>
+    <a href="#ch6">6 · 固定点、不等式与自碰撞</a>
+    <div class="part">第三部分 · 三种经典结构</div>
+    <a href="#ch7">7 · 绳子：悬链线是算出来的</a>
+    <a href="#ch8">8 · 布料：三类约束织成一张网</a>
+    <a href="#ch9">9 · 布娃娃：Hitman 的火柴人</a>
+    <div class="part">第四部分 · 碰撞与工程</div>
+    <a href="#ch10">10 · 投影式碰撞与摩擦</a>
+    <a href="#ch11">11 · 固定步长、substep 与变步长</a>
+    <a href="#ch12">12 · PBD 与 XPBD：给刚度一个物理量纲</a>
+    <a href="#ch13">13 · 完整实现：120 行的迷你引擎</a>
+    <div class="part">附录</div>
+    <a href="#app-a">A · 调参表与踩坑清单</a>
+    <a href="#app-b">B · 术语速查</a>
+    <a href="#app-c">C · 延伸阅读</a>
+  </div>
+</div>
+
+<!-- ============ 0 ============ -->
+<section id="ch0">
+  <h2><span class="num">00</span>Verlet 到底是什么</h2>
+  <p class="lead">一句话：<strong>Verlet 是一种"不存速度"的积分方法</strong> —— 速度被隐含在"上一帧位置"里。它 1967 年由法国物理学家 Loup Verlet 为分子动力学提出，2001 年被 Thomas Jakobsen 写进《Advanced Character Physics》（初代《Hitman》的布娃娃技术），从此成为游戏物理的主力方案。</p>
+
+  <p>传统欧拉积分，每个粒子存两个量：</p>
+  <div class="formula">x' = x + v·Δt        <span class="c">// 位置用速度推</span>
+v' = v + a·Δt        <span class="c">// 速度用加速度推（a = F/m）</span></div>
+
+  <p>位置 Verlet 只存位置，但存<strong>两份</strong>（当前 x、上一帧 x*）：</p>
+  <div class="formula">x' = 2x − x* + a·Δt²      <span class="c">// 注意：式子里没有 v</span>
+x* = x</div>
+
+  <p>就这么点差别，换来三件事，它们构成了整个 Verlet 体系的地基：</p>
+  <div class="grid3">
+    <div class="callout co-blue" style="margin:0">
+      <span class="hd">① 稳定</span>
+      <p>它是<strong>二阶、辛（symplectic）</strong>积分器：能量不会单调增长，只在真值附近有界振荡。显式欧拉是一阶，能量稳定地往外跑。</p>
+    </div>
+    <div class="callout co-teal" style="margin:0">
+      <span class="hd">② 约束好做</span>
+      <p>速度由位置差隐式决定，所以<strong>直接改位置</strong>就能满足约束，速度自动跟着变，不需要任何额外簿记。</p>
+    </div>
+    <div class="callout co-amber" style="margin:0">
+      <span class="hd">③ 便宜</span>
+      <p>每粒子每帧几次加减乘。没有矩阵、没有雅可比、也没有"弹簧刚度"这种需要反复试的参数。</p>
+    </div>
+  </div>
+
+  <div class="callout co-violet">
+    <span class="hd">它和 PBD 的关系</span>
+    <p>Position Based Dynamics（PBD，Müller 2007）= <strong>Verlet 风格的位置积分 + 迭代投影约束</strong>。今天 Blender 的布料节点、大量手游里的布料与头发、Unity 生态里的软体方案，底层都是 PBD 或它的改进版 XPBD。所以学 Verlet，就是在学现代实时物理的主流骨架。</p>
+  </div>
+</section>
+
+<!-- ============ 1 ============ -->
+<section id="ch1">
+  <h2><span class="num">01</span>欧拉的困境：能量从哪来</h2>
+  <p class="lead">先看对手。显式欧拉的问题不是"算错一点点"，而是<strong>算错的方向永远是同一个方向</strong> —— 系统能量一路单调递增，直到炸掉。</p>
+
+  <p>考虑最常见的场景：一个质点被弹簧拴在中心做圆周运动（布料里每个节点局部上就是这么个东西）。设劲度系数 k、半径 R，初始给一个正好等于 <code>√k · R</code> 的切向速度，理论上它应该画一个完美的圆。</p>
+
+  <p>下面是真实模拟。左边用<strong>显式欧拉（forward Euler）</strong>，右边用<strong>位置 Verlet</strong>，完全相同的初始条件、同样的弹簧。拖动时间步滑块看看：</p>
+
+  <div class="stage">
+    <canvas id="cvA"></canvas>
+    <div class="ctrl">
+      <label>时间步 <input type="range" id="aDt" min="0" max="4" step="1" value="1"><span id="aDtV" style="margin:0" class="readout">1/60</span></label>
+      <label>弹簧 k <input type="range" id="aK" min="2" max="16" step="1" value="6"><span id="aKV" style="margin:0" class="readout">6</span></label>
+      <button id="aReset">重置</button>
+      <span class="readout" id="aRead"></span>
+    </div>
+    <p class="hint">蓝 = 位置 Verlet，红 = 显式欧拉。读数栏显示各自的机械能 E/E₀（初始能量归一为 1.00）。注意：切换步长时代码会按新 Δt 重标定 Verlet 的历史位置，否则隐式速度会突变 —— 这正是第 11 节说的"Verlet 假设 Δt 恒定"。</p>
+  </div>
+
+  <p>把时间步拖到 1/30 以上，红色那个会明显<strong>向外螺旋</strong>，半径越转越大，最后撞墙乱飞；蓝色的轨道只是轻微进动，能量始终锁在 1.0 附近。</p>
+
+  <h3>为什么会这样</h3>
+  <p>欧拉的更新 <code>x' = x + v·Δt</code> 用的是<strong>这一步开始时刻的速度</strong>，而实际上速度在这一步里已经变了。在圆周运动中，这个误差恰好<strong>总是偏向切线外侧</strong> —— 每一步都往外多走一丁点，误差同向累积，能量就单调上升。</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 680 210" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 z" fill="#94a3b8"/>
+        </marker>
+      </defs>
+      <!-- 左：欧拉 -->
+      <circle cx="130" cy="105" r="4" fill="#475569"/>
+      <circle cx="90" cy="105" r="46" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 4"/>
+      <path d="M136,105 A46,46 0 1 1 176,105" fill="none" stroke="#be123c" stroke-width="2.2"/>
+      <path d="M176,105 A62,62 0 0 1 130,167" fill="none" stroke="#be123c" stroke-width="2.2" stroke-dasharray="5 4"/>
+      <path d="M130,167 A78,78 0 0 1 60,105" fill="none" stroke="#be123c" stroke-width="2.2" stroke-dasharray="5 4" opacity="0.75"/>
+      <circle cx="136" cy="105" r="6" fill="#be123c"/>
+      <text x="130" y="196" text-anchor="middle" font-size="13" fill="#be123c" font-weight="700">显式欧拉 · 向外螺旋</text>
+      <text x="130" y="30" text-anchor="middle" font-size="12" fill="#94a3b8">理想圆</text>
+
+      <!-- 右：verlet -->
+      <circle cx="470" cy="105" r="4" fill="#475569"/>
+      <circle cx="470" cy="105" r="52" fill="none" stroke="#3b5bdb" stroke-width="2.2"/>
+      <circle cx="470" cy="105" r="52" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 4"/>
+      <circle cx="522" cy="105" r="6" fill="#3b5bdb"/>
+      <text x="470" y="196" text-anchor="middle" font-size="13" fill="#3b5bdb" font-weight="700">位置 Verlet · 有界振荡</text>
+
+      <!-- 能量曲线 -->
+      <line x1="248" y1="20" x2="248" y2="190" stroke="#e2e8f0"/>
+      <line x1="248" y1="105" x2="690" y2="105" stroke="#cbd5e1" stroke-dasharray="3 3"/>
+      <path d="M258,105 C 330,105 380,40 430,32 L 660,26" fill="none" stroke="#be123c" stroke-width="2.2"/>
+      <path d="M258,105 C 340,88 420,118 500,100 C 570,86 620,112 686,104" fill="none" stroke="#3b5bdb" stroke-width="2.2"/>
+      <text x="470" y="52" font-size="12" fill="#be123c">能量 E（欧拉，单调上升）</text>
+      <text x="330" y="146" font-size="12" fill="#3b5bdb">能量 E（Verlet，有界）</text>
+      <text x="252" y="18" font-size="11" fill="#94a3b8">E</text>
+    </svg>
+    <div class="cap">图 1 · 同一初始条件下的两种积分器：欧拉把系统能量一路推向爆炸，Verlet 让它围着真值打转</div>
+  </div>
+
+  <div class="callout co-amber">
+    <span class="hd">别冤枉了半隐式欧拉</span>
+    <p>注意一个常见的混淆：把更新顺序反过来 —— <code>v += a·Δt</code> 再 <code>x += v·Δt</code> —— 得到的<strong>半隐式欧拉（symplectic Euler）其实也是辛积分器</strong>，能量同样有界，很多商业引擎（包括 Box2D 系列思路）用的就是它。真正会螺旋发散的是这里演示的<strong>显式欧拉</strong>（先用旧速度走位置）。稳定与否，差别就在那一行代码的顺序。</p>
+  </div>
+
+  <div class="callout co-rose">
+    <span class="hd">关键认知</span>
+    <p>游戏物理里"炸掉"几乎总是<strong>能量注入</strong>导致的：弹簧越硬 → 需要的时间步越小 → 60 FPS 下必然越界。用弹簧模拟"不可拉伸的绳"是条死路，因为绳子要"无限硬"，而无限硬的弹簧需要无限小的时间步。</p>
+  </div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section id="ch2">
+  <h2><span class="num">02</span>位置 Verlet：公式与三行代码</h2>
+  <p class="lead">把 x(t+Δt) 和 x(t−Δt) 各自做泰勒展开，然后加起来 —— 一次项消掉、三次项也消掉，剩下的就是 Verlet。这个推导值得亲手走一遍，因为<strong>误差的性质全写在里面</strong>。</p>
+
+  <div class="formula">x(t+Δt) = x(t) + ẋ·Δt + ½·ẍ·Δt² + (1/6)·x⃛·Δt³ + O(Δt⁴)
+x(t−Δt) = x(t) − ẋ·Δt + ½·ẍ·Δt² − (1/6)·x⃛·Δt³ + O(Δt⁴)   <span class="c">// 把 Δt 换成 −Δt</span>
+
+两式相加：  x(t+Δt) + x(t−Δt) = 2x(t) + ẍ·Δt² + O(Δt⁴)
+
+整理：      x(t+Δt) = 2x(t) − x(t−Δt) + a·Δt²          <span class="c">// ẍ = a</span></div>
+
+  <p>三个信息量：</p>
+  <ul>
+    <li><strong>一次项和三次项被完全抵消</strong> —— 局部截断误差是 O(Δt⁴)，这比欧拉的 O(Δt²) 高两个数量级。</li>
+    <li><strong>全局误差是 O(Δt²)</strong>（局部 O(Δt⁴) 累积 T/Δt 步后降两阶），所以它是二阶方法。</li>
+    <li><strong>速度根本没出现</strong> —— 它不是"被忽略"了，而是被<em>位置历史</em>替代了。</li>
+  </ul>
+
+  <div class="diagram">
+    <svg viewBox="0 0 680 190" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="ah2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 z" fill="#3b5bdb"/>
+        </marker>
+      </defs>
+      <path d="M40,140 C 140,140 190,70 300,60 C 400,52 470,110 640,96" fill="none" stroke="#cbd5e1" stroke-width="1.6" stroke-dasharray="5 5"/>
+      <circle cx="120" cy="132" r="9" fill="#fff" stroke="#94a3b8" stroke-width="2"/>
+      <circle cx="300" cy="60" r="9" fill="#fff" stroke="#3b5bdb" stroke-width="2"/>
+      <circle cx="520" cy="103" r="9" fill="#3b5bdb" stroke="#3b5bdb" stroke-width="2"/>
+      <text x="120" y="164" text-anchor="middle" font-size="13" fill="#475569">x(t−Δt)</text>
+      <text x="300" y="40" text-anchor="middle" font-size="13" fill="#3b5bdb" font-weight="700">x(t)</text>
+      <text x="520" y="132" text-anchor="middle" font-size="13" fill="#3b5bdb" font-weight="700">x(t+Δt)</text>
+      <line x1="120" y1="132" x2="300" y2="60" stroke="#3b5bdb" stroke-width="2" marker-end="url(#ah2)"/>
+      <text x="140" y="112" font-size="12.5" fill="#3b5bdb">x − x*  ← 这就是"速度"</text>
+      <line x1="300" y1="60" x2="520" y2="103" stroke="#3b5bdb" stroke-width="2" marker-end="url(#ah2)"/>
+      <text x="380" y="70" font-size="12.5" fill="#3b5bdb">再加 (x − x*) 与 a·Δt²</text>
+      <text x="40" y="30" font-size="12.5" fill="#94a3b8">x(t+Δt) = x(t) + [x(t) − x(t−Δt)] + a·Δt²</text>
+    </svg>
+    <div class="cap">图 2 · Verlet 的几何直觉：把"上一帧走过的位移"再走一遍，然后加上这一帧的加速度贡献</div>
+  </div>
+
+  <h3>代码：三行，真的就三行</h3>
+  <pre><span class="k">function</span> integrate(p, dt) {          <span class="cm">// p = {x, y, px, py}</span>
+  <span class="k">const</span> vx = p.x - p.px, vy = p.y - p.py;  <span class="cm">// ① 隐式速度（位移形式）</span>
+  p.px = p.x;  p.py = p.y;                 <span class="cm">// ② 历史前移</span>
+  p.x += vx + ax * dt * dt;                <span class="cm">// ③ 位移 + 加速度项</span>
+  p.y += vy + ay * dt * dt;
+}</pre>
+
+  <p>注意第 ③ 行的量纲：<code>a·Δt²</code> 是<strong>位移</strong>，不是速度。写成 <code>a·Δt</code> 是新手最常见的 bug —— 那样加速度的效果会和帧率挂钩，30 FPS 和 120 FPS 表现完全不同。</p>
+
+  <div class="callout co-amber">
+    <span class="hd">初始化：它不是自启动的</span>
+    <p>Verlet 需要<strong>上一帧的位置</strong>，所以第一帧必须手动造一个。给初速度 v₀ 时：<code>px = x − v₀·Δt</code>，这样第一帧的隐式速度 <code>(x − px)/Δt</code> 正好等于 v₀。忘了这一步，物体会以两倍速或零速起步。</p>
+  </div>
+
+  <h3>阻尼：改一个数字就行</h3>
+  <p>把位移项乘一个略小于 1 的系数 d，能量就按可控速率耗散，不需要单独的"速度阻尼 pass"：</p>
+  <div class="formula">x' = x + (x − x*)·d + a·Δt²        <span class="c">// d = 0.99 轻阻尼，0.98 明显黏滞，1.0 无耗散</span></div>
+  <p>空气阻力、布料的内摩擦、绳子的手感，全靠这一个数。这也是 Jakobsen 原文里提到的技巧（把 2 换成 1.99）。</p>
+</section>
+
+<!-- ============ 3 ============ -->
+<section id="ch3">
+  <h2><span class="num">03</span>隐式速度：稳定性从哪来</h2>
+  <p class="lead">Verlet 里速度不是一个独立变量，而是<strong>被定义出来的</strong>：<code>v ≡ (x − x*)/Δt</code>。这个"被动速度"带来两个决定性好处。</p>
+
+  <h3>好处一：位置和速度不可能失步</h3>
+  <p>欧拉里 x 和 v 是两个各自演化的量。一旦碰撞求解器改了 v 却忘了同步 x（或者反过来），物体就会"看起来在地面下方但速度朝上"这类诡异状态。Verlet 里<strong>改位置就是改速度</strong> —— 它们物理上是同一个存储，不存在失步。</p>
+
+  <h3>好处二：碰撞响应免费</h3>
+  <p>粒子陷进地面了？把它<strong>直接挪出来</strong>即可。下一帧的隐式速度自动变成"远离地面"，法向分量被清零。这就是所谓<strong>投影式碰撞响应</strong>（projection），对应的恢复系数恰好是 0（完全不弹）。</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="ah3" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 z" fill="#0d9488"/>
+        </marker>
+      </defs>
+      <rect x="40" y="140" width="600" height="42" fill="#f1f5f9" stroke="#cbd5e1"/>
+      <line x1="40" y1="140" x2="640" y2="140" stroke="#94a3b8" stroke-width="2"/>
+      <text x="50" y="133" font-size="12" fill="#94a3b8">地面 y = 0</text>
+
+      <text x="120" y="34" text-anchor="middle" font-size="13" font-weight="700" fill="#475569">① 穿透</text>
+      <circle cx="120" cy="128" r="16" fill="#fff5f7" stroke="#be123c" stroke-width="2"/>
+      <circle cx="120" cy="180" r="16" fill="none" stroke="#be123c" stroke-width="2" stroke-dasharray="3 3"/>
+      <text x="120" y="88" text-anchor="middle" font-size="12" fill="#be123c">y &lt; 0</text>
+
+      <text x="340" y="34" text-anchor="middle" font-size="13" font-weight="700" fill="#475569">② 投影到表面</text>
+      <circle cx="340" cy="124" r="16" fill="#f0fbf9" stroke="#0d9488" stroke-width="2"/>
+      <line x1="340" y1="132" x2="340" y2="146" stroke="#0d9488" stroke-width="2.4" marker-end="url(#ah3)"/>
+      <text x="340" y="96" text-anchor="middle" font-size="12" fill="#0d9488">直接改 y</text>
+
+      <text x="560" y="34" text-anchor="middle" font-size="13" font-weight="700" fill="#475569">③ 速度自动被改写</text>
+      <circle cx="560" cy="124" r="16" fill="#f0fbf9" stroke="#0d9488" stroke-width="2"/>
+      <circle cx="524" cy="150" r="4" fill="#94a3b8"/>
+      <text x="500" y="168" font-size="11.5" fill="#94a3b8">x*（上一帧）</text>
+      <line x1="528" y1="148" x2="552" y2="128" stroke="#3b5bdb" stroke-width="2"/>
+      <text x="575" y="100" font-size="12" fill="#3b5bdb">v = (x − x*)/Δt</text>
+      <text x="575" y="166" font-size="11.5" fill="#94a3b8">法向分量已消失</text>
+    </svg>
+    <div class="cap">图 3 · 投影式碰撞：改的是位置，速度作为副产品被自动修正</div>
+  </div>
+
+  <h3>想要弹跳怎么办：改 x*</h3>
+  <p>恢复系数 e（0 = 泥巴，1 = 超弹球）在 Verlet 里通过<strong>反写历史位置</strong>实现。碰地瞬间，设当前法向位移速度为 vₙ：</p>
+  <div class="formula"><span class="c">// 碰撞：先投影，再决定"历史位置"放在哪</span>
+y  = ground;                      <span class="c">// ① 推出穿透</span>
+py = y + vy * e;                  <span class="c">// ② 反写历史 → 下帧速度 = −e·vy</span>
+px = x - vx * (1 - friction);     <span class="c">// ③ 切向乘摩擦</span></div>
+  <p>因为下一帧速度 = (y − py)/Δt = −e·vy，符号翻转正是反弹。<strong>不用碰速度变量，因为没有速度变量。</strong></p>
+
+  <div class="callout co-teal">
+    <span class="hd">一句话记住</span>
+    <p>在 Verlet 世界里，<strong>位置是唯一的真相，速度是一个随时可以重算的观测量</strong>。想改变运动，就去改位置（或历史位置）。</p>
+  </div>
+
+  <h3>代价：别忘了它是二阶而非万能</h3>
+  <ul>
+    <li>对简谐振子，稳定条件是 <code>ω·Δt &lt; 2</code>（ω = √(k/m)）。超过就会指数发散 —— Verlet 只是把这个门槛抬高了，不是取消了。</li>
+    <li>变时间步会破坏辛性质。要么固定步长（推荐），要么用第 11 节的 TCV 修正。</li>
+    <li>它不是能量守恒，是<strong>能量有界</strong>。加上约束投影后仍会有缓慢漂移，长跑场景需要额外阻尼。</li>
+  </ul>
+</section>
+
+<!-- ============ 4 ============ -->
+<section id="ch4">
+  <h2><span class="num">04</span>距离约束与 Jakobsen 松弛</h2>
+  <p class="lead">绳子不该用弹簧。Jakobsen 的做法是把它当成一条<strong>几何命令</strong>："这两个点必须正好相距 d"。不给力，不给刚度，只给事实 —— 然后直接把点挪到满足为止。</p>
+
+  <h3>一个约束的投影</h3>
+  <p>两点 a、b，静止长度 rest，当前距离 d（注意画布坐标 y 向下）：</p>
+  <div class="formula">delta = b − a
+dist  = |delta|
+diff  = (dist − rest) / dist        <span class="c">// 归一化误差：正=太长，负=太短</span>
+
+a += delta · diff · (wa / (wa + wb))   <span class="c">// 按逆质量的反比分配修正</span>
+b −= delta · diff · (wb / (wa + wb))</div>
+
+  <div class="diagram">
+    <svg viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="ah4" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 z" fill="#b45309"/>
+        </marker>
+      </defs>
+      <text x="150" y="26" text-anchor="middle" font-size="13" font-weight="700" fill="#475569">拉伸了：dist &gt; rest</text>
+      <circle cx="70" cy="110" r="11" fill="#fff" stroke="#475569" stroke-width="2"/>
+      <circle cx="230" cy="110" r="11" fill="#fff" stroke="#475569" stroke-width="2"/>
+      <line x1="70" y1="110" x2="230" y2="110" stroke="#cbd5e1" stroke-width="2"/>
+      <line x1="70" y1="110" x2="230" y2="110" stroke="#b45309" stroke-width="2.4" stroke-dasharray="1 1" opacity="0"/>
+      <text x="150" y="98" text-anchor="middle" font-size="12" fill="#94a3b8">rest</text>
+      <line x1="230" y1="110" x2="290" y2="110" stroke="#be123c" stroke-width="2.4"/>
+      <text x="262" y="98" text-anchor="middle" font-size="11.5" fill="#be123c">超出</text>
+      <line x1="230" y1="128" x2="176" y2="128" stroke="#b45309" stroke-width="2.2" marker-end="url(#ah4)"/>
+      <line x1="70" y1="128" x2="124" y2="128" stroke="#b45309" stroke-width="2.2" marker-end="url(#ah4)"/>
+      <text x="150" y="152" text-anchor="middle" font-size="12" fill="#b45309">两端各挪一半（等质量）</text>
+
+      <line x1="360" y1="30" x2="360" y2="170" stroke="#e2e8f0"/>
+      <text x="520" y="26" text-anchor="middle" font-size="13" font-weight="700" fill="#475569">逆质量决定谁让路</text>
+      <circle cx="420" cy="70" r="11" fill="#f1f5f9" stroke="#94a3b8" stroke-width="2.5"/>
+      <text x="420" y="98" text-anchor="middle" font-size="11.5" fill="#94a3b8">w = 0（固定）</text>
+      <circle cx="620" cy="70" r="11" fill="#fff" stroke="#3b5bdb" stroke-width="2"/>
+      <line x1="420" y1="70" x2="620" y2="70" stroke="#cbd5e1" stroke-width="2"/>
+      <line x1="608" y1="70" x2="560" y2="70" stroke="#3b5bdb" stroke-width="2.4" marker-end="url(#ah4)"/>
+      <text x="530" y="60" font-size="11.5" fill="#3b5bdb">全部修正给它</text>
+      <circle cx="420" cy="130" r="11" fill="#fff" stroke="#0d9488" stroke-width="2"/>
+      <circle cx="620" cy="130" r="18" fill="#fff" stroke="#0d9488" stroke-width="2"/>
+      <line x1="420" y1="130" x2="616" y2="130" stroke="#cbd5e1" stroke-width="2"/>
+      <line x1="436" y1="130" x2="496" y2="130" stroke="#0d9488" stroke-width="2.4" marker-end="url(#ah4)"/>
+      <line x1="604" y1="130" x2="556" y2="130" stroke="#0d9488" stroke-width="2.4" marker-end="url(#ah4)"/>
+      <text x="520" y="170" text-anchor="middle" font-size="12" fill="#0d9488">重的动得少：修正量 ∝ 1/m</text>
+    </svg>
+    <div class="cap">图 4 · 距离约束投影：误差沿连线方向分摊，分摊比例由逆质量 w = 1/m 决定</div>
+  </div>
+
+  <h3>为什么要存"逆质量"而不是质量</h3>
+  <ul>
+    <li><strong>除法变乘法</strong>：w = 1/m 一次算好，循环里只用乘。</li>
+    <li><strong>固定点就是 w = 0</strong>：不需要 if 分支，"无限重"自然表达。钉住绳子一端、钉住布料顶边、抓住玩家的手 —— 全是同一个操作。</li>
+    <li>两个都是固定点（wₐ + w_b = 0）时要跳过，否则除以零。</li>
+  </ul>
+
+  <h3>松弛（relaxation）：一帧扫很多遍</h3>
+  <p>问题来了：约束之间会互相打架。你把 a−b 拉对了，b−c 又歪了；把 b−c 修正好，a−b 又被拉长。解决办法简单粗暴 —— <strong>把所有约束扫一遍，然后重复扫 N 遍</strong>：</p>
+  <pre><span class="k">for</span> (<span class="k">let</span> it = <span class="n">0</span>; it &lt; iterations; it++)      <span class="cm">// 典型 3 ~ 15</span>
+  <span class="k">for</span> (<span class="k">const</span> c <span class="k">of</span> links)
+    projectDistance(c);          <span class="cm">// 每遍只用当前最新位置 → Gauss-Seidel</span></pre>
+
+  <p>这叫 Gauss-Seidel 迭代：后面的约束立刻看到前面约束的修正结果，因此收敛比 Jacobi（先算完所有修正再统一应用）快得多。<strong>顺序敏感</strong>是它的代价 —— 同一条绳子，从左到右扫和从右到左扫，抖动形态会不一样，这也是布料左右不对称的根源之一。</p>
+
+  <div class="callout co-blue">
+    <span class="hd">Jakobsen 原文的关键洞察</span>
+    <p>碰撞约束和距离约束可以<strong>放进同一个松弛循环里</strong>。同一个框架，加一个"点必须在盒子内"的约束，就得到了箱子；加一个"点与点距离 ≥ r"，就得到了自碰撞；把链换成二维网格，就得到了布料 —— 代码一行都不用改。</p>
+  </div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section id="ch5">
+  <h2><span class="num">05</span>迭代次数决定刚性</h2>
+  <p class="lead">这是 Verlet/PBD 最重要的工程事实：<strong>你调的不是刚度，是迭代次数</strong>。迭代越多 → 越接近"完全不可拉伸"；迭代越少 → 越像一根软橡皮筋。</p>
+
+  <p>下面是一条 26 节的铁链。拖动任意一个节点甩一甩，然后切换迭代次数，看读数里的"平均拉伸"：</p>
+
+  <div class="stage">
+    <canvas id="cvB"></canvas>
+    <div class="ctrl">
+      <label>迭代次数 <input type="range" id="bItr" min="1" max="20" step="1" value="6"><span id="bItrV" style="margin:0" class="readout">6</span></label>
+      <label>节点数 <input type="range" id="bN" min="8" max="60" step="1" value="26"><span id="bNV" style="margin:0" class="readout">26</span></label>
+      <button id="bReset">重置</button>
+      <button id="bColor" class="on">误差着色</button>
+      <span class="readout" id="bRead"></span>
+    </div>
+    <p class="hint">鼠标（或手指）拖拽任意节点。颜色越红 = 那一节被拉得越长。迭代 ≤ 2 时铁链会像橡皮筋一样明显伸长。</p>
+  </div>
+
+  <p>把迭代次数拉到 1 再拖一下 —— 链条会像橡皮筋一样被拉长一大截，而且<strong>误差沿着链条往下累积</strong>：越靠近手抓的那一端越准确，越远越松。这就是"信息传播速度"问题。</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 680 230" xmlns="http://www.w3.org/2000/svg">
+      <text x="340" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#475569">一次松弛能把"修正"传播多远？</text>
+      <!-- pass 1 -->
+      <text x="60" y="62" font-size="12" fill="#94a3b8">pass 1</text>
+      <g>
+        <circle cx="110" cy="58" r="7" fill="#3b5bdb"/><circle cx="150" cy="58" r="7" fill="#3b5bdb"/>
+        <circle cx="190" cy="58" r="7" fill="#fff" stroke="#cbd5e1" stroke-width="2"/>
+        <circle cx="230" cy="58" r="7" fill="#fff" stroke="#cbd5e1" stroke-width="2"/>
+        <circle cx="270" cy="58" r="7" fill="#fff" stroke="#cbd5e1" stroke-width="2"/>
+        <circle cx="310" cy="58" r="7" fill="#fff" stroke="#cbd5e1" stroke-width="2"/>
+        <line x1="110" y1="58" x2="310" y2="58" stroke="#cbd5e1" stroke-width="2"/>
+      </g>
+      <text x="340" y="62" font-size="12" fill="#475569">只有被直接修正的 2 个节点生效</text>
+      <!-- pass 2 -->
+      <text x="60" y="112" font-size="12" fill="#94a3b8">pass 2</text>
+      <g>
+        <circle cx="110" cy="108" r="7" fill="#3b5bdb"/><circle cx="150" cy="108" r="7" fill="#3b5bdb"/>
+        <circle cx="190" cy="108" r="7" fill="#3b5bdb"/><circle cx="230" cy="108" r="7" fill="#fff" stroke="#cbd5e1" stroke-width="2"/>
+        <circle cx="270" cy="108" r="7" fill="#fff" stroke="#cbd5e1" stroke-width="2"/>
+        <circle cx="310" cy="108" r="7" fill="#fff" stroke="#cbd5e1" stroke-width="2"/>
+        <line x1="110" y1="108" x2="310" y2="108" stroke="#cbd5e1" stroke-width="2"/>
+      </g>
+      <text x="340" y="112" font-size="12" fill="#475569">波及第 3 个</text>
+      <!-- pass N -->
+      <text x="60" y="162" font-size="12" fill="#94a3b8">pass N</text>
+      <g>
+        <circle cx="110" cy="158" r="7" fill="#3b5bdb"/><circle cx="150" cy="158" r="7" fill="#3b5bdb"/>
+        <circle cx="190" cy="158" r="7" fill="#3b5bdb"/><circle cx="230" cy="158" r="7" fill="#3b5bdb"/>
+        <circle cx="270" cy="158" r="7" fill="#3b5bdb"/><circle cx="310" cy="158" r="7" fill="#3b5bdb"/>
+        <line x1="110" y1="158" x2="310" y2="158" stroke="#3b5bdb" stroke-width="2"/>
+      </g>
+      <text x="340" y="162" font-size="12" fill="#475569">整条链收敛为"刚体"</text>
+      <text x="340" y="200" text-anchor="middle" font-size="12.5" fill="#b45309">结论：N 个节点的链，误差需要 O(N) 次迭代才能从一端传到另一端</text>
+      <text x="340" y="220" text-anchor="middle" font-size="12" fill="#94a3b8">这也是为什么长绳、大布料要用 substep（第 11 节）而不是一味加迭代</text>
+    </svg>
+    <div class="cap">图 5 · 松弛的传播：每次 pass 让修正信息向外扩散一格</div>
+  </div>
+
+  <div class="callout co-amber">
+    <span class="hd">PBD 的阿喀琉斯之踵</span>
+    <p>经典 PBD 的刚度参数 k 是<strong>依赖迭代次数和帧率</strong>的：同样 k = 0.5，跑 5 次迭代和跑 15 次的手感完全不同；把帧率从 60 改成 30，布料立刻变软。美术每次调整性能预算就得重调一遍参数 —— 这正是 XPBD 要解决的问题（第 12 节）。</p>
+  </div>
+</section>
+
+<!-- ============ 6 ============ -->
+<section id="ch6">
+  <h2><span class="num">06</span>固定点、不等式与自碰撞</h2>
+  <p class="lead">距离约束是"等于"，游戏里还有大量"小于等于"和"不许进"的需求。在 Verlet 框架里它们都是同一种操作：<strong>只在条件被违反时才投影</strong>。</p>
+
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th>约束类型</th><th>数学形式</th><th>触发条件</th><th>典型用途</th></tr></thead>
+      <tbody>
+        <tr><td><strong>等式 · 距离</strong></td><td>|b − a| = d</td><td>恒成立，总是投影</td><td>绳子、布料结构线、骨骼</td></tr>
+        <tr><td><strong>不等式 · 最小距离</strong></td><td>|b − a| ≥ d</td><td>只在 dist &lt; d 时</td><td>自碰撞、防止膝盖穿模、体积保持</td></tr>
+        <tr><td><strong>不等式 · 最大距离</strong></td><td>|b − a| ≤ d</td><td>只在 dist &gt; d 时</td><td>限位绳、关节活动范围</td></tr>
+        <tr><td><strong>单侧 · 平面</strong></td><td>(p − q)·n ≥ 0</td><td>只在点越过平面</td><td>地面、墙、碰撞体表面</td></tr>
+        <tr><td><strong>钉住（pin）</strong></td><td>p = 目标点</td><td>总是</td><td>固定端、被玩家抓住的部位</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>投影代码只有一行判断的差别：</p>
+  <pre><span class="k">function</span> solveMinDist(a, b, minD) {        <span class="cm">// 不等式：只在太近时才推开</span>
+  <span class="k">const</span> dx = b.x - a.x, dy = b.y - a.y;
+  <span class="k">const</span> d = Math.hypot(dx, dy) || <span class="n">1e-6</span>;
+  <span class="k">if</span> (d &gt;= minD) <span class="k">return</span>;                  <span class="cm">// ← 与等式约束唯一的区别</span>
+  <span class="k">const</span> diff = (d - minD) / d;
+  <span class="k">const</span> s = a.w + b.w; <span class="k">if</span> (s === <span class="n">0</span>) <span class="k">return</span>;
+  a.x += dx * diff * (a.w / s); a.y += dy * diff * (a.w / s);
+  b.x -= dx * diff * (b.w / s); b.y -= dy * diff * (b.w / s);
+}</pre>
+
+  <h3>自碰撞：为什么布料不会穿自己</h3>
+  <p>布料翻折时会自己穿过去，看起来像纸片一样诡异。最省事的解法是在粒子之间加<strong>最小距离约束</strong>。粒子对数量是 O(n²)，所以要么只对"可能靠近的对"加约束（用空间哈希做宽阶段），要么只在关键位置加 —— 比如 Jakobsen 的做法：在两个膝盖之间加一个不等式约束，腿就永远不会交叉。</p>
+
+  <div class="callout co-teal">
+    <span class="hd">工程取舍</span>
+    <p>完整自碰撞（每对粒子）在 300 粒子的布料上就是 4.5 万对 × 迭代次数，直接跪。实用做法是：<strong>粒子半径 + 空间哈希</strong>只检测真正接近的对，并且<strong>每帧只做 1 次自碰撞 pass</strong>（它不需要像结构约束那样高频收敛）。</p>
+  </div>
+
+  <h3>角度约束：让关节别反折</h3>
+  <p>用点积可以约束夹角：<code>(b−a)·(c−b) / (|b−a||c−b|) ≥ cos θmax</code>。但 Jakobsen 指出，更省事的做法是<strong>加一根"虚拟连杆"</strong>：在 a 和 c 之间加一个最大距离约束，就等价于限制了夹角 —— 又回到距离约束，复用同一套代码。</p>
+</section>
+
+<!-- ============ 7 ============ -->
+<section id="ch7">
+  <h2><span class="num">07</span>绳子：悬链线是算出来的</h2>
+  <p class="lead">把 N 个粒子串成链、锁住两端、交给重力 —— 它会自己停在一个特定形状上。<strong>没人写 cosh 公式，形状是从物理里长出来的。</strong></p>
+
+  <h3>那个形状叫悬链线</h3>
+  <p>两端固定的链条，在自重下静止时的曲线是 <code>y = a·cosh(x/a)</code>，其中 a 由单位长度的重量与水平张力决定。它<strong>长得像抛物线但不是</strong>：</p>
+  <div class="grid2">
+    <div class="callout co-blue" style="margin:0">
+      <span class="hd">悬链线 catenary</span>
+      <p>载荷沿<strong>弧长</strong>分布 —— 链条自重就是这样，每一段绳子承担自己那一段的重量。</p>
+    </div>
+    <div class="callout co-amber" style="margin:0">
+      <span class="hd">抛物线 parabola</span>
+      <p>载荷沿<strong>水平距离</strong>均匀分布 —— 悬索桥的桥面由竖直吊索挂载，才是抛物线。</p>
+    </div>
+  </div>
+
+  <div class="diagram">
+    <svg viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg">
+      <line x1="60" y1="40" x2="620" y2="40" stroke="#cbd5e1" stroke-width="1.5"/>
+      <circle cx="120" cy="40" r="5" fill="#475569"/><circle cx="560" cy="40" r="5" fill="#475569"/>
+      <text x="120" y="30" text-anchor="middle" font-size="11.5" fill="#94a3b8">固定端</text>
+      <text x="560" y="30" text-anchor="middle" font-size="11.5" fill="#94a3b8">固定端</text>
+      <path d="M120,40 Q 200,160 340,168 Q 480,160 560,40" fill="none" stroke="#3b5bdb" stroke-width="2.6"/>
+      <path d="M120,40 Q 200,168 340,176 Q 480,168 560,40" fill="none" stroke="#b45309" stroke-width="2" stroke-dasharray="6 5"/>
+      <g fill="#475569">
+        <circle cx="180" cy="112" r="3.5"/><circle cx="240" cy="146" r="3.5"/><circle cx="300" cy="162" r="3.5"/>
+        <circle cx="340" cy="167" r="3.5"/><circle cx="380" cy="162" r="3.5"/><circle cx="440" cy="146" r="3.5"/><circle cx="500" cy="112" r="3.5"/>
+      </g>
+      <text x="600" y="150" font-size="12" fill="#3b5bdb">悬链线</text>
+      <text x="600" y="172" font-size="12" fill="#b45309">抛物线</text>
+      <text x="340" y="196" text-anchor="middle" font-size="12" fill="#94a3b8">节点（黑点）是模拟出来的，曲线是解析解 —— 两者重合</text>
+    </svg>
+    <div class="cap">图 6 · 重力 + 距离约束自然产生悬链线；两者差别很小，但在长跨度下肉眼可辨</div>
+  </div>
+
+  <h3>一条绳子的最小实现</h3>
+  <pre><span class="k">function</span> makeRope(x, y, n, seg) {
+  <span class="k">const</span> pts = [], links = [];
+  <span class="k">for</span> (<span class="k">let</span> i = <span class="n">0</span>; i &lt; n; i++)
+    pts.push({ x: x + i * seg, y, px: x + i * seg, py: y, w: i === <span class="n">0</span> ? <span class="n">0</span> : <span class="n">1</span> });  <span class="cm">// 首节点钉住</span>
+  <span class="k">for</span> (<span class="k">let</span> i = <span class="n">0</span>; i &lt; n - <span class="n">1</span>; i++) links.push([pts[i], pts[i + <span class="n">1</span>]]);
+  <span class="k">return</span> { pts, links };
+}</pre>
+
+  <div class="callout co-violet">
+    <span class="hd">为什么绳子不该用弹簧再补一句</span>
+    <p>用"很硬的弹簧"模拟绳子，你需要：一个巨大的 k、一个配套的小 Δt、一堆阻尼调参，最后得到一根<strong>会抖、会伸长的橡皮筋</strong>。用距离约束，你只需要一个 rest 长度和一个迭代次数，得到的是一根<strong>真的不伸长</strong>的绳子，而且迭代越多越硬、帧率不变。</p>
+  </div>
+</section>
+
+<!-- ============ 8 ============ -->
+<section id="ch8">
+  <h2><span class="num">08</span>布料：三类约束织成一张网</h2>
+  <p class="lead">把链子排成二维网格，就得到了布料。但只加"相邻连线"的布料会像渔网一样软塌塌 —— 真实布料的抗剪切和抗弯折，靠的是另外两类约束。</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 680 240" xmlns="http://www.w3.org/2000/svg">
+      <g stroke="#cbd5e1" stroke-width="1">
+        <line x1="40" y1="40" x2="240" y2="40"/><line x1="40" y1="100" x2="240" y2="100"/>
+        <line x1="40" y1="160" x2="240" y2="160"/><line x1="40" y1="220" x2="240" y2="220"/>
+        <line x1="40" y1="40" x2="40" y2="220"/><line x1="140" y1="40" x2="140" y2="220"/><line x1="240" y1="40" x2="240" y2="220"/>
+      </g>
+      <g fill="#94a3b8">
+        <circle cx="40" cy="40" r="4.5"/><circle cx="140" cy="40" r="4.5"/><circle cx="240" cy="40" r="4.5"/>
+        <circle cx="40" cy="100" r="4.5"/><circle cx="140" cy="100" r="4.5"/><circle cx="240" cy="100" r="4.5"/>
+        <circle cx="40" cy="160" r="4.5"/><circle cx="140" cy="160" r="4.5"/><circle cx="240" cy="160" r="4.5"/>
+        <circle cx="40" cy="220" r="4.5"/><circle cx="140" cy="220" r="4.5"/><circle cx="240" cy="220" r="4.5"/>
+      </g>
+      <text x="140" y="26" text-anchor="middle" font-size="12.5" font-weight="700" fill="#94a3b8">粒子网格</text>
+
+      <!-- structural -->
+      <g transform="translate(300,0)">
+        <g stroke="#cbd5e1" stroke-width="1">
+          <line x1="40" y1="40" x2="240" y2="40"/><line x1="40" y1="100" x2="240" y2="100"/>
+          <line x1="40" y1="160" x2="240" y2="160"/><line x1="40" y1="220" x2="240" y2="220"/>
+          <line x1="40" y1="40" x2="40" y2="220"/><line x1="140" y1="40" x2="140" y2="220"/><line x1="240" y1="40" x2="240" y2="220"/>
+        </g>
+        <g fill="#94a3b8">
+          <circle cx="40" cy="40" r="4.5"/><circle cx="140" cy="40" r="4.5"/><circle cx="240" cy="40" r="4.5"/>
+          <circle cx="40" cy="100" r="4.5"/><circle cx="140" cy="100" r="4.5"/><circle cx="240" cy="100" r="4.5"/>
+          <circle cx="40" cy="160" r="4.5"/><circle cx="140" cy="160" r="4.5"/><circle cx="240" cy="160" r="4.5"/>
+          <circle cx="40" cy="220" r="4.5"/><circle cx="140" cy="220" r="4.5"/><circle cx="240" cy="220" r="4.5"/>
+        </g>
+        <line x1="40" y1="100" x2="240" y2="100" stroke="#3b5bdb" stroke-width="2.4"/>
+        <line x1="140" y1="40" x2="140" y2="220" stroke="#3b5bdb" stroke-width="2.4"/>
+        <text x="140" y="26" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3b5bdb">① 结构约束 stretch</text>
+        <text x="140" y="240" text-anchor="middle" font-size="11.5" fill="#94a3b8">相邻 · 防止拉伸，最硬</text>
+      </g>
+
+      <!-- shear -->
+      <g transform="translate(560,0)">
+        <g stroke="#cbd5e1" stroke-width="1">
+          <line x1="40" y1="40" x2="240" y2="40"/><line x1="40" y1="100" x2="240" y2="100"/>
+          <line x1="40" y1="160" x2="240" y2="160"/><line x1="40" y1="220" x2="240" y2="220"/>
+          <line x1="40" y1="40" x2="40" y2="220"/><line x1="140" y1="40" x2="140" y2="220"/><line x1="240" y1="40" x2="240" y2="220"/>
+        </g>
+        <g fill="#94a3b8">
+          <circle cx="40" cy="40" r="4.5"/><circle cx="140" cy="40" r="4.5"/><circle cx="240" cy="40" r="4.5"/>
+          <circle cx="40" cy="100" r="4.5"/><circle cx="140" cy="100" r="4.5"/><circle cx="240" cy="100" r="4.5"/>
+          <circle cx="40" cy="160" r="4.5"/><circle cx="140" cy="160" r="4.5"/><circle cx="240" cy="160" r="4.5"/>
+          <circle cx="40" cy="220" r="4.5"/><circle cx="140" cy="220" r="4.5"/><circle cx="240" cy="220" r="4.5"/>
+        </g>
+        <line x1="40" y1="40" x2="240" y2="220" stroke="#0d9488" stroke-width="2.4"/>
+        <line x1="240" y1="40" x2="40" y2="220" stroke="#0d9488" stroke-width="2.4"/>
+        <text x="140" y="26" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0d9488">② 剪切约束 shear</text>
+        <text x="140" y="240" text-anchor="middle" font-size="11.5" fill="#94a3b8">对角 · 防止菱形化</text>
+      </g>
+    </svg>
+    <div class="cap">图 7 · 布料的两类核心约束（第三类 bend = 隔一个节点的连线，画在下方代码里）</div>
+  </div>
+
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th>约束</th><th>连接谁</th><th>静止长度</th><th>作用</th><th>缺失后果</th></tr></thead>
+      <tbody>
+        <tr><td><strong>stretch</strong> 结构</td><td>上下左右相邻</td><td>spacing</td><td>维持布面尺寸，承担张力</td><td>布被拉长、像橡皮膜</td></tr>
+        <tr><td><strong>shear</strong> 剪切</td><td>两条对角线</td><td>spacing·√2</td><td>抵抗面内错切</td><td>网格变成菱形，布"漏风"</td></tr>
+        <tr><td><strong>bend</strong> 弯曲</td><td>隔一个节点</td><td>spacing·2</td><td>抵抗折叠，决定挺括度</td><td>布料软塌、褶皱过碎</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <pre><span class="k">for</span> (<span class="k">let</span> r = <span class="n">0</span>; r &lt; rows; r++) <span class="k">for</span> (<span class="k">let</span> c = <span class="n">0</span>; c &lt; cols; c++) {
+  <span class="k">const</span> p = at(r, c);
+  <span class="k">if</span> (c + <span class="n">1</span> &lt; cols) link(p, at(r, c + <span class="n">1</span>));           <span class="cm">// stretch 横</span>
+  <span class="k">if</span> (r + <span class="n">1</span> &lt; rows) link(p, at(r + <span class="n">1</span>, c));           <span class="cm">// stretch 纵</span>
+  <span class="k">if</span> (r + <span class="n">1</span> &lt; rows &amp;&amp; c + <span class="n">1</span> &lt; cols) {               <span class="cm">// shear 两条对角</span>
+    link(p, at(r + <span class="n">1</span>, c + <span class="n">1</span>));  link(at(r, c + <span class="n">1</span>), at(r + <span class="n">1</span>, c));
+  }
+  <span class="k">if</span> (c + <span class="n">2</span> &lt; cols) link(p, at(r, c + <span class="n">2</span>));           <span class="cm">// bend 横</span>
+  <span class="k">if</span> (r + <span class="n">2</span> &lt; rows) link(p, at(r + <span class="n">2</span>, c));           <span class="cm">// bend 纵</span>
+}</pre>
+
+  <h3>来一块能撕的布</h3>
+  <p>22 × 15 的网格、330 个粒子、约 1300 条约束。顶边每隔 3 个钉一个（像挂起来的窗帘）。拖动鼠标扯一扯，按住 <strong>Shift</strong>（或右键）划过可以把布撕开 —— 撕布的实现就是<strong>删掉鼠标附近的约束</strong>，一行：</p>
+
+  <div class="stage">
+    <canvas id="cvC"></canvas>
+    <div class="ctrl">
+      <label>风力 <input type="range" id="cWind" min="0" max="100" step="1" value="35"><span id="cWindV" style="margin:0" class="readout">35</span></label>
+      <label>迭代 <input type="range" id="cItr" min="1" max="8" step="1" value="3"><span id="cItrV" style="margin:0" class="readout">3</span></label>
+      <button id="cBall" class="on">障碍球</button>
+      <button id="cFill">填充</button>
+      <button id="cReset">重置</button>
+      <span class="readout" id="cRead"></span>
+    </div>
+    <p class="hint">拖拽 = 抓住最近节点；按住 Shift 拖拽 = 剪断经过的约束。迭代调到 1 会看到布料明显"变软下垂"。</p>
+  </div>
+
+  <div class="callout co-teal">
+    <span class="hd">渲染小贴士</span>
+    <p>物理只需要粒子位置，渲染时才把它们连成三角/四边形网格。法线用相邻边的叉积现算，直接喂给 Mesh。绳索常用 <strong>LineRenderer</strong> 或按段生成胶囊体（capsule cylinder）；碰撞检测时，把每根"棍"当成带端帽的圆柱（capped cylinder）来处理。</p>
+  </div>
+</section>
+
+<!-- ============ 9 ============ -->
+<section id="ch9">
+  <h2><span class="num">09</span>布娃娃：Hitman 的火柴人</h2>
+  <p class="lead">初代《Hitman》的尸体不是刚体，是<strong>一堆粒子 + 距离约束组成的火柴人</strong>。这是 Verlet 最漂亮的一次亮相，也解释了为什么"布娃娃"这个词跟 Verlet 绑得这么紧。</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 680 260" xmlns="http://www.w3.org/2000/svg">
+      <g stroke="#3b5bdb" stroke-width="3" stroke-linecap="round">
+        <line x1="340" y1="60" x2="340" y2="120"/>
+        <line x1="340" y1="120" x2="290" y2="170"/><line x1="340" y1="120" x2="390" y2="170"/>
+        <line x1="290" y1="170" x2="265" y2="225"/><line x1="390" y1="170" x2="415" y2="225"/>
+        <line x1="340" y1="85" x2="270" y2="130"/><line x1="340" y1="85" x2="410" y2="130"/>
+        <line x1="270" y1="130" x2="245" y2="175"/><line x1="410" y1="130" x2="435" y2="175"/>
+      </g>
+      <g fill="#fff" stroke="#3b5bdb" stroke-width="2.4">
+        <circle cx="340" cy="52" r="9"/><circle cx="340" cy="120" r="8"/><circle cx="290" cy="170" r="7"/><circle cx="390" cy="170" r="7"/>
+        <circle cx="265" cy="225" r="7"/><circle cx="415" cy="225" r="7"/><circle cx="270" cy="130" r="6"/><circle cx="410" cy="130" r="6"/>
+        <circle cx="245" cy="175" r="6"/><circle cx="435" cy="175" r="6"/>
+      </g>
+      <text x="340" y="248" text-anchor="middle" font-size="12.5" fill="#475569">10 个粒子 + 9 根约束 = 会摔倒、会卡住、会被拖走的人形</text>
+      <g transform="translate(500,40)">
+        <text x="0" y="0" font-size="12" fill="#94a3b8">自碰撞：</text>
+        <line x1="10" y1="30" x2="90" y2="30" stroke="#be123c" stroke-width="1.6" stroke-dasharray="4 4"/>
+        <circle cx="10" cy="30" r="5" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+        <circle cx="90" cy="30" r="5" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+        <text x="10" y="52" font-size="11.5" fill="#be123c">双膝最小距离约束</text>
+        <text x="10" y="72" font-size="11.5" fill="#94a3b8">→ 腿永远不会交叉</text>
+        <text x="0" y="110" font-size="12" fill="#94a3b8">角度约束：</text>
+        <line x1="10" y1="140" x2="90" y2="140" stroke="#0d9488" stroke-width="2" stroke-dasharray="5 4"/>
+        <text x="10" y="162" font-size="11.5" fill="#0d9488">虚拟连杆限制肘/膝</text>
+        <text x="10" y="182" font-size="11.5" fill="#94a3b8">反折角度</text>
+      </g>
+    </svg>
+    <div class="cap">图 8 · Hitman 式的粒子/连杆人形：渲染时由粒子位置反推骨骼朝向，物理上只是一条链</div>
+  </div>
+
+  <h3>为什么不用刚体</h3>
+  <ul>
+    <li><strong>便宜</strong>：没有惯性张量、没有四元数积分、没有接触流形。10 个粒子比 10 个刚体快一个数量级。</li>
+    <li><strong>不会炸</strong>：约束是位置投影，最坏情况是"看起来有点软"，而不是"飞到天上"。</li>
+    <li><strong>够用</strong>：一具倒下的尸体，四肢绕自身轴的旋转根本看不出来 —— 省掉 60% 的自由度，视觉上几乎无损。</li>
+  </ul>
+
+  <p>渲染时怎么摆姿势？由粒子位置<strong>反推</strong>：大腿方向 = normalize(膝 − 髋)，再用叉积补出一条正交轴构成旋转矩阵。膝盖和手肘的弯曲方向由<strong>上一帧的姿势</strong>决定（避免抽搐），这是 Jakobsen 特意提到的细节。</p>
+
+  <div class="callout co-rose">
+    <span class="hd">代价</span>
+    <p>连杆人形<strong>没有真实的转动惯量</strong>，所以不会自己翻滚得很好；也没有自碰撞体积，手会穿过身体。所以现代引擎（Havok、PhysX）回到刚体 + 关节约束，只是用类似的迭代投影求解器 —— Verlet 的思想留下来了，粒子模型退回到特效领域（头发、布料、软体）。</p>
+  </div>
+</section>
+
+<!-- ============ 10 ============ -->
+<section id="ch10">
+  <h2><span class="num">10</span>投影式碰撞与摩擦</h2>
+  <p class="lead">传统刚体引擎用<strong>冲量</strong>解决碰撞（算一个 J，改速度）。Verlet 里没有速度可改，所以走另一条路：<strong>把穿透的点推出来</strong>。这叫投影式响应。</p>
+
+  <h3>惩罚力 vs 投影</h3>
+  <div class="grid2">
+    <div class="callout co-rose" style="margin:0">
+      <span class="hd">惩罚力（penalty）</span>
+      <p>接触时施加一个排斥力。力太大 → 抖甚至炸；力太小 → 互相穿透。<strong>力的大小极难调</strong>，而且和刚度、质量、时间步全都耦合。</p>
+    </div>
+    <div class="callout co-teal" style="margin:0">
+      <span class="hd">投影（projection）</span>
+      <p>直接把点移动到"最近的不穿透位置"。没有参数要调，永远不会炸，低速静止接触天然稳定 —— 代价是碰撞看起来"偏软"（因为恢复系数默认 0）。</p>
+    </div>
+  </div>
+
+  <h3>三种最常用的碰撞体</h3>
+  <pre><span class="cm">// ① 地面 / 墙：单侧平面，最简单也最常用</span>
+<span class="k">if</span> (p.y &gt; groundY) {
+  <span class="k">const</span> vy = p.y - p.py, vx = p.x - p.px;
+  p.y = groundY;
+  p.py = p.y + vy * restitution;          <span class="cm">// 反弹：下帧速度 = −e·vy</span>
+  p.px = p.x - vx * (<span class="n">1</span> - friction);      <span class="cm">// 摩擦：切向速度打折</span>
+}
+
+<span class="cm">// ② 球 / 障碍物：沿法向推出</span>
+<span class="k">const</span> dx = p.x - cx, dy = p.y - cy, d = Math.hypot(dx, dy);
+<span class="k">if</span> (d &lt; R) { p.x = cx + dx / d * R;  p.y = cy + dy / d * R; }
+
+<span class="cm">// ③ 棍 vs 三角形（Hitman 的做法）：每根连杆当"带端帽的圆柱"</span>
+<span class="cm">//    检测到穿透后，取穿透深度与接触点，把整根棍上的两个粒子按重心坐标推开</span></pre>
+
+  <div class="diagram">
+    <svg viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="ah5" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#0d9488"/></marker></defs>
+      <line x1="40" y1="150" x2="300" y2="150" stroke="#94a3b8" stroke-width="2"/>
+      <text x="44" y="142" font-size="11.5" fill="#94a3b8">地面</text>
+      <circle cx="170" cy="132" r="20" fill="none" stroke="#cbd5e1" stroke-width="2"/>
+      <text x="170" y="122" text-anchor="middle" font-size="12" fill="#94a3b8">R</text>
+      <line x1="170" y1="112" x2="170" y2="140" stroke="#be123c" stroke-width="1.8"/>
+      <text x="180" y="120" font-size="11.5" fill="#be123c">穿透深度</text>
+      <line x1="170" y1="150" x2="170" y2="112" stroke="#0d9488" stroke-width="2.4" marker-end="url(#ah5)"/>
+      <text x="176" y="96" font-size="12" fill="#0d9488">沿法向推出</text>
+
+      <line x1="360" y1="30" x2="360" y2="180" stroke="#e2e8f0"/>
+      <path d="M430,170 L620,120 L540,60 z" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.6"/>
+      <text x="520" y="186" text-anchor="middle" font-size="12" fill="#94a3b8">三角形（环境）</text>
+      <line x1="410" y1="90" x2="560" y2="130" stroke="#3b5bdb" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="410" cy="90" r="6" fill="#fff" stroke="#3b5bdb" stroke-width="2.4"/>
+      <circle cx="560" cy="130" r="6" fill="#fff" stroke="#3b5bdb" stroke-width="2.4"/>
+      <text x="400" y="76" font-size="11.5" fill="#3b5bdb">连杆 = 带端帽圆柱</text>
+      <circle cx="485" cy="110" r="3.5" fill="#be123c"/>
+      <text x="470" y="66" font-size="11.5" fill="#be123c">接触点 → 按重心坐标分摊给两端粒子</text>
+    </svg>
+    <div class="cap">图 9 · 碰撞响应：粒子沿最短路径推出表面；连杆碰撞则把接触点按权重分给两端</div>
+  </div>
+
+  <div class="callout co-amber">
+    <span class="hd">摩擦在 Verlet 里的样子</span>
+    <p>改 <code>px</code>（上一帧位置）就是在改速度。地面摩擦 = <code>px = x − vx·(1−μ)</code>，μ 越大越黏。这也是"布料搭在球上不会滑下来"的实现方式 —— 完全不需要切向冲量那一套。</p>
+  </div>
+
+  <h3>碰撞也要参与松弛</h3>
+  <p>把碰撞放进每一轮松弛里，而不是"积分完做一次"。否则会出现：约束求解把点推回墙里 → 但你这一帧不再检测碰撞 → 渲染出一帧穿墙。顺序建议：</p>
+  <div class="formula">积分 → <span class="c">[</span> for it in 1..N: { 距离约束 → 自碰撞 → 环境碰撞 → 边界 } <span class="c">]</span> → 渲染</div>
+</section>
+
+<!-- ============ 11 ============ -->
+<section id="ch11">
+  <h2><span class="num">11</span>固定步长、substep 与变步长</h2>
+  <p class="lead">Verlet 的 <code>a·Δt²</code> 假设 Δt 恒定。一旦帧率波动，隐式速度 <code>(x − x*)/Δt</code> 就会把帧率抖动<strong>直接翻译成速度抖动</strong> —— 布料会在掉帧时抽搐。三个手段，从推荐到不推荐。</p>
+
+  <h3>① 固定步长 + 累加器（首选）</h3>
+  <pre><span class="k">let</span> acc = <span class="n">0</span>;
+<span class="k">function</span> frame(realDt) {
+  acc += Math.min(realDt, <span class="n">0.25</span>);          <span class="cm">// 防止卡顿后的"死亡螺旋"</span>
+  <span class="k">while</span> (acc &gt;= FIXED) { step(FIXED); acc -= FIXED; }
+}</pre>
+  <p>物理永远以 1/60 推进，渲染帧率多少都无所谓。渲染时可以对位置做插值消除轻微抖动。</p>
+
+  <h3>② substep：同样预算，效果好得多</h3>
+  <p>Macklin 等人 2019 年的《Small Steps in Physics Simulation》给了一个反直觉的结论：<strong>把一帧切成 8 个小步、每步只做 1 次约束迭代，比一帧做 8 次迭代效果好得多，开销完全一样。</strong></p>
+
+  <div class="grid2">
+    <div class="callout co-rose" style="margin:0">
+      <span class="hd">1 步 × 8 次迭代</span>
+      <p>约束求解更"收敛"，但积分误差已经发生了：<strong>一次性走了大步</strong>，穿透更深、能量误差更大，迭代只是在收拾残局。</p>
+    </div>
+    <div class="callout co-teal" style="margin:0">
+      <span class="hd">8 步 × 1 次迭代</span>
+      <p>每步都很小 → <strong>线性化误差更小</strong>、穿透更浅、速度更新更及时。同样 8 次投影，稳定性提升显著。</p>
+    </div>
+  </div>
+
+  <div class="formula">dt_sub = dt / substeps
+<span class="k">for</span> (s = <span class="n">0</span>; s &lt; substeps; s++) {
+  integrate(dt_sub);                  <span class="c">// 注意：a·dt_sub²，别写成 dt²</span>
+  <span class="k">for</span> (it = <span class="n">0</span>; it &lt; itersPerSub; it++) solveConstraints();
+}</div>
+
+  <h3>③ 变步长的补丁：Time-Corrected Verlet</h3>
+  <p>如果非要跟着真实 dt 走，用 TCV 把速度按步长比例缩放：</p>
+  <div class="formula">x' = x + (x − x*) · (Δt_n / Δt_{n−1}) + a · Δt_n²</div>
+  <p>它能让不同帧率下的轨迹大致一致，但<strong>会破坏辛性质</strong>，长期能量表现不如固定步长。只在无法控制帧率的场合（比如网页里直接用 rAF 的 dt）作为折中。</p>
+
+  <div class="callout co-blue">
+    <span class="hd">推荐配置</span>
+    <p>固定 <code>dt = 1/60</code>，<code>substeps = 4~8</code>，每 substep <code>1~2</code> 次约束迭代。布料迭代总量 8 左右就足够挺括；绳子 3~6 就够硬。遇到性能问题，<strong>先减粒子数，再减 substep，最后才减迭代</strong>。</p>
+  </div>
+</section>
+
+<!-- ============ 12 ============ -->
+<section id="ch12">
+  <h2><span class="num">12</span>PBD 与 XPBD：给刚度一个物理量纲</h2>
+  <p class="lead">经典 PBD 的刚度是"手感参数"，随迭代次数和帧率漂移。XPBD（Macklin 2016）引入<strong>柔度 α = 1/刚度</strong>，让刚度第一次变成了与帧率、迭代次数<strong>解耦</strong>的物理量。</p>
+
+  <div class="formula">α̃ = α / Δt²                        <span class="c">// 柔度按时间步归一化</span>
+Δλ = (−C − α̃·λ) / ( Σᵢ wᵢ|∇Cᵢ|² + α̃ )   <span class="c">// 拉格朗日乘子增量</span>
+Δxᵢ = wᵢ · Δλ · ∇Cᵢ                  <span class="c">// 位置修正</span>
+λ ← λ + Δλ                          <span class="c">// 每步开始清零，跨迭代累积</span></div>
+
+  <p>其中 <code>C = |b − a| − rest</code> 是约束违反量，<code>∇C</code> 是梯度（对距离约束就是单位方向向量）。对比一下：</p>
+
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th></th><th>经典 PBD</th><th>XPBD</th></tr></thead>
+      <tbody>
+        <tr><td>刚度表示</td><td>k ∈ [0,1] 的修正比例</td><td>柔度 α（单位 m/N），物理可解释</td></tr>
+        <tr><td>依赖迭代次数</td><td><strong>是</strong> —— 迭代翻倍，材料变硬</td><td>否 —— 迭代只影响收敛精度</td></tr>
+        <tr><td>依赖时间步</td><td><strong>是</strong> —— 30 FPS 布料会变软</td><td>否 —— α̃ = α/Δt² 已归一化</td></tr>
+        <tr><td>额外内存</td><td>无</td><td>每条约束一个 λ（每步清零）</td></tr>
+        <tr><td>α = 0 时</td><td>—</td><td>退化为完全刚性，等价于经典 PBD 的 k=1</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout co-violet">
+    <span class="hd">要不要上 XPBD</span>
+    <p>如果你的布料只在一个固定帧率下运行、且参数是你自己调的，经典 PBD 完全够用，多写 20 行不划算。但如果：<strong>要支持可变帧率</strong>（移动端常见）、<strong>要暴露刚度给美术</strong>、<strong>要做软体/可形变材料</strong> —— XPBD 是标准答案。Blender 的布料节点、现代软体求解器都走这条线。</p>
+  </div>
+
+  <h3>还有更大的图景</h3>
+  <ul>
+    <li><strong>约束分组 / 图着色</strong>：把互不相连的约束染成同色，组内可并行 —— Gauss-Seidel 的顺序偏差也随之减轻。</li>
+    <li><strong>多层网格（multigrid）</strong>：在粗网格上先解一遍，让修正信息一步传遍整块布，解决第 5 节的传播速度问题。</li>
+    <li><strong> warm starting</strong>：把上一帧的 λ 保留下来作为初值，收敛更快，特别适合悬挂类场景。</li>
+  </ul>
+</section>
+
+<!-- ============ 13 ============ -->
+<section id="ch13">
+  <h2><span class="num">13</span>完整实现：120 行的迷你引擎</h2>
+  <p class="lead">把前面所有零件拼起来。这段代码可以直接粘进浏览器的 console 跑 —— 粒子、Verlet 积分、距离约束松弛、地面碰撞、布料构建、主循环，全在里面。</p>
+
+  <div class="diagram">
+    <div class="flow">
+      <div class="box blue"><b>① 积分</b><span>位置 Verlet + 重力</span></div>
+      <div class="arw">→</div>
+      <div class="box violet"><b>② 松弛</b><span>× N 次：距离 / 碰撞</span></div>
+      <div class="arw">→</div>
+      <div class="box teal"><b>③ 边界</b><span>地面 + 墙 + 摩擦</span></div>
+      <div class="arw">→</div>
+      <div class="box amber"><b>④ 渲染</b><span>用位置画线/网格</span></div>
+    </div>
+    <div class="cap">图 10 · 一帧的完整流程。第 ②③ 步在 substep 里重复若干次（第 11 节）</div>
+  </div>
+
+  <pre><span class="cm">// ── 数据结构：一个粒子只存 4 个数 + 1 个逆质量 ──────────────────</span>
+<span class="k">const</span> P = (x, y, w = <span class="n">1</span>) =&gt; ({ x, y, px: x, py: y, w });
+
+<span class="cm">// ── 积分：整个引擎的心脏，就这几行 ──────────────────────────────</span>
+<span class="k">function</span> integrate(p, dt, gx, gy, damping) {
+  <span class="k">const</span> vx = (p.x - p.px) * damping, vy = (p.y - p.py) * damping;
+  p.px = p.x;  p.py = p.y;
+  p.x += vx + gx * dt * dt;
+  p.y += vy + gy * dt * dt;
+}
+
+<span class="cm">// ── 距离约束：等式（绳子/结构线）与不等式（自碰撞）合一 ─────────</span>
+<span class="k">function</span> solveLink(a, b, rest, isMin = <span class="k">false</span>) {
+  <span class="k">const</span> dx = b.x - a.x, dy = b.y - a.y;
+  <span class="k">const</span> d = Math.hypot(dx, dy) || <span class="n">1e-6</span>;
+  <span class="k">if</span> (isMin &amp;&amp; d &gt;= rest) <span class="k">return</span>;          <span class="cm">// 不等式：太近才推</span>
+  <span class="k">const</span> s = a.w + b.w; <span class="k">if</span> (s === <span class="n">0</span>) <span class="k">return</span>;   <span class="cm">// 两端都固定</span>
+  <span class="k">const</span> diff = (d - rest) / d;
+  a.x += dx * diff * (a.w / s);  a.y += dy * diff * (a.w / s);
+  b.x -= dx * diff * (b.w / s);  b.y -= dy * diff * (b.w / s);
+}
+
+<span class="cm">// ── 边界：投影 + 反弹 + 摩擦，全靠改 x / px ─────────────────────</span>
+<span class="k">function</span> bounds(p, W, H, e = <span class="n">0.3</span>, mu = <span class="n">0.15</span>) {
+  <span class="k">if</span> (p.y &gt; H) { <span class="k">const</span> vy = p.y - p.py, vx = p.x - p.px;
+                 p.y = H; p.py = p.y + vy * e; p.px = p.x - vx * (<span class="n">1</span> - mu); }
+  <span class="k">if</span> (p.x &lt; <span class="n">0</span>) { p.x = <span class="n">0</span>; p.px = p.x + (p.x - p.px) * -e; }
+  <span class="k">if</span> (p.x &gt; W) { p.x = W; p.px = p.x + (p.x - p.px) * -e; }
+}
+
+<span class="cm">// ── 布料：三类约束一次建好 ─────────────────────────────────────</span>
+<span class="k">function</span> makeCloth(ox, oy, cols, rows, sp) {
+  <span class="k">const</span> pts = [], links = [];
+  <span class="k">const</span> at = (r, c) =&gt; pts[r * cols + c];
+  <span class="k">for</span> (<span class="k">let</span> r = <span class="n">0</span>; r &lt; rows; r++) <span class="k">for</span> (<span class="k">let</span> c = <span class="n">0</span>; c &lt; cols; c++)
+    pts.push(P(ox + c * sp, oy + r * sp, (r === <span class="n">0</span> &amp;&amp; c % <span class="n">3</span> === <span class="n">0</span>) ? <span class="n">0</span> : <span class="n">1</span>));  <span class="cm">// 顶边每隔 3 个钉住</span>
+  <span class="k">const</span> L = (a, b) =&gt; links.push({ a, b, rest: Math.hypot(b.x - a.x, b.y - a.y) });
+  <span class="k">for</span> (<span class="k">let</span> r = <span class="n">0</span>; r &lt; rows; r++) <span class="k">for</span> (<span class="k">let</span> c = <span class="n">0</span>; c &lt; cols; c++) {
+    <span class="k">if</span> (c + <span class="n">1</span> &lt; cols) L(at(r, c), at(r, c + <span class="n">1</span>));
+    <span class="k">if</span> (r + <span class="n">1</span> &lt; rows) L(at(r, c), at(r + <span class="n">1</span>, c));
+    <span class="k">if</span> (r + <span class="n">1</span> &lt; rows &amp;&amp; c + <span class="n">1</span> &lt; cols) { L(at(r, c), at(r + <span class="n">1</span>, c + <span class="n">1</span>)); L(at(r, c + <span class="n">1</span>), at(r + <span class="n">1</span>, c)); }
+    <span class="k">if</span> (c + <span class="n">2</span> &lt; cols) L(at(r, c), at(r, c + <span class="n">2</span>));
+    <span class="k">if</span> (r + <span class="n">2</span> &lt; rows) L(at(r, c), at(r + <span class="n">2</span>, c));
+  }
+  <span class="k">return</span> { pts, links };
+}
+
+<span class="cm">// ── 主循环：固定步长 + substep ─────────────────────────────────</span>
+<span class="k">const</span> DT = <span class="n">1</span> / <span class="n">60</span>, SUB = <span class="n">4</span>, ITER = <span class="n">2</span>, GRAV = <span class="n">1400</span>, DAMP = <span class="n">0.996</span>;
+<span class="k">let</span> acc = <span class="n">0</span>;
+<span class="k">function</span> frame(realDt, cloth, W, H) {
+  acc += Math.min(realDt, <span class="n">0.25</span>);
+  <span class="k">while</span> (acc &gt;= DT) {
+    <span class="k">const</span> h = DT / SUB;
+    <span class="k">for</span> (<span class="k">let</span> s = <span class="n">0</span>; s &lt; SUB; s++) {
+      <span class="k">for</span> (<span class="k">const</span> p <span class="k">of</span> cloth.pts) integrate(p, h, <span class="n">0</span>, GRAV, DAMP);
+      <span class="k">for</span> (<span class="k">let</span> it = <span class="n">0</span>; it &lt; ITER; it++) {
+        <span class="k">for</span> (<span class="k">const</span> l <span class="k">of</span> cloth.links) solveLink(l.a, l.b, l.rest);
+        <span class="k">for</span> (<span class="k">const</span> p <span class="k">of</span> cloth.pts) bounds(p, W, H);
+      }
+    }
+    acc -= DT;
+  }
+}</pre>
+
+  <div class="callout co-teal">
+    <span class="hd">数一数</span>
+    <p>积分 6 行、约束 10 行、边界 6 行、布料 20 行、主循环 15 行。<strong>没有矩阵、没有求解器库、没有刚度参数</strong> —— 这就是 Verlet 在实时物理里长盛不衰的原因。</p>
+  </div>
+</section>
+
+<!-- ============ A ============ -->
+<section id="app-a">
+  <h2><span class="num">A</span>调参表与踩坑清单</h2>
+  <p class="lead">这些数字不是物理常数，是<strong>手感起点</strong>。单位按"1 米 = 100 像素、重力 ≈ 1400 px/s²"的尺度给。</p>
+
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th>参数</th><th>典型值</th><th>调大的效果</th><th>调小的效果</th></tr></thead>
+      <tbody>
+        <tr><td><strong>damping</strong> 阻尼</td><td>0.99 ~ 0.999</td><td>更黏、更快静止（&gt;1 会自激振荡！）</td><td>更飘、晃个不停</td></tr>
+        <tr><td><strong>iterations</strong> 迭代</td><td>3 ~ 15</td><td>更硬、更接近不可拉伸，更费 CPU</td><td>橡皮筋感、误差沿链累积</td></tr>
+        <tr><td><strong>substeps</strong></td><td>4 ~ 8</td><td>更稳、穿透更浅（同预算下优于加迭代）</td><td>大步长误差、抖动</td></tr>
+        <tr><td><strong>dt</strong></td><td>1/60 固定</td><td>更快但更糙</td><td>更准但更费（配合 substep 用）</td></tr>
+        <tr><td><strong>gravity</strong></td><td>900 ~ 2000 px/s²</td><td>更快下落，需要更多迭代才不拉伸</td><td>飘、像在水下</td></tr>
+        <tr><td><strong>restitution</strong> e</td><td>0 ~ 0.5</td><td>更弹（&gt;1 会增能，会炸）</td><td>0 = 泥巴，静止接触最稳</td></tr>
+        <tr><td><strong>friction</strong> μ</td><td>0.1 ~ 0.4</td><td>更黏（布搭在球上不滑）</td><td>打滑、堆叠站不住</td></tr>
+        <tr><td><strong>spacing</strong> 网格间距</td><td>15 ~ 25 px</td><td>更省但更粗糙</td><td>更细腻但 O(n²) 开销上升</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>七个一定会踩的坑</h3>
+  <ol>
+    <li><strong>把 a·Δt² 写成 a·Δt</strong> —— 加速度效果和帧率挂钩，改帧率手感全变。</li>
+    <li><strong>忘记初始化 px/py</strong> —— 第一帧速度为 0 或翻倍，物体"跳"一下才动。</li>
+    <li><strong>除以零</strong> —— 两点重合时 <code>d = 0</code>，或者两个固定点（w 之和为 0）。都要保护。</li>
+    <li><strong>damping &gt; 1</strong> —— 每帧注入能量，几秒后必炸。阻尼永远 ≤ 1。</li>
+    <li><strong>一帧只做一次碰撞检测</strong> —— 约束求解会把点推回墙里，必须把碰撞放进松弛循环。</li>
+    <li><strong>直接用 rAF 的真实 dt 积分</strong> —— 切后台再回来会瞬移。要固定步长 + 累加器 + clamp。</li>
+    <li><strong>改了位置却没同步 px</strong> —— 拖拽物体时如果只设 x 不改 px，松手瞬间会获得巨大速度（有时这正是你想要的手感，但要知道自己在干什么）。</li>
+  </ol>
+
+  <div class="callout co-rose">
+    <span class="hd">调试心法</span>
+    <p>Verlet 出问题时，<strong>先关掉所有约束</strong>看纯积分是否正常，再逐个加回约束；把 <code>iterations</code> 拉到 50 看问题是"不收敛"还是"模型本身错了"；把 <code>gravity</code> 设 0 看是不是重力放大了误差。三步能定位 90% 的诡异行为。</p>
+  </div>
+</section>
+
+<!-- ============ B ============ -->
+<section id="app-b">
+  <h2><span class="num">B</span>术语速查</h2>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th>术语</th><th>含义</th></tr></thead>
+      <tbody>
+        <tr><td><strong>位置 Verlet</strong></td><td>x' = 2x − x* + a·Δt²。只存位置，速度隐含在位置差里</td></tr>
+        <tr><td><strong>隐式速度</strong></td><td>v ≡ (x − x*)/Δt。改位置即改速度，二者不可能失步</td></tr>
+        <tr><td><strong>辛积分器</strong></td><td>保持相空间体积的积分器；能量有界振荡而非单调漂移</td></tr>
+        <tr><td><strong>约束投影</strong></td><td>把违反约束的位置直接挪回满足约束的位置</td></tr>
+        <tr><td><strong>松弛 / relaxation</strong></td><td>反复扫描所有约束直到整体收敛（Gauss-Seidel 风格）</td></tr>
+        <tr><td><strong>逆质量 w</strong></td><td>w = 1/m；w = 0 表示固定不动。修正量按 w 比例分摊</td></tr>
+        <tr><td><strong>刚性 / stiffness</strong></td><td>约束"有多不可违反"。PBD 里由迭代次数决定，XPBD 里由柔度 α 决定</td></tr>
+        <tr><td><strong>柔度 α</strong></td><td>α = 1/k，XPBD 的参数，单位 m/N，与帧率和迭代次数解耦</td></tr>
+        <tr><td><strong>substep</strong></td><td>把一帧切成若干小步，每步做少量迭代；同预算下比堆迭代更稳</td></tr>
+        <tr><td><strong>TCV</strong></td><td>Time-Corrected Verlet，变步长时按 Δt 比例缩放位移项的补丁</td></tr>
+        <tr><td><strong>投影式碰撞</strong></td><td>把穿透点沿最短路径推出表面，等价于恢复系数 0 的碰撞响应</td></tr>
+        <tr><td><strong>capped cylinder</strong></td><td>带端帽的圆柱。Hitman 用它近似每根连杆去做三角形碰撞</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ C ============ -->
+<section id="app-c">
+  <h2><span class="num">C</span>延伸阅读</h2>
+  <p class="lead">三篇原始文献 + 一份课程讲义，按阅读顺序排。前两篇非常易读，强烈建议看原文。</p>
+  <ol>
+    <li><strong>Thomas Jakobsen, 《Advanced Character Physics》(2001)</strong> —— 一切的开端。粒子 + 距离约束 + 松弛 + Hitman 布娃娃，全文不到 20 页，代码直接可抄。<br><span class="small">graphics.cs.cmu.edu/nsp/course/15-869/2006/papers/jakobsen.htm</span></li>
+    <li><strong>Müller et al., 《Position Based Dynamics》(2007)</strong> —— 把 Jakobsen 的经验方法系统化，给出约束投影的统一框架，正式命名 PBD。</li>
+    <li><strong>Macklin &amp; Müller, 《XPBD》(2016)</strong> —— 引入柔度 α，解决刚度依赖迭代次数与帧率的问题。</li>
+    <li><strong>Macklin et al., 《Small Steps in Physics Simulation》(2019)</strong> —— substep 优于 iteration 的系统性论证，工程价值极高。</li>
+    <li><strong>ETH Zürich《Real Time Physics》课程笔记</strong> —— 严谨的积分器对比（含泰勒展开推导与稳定性分析），想把数学补扎实就看它。<br><span class="small">cgl.ethz.ch/Downloads/Publications/Tutorials/2008/Mue08/coursenotes.pdf</span></li>
+  </ol>
+
+  <div class="callout co-blue">
+    <span class="hd">动手清单</span>
+    <ol style="margin:0;padding-left:20px">
+      <li>一个自由落体的球 + 地面反弹（确认积分正确）</li>
+      <li>两点一根约束 → 一条 20 节的绳 → 钉住顶端甩一甩</li>
+      <li>把迭代次数做成滑块，看刚性变化（本文第 5 节）</li>
+      <li>二维网格 → 布料，加风、加球障碍</li>
+      <li>加 substep，对比同预算下的稳定性差异</li>
+      <li>（进阶）把距离约束换成 XPBD 形式，验证帧率无关性</li>
+    </ol>
+  </div>
+
+  <div class="tags">
+    <span class="tag">Verlet 积分</span>
+    <span class="tag">PBD</span>
+    <span class="tag">XPBD</span>
+    <span class="tag">约束松弛</span>
+    <span class="tag">布料模拟</span>
+    <span class="tag">布娃娃</span>
+    <span class="tag">游戏物理</span>
+    <span class="tag">Unity</span>
+  </div>
+</section>
+
+<footer>
+  图解教程 · Verlet 物理 —— 演示均为原生 canvas，无任何第三方依赖<br>
+  <a href="../index.html">← 回到 ptato 的首页</a>
+</footer>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var DPR = Math.min(2, window.devicePixelRatio || 1);
+  var demos = [];
+
+  function mix(a, b, t) {
+    return 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * t) + ',' +
+                    Math.round(a[1] + (b[1] - a[1]) * t) + ',' +
+                    Math.round(a[2] + (b[2] - a[2]) * t) + ')';
+  }
+  var BLUE = [59, 91, 219], RED = [190, 18, 60], SLATE = [100, 116, 139], TEAL = [13, 148, 136];
+
+  function base(cv, h) {
+    var o = { cv: cv, h: h, w: 620, ctx: cv.getContext('2d'), visible: false };
+    o.fit = function () {
+      o.w = cv.clientWidth || 620;
+      cv.width = Math.round(o.w * DPR);
+      cv.height = Math.round(o.h * DPR);
+      cv.style.height = o.h + 'px';
+      o.ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    };
+    cv.__demo = o;
+    demos.push(o);
+    return o;
+  }
+
+  function pointer(o, down, move, up) {
+    var cv = o.cv;
+    function pos(e) { var r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+    cv.addEventListener('pointerdown', function (e) { try { cv.setPointerCapture(e.pointerId); } catch (x) {} down(pos(e), e); e.preventDefault(); });
+    cv.addEventListener('pointermove', function (e) { move(pos(e), e); });
+    cv.addEventListener('pointerup', function (e) { up(pos(e), e); });
+    cv.addEventListener('pointercancel', function (e) { up(pos(e), e); });
+    cv.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+  }
+
+  function clear(o) {
+    o.ctx.fillStyle = '#fff';
+    o.ctx.fillRect(0, 0, o.w, o.h);
+  }
+
+  /* ============ Demo A · 欧拉 vs Verlet 轨道 ============ */
+  var A = base(document.getElementById('cvA'), 340);
+  var DTS = [1 / 120, 1 / 60, 1 / 30, 1 / 20, 1 / 12];
+  var DTL = ['1/120', '1/60', '1/30', '1/20', '1/12'];
+  var aDt = 1, aK = 6, AE, AV, aE0, aCx, aCy, aR, trajE, trajV;
+
+  function aReset() {
+    A.fit();
+    aCx = A.w * 0.5; aCy = A.h * 0.5; aR = Math.min(A.w, A.h) * 0.33;
+    var v0 = Math.sqrt(aK) * aR, dt = DTS[aDt];
+    AV = { x: aCx + aR, y: aCy, px: aCx + aR, py: aCy + v0 * dt };
+    AE = { x: aCx + aR, y: aCy, vx: 0, vy: -v0 };
+    trajE = []; trajV = [];
+    aE0 = 0.5 * v0 * v0 + 0.5 * aK * aR * aR;
+  }
+  function aWallV(p) {
+    var m = 8, e = 0.7;
+    if (p.x < m) { var vx = p.x - p.px; p.x = m; p.px = p.x + vx * e; }
+    else if (p.x > A.w - m) { var vx2 = p.x - p.px; p.x = A.w - m; p.px = p.x + vx2 * e; }
+    if (p.y < m) { var vy = p.y - p.py; p.y = m; p.py = p.y + vy * e; }
+    else if (p.y > A.h - m) { var vy2 = p.y - p.py; p.y = A.h - m; p.py = p.y + vy2 * e; }
+  }
+  function aWallE() {
+    var m = 8, e = 0.7, p = AE;
+    if (p.x < m) { p.x = m; p.vx = -p.vx * e; }
+    else if (p.x > A.w - m) { p.x = A.w - m; p.vx = -p.vx * e; }
+    if (p.y < m) { p.y = m; p.vy = -p.vy * e; }
+    else if (p.y > A.h - m) { p.y = A.h - m; p.vy = -p.vy * e; }
+  }
+  function aStep(dt) {
+    var ax = -aK * (AV.x - aCx), ay = -aK * (AV.y - aCy);
+    var vx = AV.x - AV.px, vy = AV.y - AV.py;
+    AV.px = AV.x; AV.py = AV.y;
+    AV.x += vx + ax * dt * dt; AV.y += vy + ay * dt * dt;
+    aWallV(AV);
+
+    var ex = -aK * (AE.x - aCx), ey = -aK * (AE.y - aCy);
+    AE.x += AE.vx * dt; AE.y += AE.vy * dt;   // 显式欧拉：先用旧速度走位置
+    AE.vx += ex * dt;   AE.vy += ey * dt;     // 再更新速度
+    aWallE();
+
+    trajV.push(AV.x, AV.y); if (trajV.length > 600) trajV.splice(0, 2);
+    trajE.push(AE.x, AE.y); if (trajE.length > 600) trajE.splice(0, 2);
+  }
+  function aEnergy() {
+    var dt = DTS[aDt];
+    var vvx = (AV.x - AV.px) / dt, vvy = (AV.y - AV.py) / dt;
+    var rv = Math.hypot(AV.x - aCx, AV.y - aCy), re = Math.hypot(AE.x - aCx, AE.y - aCy);
+    var ev = 0.5 * (vvx * vvx + vvy * vvy) + 0.5 * aK * rv * rv;
+    var ee = 0.5 * (AE.vx * AE.vx + AE.vy * AE.vy) + 0.5 * aK * re * re;
+    return [ev / aE0, ee / aE0];
+  }
+  function aTraj(ctx, arr, color) {
+    if (arr.length < 4) return;
+    ctx.strokeStyle = color; ctx.lineWidth = 1.4; ctx.globalAlpha = 0.35;
+    ctx.beginPath(); ctx.moveTo(arr[0], arr[1]);
+    for (var i = 2; i < arr.length; i += 2) ctx.lineTo(arr[i], arr[i + 1]);
+    ctx.stroke(); ctx.globalAlpha = 1;
+  }
+  A.step = function (real) {
+    var dt = DTS[aDt], guard = 0;
+    A.acc = (A.acc || 0) + Math.min(real, 0.1);
+    while (A.acc >= dt && guard < 20) { aStep(dt); A.acc -= dt; guard++; }
+  };
+  A.draw = function () {
+    var c = A.ctx; clear(A);
+    c.strokeStyle = '#eef2f7'; c.lineWidth = 1;
+    c.beginPath(); c.moveTo(0, aCy); c.lineTo(A.w, aCy); c.moveTo(aCx, 0); c.lineTo(aCx, A.h); c.stroke();
+    aTraj(c, trajV, '#93b0f5'); aTraj(c, trajE, '#f2aab8');
+
+    c.setLineDash([4, 4]); c.lineWidth = 1.6;
+    c.strokeStyle = '#c7d2fe';
+    c.beginPath(); c.moveTo(aCx, aCy); c.lineTo(AV.x, AV.y); c.stroke();
+    c.strokeStyle = '#fbc7d1';
+    c.beginPath(); c.moveTo(aCx, aCy); c.lineTo(AE.x, AE.y); c.stroke();
+    c.setLineDash([]);
+
+    c.fillStyle = '#475569';
+    c.beginPath(); c.arc(aCx, aCy, 4, 0, 6.284); c.fill();
+    c.fillStyle = '#3b5bdb';
+    c.beginPath(); c.arc(AV.x, AV.y, 8, 0, 6.284); c.fill();
+    c.fillStyle = '#be123c';
+    c.beginPath(); c.arc(AE.x, AE.y, 8, 0, 6.284); c.fill();
+
+    var e = aEnergy();
+    document.getElementById('aRead').textContent =
+      'E/E₀　Verlet ' + e[0].toFixed(2) + '　·　欧拉 ' + e[1].toFixed(2);
+  };
+  document.getElementById('aDt').addEventListener('input', function (e) {
+    var nd = +e.target.value;
+    if (nd !== aDt && AV) {                       // 步长变了：按新步长重标定隐式速度
+      var s = DTS[nd] / DTS[aDt];
+      AV.px = AV.x - (AV.x - AV.px) * s;
+      AV.py = AV.y - (AV.y - AV.py) * s;
+    }
+    aDt = nd; document.getElementById('aDtV').textContent = DTL[aDt];
+  });
+  document.getElementById('aK').addEventListener('input', function (e) {
+    aK = +e.target.value; document.getElementById('aKV').textContent = aK; aReset();
+  });
+  document.getElementById('aReset').addEventListener('click', aReset);
+
+  /* ============ Demo B · 链条与迭代次数 ============ */
+  var B = base(document.getElementById('cvB'), 380);
+  var bItr = 6, bN = 26, bRest = 11, bNodes = [], bLinks = [], bDrag = null, bColor = true, bMouse = { x: 0, y: 0 };
+
+  function bReset() {
+    B.fit();
+    bRest = Math.min(16, Math.floor((B.h - 70) / bN));
+    bNodes = []; bLinks = [];
+    var x0 = B.w * 0.5, y0 = 34;
+    for (var i = 0; i < bN; i++) {
+      var x = x0 + Math.sin(i * 0.32) * 14, y = y0 + i * bRest;
+      bNodes.push({ x: x, y: y, px: x, py: y, w: i === 0 ? 0 : 1 });
+    }
+    for (var j = 0; j < bN - 1; j++) bLinks.push({ a: bNodes[j], b: bNodes[j + 1], rest: bRest });
+    bDrag = null;
+  }
+  function bSolve() {
+    for (var i = 0; i < bLinks.length; i++) {
+      var l = bLinks[i], a = l.a, b = l.b;
+      var dx = b.x - a.x, dy = b.y - a.y;
+      var d = Math.hypot(dx, dy) || 1e-6;
+      var s = a.w + b.w; if (s === 0) continue;
+      var diff = (d - l.rest) / d;
+      a.x += dx * diff * (a.w / s); a.y += dy * diff * (a.w / s);
+      b.x -= dx * diff * (b.w / s); b.y -= dy * diff * (b.w / s);
+    }
+  }
+  function bBounds(p) {
+    var m = 6, e = 0.35, mu = 0.2;
+    if (p.y > B.h - m) {
+      var vy = p.y - p.py, vx = p.x - p.px;
+      p.y = B.h - m; p.py = p.y + vy * e; p.px = p.x - vx * (1 - mu);
+    }
+    if (p.x < m) { var vx2 = p.x - p.px; p.x = m; p.px = p.x + vx2 * e; }
+    if (p.x > B.w - m) { var vx3 = p.x - p.px; p.x = B.w - m; p.px = p.x + vx3 * e; }
+  }
+  B.step = function (real) {
+    var DT = 1 / 60, SUB = 2, h = DT / SUB, guard = 0;
+    B.acc = (B.acc || 0) + Math.min(real, 0.1);
+    while (B.acc >= DT && guard < 4) {
+      for (var s = 0; s < SUB; s++) {
+        for (var i = 0; i < bNodes.length; i++) {
+          var p = bNodes[i];
+          if (p.w === 0) continue;
+          var vx = (p.x - p.px) * 0.997, vy = (p.y - p.py) * 0.997;
+          p.px = p.x; p.py = p.y;
+          p.x += vx; p.y += vy + 1400 * h * h;
+        }
+        for (var it = 0; it < bItr; it++) { bSolve(); for (var k = 0; k < bNodes.length; k++) bBounds(bNodes[k]); }
+      }
+      if (bDrag) { bDrag.x = bMouse.x; bDrag.y = bMouse.y; }
+      B.acc -= DT; guard++;
+    }
+  };
+  B.draw = function () {
+    var c = B.ctx; clear(B);
+    var sum = 0, mx = 0;
+    for (var i = 0; i < bLinks.length; i++) {
+      var l = bLinks[i], d = Math.hypot(l.b.x - l.a.x, l.b.y - l.a.y);
+      var err = (d - l.rest) / l.rest; sum += err; if (err > mx) mx = err;
+    }
+    var avg = bLinks.length ? sum / bLinks.length : 0;
+
+    c.lineWidth = 3; c.lineCap = 'round';
+    for (var j = 0; j < bLinks.length; j++) {
+      var l2 = bLinks[j], dd = Math.hypot(l2.b.x - l2.a.x, l2.b.y - l2.a.y);
+      var t = Math.min(1, Math.max(0, Math.abs(dd - l2.rest) / l2.rest / 0.25));
+      c.strokeStyle = bColor ? mix(BLUE, RED, t) : '#3b5bdb';
+      c.beginPath(); c.moveTo(l2.a.x, l2.a.y); c.lineTo(l2.b.x, l2.b.y); c.stroke();
+    }
+    for (var k = 0; k < bNodes.length; k++) {
+      var p = bNodes[k];
+      c.beginPath(); c.arc(p.x, p.y, p.w === 0 ? 6 : 4, 0, 6.284);
+      c.fillStyle = p.w === 0 ? '#475569' : '#fff';
+      c.strokeStyle = p === bDrag ? '#b45309' : '#3b5bdb'; c.lineWidth = 2;
+      c.fill(); c.stroke();
+    }
+    document.getElementById('bRead').textContent =
+      '平均拉伸 ' + (avg * 100).toFixed(1) + '%　·　最大 ' + (mx * 100).toFixed(1) + '%';
+  };
+  pointer(B,
+    function (pt) {
+      var best = null, bd = 36;
+      for (var i = 0; i < bNodes.length; i++) {
+        var d = Math.hypot(bNodes[i].x - pt.x, bNodes[i].y - pt.y);
+        if (d < bd) { bd = d; best = bNodes[i]; }
+      }
+      bDrag = best; bMouse.x = pt.x; bMouse.y = pt.y;
+    },
+    function (pt) { bMouse.x = pt.x; bMouse.y = pt.y; },
+    function () { bDrag = null; });
+  document.getElementById('bItr').addEventListener('input', function (e) {
+    bItr = +e.target.value; document.getElementById('bItrV').textContent = bItr;
+  });
+  document.getElementById('bN').addEventListener('input', function (e) {
+    bN = +e.target.value; document.getElementById('bNV').textContent = bN; bReset();
+  });
+  document.getElementById('bReset').addEventListener('click', bReset);
+  document.getElementById('bColor').addEventListener('click', function (e) {
+    bColor = !bColor; e.target.classList.toggle('on', bColor);
+  });
+
+  /* ============ Demo C · 布料 / 风 / 撕扯 ============ */
+  var C = base(document.getElementById('cvC'), 430);
+  var cCols = 22, cRows = 15, cSp = 16, cNodes = [], cLinks = [], cT = 0;
+  var cWind = 35, cItr = 3, cBall = true, cFill = false, cDrag = null, cMouse = { x: 0, y: 0 };
+  var cH, cV, cBallR = 52;
+
+  function cReset() {
+    C.fit();
+    cSp = Math.min(18, (C.w - 60) / cCols);
+    cNodes = []; cLinks = []; cT = 0; cDrag = null;
+    cH = []; cV = [];
+    var ox = (C.w - cSp * (cCols - 1)) / 2, oy = 26;
+    var at = function (r, c) { return cNodes[r * cCols + c]; };
+    for (var r = 0; r < cRows; r++) {
+      cH.push([]); cV.push([]);
+      for (var c = 0; c < cCols; c++) {
+        var x = ox + c * cSp, y = oy + r * cSp;
+        cNodes.push({ x: x, y: y, px: x, py: y, w: (r === 0 && c % 3 === 0) ? 0 : 1, r: r, c: c });
+        cH[r].push(1); cV[r].push(1);
+      }
+    }
+    function L(a, b) { cLinks.push({ a: a, b: b, rest: Math.hypot(b.x - a.x, b.y - a.y), dead: false, kind: 's', r: a.r, c: a.c }); }
+    for (var r2 = 0; r2 < cRows; r2++) for (var c2 = 0; c2 < cCols; c2++) {
+      var p = at(r2, c2);
+      if (c2 + 1 < cCols) { var l1 = { a: p, b: at(r2, c2 + 1), rest: cSp, dead: false, kind: 'h', r: r2, c: c2 }; cLinks.push(l1); }
+      if (r2 + 1 < cRows) { cLinks.push({ a: p, b: at(r2 + 1, c2), rest: cSp, dead: false, kind: 'v', r: r2, c: c2 }); }
+      if (r2 + 1 < cRows && c2 + 1 < cCols) { L(p, at(r2 + 1, c2 + 1)); L(at(r2, c2 + 1), at(r2 + 1, c2)); }
+      if (c2 + 2 < cCols) L(p, at(r2, c2 + 2));
+      if (r2 + 2 < cRows) L(p, at(r2 + 2, c2));
+    }
+  }
+  function cSolveLink(l) {
+    var a = l.a, b = l.b;
+    var dx = b.x - a.x, dy = b.y - a.y;
+    var d = Math.hypot(dx, dy) || 1e-6;
+    var s = a.w + b.w; if (s === 0) return;
+    var diff = (d - l.rest) / d;
+    a.x += dx * diff * (a.w / s); a.y += dy * diff * (a.w / s);
+    b.x -= dx * diff * (b.w / s); b.y -= dy * diff * (b.w / s);
+  }
+  function cBounds(p) {
+    var m = 4, e = 0.2, mu = 0.25;
+    if (p.y > C.h - m) {
+      var vy = p.y - p.py, vx = p.x - p.px;
+      p.y = C.h - m; p.py = p.y + vy * e; p.px = p.x - vx * (1 - mu);
+    }
+    if (p.x < m) { p.x = m; } if (p.x > C.w - m) { p.x = C.w - m; }
+    if (p.y < m) { p.y = m; }
+  }
+  C.step = function (real) {
+    var DT = 1 / 60, SUB = 2, h = DT / SUB, guard = 0;
+    C.acc = (C.acc || 0) + Math.min(real, 0.1);
+    while (C.acc >= DT && guard < 4) {
+      for (var s = 0; s < SUB; s++) {
+        cT += h;
+        var base_w = cWind * 7 * (0.55 + 0.45 * Math.sin(cT * 1.5));
+        for (var i = 0; i < cNodes.length; i++) {
+          var p = cNodes[i];
+          if (p.w === 0) continue;
+          var w = base_w * (0.75 + 0.25 * Math.sin(cT * 1.1 + p.r * 0.3));
+          var vx = (p.x - p.px) * 0.996, vy = (p.y - p.py) * 0.996;
+          p.px = p.x; p.py = p.y;
+          p.x += vx + w * h * h; p.y += vy + 1400 * h * h;
+        }
+        for (var it = 0; it < cItr; it++) {
+          for (var j = 0; j < cLinks.length; j++) if (!cLinks[j].dead) cSolveLink(cLinks[j]);
+          for (var k = 0; k < cNodes.length; k++) {
+            var n = cNodes[k]; cBounds(n);
+            if (cBall) {
+              var bx = C.w * 0.5, by = C.h * 0.62;
+              var dx = n.x - bx, dy = n.y - by, d = Math.hypot(dx, dy) || 1e-6;
+              if (d < cBallR) {
+                var vxx = n.x - n.px, vyy = n.y - n.py;
+                n.x = bx + dx / d * cBallR; n.y = by + dy / d * cBallR;
+                n.px = n.x - vxx * 0.7; n.py = n.y - vyy * 0.7;
+              }
+            }
+          }
+        }
+      }
+      if (cDrag) { cDrag.x = cMouse.x; cDrag.y = cMouse.y; }
+      C.acc -= DT; guard++;
+    }
+  };
+  C.draw = function () {
+    var c = C.ctx; clear(C);
+    var ox = (C.w - cSp * (cCols - 1)) / 2;
+    if (cFill) {
+      for (var r = 0; r < cRows - 1; r++) for (var cc = 0; cc < cCols - 1; cc++) {
+        if (!cH[r][cc] || !cV[r][cc] || !cV[r][cc + 1] || !cH[r + 1][cc]) continue;
+        var a = cNodes[r * cCols + cc], b = cNodes[r * cCols + cc + 1],
+            d = cNodes[(r + 1) * cCols + cc + 1], e = cNodes[(r + 1) * cCols + cc];
+        var sh = Math.min(1, Math.max(0, (d.y - a.y) / (cSp * 2)));
+        c.fillStyle = mix([214, 228, 255], [165, 195, 250], sh);
+        c.beginPath(); c.moveTo(a.x, a.y); c.lineTo(b.x, b.y); c.lineTo(d.x, d.y); c.lineTo(e.x, e.y);
+        c.closePath(); c.fill();
+      }
+    }
+    c.strokeStyle = cFill ? 'rgba(59,91,219,.35)' : '#a9bcf3'; c.lineWidth = 1;
+    c.beginPath();
+    for (var i = 0; i < cLinks.length; i++) {
+      var l = cLinks[i]; if (l.dead) continue;
+      if (l.kind === 'h' && cH[l.r][l.c]) { c.moveTo(l.a.x, l.a.y); c.lineTo(l.b.x, l.b.y); }
+      if (l.kind === 'v' && cV[l.r][l.c]) { c.moveTo(l.a.x, l.a.y); c.lineTo(l.b.x, l.b.y); }
+    }
+    c.stroke();
+    for (var k = 0; k < cNodes.length; k++) {
+      var p = cNodes[k];
+      if (p.w === 0) { c.fillStyle = '#475569'; c.beginPath(); c.arc(p.x, p.y, 3.2, 0, 6.284); c.fill(); }
+      else if (p === cDrag) { c.fillStyle = '#b45309'; c.beginPath(); c.arc(p.x, p.y, 5, 0, 6.284); c.fill(); }
+    }
+    if (cBall) {
+      c.strokeStyle = '#cbd5e1'; c.lineWidth = 1.5;
+      c.beginPath(); c.arc(C.w * 0.5, C.h * 0.62, cBallR, 0, 6.284); c.stroke();
+      c.fillStyle = '#f8fafc'; c.fill();
+    }
+    var alive = 0;
+    for (var m = 0; m < cLinks.length; m++) if (!cLinks[m].dead) alive++;
+    document.getElementById('cRead').textContent =
+      cNodes.length + ' 粒子 · ' + alive + ' / ' + cLinks.length + ' 约束';
+  };
+  function cCut(pt) {
+    for (var i = 0; i < cLinks.length; i++) {
+      var l = cLinks[i]; if (l.dead) continue;
+      var mx = (l.a.x + l.b.x) / 2, my = (l.a.y + l.b.y) / 2;
+      if (Math.hypot(mx - pt.x, my - pt.y) < 16) {
+        l.dead = true;
+        if (l.kind === 'h') cH[l.r][l.c] = 0;
+        if (l.kind === 'v') cV[l.r][l.c] = 0;
+      }
+    }
+  }
+  pointer(C,
+    function (pt, e) {
+      cMouse.x = pt.x; cMouse.y = pt.y;
+      if (e.shiftKey || e.button === 2) { cCut(pt); return; }
+      var best = null, bd = 40;
+      for (var i = 0; i < cNodes.length; i++) {
+        var d = Math.hypot(cNodes[i].x - pt.x, cNodes[i].y - pt.y);
+        if (d < bd) { bd = d; best = cNodes[i]; }
+      }
+      cDrag = best;
+    },
+    function (pt, e) {
+      cMouse.x = pt.x; cMouse.y = pt.y;
+      if (cDrag && (e.shiftKey || (e.buttons & 2))) cCut(pt);
+    },
+    function () { cDrag = null; });
+  document.getElementById('cWind').addEventListener('input', function (e) {
+    cWind = +e.target.value; document.getElementById('cWindV').textContent = cWind;
+  });
+  document.getElementById('cItr').addEventListener('input', function (e) {
+    cItr = +e.target.value; document.getElementById('cItrV').textContent = cItr;
+  });
+  document.getElementById('cBall').addEventListener('click', function (e) {
+    cBall = !cBall; e.target.classList.toggle('on', cBall);
+  });
+  document.getElementById('cFill').addEventListener('click', function (e) {
+    cFill = !cFill; e.target.classList.toggle('on', cFill);
+  });
+  document.getElementById('cReset').addEventListener('click', cReset);
+
+  /* ============ 主循环 ============ */
+  aReset(); bReset(); cReset();
+  A.visible = B.visible = C.visible = true;
+
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (en) { if (en.target.__demo) en.target.__demo.visible = en.isIntersecting; });
+    }, { rootMargin: '120px' });
+    demos.forEach(function (d) { io.observe(d.cv); });
+  }
+  var last = performance.now();
+  function loop(now) {
+    var dt = Math.min((now - last) / 1000, 0.1); last = now;
+    for (var i = 0; i < demos.length; i++) {
+      var d = demos[i];
+      if (!d.visible) continue;
+      try { d.step(dt); d.draw(); } catch (err) { d.visible = false; }
+    }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  var rt = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(rt);
+    rt = setTimeout(function () { aReset(); bReset(); cReset(); }, 180);
+  });
+})();
+</script>
+</body>
+</html>
