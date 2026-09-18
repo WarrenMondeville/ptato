@@ -1,0 +1,1677 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>游戏物理引擎开发 · 图解教程</title>
+<style>
+:root{
+  --bg:#f6f8fb; --card:#fff; --ink:#1e293b; --ink2:#475569; --ink3:#94a3b8;
+  --line:#e2e8f0; --line2:#cbd5e1;
+  --blue:#3b5bdb; --amber:#b45309; --teal:#0d9488; --violet:#6d28d9; --rose:#be123c; --green:#15803d;
+  --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px -12px rgba(15,23,42,.14);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",sans-serif;
+  font-size:16px; line-height:1.85; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:920px;margin:0 auto;padding:0 20px 80px}
+a{color:var(--blue);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ---------- hero ---------- */
+.hero{
+  background:linear-gradient(160deg,#fff 0%,#f3f6ff 55%,#eef4ff 100%);
+  border:1px solid var(--line); border-radius:20px; padding:44px 38px; margin:28px 0 26px;
+  box-shadow:var(--shadow); position:relative; overflow:hidden;
+}
+.hero::after{
+  content:""; position:absolute; right:-70px; top:-70px; width:260px; height:260px; border-radius:50%;
+  background:radial-gradient(circle,rgba(59,91,219,.10),transparent 70%);
+}
+.kicker{font-size:13px;letter-spacing:.16em;color:var(--blue);font-weight:700;margin-bottom:14px}
+.hero h1{font-size:33px;line-height:1.3;margin:0 0 12px;letter-spacing:-.01em}
+.hero .sub{font-size:16.5px;color:var(--ink2);margin:0 0 22px;max-width:640px}
+.hero .meta{display:flex;flex-wrap:wrap;gap:10px}
+.chip{
+  background:#fff;border:1px solid var(--line2);border-radius:999px;
+  padding:5px 14px;font-size:12.5px;color:var(--ink2);
+}
+.chip b{color:var(--ink);font-weight:600}
+
+/* ---------- 目录 ---------- */
+.toc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-bottom:30px;box-shadow:var(--shadow)}
+.toc h2{font-size:15px;margin:0 0 16px;color:var(--ink3);font-weight:700;letter-spacing:.08em}
+.tocgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:6px 26px}
+.toc a{display:block;padding:5px 0;font-size:14.5px;color:var(--ink2);border-bottom:1px dashed transparent}
+.toc a:hover{color:var(--blue);border-bottom-color:var(--line2);text-decoration:none}
+.toc .part{grid-column:1/-1;font-size:12px;color:var(--ink3);font-weight:700;margin-top:12px;letter-spacing:.05em}
+
+/* ---------- 章节 ---------- */
+section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:34px 38px;margin-bottom:26px;box-shadow:var(--shadow)}
+section>h2{font-size:24px;margin:0 0 6px;letter-spacing:-.01em;scroll-margin-top:20px}
+section>h2 .num{color:var(--line2);font-weight:800;margin-right:10px;font-size:20px}
+.lead{color:var(--ink2);font-size:15.5px;margin:0 0 22px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+h3{font-size:18px;margin:32px 0 10px;color:var(--ink)}
+h3:first-of-type{margin-top:8px}
+h4{font-size:15px;margin:22px 0 8px;color:var(--ink2)}
+p{margin:0 0 14px}
+ul,ol{margin:0 0 16px;padding-left:22px}
+li{margin-bottom:7px}
+strong{font-weight:650;color:var(--ink)}
+code{
+  font-family:"SFMono-Regular",Menlo,Consolas,monospace;font-size:13px;
+  background:#f1f5f9;border:1px solid var(--line);border-radius:5px;padding:1px 5px;color:#0f172a;
+}
+.small{font-size:13.5px;color:var(--ink3)}
+
+/* ---------- 图 ---------- */
+.diagram{background:linear-gradient(180deg,#fdfefe,#f8fafc);border:1px solid var(--line);border-radius:14px;padding:22px 18px;margin:22px 0}
+.cap{font-size:12.5px;color:var(--ink3);text-align:center;margin-top:12px;line-height:1.6}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;justify-content:center;gap:8px}
+.box{background:#fff;border:1.5px solid var(--line2);border-radius:11px;padding:10px 14px;font-size:13.5px;text-align:center;line-height:1.5}
+.box b{display:block;font-size:13.5px;font-weight:700;color:var(--ink)}
+.box span{font-size:11.5px;color:var(--ink3)}
+.box.blue{border-color:#a8b8f5;background:#f3f6ff}
+.box.teal{border-color:#8fd3cb;background:#f0fbf9}
+.box.amber{border-color:#f0c48a;background:#fffaf0}
+.box.rose{border-color:#f2aab8;background:#fff5f7}
+.box.violet{border-color:#c4b0f5;background:#f8f5ff}
+.box.green{border-color:#9bd3a4;background:#f2fbf4}
+.box.dark{border-color:#94a3b8;background:#f1f5f9}
+.arw{align-self:center;color:#94a3b8;font-size:17px;font-weight:700}
+.arw.dn{display:block;text-align:center;margin:6px auto;color:#94a3b8;font-size:16px}
+.stack{display:grid;gap:7px}
+.layer{display:flex;gap:12px;align-items:center;border:1.5px solid var(--line2);border-radius:11px;padding:11px 15px;background:#fff;font-size:13.5px}
+.layer .taglbl{
+  flex:0 0 auto;font-size:11px;font-weight:700;color:#fff;background:var(--blue);
+  border-radius:6px;padding:2px 8px;letter-spacing:.03em;
+}
+.layer.t .taglbl{background:var(--teal)}
+.layer.a .taglbl{background:var(--amber)}
+.layer.v .taglbl{background:var(--violet)}
+.layer.r .taglbl{background:var(--rose)}
+.layer.g .taglbl{background:var(--green)}
+.layer.d .taglbl{background:#64748b}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:680px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+
+/* ---------- 高亮框 ---------- */
+.callout{border-radius:12px;padding:16px 18px;margin:20px 0;font-size:14.5px;border:1px solid;line-height:1.75}
+.callout .hd{font-weight:700;font-size:13px;letter-spacing:.05em;margin-bottom:6px;display:block}
+.callout p:last-child{margin-bottom:0}
+.co-blue{background:#f3f6ff;border-color:#c7d2fe;color:#1e3a8a}
+.co-blue .hd{color:var(--blue)}
+.co-teal{background:#f0fbf9;border-color:#99e6d9;color:#134e4a}
+.co-teal .hd{color:var(--teal)}
+.co-amber{background:#fffaf0;border-color:#fcd9a5;color:#78350f}
+.co-amber .hd{color:var(--amber)}
+.co-rose{background:#fff5f7;border-color:#f8c2cd;color:#831843}
+.co-rose .hd{color:var(--rose)}
+.co-violet{background:#f8f5ff;border-color:#ddd0fb;color:#4c1d95}
+.co-violet .hd{color:var(--violet)}
+
+/* ---------- 数据卡 ---------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0}
+.stat{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:14px 16px;text-align:center}
+.stat .v{font-size:23px;font-weight:750;color:var(--blue);line-height:1.2;letter-spacing:-.02em}
+.stat .k{font-size:12px;color:var(--ink3);margin-top:4px;line-height:1.4}
+
+/* ---------- 表格 ---------- */
+.tblwrap{overflow-x:auto;margin:20px 0;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13.5px;background:#fff}
+th{background:#f8fafc;text-align:left;padding:10px 13px;font-weight:700;color:var(--ink2);border-bottom:1px solid var(--line);white-space:nowrap;font-size:13px}
+td{padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#fcfdff}
+
+/* ---------- 公式 ---------- */
+.formula{
+  background:#f8fafc;border:1px solid var(--line);border-left:3px solid var(--blue);
+  border-radius:0 10px 10px 0;padding:12px 16px;margin:16px 0;
+  font-family:"SFMono-Regular",Menlo,Consolas,monospace;font-size:13.5px;line-height:2;color:#0f172a;
+  overflow-x:auto;white-space:pre;
+}
+.formula .c{color:var(--ink3)}
+
+/* ---------- 代码 ---------- */
+pre{
+  background:#0f172a;color:#e2e8f0;border-radius:12px;padding:16px 18px;overflow-x:auto;
+  font-family:"SFMono-Regular",Menlo,Consolas,monospace;font-size:12.8px;line-height:1.75;margin:18px 0;
+}
+pre .k{color:#93c5fd}
+pre .t{color:#86efac}
+pre .cm{color:#94a3b8}
+pre .n{color:#fcd34d}
+
+/* ---------- 其他 ---------- */
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0}
+.tag{font-size:11.5px;background:#f1f5f9;border:1px solid var(--line);border-radius:6px;padding:2px 9px;color:var(--ink2)}
+.q{border-left:3px solid var(--line2);padding:2px 0 2px 16px;color:var(--ink2);font-size:14.5px;margin:16px 0}
+footer{text-align:center;color:var(--ink3);font-size:13px;padding:30px 20px 0;line-height:1.9}
+.divider{height:1px;background:var(--line);margin:34px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hero">
+  <div class="kicker">图 解 教 程 · 读 书 笔 记</div>
+  <h1>游戏物理引擎开发</h1>
+  <p class="sub">Ian Millington《Game Physics Engine Development》精读 —— 从一颗会下落的粒子开始，一路走到能撑起商业游戏的刚体 + 碰撞 + 接触求解系统。</p>
+  <div class="meta">
+    <span class="chip">原书 <b>第 2 版 / 18 章</b></span>
+    <span class="chip">配套引擎 <b>Cyclone（C++ / 13k 行）</b></span>
+    <span class="chip">中文版 <b>334 页 · 清华大学出版社</b></span>
+    <span class="chip">阅读时长 <b>约 45 分钟</b></span>
+    <span class="chip">图表 <b>30+ 张（全部重绘）</b></span>
+  </div>
+</div>
+
+<div class="toc">
+  <h2>目 录</h2>
+  <div class="tocgrid">
+    <div class="part">开篇</div>
+    <a href="#ch0">0 · 物理引擎到底是什么</a>
+    <a href="#ch1">1 · 三种实现方案与取舍</a>
+    <div class="part">第一部分 · 粒子物理</div>
+    <a href="#ch2">2 · 粒子数学：向量与积分</a>
+    <a href="#ch3">3 · 运动定律与积分算式</a>
+    <a href="#ch4">4 · 第一个粒子引擎</a>
+    <a href="#ch5">5 · 合力：D'Alembert 与力发生器</a>
+    <a href="#ch6">6 · 弹力：弹簧与蹦极绳</a>
+    <a href="#ch7">7 · 硬约束：缆绳与杆</a>
+    <a href="#ch8">8 · 质体引擎：布料与破碎</a>
+    <div class="part">第二部分 · 刚体物理</div>
+    <a href="#ch9">9 · 旋转的数学：四元数与惯性张量</a>
+    <a href="#ch10">10 · 刚体运算定律：力矩</a>
+    <a href="#ch11">11 · 刚体引擎主循环</a>
+    <div class="part">第三部分 · 碰撞检测</div>
+    <a href="#ch12">12 · 碰撞检测：粗检与细检</a>
+    <a href="#ch13">13 · 生成碰撞：7 种图元对</a>
+    <div class="part">第四部分 · 接触物理</div>
+    <a href="#ch14">14 · 碰撞处理：冲量求解</a>
+    <a href="#ch15">15 · 静态接触与摩擦力</a>
+    <a href="#ch16">16 · 稳定性与优化</a>
+    <a href="#ch17">17 · 整合：完整的一帧</a>
+    <a href="#ch18">18 · 其他引擎与选型</a>
+    <div class="part">附录</div>
+    <a href="#app-a">A · 术语速查表</a>
+    <a href="#app-b">B · 关键参数默认值</a>
+    <a href="#app-c">C · 动手清单：12 步造引擎</a>
+    <a href="#app-d">D · 源码勘误与避坑</a>
+    <a href="#app-e">E · 思考题</a>
+  </div>
+</div>
+
+<!-- ============ 0 ============ -->
+<section id="ch0">
+  <h2><span class="num">00</span>物理引擎到底是什么</h2>
+  <p class="lead">一句话：<strong>物理引擎是一个接收"力"、输出"位置与朝向"的循环</strong>。它不关心你怎么渲染，也不关心玩家按了什么键 —— 它只负责让物体动起来，并且动得"看起来对"。</p>
+
+  <p>先破一个常见的幻想：游戏物理引擎<strong>不是</strong>科学仿真。科学仿真追求"与真实世界一致到小数点后几位"，游戏物理追求的是<strong>在 16.6 毫秒内算完、看起来可信、绝不许炸</strong>。Millington 在开篇就明确点出这一点 —— 引擎里大量参数（阻尼系数、迭代次数、穿透容差）都是"手感调出来的"，不是物理常数。</p>
+
+  <div class="diagram">
+    <div class="flow">
+      <div class="box blue"><b>输入</b><span>力 / 力矩 / 碰撞</span></div>
+      <div class="arw">→</div>
+      <div class="box dark" style="min-width:200px"><b>物理引擎</b><span>积分 → 检测 → 求解</span></div>
+      <div class="arw">→</div>
+      <div class="box teal"><b>输出</b><span>位置 + 朝向</span></div>
+      <div class="arw">→</div>
+      <div class="box violet"><b>渲染</b><span>画出来</span></div>
+    </div>
+    <div class="cap">图 1 · 物理引擎在游戏中的位置：它是一个纯数据的黑盒，与渲染完全解耦</div>
+  </div>
+
+  <h3>为什么需要它？</h3>
+  <p>没有物理引擎的日子里，游戏里所有运动都是<strong>手写关键帧动画</strong>或<strong>硬编码脚本</strong>：箱子被打飞就播一段动画，石头落地就播一段动画。这在"只有一种情况会发生"时很好用，但一旦玩家能自由交互，组合数就爆炸了 —— 你不可能为"箱子以 37° 角撞到斜坡再弹到木桶上"预先做一段动画。</p>
+  <p>物理引擎的价值就在于：<strong>用一套统一的规则，覆盖所有你没预料到的情况</strong>。</p>
+
+  <div class="callout co-teal">
+    <span class="hd">一句话记住</span>
+    <p>物理引擎 = <strong>用可预测的数值方法，替换掉无穷无尽的动画</strong>。它的产出不是"正确的物理"，而是"可信的运动"。</p>
+  </div>
+
+  <h3>它的优缺点，得先说清楚</h3>
+  <div class="grid2">
+    <div class="callout co-blue" style="margin:0">
+      <span class="hd">✓ 优点</span>
+      <ul style="margin:0;padding-left:18px">
+        <li>玩家交互的组合爆炸被自动覆盖</li>
+        <li>美术资产可复用：同一个箱子在哪都自然</li>
+        <li>行为可调：改几个参数就换手感</li>
+        <li>涌现式玩法（物理谜题、可破坏场景）</li>
+      </ul>
+    </div>
+    <div class="callout co-rose" style="margin:0">
+      <span class="hd">✗ 缺点</span>
+      <ul style="margin:0;padding-left:18px">
+        <li>CPU 开销大，且不可预测（最坏情况会掉帧）</li>
+        <li>难调试：一个抖动的箱子可能源于十处参数</li>
+        <li>美术失去精确控制（动画师会很痛苦）</li>
+        <li>数值不稳定时会"炸"，而炸的方式很吓人</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout co-amber">
+    <span class="hd">实践建议</span>
+    <p>商业项目里最常见的做法是<strong>混合</strong>：主角用动画/状态机控制（精确、可预测），环境与道具交给物理（自然、可交互），两者用"运动学刚体"衔接 —— 主角是 Kinematic Body，能推动别人但不会被别人推倒。</p>
+  </div>
+</section>
+
+<!-- ============ 1 ============ -->
+<section id="ch1">
+  <h2><span class="num">01</span>三种实现方案与取舍</h2>
+  <p class="lead">在动手之前，Millington 先摊开了一张选择表。引擎的设计其实就三个维度的取舍：<strong>模拟什么对象</strong>、<strong>怎么解决碰撞</strong>、<strong>碰撞用冲量还是用力</strong>。</p>
+
+  <h3>维度一：对象类型</h3>
+  <div class="diagram">
+    <div class="stack">
+      <div class="layer g"><span class="taglbl">粒子</span><div><b>Particle</b> —— 只有位置，没有体积和朝向。最便宜，适合烟、火、火花、水花。</div></div>
+      <div class="layer t"><span class="taglbl">质体</span><div><b>Mass-Aggregate</b> —— 一堆粒子用弹簧/杆连起来。布料、绳索、软体、可破碎物体。</div></div>
+      <div class="layer blue"><span class="taglbl">刚体</span><div><b>Rigid Body</b> —— 有体积、有朝向、会旋转。箱子、车轮、飞船。游戏里的主力。</div></div>
+      <div class="layer d"><span class="taglbl">关节</span><div><b>Joint / Ragdoll</b> —— 刚体 + 约束。布娃娃、门铰链、链条。</div></div>
+    </div>
+    <div class="cap">图 2 · 四种对象类型，越往下越贵、也越真实。本书的路线是逐个往上加</div>
+  </div>
+
+  <h3>维度二：碰撞处理方案</h3>
+  <p>这是本书最核心的分水岭。物体压在一起（穿透）了怎么办？</p>
+
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th>方案</th><th>做法</th><th>优点</th><th>致命缺点</th></tr></thead>
+      <tbody>
+        <tr><td><b>惩罚力</b><br><span class="small">Penalty Force</span></td><td>穿透多深，就施加多大的排斥力把它推开</td><td>实现最简单，代码量最小</td><td>穿透不可避免；力太大就爆炸，太小就陷进去。<strong>参数极难调</strong></td></tr>
+        <tr><td><b>冲量</b><br><span class="small">Impulse</span></td><td>瞬间改变速度，让物体"弹开"，穿透再单独位置修正</td><td>无穿透残留、可堆叠、稳定</td><td>需要处理多接触相互干扰，要迭代</td></tr>
+        <tr><td><b>约束 / 解析解</b><br><span class="small">Constraint (LCP)</span></td><td>把所有接触列成方程组一次解出</td><td>最精确、最稳定</td><td>求解器复杂，实时性难保证</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout co-violet">
+    <span class="hd">本书的选择</span>
+    <p>Cyclone 走的是<strong>冲量法 + 迭代求解</strong>：先做一轮位置修正把穿透推开，再做多轮速度迭代把接触一个个解决。这是商业引擎（Box2D、Bullet 的 Sequential Impulse）的主流路线，也是本书最值得学的部分。</p>
+  </div>
+
+  <h3>维度三：冲量 vs 作用力</h3>
+  <p>这两者的区别，很多初学者会混淆：</p>
+  <div class="grid2">
+    <div class="box blue" style="text-align:left;padding:14px 16px">
+      <b>力 Force（N）</b><br>
+      <span class="small">持续作用一整帧，产生加速度。重力、弹簧、推力都是力。<br>公式：<code>a = F / m</code></span>
+    </div>
+    <div class="box amber" style="text-align:left;padding:14px 16px">
+      <b>冲量 Impulse（N·s）</b><br>
+      <span class="small">瞬间作用，直接改变速度。碰撞、"踢一脚"是冲量。<br>公式：<code>Δv = J / m</code></span>
+    </div>
+  </div>
+  <p style="margin-top:14px">在 Cyclone 里两者泾渭分明：<strong>力</strong>通过 <code>addForce()</code> 进入累加器，活一帧；<strong>冲量</strong>由接触求解器直接施加，绕过整个积分流程。</p>
+
+  <div class="diagram">
+    <div class="flow">
+      <div class="box blue"><b>持续力</b><span>重力 / 弹簧 / 风</span></div>
+      <div class="arw">→</div>
+      <div class="box dark"><b>forceAccum</b><span>力累加器</span></div>
+      <div class="arw">→</div>
+      <div class="box teal"><b>integrate()</b><span>a = F/m → v += a·Δt</span></div>
+    </div>
+    <div class="arw dn">↓</div>
+    <div class="flow">
+      <div class="box amber"><b>瞬时冲量</b><span>碰撞</span></div>
+      <div class="arw">→</div>
+      <div class="box rose"><b>ContactResolver</b><span>直接改 velocity</span></div>
+      <div class="arw">→</div>
+      <div class="box dark" style="opacity:.55"><b>跳过积分</b><span>不进累加器</span></div>
+    </div>
+    <div class="cap">图 3 · 两条完全不同的路径：力走积分器，冲量直接改速度</div>
+  </div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section id="ch2">
+  <h2><span class="num">02</span>粒子数学：向量与积分</h2>
+  <p class="lead">粒子是引擎里最简单的东西 —— 一个位置、一个速度、一个质量，没了。但它是整本书的地基：后面刚体的<strong>平动部分和粒子一模一样</strong>，只是多挂了一套旋转。</p>
+
+  <h3>先记住三个向量运算</h3>
+  <p>整本书 80% 的数学都落在这三个运算上。Cyclone 里它们的运算符重载长这样（<code>core.h</code>）：</p>
+
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th style="width:110px">运算</th><th>公式</th><th style="width:90px">C++ 写法</th><th>几何含义</th></tr></thead>
+      <tbody>
+        <tr><td><b>点积</b></td><td><code>a·b = ax·bx + ay·by + az·bz</code></td><td><code>a * b</code></td><td>两个方向有多"同向"。垂直为 0。用来算速度在法线上的分量</td></tr>
+        <tr><td><b>叉积</b></td><td><code>a×b = (aybz−azby, azbx−axbz, axby−aybx)</code></td><td><code>a % b</code></td><td>产生垂直于两者的新向量。用来算力矩、算接触基</td></tr>
+        <tr><td><b>模长/归一</b></td><td><code>‖a‖ = √(ax²+ay²+az²)</code>，<code>â = a/‖a‖</code></td><td><code>a.magnitude()</code><br><code>a.normalise()</code></td><td>把向量变成"纯方向"，长度 1</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout co-blue">
+    <span class="hd">为什么点积这么重要</span>
+    <p>后面碰撞求解里反复出现的<strong>分离速度</strong> <code>v_sep = (v₀ − v₁) · n</code>，本质就是"相对速度在法线方向上的投影"。两辆车迎面撞 vs 追尾，差别全在这个点积的符号和大小上。</p>
+  </div>
+
+  <h3>积分：把加速度变成位置</h3>
+  <p>物理只告诉我们<strong>加速度</strong>（<code>F = ma</code>），但渲染要的是<strong>位置</strong>。从加速度走到位置，这步叫积分。游戏里用得最多、也最朴素的是<strong>半隐式欧拉（Semi-implicit Euler）</strong>：</p>
+
+  <div class="formula">① 位置更新    p ← p + v·Δt
+② 加速度      a ← acceleration + forceAccum · (1/m)
+③ 速度更新    v ← v + a·Δt
+④ 阻尼        v ← v · damping^Δt
+⑤ 清空累加器  forceAccum ← 0
+
+<span class="c">// 对应 Cyclone src/particle.cpp:25-47</span></div>
+
+  <div class="callout co-amber">
+    <span class="hd">注意这个"半隐式"</span>
+    <p>先用<strong>旧速度</strong>更新位置，再用<strong>新加速度</strong>更新速度。这比"先更新速度再更新位置"的显式欧拉稳定得多 —— 显式欧拉会让弹簧和轨道运动<strong>能量发散</strong>（越摆越高，最后飞出去）。半隐式欧拉虽然也不守恒能量，但它是辛的，长期行为不会跑偏。<strong>这一行代码的顺序，决定了你的引擎会不会炸。</strong></p>
+  </div>
+
+  <div class="diagram">
+    <div class="flow">
+      <div class="box blue"><b>forceAccum</b><span>本帧所有力</span></div>
+      <div class="arw">→</div>
+      <div class="box dark"><b>× inverseMass</b><span>1/m</span></div>
+      <div class="arw">→</div>
+      <div class="box teal"><b>a</b><span>加速度</span></div>
+      <div class="arw">→</div>
+      <div class="box amber"><b>v += a·Δt</b><span>速度</span></div>
+      <div class="arw">→</div>
+      <div class="box rose"><b>p += v·Δt</b><span>位置</span></div>
+    </div>
+    <div class="cap">图 4 · 力的流动路径：力只活一帧，位置是它的最终沉淀</div>
+  </div>
+
+  <h3>为什么存"质量的倒数"？</h3>
+  <p>Cyclone 里 <code>Particle</code> 和 <code>RigidBody</code> 都存 <code>inverseMass</code> 而不是 <code>mass</code>。源码注释给了两个理由：</p>
+  <ol>
+    <li><strong>省除法</strong>：<code>a = F/m</code> 变成 <code>a = F × (1/m)</code>，积分热路径上只有乘法。</li>
+    <li><strong>能优雅表达"无限质量"</strong>：<code>inverseMass = 0</code> 就是不可动物体（地面、墙）。而 <code>mass = ∞</code> 在浮点里是要溢出的。源码原话：<em>"在实时仿真里，拥有无限质量（不可动）比拥有零质量（数值上完全不稳定）有用得多。"</em></li>
+  </ol>
+  <p>这条设计在整本书里反复受益 —— 所有接触到 <code>1/m</code> 的公式，遇到静态物体时那一项自然变成 0，不需要任何 <code>if</code> 分支。</p>
+</section>
+
+<!-- ============ 3 ============ -->
+<section id="ch3">
+  <h2><span class="num">03</span>运动定律与积分算式</h2>
+  <p class="lead">牛顿三定律在游戏引擎里的落地版本，其实只有一个公式在干活。这一章要把"力 → 运动"这条链路彻底钉死。</p>
+
+  <h3>牛顿第二定律，引擎版本</h3>
+  <div class="formula">F = m · a          <span class="c">// 教科书</span>
+a = F · (1/m)   <span class="c">// 引擎里真正写的样子</span>
+
+动量      p = m · v
+冲量关系  J = Δp = m · Δv   →   Δv = J · (1/m)</div>
+
+  <p>由此得出粒子引擎里唯一需要实现的动力学：<strong>把所有力累加起来，除以质量，乘上时间步长，加到速度上</strong>。就这么简单。</p>
+
+  <h3>重力：唯一一个"不走累加器"的力</h3>
+  <p>有意思的细节：Cyclone 里重力既可以做成力发生器（<code>ParticleGravity</code>，施加 <code>F = m·g</code>），也可以直接写进 <code>acceleration</code> 字段。后者更省 —— 因为 <code>F = m·g</code> 除以 <code>m</code> 又变回 <code>g</code>，<strong>重力产生的加速度与质量无关</strong>，这也是伽利略比萨斜塔实验的结论。</p>
+
+  <div class="callout co-teal">
+    <span class="hd">为什么"轻重同时落地"</span>
+    <p>因为 <code>a = F/m = m·g/m = g</code>。质量约掉了。引擎里把重力放进 <code>acceleration</code>，正是利用了这一点 —— 一次赋值，对所有物体生效，且与质量无关。</p>
+  </div>
+
+  <h3>一帧的完整顺序</h3>
+  <div class="diagram">
+    <div class="stack">
+      <div class="layer d"><span class="taglbl">STEP 1</span><div><b>清空 / 施加力</b> —— 注册表遍历所有力发生器，各自往目标粒子的 <code>forceAccum</code> 里加力</div></div>
+      <div class="layer blue"><span class="taglbl">STEP 2</span><div><b>积分</b> —— 每个粒子调用 <code>integrate(Δt)</code>：更新位置、速度、阻尼，清空累加器</div></div>
+      <div class="layer t"><span class="taglbl">STEP 3</span><div><b>生成接触</b> —— 遍历所有接触生成器（缆绳、杆、地面…），把违规的约束写进接触数组</div></div>
+      <div class="layer a"><span class="taglbl">STEP 4</span><div><b>求解接触</b> —— <code>ContactResolver</code> 迭代 N 轮，逐个用冲量解决</div></div>
+      <div class="layer v"><span class="taglbl">STEP 5</span><div><b>渲染</b> —— 用最新位置画出来</div></div>
+    </div>
+    <div class="cap">图 5 · <code>ParticleWorld::runPhysics()</code> 一帧主循环（对应 pworld.cpp:77-94）</div>
+  </div>
+
+  <p>值得注意的是 <strong>STEP 3 和 STEP 4 的顺序</strong>：先让所有物体自由运动一步，<em>然后</em>再检查有没有穿模、有没有把绳子拉断，最后统一修。这种<strong>"先预测，后修正"</strong>的思路贯穿全书 —— 包括后面的刚体碰撞也是这个套路。</p>
+
+  <h3>阻尼：一个"乘以小数"的把戏</h3>
+  <p>阻尼用来模拟空气阻力、能量损耗，并顺手让系统收敛。Cyclone 的实现极简：</p>
+  <div class="formula">v ← v · damping^Δt
+
+<span class="c">// damping = 0.99 时，每帧保留 99% 的速度
+// 用 ^Δt 而不是直接乘，是为了让阻尼效果与帧率无关</span></div>
+  <p>为什么是 <code>damping^Δt</code> 而不是 <code>v *= damping</code>？因为后者在 30fps 和 60fps 下衰减速度差一倍，游戏换个机器手感就变了。取幂之后，无论 Δt 多大，<strong>每秒衰减比例恒定</strong>。</p>
+
+  <div class="callout co-rose">
+    <span class="hd">反直觉点</span>
+    <p>阻尼虽然叫"阻力"，但它<strong>不是力</strong>，不进累加器，也不受质量影响。它是积分器最后一步的乘法。这意味着：一个 1kg 的球和一个 1000kg 的球，用同样的 damping 会<strong>同时停下来</strong> —— 这在真实世界里是错的，但在游戏里往往正是你想要的手感。</p>
+  </div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section id="ch4">
+  <h2><span class="num">04</span>第一个粒子引擎：弹道与焰火</h2>
+  <p class="lead">这一章把前三章的东西组装起来，做两个能跑的 demo。它们是理解"粒子引擎够不够用"的最佳标尺。</p>
+
+  <h3>示例一：弹道轨迹</h3>
+  <p>一个炮弹，给定初速度、发射角和质量，算它落在哪。三种发射类型：</p>
+
+  <div class="grid3">
+    <div class="box rose"><b>PISTOL</b><br><span>初速 35 m/s，几乎直线飞出</span></div>
+    <div class="box amber"><b>ARTILLERY</b><br><span>初速 40 m/s，明显抛物线</span></div>
+    <div class="box violet"><b>FIREBALL</b><br><span>初速 10 m/s 但质量大，慢而沉</span></div>
+  </div>
+
+  <p>实现上只有三件事：设置 <code>velocity</code>、设置 <code>acceleration = (0, -9.81, 0)</code>、然后每个时间步调一次 <code>integrate()</code>。</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 640 260" style="width:100%;height:auto">
+      <defs>
+        <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+          <path d="M0,0 L9,4.5 L0,9 z" fill="#94a3b8"/>
+        </marker>
+      </defs>
+      <line x1="50" y1="215" x2="610" y2="215" stroke="#cbd5e1" stroke-width="1.5"/>
+      <line x1="50" y1="215" x2="50" y2="25" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#ah)"/>
+      <text x="20" y="30" font-size="11" fill="#94a3b8">高度</text>
+      <text x="600" y="235" font-size="11" fill="#94a3b8">距离</text>
+      <!-- grid -->
+      <g stroke="#f1f5f9" stroke-width="1">
+        <line x1="50" y1="175" x2="610" y2="175"/><line x1="50" y1="135" x2="610" y2="135"/>
+        <line x1="50" y1="95" x2="610" y2="95"/><line x1="50" y1="55" x2="610" y2="55"/>
+      </g>
+      <!-- pistol -->
+      <path d="M50,215 Q 190,60 330,215" fill="none" stroke="#be123c" stroke-width="2.2"/>
+      <path d="M50,215 Q 205,-5 360,215" fill="none" stroke="#b45309" stroke-width="2.2"/>
+      <path d="M50,215 Q 120,150 190,215" fill="none" stroke="#6d28d9" stroke-width="2.2"/>
+      <!-- dots for artillery -->
+      <g fill="#b45309">
+        <circle cx="98" cy="150" r="3"/><circle cx="146" cy="103" r="3"/><circle cx="194" cy="73" r="3"/>
+        <circle cx="242" cy="60" r="3"/><circle cx="290" cy="65" r="3"/><circle cx="338" cy="88" r="3"/>
+      </g>
+      <g font-size="11.5">
+        <text x="345" y="210" fill="#be123c">手枪</text>
+        <text x="368" y="200" fill="#b45309">火炮</text>
+        <text x="196" y="235" fill="#6d28d9">火球</text>
+      </g>
+      <text x="60" y="45" font-size="11.5" fill="#94a3b8">弹道越平 → 初速越大</text>
+    </svg>
+    <div class="cap">图 6 · 三种发射类型的弹道对比。注意：质量完全不影响轨迹，只影响被击中时的反应</div>
+  </div>
+
+  <div class="callout co-blue">
+    <span class="hd">一个初学者常问的问题</span>
+    <p>"为什么炮弹质量不同，轨迹却一模一样？" —— 因为重力加速度 <code>g</code> 与质量无关（见上一章）。质量在这里唯一的作用是：<strong>炮弹撞到别的东西时，产生多大的冲量</strong>。飞行过程中它完全隐身。</p>
+  </div>
+
+  <h3>示例二：焰火</h3>
+  <p>焰火是粒子引擎的经典展示：一个"母体"升空，到达顶点后炸成几十个小火花，每个火花各自受重力、各自带阻尼、各自淡出。</p>
+
+  <div class="diagram">
+    <div class="stack">
+      <div class="layer v"><span class="taglbl">规则 1</span><div><b>焰火由若干"载荷"（payload）组成</b> —— 每个载荷有自己的类型、颜色、寿命</div></div>
+      <div class="layer a"><span class="taglbl">规则 2</span><div><b>载荷可以被"引爆"</b> —— 到期后在原地生成 N 个子粒子</div></div>
+      <div class="layer r"><span class="taglbl">规则 3</span><div><b>子粒子继承母体的速度</b> + 一个随机方向的速度增量（球面均匀采样）</div></div>
+      <div class="layer t"><span class="taglbl">规则 4</span><div><b>子粒子受重力 + 阻尼</b>，寿命结束后从场景移除</div></div>
+    </div>
+    <div class="cap">图 7 · 焰火规则集（对应原书 4.2.2 节）</div>
+  </div>
+
+  <p>这里有个值得学习的工程细节：<strong>粒子池</strong>。焰火每秒生成成百上千个粒子，如果每次 <code>new</code>/<code>delete</code>，内存分配开销会直接吃掉帧预算。Cyclone 的做法是预分配一个定长数组，用一个"活跃计数"标记前 N 个是活的 —— 销毁粒子 = 把最后一个活粒子拷过来覆盖它，计数减一。</p>
+
+  <div class="formula"><span class="c">// 销毁粒子的 O(1) 技巧：用最后一个元素覆盖</span>
+particles[i] = particles[--numParticles];</div>
+
+  <div class="callout co-teal">
+    <span class="hd">这一章的收获</span>
+    <p>粒子引擎能做出很炫的效果，但有个硬伤：<strong>它没有体积，所以永远不会"撞"到任何东西</strong>。焰火穿过墙壁、火花穿进地板 —— 要做真正的碰撞，就必须引入有形状的物体。这就是第二部分刚体的起点。</p>
+  </div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section id="ch5">
+  <h2><span class="num">05</span>合力：D'Alembert 原理与力发生器</h2>
+  <p class="lead">当力越来越多 —— 重力、风、弹簧、浮力、引擎推力 —— 你不可能为每个组合写一段代码。这一章给出一个清爽的解法：<strong>力发生器 + 注册表</strong>。</p>
+
+  <h3>D'Alembert 原理：一句话版本</h3>
+  <div class="callout co-violet">
+    <span class="hd">核心思想</span>
+    <p><strong>"所有力可以各自独立计算，然后简单相加。"</strong> 你不需要知道别的力存不存在 —— 每个力发生器只看自己关心的那点信息（重力只看质量，阻力只看速度），算出自己的那份力，往累加器里一扔就完事。</p>
+  </div>
+  <p>这个原理让物理引擎的代码彻底<strong>模块化</strong>：加一个新力 = 写一个 <code>updateForce()</code> 函数 + 注册一下。这也正是 Cyclone 里"数据与逻辑分离"的体现 —— 力是<em>数据</em>（注册表里的一条记录），力的计算是<em>逻辑</em>（一个可复用的类）。</p>
+
+  <div class="diagram">
+    <div class="grid3">
+      <div class="box blue"><b>Gravity</b><span>F = m·g</span></div>
+      <div class="box teal"><b>Drag</b><span>F = −(k₁‖v‖+k₂‖v‖²)·v̂</span></div>
+      <div class="box amber"><b>Spring</b><span>F = −k·Δl·d̂</span></div>
+    </div>
+    <div class="arw dn">↓</div>
+    <div class="flow">
+      <div class="box dark" style="min-width:240px"><b>ForceRegistry</b><span>{(重力, 粒子A), (阻力, 粒子A), (弹簧, 粒子B)…}</span></div>
+    </div>
+    <div class="arw dn">↓</div>
+    <div class="flow">
+      <div class="box violet"><b>updateForces(Δt)</b><span>遍历注册表 → 各生成器 addForce()</span></div>
+      <div class="arw">→</div>
+      <div class="box rose"><b>forceAccum</b><span>每个粒子的合力</span></div>
+    </div>
+    <div class="cap">图 8 · 力注册表：把"谁受什么力"变成一张可增删的表</div>
+  </div>
+
+  <h3>力发生器全家桶</h3>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th style="width:170px">发生器</th><th>公式</th><th>用途与要点</th></tr></thead>
+      <tbody>
+        <tr><td><b>Gravity</b> 重力</td><td><code>F = m·g</code></td><td>恒定。可直接写进 <code>acceleration</code> 省一次乘法</td></tr>
+        <tr><td><b>Drag</b> 阻力</td><td><code>F = −(k₁‖v‖ + k₂‖v‖²)·v̂</code></td><td>一次项 + 二次项。低速层流、高速湍流，两个系数分别调</td></tr>
+        <tr><td><b>Spring</b> 弹簧</td><td><code>F = −k·(‖d‖ − L₀)·d̂</code></td><td>既能拉也能推。<code>k</code> 是劲度系数，<code>L₀</code> 是静止长度</td></tr>
+        <tr><td><b>AnchoredSpring</b> 锚点弹簧</td><td><code>F = +k·(L₀ − ‖d‖)·d̂</code></td><td>一端固定在世界中的某点（吊灯、摆锤）</td></tr>
+        <tr><td><b>Bungee</b> 蹦极绳</td><td>仅当 <code>‖d‖ &gt; L₀</code> 时：<code>F = −k·(‖d‖−L₀)·d̂</code></td><td><strong>只拉不推</strong>。超过静止长度才产生力</td></tr>
+        <tr><td><b>FakeSpring</b> 假弹簧</td><td>解析解直接定位（见下）</td><td>为"极硬的弹簧"准备的稳定替代方案</td></tr>
+        <tr><td><b>Buoyancy</b> 浮力</td><td><code>F_y = ρ·V</code>（完全浸没）</td><td>浮体。部分浸没时按浸没深度线性插值</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>硬弹簧为什么会炸，以及假弹簧怎么救</h3>
+  <p>这是本章最有实战价值的一段。想做一根"几乎不可拉伸"的绳子，直觉是<strong>把 k 调得很大</strong>。但 k 越大，同样的形变产生的力越大，在离散时间步下：<strong>力大到一步就把粒子弹过头，下一步反向弹得更多</strong> —— 系统发散，粒子飞出宇宙。</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 640 220" style="width:100%;height:auto">
+      <line x1="60" y1="180" x2="600" y2="180" stroke="#cbd5e1" stroke-width="1.5"/>
+      <line x1="60" y1="180" x2="60" y2="20" stroke="#cbd5e1" stroke-width="1.5"/>
+      <text x="18" y="28" font-size="11" fill="#94a3b8">位移</text>
+      <text x="570" y="200" font-size="11" fill="#94a3b8">时间</text>
+      <line x1="60" y1="100" x2="600" y2="100" stroke="#e2e8f0" stroke-dasharray="4 4"/>
+      <text x="64" y="96" font-size="10.5" fill="#cbd5e1">静止长度 L₀</text>
+      <!-- 稳定弹簧 -->
+      <path d="M60,100 C 120,40 180,160 240,100 C 300,52 360,142 420,100 C 480,68 540,126 600,100"
+            fill="none" stroke="#0d9488" stroke-width="2.2"/>
+      <text x="300" y="30" font-size="11.5" fill="#0d9488" text-anchor="middle">k 适中：衰减振荡，收敛</text>
+      <!-- 爆炸弹簧 -->
+      <path d="M60,100 C 110,10 140,190 190,60 C 230,-30 270,230 310,20 C 345,-90 380,290 420,-40"
+            fill="none" stroke="#be123c" stroke-width="2.2"/>
+      <text x="430" y="215" font-size="11" fill="#be123c">k 过大 → 振幅递增 → 发散</text>
+    </svg>
+    <div class="cap">图 9 · 硬弹簧的数值爆炸：同样的物理，仅仅因为 k 太大就完全崩溃</div>
+  </div>
+
+  <p><strong>FakeSpring（假弹簧）</strong>的思路是：既然弹簧的运动方程有<strong>解析解</strong>（阻尼简谐振动的闭式解），那就别用数值积分去逼近它了，直接把粒子放到解析解算出来的位置上。</p>
+
+  <div class="formula">γ = ½·√(4k − c²)
+target = [p·cos(γΔt) + c·sin(γΔt)] · e^(−½·c·Δt)
+a = (target − p)/Δt² − v/Δt
+F = m·a
+
+<span class="c">// 结果：多硬的弹簧都不会炸，因为它根本不走"力→加速度"那条路</span></div>
+
+  <div class="callout co-amber">
+    <span class="hd">什么时候用假弹簧</span>
+    <p>需要<strong>刚性连接但又要一点点弹性反馈</strong>时 —— 比如相机跟随、角色手臂的柔性摆动、UI 的弹性质感。它牺牲了严格的物理正确性（力不再守恒），换来的是<strong>绝对不会炸</strong>。游戏开发里这种交易几乎总是划算的。</p>
+  </div>
+</section>
+
+<!-- ============ 6 ============ -->
+<section id="ch6">
+  <h2><span class="num">06</span>弹力：弹簧、蹦极与软体</h2>
+  <p class="lead">弹簧是物理引擎里的"万能胶"。它既能做悬挂、绳索、布料，也能做软体、果冻、可变形物体 —— 区别只在于你怎么连。</p>
+
+  <h3>胡克定律，以及它的三种变体</h3>
+  <div class="formula">胡克定律    F = −k · x          <span class="c">// x 是形变量</span>
+
+弹簧        F = −k·(‖d‖ − L₀)·d̂    <span class="c">// 拉伸和压缩都产生力</span>
+蹦极绳      ‖d‖ &gt; L₀ 时才有力      <span class="c">// 只拉不推，像绳子</span>
+刚性杆      |‖d‖ − L₀| 都要修正     <span class="c">// 下一章，且不用力来做</span></div>
+
+  <p>方向 <code>d̂</code> 的符号是这里最容易写错的地方。记住一条：<strong>弹簧总是试图把两端拉回静止长度</strong> —— 拉长了就往内拉，压短了就往外推。蹦极绳则是"只在拉长时往内拉"。</p>
+
+  <div class="diagram">
+    <div class="grid3">
+      <div class="box teal"><b>弹簧 Spring</b><br><span class="small">拉伸 → 向内拉 ✓<br>压缩 → 向外推 ✓<br>像：减震器、果冻</span></div>
+      <div class="box amber"><b>蹦极 Bungee</b><br><span class="small">拉伸 → 向内拉 ✓<br>压缩 → 无作用力 ✗<br>像：绳子、橡皮筋</span></div>
+      <div class="box rose"><b>杆 Rod</b><br><span class="small">拉伸 → 约束修正<br>压缩 → 约束修正<br>像：自行车架（见下章）</span></div>
+    </div>
+    <div class="cap">图 10 · 三种"连接"的行为差异，用错就会得到奇怪的结果</div>
+  </div>
+
+  <h3>用弹簧搭出软体</h3>
+  <p>把一堆粒子用弹簧连成网格，就得到了<strong>可变形的软体</strong>。这是"质体物理引擎"（Mass-Aggregate）的基础，下一章的布料、破碎都建立在此之上。</p>
+
+  <div class="callout co-rose">
+    <span class="hd">陷阱：弹簧网格也会炸</span>
+    <p>网格里每个粒子被多个弹簧同时拉扯，等效刚度是各弹簧之和，很容易超过数值稳定上限。解决方案有三种：① <strong>降低 k 并加阻尼</strong>（最简单）；② 用假弹簧；③ 改用下一章的<strong>硬约束</strong>，直接限制长度而不是用力去拉。</p>
+  </div>
+</section>
+
+<!-- ============ 7 ============ -->
+<section id="ch7">
+  <h2><span class="num">07</span>硬约束：缆绳与杆</h2>
+  <p class="lead">这一章是全书第一个"思维跃迁"：<strong>有些约束，不该用力来实现，而该用冲量</strong>。</p>
+
+  <h3>为什么弹簧做不好"杆"</h3>
+  <p>想做一根刚性杆（长度永远不变）。用弹簧近似？那你得把 k 调到无穷大 —— 结果就是上一章的爆炸。就算不炸，杆也会被"拉长一点点再弹回来"，玩家能看出来。</p>
+  <p>Millington 给出的解法非常聪明：<strong>不施加任何力。每帧检查一次几何约束，超了就生成一个"接触"，让通用求解器用冲量瞬间把它拉回来。</strong></p>
+
+  <div class="diagram">
+    <div class="flow">
+      <div class="box blue"><b>每帧检查</b><span>L = ‖p₁ − p₀‖</span></div>
+      <div class="arw">→</div>
+      <div class="box dark"><b>违规？</b><span>Cable: L &gt; maxLength<br>Rod: L ≠ length</span></div>
+      <div class="arw">→</div>
+      <div class="box amber"><b>生成接触</b><span>n, penetration, restitution</span></div>
+      <div class="arw">→</div>
+      <div class="box rose"><b>冲量求解</b><span>瞬间修正速度 + 位置</span></div>
+    </div>
+    <div class="cap">图 11 · 硬约束不是"力"，是"每帧一次的几何检查 + 冲量修正"</div>
+  </div>
+
+  <h3>两种约束的行为</h3>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th style="width:140px">约束</th><th>拉伸时</th><th>压缩时</th><th>弹性系数</th><th>现实类比</th></tr></thead>
+      <tbody>
+        <tr><td><b>Cable</b> 缆绳</td><td>生成接触，拉回来</td><td><strong>不生成接触</strong>，自由靠近</td><td>用户设定（有弹性）</td><td>绳子、吊索</td></tr>
+        <tr><td><b>Rod</b> 杆</td><td>生成接触，压回来</td><td>生成接触（法线取反），顶回来</td><td><strong>强制为 0</strong>（完全非弹性）</td><td>自行车架、骨骼</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>注意 <strong>Rod 的 restitution 被强制设为 0</strong>：杆不该"弹"，它应该是刚性的。而 Cable 保留用户设定的弹性 —— 绳子绷紧时是可以弹一下的（想想蹦极绳绷直的瞬间）。</p>
+
+  <div class="callout co-blue">
+    <span class="hd">这个设计的优雅之处</span>
+    <p>缆绳、杆、碰撞、关节 —— 它们<strong>共用同一套接触求解器</strong>。物理引擎里没有"缆绳专用代码"，只有一个通用的"两个东西违反了某个沿法线的约束，请用冲量修正"机制。这是本书最重要的架构思想之一：<strong>把约束统一表达成接触</strong>。</p>
+  </div>
+
+  <div class="diagram">
+    <div class="grid2">
+      <div class="box teal" style="text-align:left;padding:14px 16px">
+        <b>Cable 缆绳</b><br>
+        <span class="small">L &lt; maxLength → 返回 0 个接触<br>L ≥ maxLength → n = normalize(p₁−p₀)，penetration = L − maxLength</span>
+      </div>
+      <div class="box rose" style="text-align:left;padding:14px 16px">
+        <b>Rod 杆</b><br>
+        <span class="small">L &gt; length → n = normalize(p₁−p₀)，d = L − length<br>L &lt; length → n 取反，d = length − L</span>
+      </div>
+    </div>
+    <div class="cap">图 12 · 接触生成的判定逻辑（对应 plinks.cpp:24-84）</div>
+  </div>
+</section>
+
+<!-- ============ 8 ============ -->
+<section id="ch8">
+  <h2><span class="num">08</span>质体引擎：布料、绳索与破碎</h2>
+  <p class="lead">把大量粒子用弹簧和硬约束连起来，就得到了"质体物理引擎"（Mass-Aggregate）。它能做出刚体做不到的效果：布料飘动、绳索摆动、物体碎裂。</p>
+
+  <h3>质体引擎的三件套</h3>
+  <div class="diagram">
+    <div class="stack">
+      <div class="layer blue"><span class="taglbl">粒子</span><div><b>Particle[]</b> —— 一个预分配的定长数组，质体世界里所有的"肉"</div></div>
+      <div class="layer t"><span class="taglbl">连接</span><div><b>Cable / Rod / Spring</b> —— 记录哪些粒子之间有约束，每帧生成接触</div></div>
+      <div class="layer a"><span class="taglbl">求解</span><div><b>ParticleWorld + ContactResolver</b> —— 把所有约束当接触一起迭代求解</div></div>
+    </div>
+    <div class="cap">图 13 · 质体引擎 = 粒子池 + 约束表 + 通用求解器</div>
+  </div>
+
+  <h3>示例：一座吊桥</h3>
+  <p>原书里的经典 demo。桥面是一串粒子，相邻粒子用 <strong>Rod</strong> 连接（保持间距），两端用 <strong>Cable Constraint</strong> 锚定在固定点上（可以摆动但不会掉下去）。</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 640 190" style="width:100%;height:auto">
+      <!-- anchors -->
+      <rect x="40" y="40" width="16" height="16" fill="#64748b" rx="3"/>
+      <rect x="584" y="40" width="16" height="16" fill="#64748b" rx="3"/>
+      <!-- rope left -->
+      <line x1="48" y1="48" x2="70" y2="90" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <line x1="592" y1="48" x2="570" y2="90" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <!-- plank particles -->
+      <g stroke="#3b5bdb" stroke-width="2">
+        <line x1="70" y1="90" x2="150" y2="118"/>
+        <line x1="150" y1="118" x2="230" y2="136"/>
+        <line x1="230" y1="136" x2="310" y2="143"/>
+        <line x1="310" y1="143" x2="390" y2="140"/>
+        <line x1="390" y1="140" x2="470" y2="128"/>
+        <line x1="470" y1="128" x2="570" y2="100"/>
+      </g>
+      <g fill="#3b5bdb">
+        <circle cx="70" cy="90" r="5"/><circle cx="150" cy="118" r="5"/><circle cx="230" cy="136" r="5"/>
+        <circle cx="310" cy="143" r="5"/><circle cx="390" cy="140" r="5"/><circle cx="470" cy="128" r="5"/>
+        <circle cx="570" cy="100" r="5"/>
+      </g>
+      <text x="200" y="172" font-size="11.5" fill="#475569">Rod：保持桥板间距（双向约束）</text>
+      <text x="42" y="34" font-size="11.5" fill="#b45309">Cable：锚点绳（只拉不推）</text>
+    </svg>
+    <div class="cap">图 14 · 吊桥 demo：Rod 撑起形状，Cable 提供悬挂</div>
+  </div>
+
+  <h3>示例：可破碎物体</h3>
+  <p>破碎的做法很朴素：<strong>先按正常刚体模拟，冲击超过阈值时，把它替换成若干碎块粒子</strong>。Cyclone 的 <code>fracture</code> demo 里，每个碎块是一个独立的刚体，被"炸开"后各自飞散。</p>
+
+  <div class="stats">
+    <div class="stat"><div class="v">8</div><div class="k">破碎后的碎块数<br><span class="small">（demo 里的典型值）</span></div></div>
+    <div class="stat"><div class="v">0.2</div><div class="k">碎块的弹性系数<br><span class="small">restitution</span></div></div>
+    <div class="stat"><div class="v">2048</div><div class="k">demo 的求解器迭代上限</div></div>
+    <div class="stat"><div class="v">256</div><div class="k">单帧接触数组上限</div></div>
+  </div>
+
+  <div class="callout co-teal">
+    <span class="hd">质体引擎的边界</span>
+    <p>质体引擎做布料和绳索很棒，但它有个根本限制：<strong>粒子没有体积，所以碎块之间、布料自身不会互相碰撞</strong>。布料穿模就是这么来的。要解决这个问题，必须给它加上真实形状 —— 也就是刚体。第一部分到此结束。</p>
+  </div>
+</section>
+
+<!-- ============ 9 ============ -->
+<section id="ch9">
+  <h2><span class="num">09</span>旋转的数学：四元数与惯性张量</h2>
+  <p class="lead">刚体比粒子多的那部分，全在这一章。很多人卡在这里不是因为难，而是因为没搞清<strong>为什么非要四元数</strong>。先回答这个"为什么"，公式就好记了。</p>
+
+  <h3>朝向的三种表示法</h3>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th style="width:120px">表示法</th><th>用几个数</th><th>优点</th><th>致命问题</th></tr></thead>
+      <tbody>
+        <tr><td><b>欧拉角</b><br><span class="small">Yaw/Pitch/Roll</span></td><td>3 个</td><td>直观，人能读懂</td><td><strong>万向锁</strong>：某个角度到 90° 时丢一个自由度，物体突然卡住不能转</td></tr>
+        <tr><td><b>旋转矩阵</b></td><td>9 个</td><td>变换向量快，无奇异</td><td>占内存；数值漂移后会"非正交"，需要不断重新正交化</td></tr>
+        <tr><td><b>四元数</b></td><td>4 个</td><td>无万向锁、插值平滑、只需归一化就能修正漂移</td><td>不直观，人类看不懂 (r,i,j,k) 代表什么角度</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout co-rose">
+    <span class="hd">万向锁到底是怎么回事</span>
+    <p>用欧拉角描述飞机朝向：先偏航（Yaw），再俯仰（Pitch），最后滚转（Roll）。当俯仰角达到 <strong>±90°</strong>（机头垂直朝天或朝地）时，偏航轴和滚转轴<strong>重合了</strong> —— 两个不同的操作产生了完全相同的效果，你丢失了一个自由度。飞机在这一瞬间无法做出你期望的转向。<br>四元数用 4 个数表示 3 个自由度（多出来的一个是冗余），从根本上绕开了这个问题。</p>
+  </div>
+
+  <h3>四元数：只需要记住四件事</h3>
+  <p>你不需要理解四元数的代数结构，只要记住它在引擎里的四个用法：</p>
+
+  <div class="diagram">
+    <div class="stack">
+      <div class="layer v"><span class="taglbl">①</span><div><b>表示朝向</b>：<code>q = (r, i, j, k)</code>，<strong>必须保持单位长度</strong>才是合法旋转 → 定期 <code>normalise()</code></div></div>
+      <div class="layer blue"><span class="taglbl">②</span><div><b>角速度更新朝向</b>：<code>q̇ = ½ · ω ⊗ q</code>。Cyclone 里写成 <code>addScaledVector(ω, Δt)</code></div></div>
+      <div class="layer t"><span class="taglbl">③</span><div><b>旋转一个向量</b>：把局部坐标的向量转到世界坐标（机翼方向、锚点位置都靠它）</div></div>
+      <div class="layer a"><span class="taglbl">④</span><div><b>转成矩阵</b>：渲染和惯性张量变换都需要矩阵，四元数能一键转出 3×3 旋转矩阵</div></div>
+    </div>
+    <div class="cap">图 15 · 四元数在引擎里的四个职责</div>
+  </div>
+
+  <div class="formula">角速度 → 四元数     q̇ = ½ · ω ⊗ q          <span class="c">// core.h:592</span>
+归一化               q ← q / ‖q‖              <span class="c">// ‖q‖ 太小则重置为 (1,0,0,0)</span>
+
+四元数 → 旋转矩阵 R（设 q = (r,i,j,k)）：
+  R₀₀ = 1−2j²−2k²   R₀₁ = 2ij−2rk     R₀₂ = 2ik+2rj
+  R₁₀ = 2ij+2rk     R₁₁ = 1−2i²−2k²   R₁₂ = 2jk−2ri
+  R₂₀ = 2ik−2rj     R₂₁ = 2jk+2ri     R₂₂ = 1−2i²−2j²</div>
+
+  <div class="callout co-blue">
+    <span class="hd">关键区分</span>
+    <p>源码注释里有一句话点破本质：<em>"角速度和角加速度可以正确地用向量表示，只有朝向才需要四元数。"</em> —— 也就是说，<strong>ω 是普通的 Vector3，只有 orientation 是 Quaternion</strong>。别把角速度也变成四元数，那是新手常见的过度设计。</p>
+  </div>
+
+  <h3>惯性张量：转动的"质量"</h3>
+  <p>平动时 <code>F = ma</code>，质量 <code>m</code> 是一个数。转动时 <code>τ = I·α</code>，但这里的 <code>I</code> 是一个 <strong>3×3 矩阵</strong> —— 因为物体绕不同轴转起来的"费劲程度"不一样。</p>
+
+  <div class="callout co-amber">
+    <span class="hd">用一根棍子感受一下</span>
+    <p>拿起一根长棍：<strong>绕长轴</strong>旋转（像转笔）非常轻松；<strong>绕垂直于长轴</strong>的方向旋转（像挥棒）明显更费力。同样的质量，不同方向的转动惯量差了几十倍 —— 这就是惯性张量存在的意义。它是一个对角矩阵时（长方体等对称形状），三个对角元素就是绕 X/Y/Z 三轴的转动惯量。</p>
+  </div>
+
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th>形状</th><th>绕 X 轴</th><th>绕 Y 轴</th><th>绕 Z 轴</th></tr></thead>
+      <tbody>
+        <tr><td><b>长方体</b>（半边长 hx,hy,hz）</td><td><code>⅓·m·(hy²+hz²)</code></td><td><code>⅓·m·(hx²+hz²)</code></td><td><code>⅓·m·(hx²+hy²)</code></td></tr>
+        <tr><td><b>实心球</b>（半径 r）</td><td colspan="3" style="text-align:center"><code>0.4·m·r²</code>（三轴相同，所以球怎么转都一样）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>为什么存"逆惯性张量"，以及它怎么跟着物体转</h3>
+  <p>和质量一样，Cyclone 存的是<strong>逆</strong>张量 <code>I⁻¹</code>。好处同样是两条：省一次矩阵求逆、能表达"无限惯量"（零矩阵 = 不可旋转）。</p>
+  <p>但有个新问题：<strong>物体会转，转过之后惯量就变了</strong>。一根棍子横着和竖着，绕同一个世界轴的转动惯量完全不同。解决办法是每帧做一次变换：</p>
+
+  <div class="diagram">
+    <div class="flow">
+      <div class="box blue"><b>I⁻¹_body</b><span>局部系，建模时算好</span></div>
+      <div class="arw">→</div>
+      <div class="box dark"><b>R · I⁻¹ · Rᵀ</b><span>R 来自四元数</span></div>
+      <div class="arw">→</div>
+      <div class="box teal"><b>I⁻¹_world</b><span>世界系，直接用</span></div>
+    </div>
+    <div class="cap">图 16 · 逆惯性张量每帧的世界坐标变换</div>
+  </div>
+
+  <div class="callout co-violet">
+    <span class="hd">这里有个漂亮的数学结论</span>
+    <p><code>(R·I·Rᵀ)⁻¹ = R·I⁻¹·Rᵀ</code>。也就是说：<strong>先求逆再变换，和先变换再求逆，结果完全一样</strong>。引擎因此可以只在建模时求一次逆，之后每帧只做两次矩阵乘法 —— <strong>零次求逆</strong>。这是本书里最优雅的一处性能优化。</p>
+  </div>
+</section>
+
+<!-- ============ 10 ============ -->
+<section id="ch10">
+  <h2><span class="num">10</span>刚体运算定律：力矩</h2>
+  <p class="lead">这一章解释一个日常现象：<strong>为什么推箱子的边缘它会转，推正中间它就只会滑走</strong>。答案就一个叉乘。</p>
+
+  <h3>力矩 = 力臂 × 力</h3>
+  <div class="formula">τ = r × F          <span class="c">// r 是从质心指向作用点的向量</span>
+α = I⁻¹_world · τ
+ω ← ω + α·Δt</div>
+
+  <div class="diagram">
+    <div class="grid2">
+      <div class="box blue" style="text-align:left;padding:14px 16px">
+        <b>推质心 → r = 0</b><br>
+        <span class="small">叉乘为 0，τ = 0<br>→ 只有平动，箱子滑走<br><br>同理：如果 <b>r 与 F 平行</b>（沿着质心方向推/拉），叉乘也是 0</span>
+      </div>
+      <div class="box rose" style="text-align:left;padding:14px 16px">
+        <b>推边缘 → r ⊥ F</b><br>
+        <span class="small">叉乘最大，τ 最大<br>→ 平动 + 旋转，箱子翻倒<br><br>r 越远、F 越大、夹角越接近 90°，力矩越大</span>
+      </div>
+    </div>
+    <div class="cap">图 17 · 同样的力，作用点不同，结果天差地别</div>
+  </div>
+
+  <h3>两个 API 的区别</h3>
+  <p>Cyclone 提供了两个施加力的函数，差别只在坐标系：</p>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th style="width:200px">函数</th><th>作用点用什么坐标</th><th>内部做了什么</th></tr></thead>
+      <tbody>
+        <tr><td><code>addForceAtPoint(F, worldPoint)</code></td><td>世界坐标</td><td>直接算 <code>r = point − position</code></td></tr>
+        <tr><td><code>addForceAtBodyPoint(F, localPoint)</code></td><td>刚体局部坐标</td><td>先用 <code>R·p + position</code> 转到世界，再算力矩</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>实际开发中 <code>addForceAtBodyPoint</code> 更好用 —— 机翼、螺旋桨、车轮的位置是"焊在物体上的"，用局部坐标描述，物体转了它们自动跟着转。</p>
+
+  <div class="diagram">
+    <div class="flow">
+      <div class="box blue"><b>施加力 F 于点 P</b></div>
+      <div class="arw">→</div>
+      <div class="box dark"><b>平动分量</b><span>forceAccum += F</span></div>
+      <div class="arw">→</div>
+      <div class="box teal"><b>a = F·(1/m)</b><span>→ 速度变化</span></div>
+    </div>
+    <div class="arw dn">↓ 同时</div>
+    <div class="flow">
+      <div class="box amber"><b>力臂 r = P − 质心</b></div>
+      <div class="arw">→</div>
+      <div class="box dark"><b>转动分量</b><span>torqueAccum += r × F</span></div>
+      <div class="arw">→</div>
+      <div class="box rose"><b>α = I⁻¹·τ</b><span>→ 角速度变化</span></div>
+    </div>
+    <div class="cap">图 18 · 一个力被拆成两条独立的线：平动和转动</div>
+  </div>
+
+  <div class="callout co-teal">
+    <span class="hd">工程价值</span>
+    <p>理解了力矩，你就能用<strong>同一个引擎</strong>做出：赛车（在后轮位置施加驱动力 → 加速时车头抬起）、飞机（在机翼位置施加升力 → 自然产生俯仰/滚转）、开门（在把手位置施力 → 门绕轴转）。<strong>不需要写任何"旋转动画"</strong>，位置摆对了，旋转自己就出来了。</p>
+  </div>
+
+  <h3>飞行模拟：Aero 翼面</h3>
+  <p>原书用一整节讲飞行模拟，因为它是"力矩 + 局部坐标"最漂亮的展示。核心是一个<strong>四步坐标变换</strong>：</p>
+
+  <div class="diagram">
+    <div class="stack">
+      <div class="layer blue"><span class="taglbl">①</span><div><b>合成气流</b>：<code>v_rel = 物体速度 + 风速</code>（世界系）</div></div>
+      <div class="layer t"><span class="taglbl">②</span><div><b>转到机体坐标</b>：<code>v_loc = Rᵀ · v_rel</code> —— 机翼的物理常数是焊在机体上的</div></div>
+      <div class="layer a"><span class="taglbl">③</span><div><b>气动张量映射</b>：<code>f_loc = T · v_loc</code> —— 一个 3×3 矩阵把"翼型+面积+空气密度"全烘焙进去</div></div>
+      <div class="layer r"><span class="taglbl">④</span><div><b>转回世界并施加</b>：<code>f = R · f_loc</code>，然后 <code>addForceAtBodyPoint(f, 机翼位置)</code></div></div>
+    </div>
+    <div class="cap">图 19 · Aero 翼面四步：世界 → 机体 → 张量 → 世界</div>
+  </div>
+
+  <div class="callout co-amber">
+    <span class="hd">副翼是怎么让飞机滚转的</span>
+    <p>左右机翼各有一个 Aero 力发生器。向左压杆时，<strong>左副翼和右副翼朝相反方向偏转</strong>，于是两边用不同的气动张量插值 —— 一侧升力增大、另一侧减小，升力差 × 力臂 = 滚转力矩。<br>整个飞行手感，就是几个 3×3 矩阵在插值。这也是"数据驱动物理"的好例子：改手感 = 改矩阵元素，不用改代码。</p>
+  </div>
+</section>
+
+<!-- ============ 11 ============ -->
+<section id="ch11">
+  <h2><span class="num">11</span>刚体引擎主循环</h2>
+  <p class="lead">把上一章的东西组装起来，得到刚体的每一帧。这张流程图值得存下来 —— 它是整个引擎的骨架。</p>
+
+  <div class="diagram">
+    <div class="stack">
+      <div class="layer d"><span class="taglbl">STEP 1</span><div><b>清空累加器</b> —— <code>forceAccum = 0</code>，<code>torqueAccum = 0</code></div></div>
+      <div class="layer blue"><span class="taglbl">STEP 2</span><div><b>施加力</b> —— 遍历 ForceRegistry，各力发生器 <code>addForce</code> / <code>addForceAtPoint</code></div></div>
+      <div class="layer t"><span class="taglbl">STEP 3</span><div><b>积分</b> —— <code>integrate(Δt)</code>：算 a 与 α，更新 v/ω，加阻尼，更新 p/q</div></div>
+      <div class="layer a"><span class="taglbl">STEP 4</span><div><b>更新派生数据</b> —— 归一化四元数 → 算变换矩阵 R → 算 <code>I⁻¹_world = R·I⁻¹·Rᵀ</code></div></div>
+      <div class="layer v"><span class="taglbl">STEP 5</span><div><b>碰撞检测</b> —— 粗检筛出候选对 → 细检生成 Contact 数组</div></div>
+      <div class="layer r"><span class="taglbl">STEP 6</span><div><b>接触求解</b> —— 先解穿透（位置），再迭代解速度（冲量）</div></div>
+      <div class="layer g"><span class="taglbl">STEP 7</span><div><b>渲染</b> —— 用 <code>transformMatrix</code> 画出物体</div></div>
+    </div>
+    <div class="cap">图 20 · 刚体世界的一帧（对应 flightsim.cpp 的 update()）</div>
+  </div>
+
+  <p>把粒子的主循环（图 5）和这张图对比，会发现：<strong>刚体只是把"速度/位置"各拆成了线性和角量两份，其余流程完全一致</strong>。这正是本书循序渐进的好处 —— 学会粒子，刚体只多了三个新概念：四元数、惯性张量、力矩。</p>
+
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th style="width:130px"></th><th>线性（平动）</th><th>角量（转动）</th></tr></thead>
+      <tbody>
+        <tr><td><b>状态</b></td><td>position, velocity</td><td>orientation(Quaternion), rotation(Vector3)</td></tr>
+        <tr><td><b>"质量"</b></td><td>inverseMass = 1/m</td><td>inverseInertiaTensor（3×3）</td></tr>
+        <tr><td><b>驱动力</b></td><td>forceAccum</td><td>torqueAccum</td></tr>
+        <tr><td><b>加速度</b></td><td><code>a = F·(1/m)</code></td><td><code>α = I⁻¹_world · τ</code></td></tr>
+        <tr><td><b>更新</b></td><td><code>v += a·Δt</code>，<code>p += v·Δt</code></td><td><code>ω += α·Δt</code>，<code>q += ½(ω⊗q)·Δt</code></td></tr>
+        <tr><td><b>阻尼</b></td><td>linearDamping</td><td>angularDamping</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="margin-top:12px" class="small">注意 Cyclone 把角速度字段名叫做 <code>rotation</code> 而不是 <code>angularVelocity</code>，读源码时别被绕进去。</p>
+
+  <h3>休眠：让静止的物体停止消耗</h3>
+  <p>场景里 90% 的刚体在 90% 的时间里是静止的。让它们继续参与积分和碰撞求解，纯属浪费。Cyclone 的做法是给每个刚体维护一个<strong>平滑后的运动量</strong>：</p>
+  <div class="formula">currentMotion = v·v + ω·ω
+motion = 0.5^Δt · motion + (1 − 0.5^Δt) · currentMotion     <span class="c">// 指数平滑</span>
+
+motion &lt; sleepEpsilon (0.3)   → 进入休眠，跳过积分
+motion &gt; 10 × sleepEpsilon    → 钳制到上限（防止刚被撞飞的物体数值爆炸）</div>
+
+  <div class="diagram">
+    <div class="flow">
+      <div class="box teal"><b>静止</b><span>motion &lt; ε</span></div>
+      <div class="arw">→</div>
+      <div class="box dark"><b>休眠</b><span>isAwake = false</span></div>
+      <div class="arw">→</div>
+      <div class="box blue"><b>被碰撞唤醒</b><span>matchAwakeState()</span></div>
+      <div class="arw">→</div>
+      <div class="box rose"><b>唤醒</b><span>motion = 2ε</span></div>
+    </div>
+    <div class="cap">图 21 · 休眠状态机。唤醒时把 motion 抬到 2ε，避免刚醒就又睡</div>
+  </div>
+
+  <div class="callout co-blue">
+    <span class="hd">休眠会传染</span>
+    <p>一个运动的物体撞到一个睡着的物体，睡着的那个必须醒过来 —— 否则你会看到"箱子把另一个箱子推穿了"这种诡异画面。这个传播由 <code>matchAwakeState()</code> 完成：接触两端只要有一个是醒的，就一起唤醒。这是休眠机制最容易漏掉的一环。</p>
+  </div>
+</section>
+
+<!-- ============ 12 ============ -->
+<section id="ch12">
+  <h2><span class="num">12</span>碰撞检测：粗检与细检</h2>
+  <p class="lead">碰撞检测是引擎里最"算法"的部分。它的核心矛盾是：<strong>精确检测很贵，但你不能对每个物体对都做精确检测</strong>。</p>
+
+  <div class="callout co-rose">
+    <span class="hd">先感受一下复杂度</span>
+    <p>场景里有 N 个物体，两两检测是 <code>N(N−1)/2</code> 对。<strong>100 个物体 = 4950 对，1000 个物体 = 499500 对</strong>。每对都做精确的盒-盒检测，一帧内绝无可能完成。所以必须分层。</p>
+  </div>
+
+  <h3>分两层：粗检筛人，细检定责</h3>
+  <div class="diagram">
+    <div class="stack">
+      <div class="layer blue"><span class="taglbl">粗检</span><div><b>Broad Phase</b> —— 用一个便宜的包围体（球/AABB）快速排除绝大多数不可能相交的对。<br><span class="small">要求：<strong>绝不漏报</strong>（可以有假阳性，交给细检处理）</span></div></div>
+      <div class="arw dn" style="margin:2px auto">↓ 候选对（通常只剩百分之几）</div>
+      <div class="layer r"><span class="taglbl">细检</span><div><b>Narrow Phase</b> —— 对候选对做精确检测，算出<strong>接触法线、穿透深度、接触点</strong>这三件套</div></div>
+    </div>
+    <div class="cap">图 22 · 碰撞检测的两层漏斗</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="v">1000 → ~50</div><div class="k">粗检的筛选效果<br><span class="small">（量级示意）</span></div></div>
+    <div class="stat"><div class="v">1 次点积</div><div class="k">包围球相交的代价<br><span class="small">|c₁−c₂|² &lt; (r₁+r₂)²</span></div></div>
+    <div class="stat"><div class="v">15 根轴</div><div class="k">盒-盒 SAT 要测的轴数</div></div>
+  </div>
+
+  <h3>粗检的三种武器</h3>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th style="width:130px">结构</th><th>思路</th><th>适用</th></tr></thead>
+      <tbody>
+        <tr><td><b>包围球</b><br><span class="small">Bounding Sphere</span></td><td>最简单的包围体，一次点积判相交</td><td>第一道防线。形状不贴合，但对旋转免疫（不用重算）</td></tr>
+        <tr><td><b>BVH</b><br><span class="small">层次包围体</span></td><td>把物体组织成二叉树，父节点包住子节点；插入时用"体积增长最小"启发式</td><td>通用方案，动态场景友好，主流引擎的选择</td></tr>
+        <tr><td><b>四叉树 / 八叉树</b></td><td>把空间递归切分成格子，只检测同格或邻格的物体</td><td>大规模静态场景、地形。物体跨格时维护麻烦</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout co-amber">
+    <span class="hd">一个实用提醒</span>
+    <p>Cyclone 源码里<strong>只有包围球和 BVH 模板</strong>，书里讲的四叉树/八叉树并没有实现。想学四叉树要另外找资料 —— 但原理一致：用空间关系换取"少算几对"。</p>
+  </div>
+
+  <h3>细检的核心：分离轴定理（SAT）</h3>
+  <p>这是整个碰撞检测里最重要的一个定理，而且它惊人地好懂：</p>
+
+  <div class="callout co-violet">
+    <span class="hd">分离轴定理</span>
+    <p><strong>两个凸形状不相交，当且仅当存在一根轴，使得它们在这根轴上的投影不重叠。</strong><br>反过来：如果你把所有"可能的分离轴"都试了一遍，每根轴上投影都重叠 —— 那它们一定相交。</p>
+  </div>
+
+  <div class="diagram">
+    <svg viewBox="0 0 640 210" style="width:100%;height:auto">
+      <!-- separated case -->
+      <text x="110" y="20" font-size="12" fill="#15803d" text-anchor="middle" font-weight="700">找到分离轴 → 不相交</text>
+      <line x1="40" y1="105" x2="230" y2="105" stroke="#cbd5e1" stroke-width="1"/>
+      <rect x="52" y="62" width="62" height="46" fill="#dcfce7" stroke="#15803d" stroke-width="1.8" transform="rotate(-12 83 85)"/>
+      <rect x="160" y="70" width="56" height="52" fill="#dcfce7" stroke="#15803d" stroke-width="1.8" transform="rotate(8 188 96)"/>
+      <g stroke="#15803d" stroke-width="1.4" stroke-dasharray="3 3">
+        <line x1="52" y1="50" x2="52" y2="125"/><line x1="216" y1="50" x2="216" y2="125"/>
+      </g>
+      <line x1="52" y1="140" x2="216" y2="140" stroke="#15803d" stroke-width="3"/>
+      <text x="134" y="160" font-size="11" fill="#15803d" text-anchor="middle">投影区间有空隙</text>
+
+      <!-- overlapped case -->
+      <text x="450" y="20" font-size="12" fill="#be123c" text-anchor="middle" font-weight="700">所有轴都重叠 → 相交</text>
+      <line x1="310" y1="105" x2="600" y2="105" stroke="#cbd5e1" stroke-width="1"/>
+      <rect x="360" y="62" width="66" height="50" fill="#ffe4e6" stroke="#be123c" stroke-width="1.8" transform="rotate(-12 393 87)"/>
+      <rect x="420" y="72" width="58" height="52" fill="#ffe4e6" stroke="#be123c" stroke-width="1.8" transform="rotate(8 449 98)"/>
+      <g stroke="#be123c" stroke-width="1.4" stroke-dasharray="3 3">
+        <line x1="360" y1="50" x2="360" y2="130"/><line x1="478" y1="50" x2="478" y2="130"/>
+      </g>
+      <line x1="360" y1="140" x2="478" y2="140" stroke="#be123c" stroke-width="3"/>
+      <text x="419" y="160" font-size="11" fill="#be123c" text-anchor="middle">投影区间重叠了</text>
+    </svg>
+    <div class="cap">图 23 · 分离轴定理的可视化：把形状投影到一根轴上，看区间是否重叠</div>
+  </div>
+
+  <p>关键问题变成：<strong>该试哪几根轴？</strong> 对两个 OBB（有向包围盒）来说，答案恰好是 15 根：</p>
+
+  <div class="formula">盒 A 的 3 根面法线     → 索引 0, 1, 2
+盒 B 的 3 根面法线     → 索引 3, 4, 5
+两者的 3×3 = 9 根叉积轴 → 索引 6 .. 14
+────────────────────────────────
+合计 15 根轴，全部测试后取<b style="color:#3b5bdb">穿透最浅</b>的那根作为分离轴</div>
+
+  <div class="callout co-teal">
+    <span class="hd">为什么"取穿透最浅"的那根</span>
+    <p>因为那才是<strong>最少侵入的方向</strong> —— 沿它推开物体，位移最小、看起来最自然。这也是为什么两个盒子斜着叠在一起时，引擎会聪明地选择"往侧面推"而不是"往上顶"。</p>
+  </div>
+</section>
+
+<!-- ============ 13 ============ -->
+<section id="ch13">
+  <h2><span class="num">13</span>生成碰撞：7 种图元对</h2>
+  <p class="lead">细检的产物是一个 <code>Contact</code>（接触）。不管什么形状相交，最终都归结为三样东西：<strong>法线 n、穿透深度 d、接触点 P</strong>。这一章看各种图元对怎么算出这三样。</p>
+
+  <div class="diagram">
+    <div class="flow">
+      <div class="box blue"><b>球-球</b></div>
+      <div class="box teal"><b>球-平面</b></div>
+      <div class="box amber"><b>盒-平面</b></div>
+      <div class="box violet"><b>盒-球</b></div>
+      <div class="box rose"><b>盒-盒</b></div>
+      <div class="box green"><b>盒-点</b></div>
+    </div>
+    <div class="cap">图 24 · Cyclone 的 CollisionDetector 分发：按图元类型分派到对应的检测函数</div>
+  </div>
+
+  <h3>最简单的两个</h3>
+  <div class="formula">球-球：
+  d = ‖p₁ − p₂‖
+  n = (p₁ − p₂)/d
+  contactPoint = p₁ + (p₁ − p₂)·0.5      <span class="c">// 中点</span>
+  penetration  = r₁ + r₂ − d
+
+球-半空间（地面）：
+  ballDistance = n·p − r − offset
+  penetration  = −ballDistance
+  contactPoint = p − n·(ballDistance + r)   <span class="c">// 球心沿法线回退</span></div>
+
+  <p>球-球检测只要<strong>一次减法、一次点积、一次开方</strong>，是最便宜的图元。这也是为什么性能敏感的场景喜欢用球做包围体。</p>
+
+  <h3>盒-盒：SAT 之后的三种接触类型</h3>
+  <p>测完 15 根轴、选定"最优轴"之后，还要判断这到底是哪种接触 —— 因为接触点的算法完全不同：</p>
+
+  <div class="diagram">
+    <div class="stack">
+      <div class="layer v"><span class="taglbl">best 0-2</span><div><b>点-面</b>：盒 B 的一个顶点插进盒 A 的一个面里 → <code>fillPointFaceBoxBox(A, B, ...)</code></div></div>
+      <div class="layer a"><span class="taglbl">best 3-5</span><div><b>点-面</b>（反过来）：盒 A 的顶点插进盒 B → 把两个盒<strong>参数对调</strong>复用同一个函数</div></div>
+      <div class="layer r"><span class="taglbl">best 6-14</span><div><b>边-边</b>：两根棱交叉 → 求两条线段的最近点对，取中点</div></div>
+    </div>
+    <div class="cap">图 25 · 最优轴的编号直接决定了接触类型 —— 这是个非常省代码的設計</div>
+  </div>
+
+  <div class="diagram">
+    <svg viewBox="0 0 640 170" style="width:100%;height:auto">
+      <!-- point-face -->
+      <g>
+        <text x="95" y="18" font-size="12" fill="#6d28d9" text-anchor="middle" font-weight="700">点-面接触</text>
+        <rect x="30" y="45" width="90" height="80" fill="#f5f3ff" stroke="#6d28d9" stroke-width="1.8"/>
+        <path d="M150,60 L195,80 L150,100 L105,80 Z" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.8"/>
+        <circle cx="105" cy="80" r="5" fill="#6d28d9"/>
+        <line x1="105" y1="80" x2="50" y2="80" stroke="#be123c" stroke-width="2"/>
+        <polygon points="50,80 60,74 60,86" fill="#be123c"/>
+        <text x="76" y="72" font-size="10.5" fill="#be123c">n</text>
+        <text x="95" y="145" font-size="11" fill="#475569" text-anchor="middle">1 个接触点</text>
+      </g>
+      <!-- edge-edge -->
+      <g>
+        <text x="320" y="18" font-size="12" fill="#be123c" text-anchor="middle" font-weight="700">边-边接触</text>
+        <path d="M235,50 L330,60 L325,90 L230,80 Z" fill="#ffe4e6" stroke="#be123c" stroke-width="1.8"/>
+        <path d="M300,95 L395,75 L400,105 L305,125 Z" fill="#ffe4e6" stroke="#be123c" stroke-width="1.8"/>
+        <circle cx="318" cy="88" r="5" fill="#be123c"/>
+        <text x="320" y="145" font-size="11" fill="#475569" text-anchor="middle">1 个接触点（最近点对的中点）</text>
+      </g>
+      <!-- face-face -->
+      <g>
+        <text x="530" y="18" font-size="12" fill="#0d9488" text-anchor="middle" font-weight="700">面-面接触</text>
+        <rect x="440" y="45" width="110" height="42" fill="#ccfbf1" stroke="#0d9488" stroke-width="1.8"/>
+        <rect x="455" y="85" width="95" height="42" fill="#ccfbf1" stroke="#0d9488" stroke-width="1.8"/>
+        <circle cx="470" cy="87" r="4.5" fill="#0d9488"/><circle cx="530" cy="87" r="4.5" fill="#0d9488"/>
+        <text x="503" y="145" font-size="11" fill="#475569" text-anchor="middle">需生成 2~4 个接触点</text>
+      </g>
+    </svg>
+    <div class="cap">图 26 · 三种接触类型。接触点数量直接决定堆叠是否稳定</div>
+  </div>
+
+  <div class="callout co-rose">
+    <span class="hd">为什么盒子叠不稳</span>
+    <p>两个面贴面时，理想情况需要 <strong>2~4 个接触点</strong>才能锁住旋转（一个点会让盒子绕着它翻倒）。Cyclone 的盒-盒检测<strong>只生成 1 个接触点</strong> —— 这是它的简化之处，也是"箱子堆高了会晃"的原因。商业引擎会生成接触流形（manifold）来做这件事。</p>
+  </div>
+
+  <h3>Contact 长什么样</h3>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th style="width:190px">字段</th><th>含义</th></tr></thead>
+      <tbody>
+        <tr><td><code>body[2]</code></td><td>接触的两个刚体（第二个可以是 NULL，表示静态物体）</td></tr>
+        <tr><td><code>contactNormal</code></td><td>单位法线，约定<strong>从 body[0] 指向 body[1]</strong></td></tr>
+        <tr><td><code>contactPoint</code></td><td>世界坐标下的接触点位置</td></tr>
+        <tr><td><code>penetration</code></td><td>穿透深度，正值表示重叠了多少</td></tr>
+        <tr><td><code>restitution</code></td><td>弹性系数（0 = 完全不弹，1 = 完全弹性）</td></tr>
+        <tr><td><code>friction</code></td><td>摩擦系数 μ</td></tr>
+        <tr><td><code>contactToWorld</code></td><td>接触坐标系矩阵：3 列分别是 法线 n、切线 t₀、切线 t₁</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>最后那个 <code>contactToWorld</code> 很关键：有了它，就能把"世界坐标下的速度"和"接触坐标下的速度"互相转换 —— 摩擦计算全靠它。</p>
+</section>
+
+<!-- ============ 14 ============ -->
+<section id="ch14">
+  <h2><span class="num">14</span>碰撞处理：冲量求解</h2>
+  <p class="lead">这是全书技术含量最高的一章，也是"物理引擎感"的来源。目标很朴素：<strong>两个物体撞上了，它们之后的速度该是多少？</strong></p>
+
+  <h3>第一步：算分离速度</h3>
+  <p>先判断这次碰撞"有多严重"。核心量是<strong>分离速度</strong>（separating velocity）—— 两个物体沿接触法线方向靠近或分离的速度：</p>
+
+  <div class="formula">v_sep = (v₀ − v₁) · n
+
+v_sep &gt; 0  → 正在分离，<b style="color:#15803d">不用管</b>（它们已经在分开了）
+v_sep &lt; 0  → 正在靠近，<b style="color:#be123c">需要冲量</b>
+v_sep = 0  → 相对静止（比如静止堆叠），也不用管</div>
+
+  <div class="diagram">
+    <div class="grid2">
+      <div class="box rose" style="text-align:left;padding:14px 16px">
+        <b>迎面撞上</b><br>
+        <span class="small">相对速度与法线反向<br>→ v_sep 是大负数<br>→ 需要<strong>大冲量</strong>，弹得猛</span>
+      </div>
+      <div class="box teal" style="text-align:left;padding:14px 16px">
+        <b>擦身而过</b><br>
+        <span class="small">相对速度几乎垂直于法线<br>→ v_sep 接近 0<br>→ 几乎不需要法向冲量（但摩擦在起作用）</span>
+      </div>
+    </div>
+    <div class="cap">图 27 · 分离速度决定了需要多大的冲量</div>
+  </div>
+
+  <h3>第二步：算需要多大的冲量</h3>
+  <p>我们希望碰撞后的分离速度变成 <code>−e · v_sep</code>（<code>e</code> 是弹性系数）。于是速度改变量是：</p>
+
+  <div class="formula">目标：     v'_sep = −e · v_sep
+需要的改变： Δv   = v'_sep − v_sep
+
+冲量大小：   g = Δv / (1/m₀ + 1/m₁)        <span class="c">// 粒子版，pcontacts.cpp:76</span>
+
+施加：       v₀ ← v₀ + n · g · (1/m₀)
+            v₁ ← v₁ − n · g · (1/m₁)      <span class="c">// 注意减号：动量守恒</span></div>
+
+  <p>如果 <code>1/m₀ + 1/m₁ ≤ 0</code>（两个都是无限质量的静态物体），直接返回 —— 除数会炸。这也印证了前面"存倒数"设计的好处：静态物体那一项自然为 0。</p>
+
+  <div class="callout co-blue">
+    <span class="hd">刚体版多了什么</span>
+    <p>刚体会在接触点产生<strong>力矩</strong>，所以分母不再是简单的 <code>1/m₀ + 1/m₁</code>，而是要把"绕接触点转动的等效惯量"也算进去：</p>
+    <div class="formula" style="margin-top:10px;background:#fff">g = [(I₀⁻¹(r₀×n)) × r₀]·n  +  1/m₀
+  + [(I₁⁻¹(r₁×n)) × r₁]·n  +  1/m₁</div>
+    <p style="margin-top:10px">多出来的那项 <code>[(I⁻¹(r×n)) × r]·n</code> 读作：<strong>"如果沿着法线推这个物体，它在接触点会产生多少位移"</strong>。接触点离质心越远，这项越大，物体越倾向于<strong>旋转</strong>而不是平动 —— 这就是为什么打在箱子角上它会翻滚。</p>
+  </div>
+
+  <h3>第三步：修正穿透</h3>
+  <p>冲量只改了速度，物体还<strong>嵌在一起</strong>。必须把它们分开。原则是按质量比例分配位移：</p>
+
+  <div class="formula">总惯量  M = (1/m₀ + 1/m₁)
+位移    Δx₀ = +n · (penetration / M) · (1/m₀)
+        Δx₁ = −n · (penetration / M) · (1/m₁)
+
+<span class="c">// 轻的让得多，重的让得少 —— 卡车撞小车，小车被推开</span>
+<span class="c">// 若 1/m = 0（静态物体），它的位移自动为 0，地面纹丝不动</span></div>
+
+  <p>刚体还要处理<strong>旋转位移</strong>：把物体沿法线挪开，可能一部分该由"平移"完成、一部分该由"绕接触点旋转"完成。Cyclone 按各自的等效惯量比例分配，并且给旋转量加了个<strong>上限</strong>（默认 0.2 倍），防止出现"物体被旋转得飞出去"的诡异画面 —— 超出部分补给平移，保证总分离量不变。</p>
+
+  <h3>第四步：为什么要迭代</h3>
+  <p>一个箱子同时接触地面和另一个箱子。解决接触 A 会改变接触 B 的状态，解决 B 又破坏了 A。<strong>单次求解不可能让所有接触同时满足。</strong></p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 640 190" style="width:100%;height:auto">
+      <line x1="50" y1="160" x2="610" y2="160" stroke="#cbd5e1" stroke-width="1.5"/>
+      <line x1="50" y1="160" x2="50" y2="25" stroke="#cbd5e1" stroke-width="1.5"/>
+      <text x="14" y="32" font-size="11" fill="#94a3b8">残余误差</text>
+      <text x="570" y="180" font-size="11" fill="#94a3b8">迭代次数</text>
+      <path d="M60,50 C 130,72 180,95 240,115 C 300,132 360,143 430,150 C 490,155 550,157 600,158"
+            fill="none" stroke="#3b5bdb" stroke-width="2.4"/>
+      <line x1="50" y1="150" x2="610" y2="150" stroke="#be123c" stroke-width="1.4" stroke-dasharray="5 4"/>
+      <text x="600" y="145" font-size="10.5" fill="#be123c" text-anchor="end">容差 ε</text>
+      <g fill="#3b5bdb">
+        <circle cx="60" cy="50" r="3"/><circle cx="130" cy="71" r="3"/><circle cx="200" cy="96" r="3"/>
+      </g>
+      <text x="70" y="42" font-size="11" fill="#3b5bdb">第 1 轮：误差很大</text>
+      <text x="360" y="140" font-size="11" fill="#3b5bdb">逐渐收敛</text>
+      <text x="480" y="175" font-size="11" fill="#15803d">低于 ε → 提前退出</text>
+    </svg>
+    <div class="cap">图 28 · 迭代收敛曲线：每轮挑"最严重"的接触先解决，误差指数下降</div>
+  </div>
+
+  <p>每一轮的策略是<strong>贪心</strong>：扫描所有接触，挑出<strong>最需要解决</strong>的那个（速度误差最大的 / 穿透最深的），解决它，然后把这次改动同步到所有共享刚体的其他接触上，再进入下一轮。</p>
+
+  <div class="diagram">
+    <div class="flow">
+      <div class="box blue"><b>扫描全部接触</b></div>
+      <div class="arw">→</div>
+      <div class="box rose"><b>挑最严重的</b></div>
+      <div class="arw">→</div>
+      <div class="box amber"><b>施加冲量</b></div>
+      <div class="arw">→</div>
+      <div class="box teal"><b>同步其他接触</b></div>
+      <div class="arw">→</div>
+      <div class="box dark"><b>下一轮</b></div>
+    </div>
+    <div class="cap">图 29 · 贪心迭代循环。<code>ε</code> 以下就提前退出，不浪费预算</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="v">×2</div><div class="k">粒子世界的默认迭代数<br><span class="small">接触数 × 2</span></div></div>
+    <div class="stat"><div class="v">×4</div><div class="k">刚体世界的默认迭代数<br><span class="small">接触数 × 4</span></div></div>
+    <div class="stat"><div class="v">2048</div><div class="k">demo 的硬上限<br><span class="small">maxContacts × 8</span></div></div>
+    <div class="stat"><div class="v">0.01</div><div class="k">速度与位置容差 ε</div></div>
+  </div>
+</section>
+
+<!-- ============ 15 ============ -->
+<section id="ch15">
+  <h2><span class="num">15</span>静态接触与摩擦力</h2>
+  <p class="lead">前面讲的是"撞上去又弹开"。但游戏里更常见的是<strong>静止接触</strong>：箱子放在地上、球停在斜坡上。这时候决定成败的是摩擦。</p>
+
+  <h3>先解决一个反直觉的问题：静止的箱子为什么不下沉</h3>
+  <p>每帧重力给箱子一个向下的速度，地面接触把它弹回来。如果弹性系数 <code>e</code> 不为 0，箱子会<strong>永远在微微跳动</strong> —— 这是物理引擎最经典的"抖动"bug。</p>
+
+  <div class="callout co-amber">
+    <span class="hd">解法：低速时关掉弹性</span>
+    <p>Cyclone 的做法：如果分离速度的绝对值小于 <strong>0.25</strong>，就把有效弹性系数 <code>e_eff</code> <strong>强制设为 0</strong>。低于这个阈值，物体之间就是纯非弹性碰撞 —— 不弹，安静地贴着。<br>这个小小的阈值，是"堆叠稳定"和"永远抖动"的分界线。</p>
+  </div>
+
+  <p>还有一处更精细的处理：<strong>重力补偿</strong>。求解接触时，要考虑"这一帧重力还会给它多少速度"，如果目标速度已经包含了这部分补偿，物体就不会因为"重力给它速度 → 求解器再消掉"而抖动。<code>desiredDeltaVelocity</code> 里的 <code>velocityFromAcc</code> 项就是干这个的。</p>
+
+  <h3>摩擦：库仑模型</h3>
+  <p>游戏里用的摩擦模型极其简单，一句话：<strong>摩擦力最大不超过 μ × 法向力</strong>。</p>
+
+  <div class="formula">|f_tangential| ≤ μ · f_normal
+
+<span class="c">// 在冲量世界里：</span>
+切向冲量的模  √(j_y² + j_z²)  ≤  μ · j_x</div>
+
+  <div class="diagram">
+    <svg viewBox="0 0 640 200" style="width:100%;height:auto">
+      <line x1="320" y1="30" x2="320" y2="180" stroke="#cbd5e1" stroke-width="1.5"/>
+      <line x1="120" y1="180" x2="520" y2="180" stroke="#cbd5e1" stroke-width="1.5"/>
+      <text x="326" y="42" font-size="11" fill="#94a3b8">法向 n</text>
+      <text x="500" y="196" font-size="11" fill="#94a3b8">切平面</text>
+      <!-- friction cone -->
+      <path d="M320,180 L 210,60 L 430,60 Z" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+      <line x1="320" y1="180" x2="320" y2="60" stroke="#b45309" stroke-width="1.4" stroke-dasharray="4 3"/>
+      <text x="330" y="70" font-size="11" fill="#b45309">摩擦锥（半角 arctan μ）</text>
+      <!-- inside impulse -->
+      <line x1="320" y1="180" x2="352" y2="95" stroke="#15803d" stroke-width="2.6"/>
+      <polygon points="352,95 344,106 360,104" fill="#15803d"/>
+      <text x="362" y="108" font-size="11" fill="#15803d">锥内：静摩擦，物体不动</text>
+      <!-- outside impulse -->
+      <line x1="320" y1="180" x2="440" y2="120" stroke="#be123c" stroke-width="2.6"/>
+      <polygon points="440,120 428,120 431,131" fill="#be123c"/>
+      <text x="352" y="140" font-size="11" fill="#be123c">锥外：滑动，切向冲量被截断到锥面上</text>
+    </svg>
+    <div class="cap">图 30 · 摩擦锥：算出来的冲量如果跑出锥外，就把它拉回锥面</div>
+  </div>
+
+  <p>算法实现就是<strong>一次截断</strong>：先当没有限制算出冲量 <code>j</code>，如果切向分量太大，就保持方向不变、把长度缩到 <code>μ·j_x</code>：</p>
+
+  <div class="formula">planar = √(j_y² + j_z²)
+若 planar &gt; μ · j_x：
+    (ĵ_y, ĵ_z) = (j_y, j_z) / planar        <span class="c">// 只需方向</span>
+    j_x = desiredDeltaVelocity / (D₀₀ + μ·(D₀₁·ĵ_y + D₀₂·ĵ_z))
+    j_y = μ · j_x · ĵ_y
+    j_z = μ · j_x · ĵ_z</div>
+
+  <div class="callout co-teal">
+    <span class="hd">参考：常见摩擦系数</span>
+    <p>原书附录 B 给了实测参考值。几个常用的：冰-冰 <strong>0.05</strong>、木头-木头 <strong>0.4</strong>、橡胶-混凝土 <strong>0.7~1.0</strong>、金属-金属（润滑）<strong>0.15</strong>。游戏里通常会往上调一点，因为真实摩擦系数下物体"太滑"。<br><strong>μ &gt; 1 是完全合法的</strong>（比如橡胶轮胎），尽管中学物理常说 μ &lt; 1 —— 那只是简化。</p>
+  </div>
+
+  <div class="callout co-rose">
+    <span class="hd">各向异性摩擦：一个高级技巧</span>
+    <p>有些物体在不同方向上摩擦不同 —— 最典型的是<strong>车轮</strong>：滚动方向摩擦小（能滚），侧向摩擦大（不打滑）。做法是把摩擦系数写成一个 2×2 矩阵（在切平面内），而不是一个数。原书提到这个技巧，Cyclone 源码里没有实现，但赛车游戏几乎都会做。</p>
+  </div>
+</section>
+
+<!-- ============ 16 ============ -->
+<section id="ch16">
+  <h2><span class="num">16</span>稳定性与优化</h2>
+  <p class="lead">这一章是"让你的引擎不炸"的实用手册。前面跑通了，这里是让它<strong>在真实项目里跑得住</strong>。</p>
+
+  <h3>五个常见的翻车现场</h3>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th style="width:150px">症状</th><th>原因</th><th>解法</th></tr></thead>
+      <tbody>
+        <tr><td><b>物体永远抖动</b></td><td>低速时仍施加弹性反弹</td><td>分离速度 &lt; 0.25 时把 <code>e</code> 置 0；开启重力补偿</td></tr>
+        <tr><td><b>堆叠的箱子慢慢陷进地面</b></td><td>穿透修正不足，或迭代次数不够</td><td>提高 <code>positionIterations</code>；允许少量穿透（不要强求 0）</td></tr>
+        <tr><td><b>高速物体穿墙</b></td><td>一帧移动距离 &gt; 墙的厚度（隧道效应）</td><td>连续碰撞检测 CCD / 射线扫掠；或限制最大速度</td></tr>
+        <tr><td><b>帧率一变手感就变</b></td><td>用可变 Δt；阻尼用了乘法而非幂</td><td><strong>固定时间步</strong>（1/60s），渲染插值；阻尼用 <code>d^Δt</code></td></tr>
+        <tr><td><b>物体突然飞出宇宙</b></td><td>数值发散（硬弹簧、极端质量比、NaN）</td><td>限幅最大速度/冲量；检查质量比别超过 100:1</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout co-violet">
+    <span class="hd">最重要的一条：固定时间步</span>
+    <p>这是所有优化里性价比最高的。<strong>物理永远以固定 Δt（如 1/60 秒）推进</strong>，不管渲染帧率是多少；多余的渲染帧用插值平滑。理由：所有调出来的参数（阻尼、迭代、容差）都只在固定 Δt 下成立，一旦 Δt 变化，整个系统的行为就变了 —— 而且是不可预测的变。</p>
+  </div>
+
+  <div class="diagram">
+    <div class="stack">
+      <div class="layer d"><span class="taglbl">优化</span><div><b>休眠机制</b> —— 静止物体跳过积分与求解。收益最大，实现最简</div></div>
+      <div class="layer blue"><span class="taglbl">优化</span><div><b>接触缓存（warm starting）</b> —— 记住上一帧的冲量，作为这一帧的初值，收敛快数倍</div></div>
+      <div class="layer t"><span class="taglbl">优化</span><div><b>空间划分</b> —— BVH / 网格，让粗检从 O(N²) 降到接近 O(N log N)</div></div>
+      <div class="layer a"><span class="taglbl">优化</span><div><b>质量比限制</b> —— 避免 1kg 撞 10000kg 这种病态配置，迭代难以收敛</div></div>
+      <div class="layer r"><span class="taglbl">优化</span><div><b>接触数上限</b> —— 单帧接触数封顶（Cyclone 用 256），超了就丢弃次要接触，保证帧时间可控</div></div>
+    </div>
+    <div class="cap">图 31 · 五种稳定性/性能手段，按性价比排序</div>
+  </div>
+
+  <h3>关于"允许一点点穿透"</h3>
+  <p>新手总想让穿透为 0。但这是<strong>做不到的，也不该追求</strong>：位置修正本身是"硬拽"物体，拽多了会引入能量，反而制造抖动。正确做法是留一个<strong>允许穿透容差（slop）</strong> —— 比如 0.01~0.05 个世界单位，在这个范围内不修正。玩家完全看不出来，系统却稳定得多。</p>
+
+  <div class="callout co-blue">
+    <span class="hd">一句行业共识</span>
+    <p><strong>"宁可让物体轻微重叠，也不要让它们抖动。"</strong> 玩家对"穿透 1 厘米"几乎无感，但对"箱子在地面上颤动"极其敏感 —— 后者会立刻让人觉得"这游戏很廉价"。</p>
+  </div>
+</section>
+
+<!-- ============ 17 ============ -->
+<section id="ch17">
+  <h2><span class="num">17</span>整合：完整的一帧</h2>
+  <p class="lead">把所有部件拼起来。这张图是整本书的收束 —— 如果你只记一张图，记这张。</p>
+
+  <div class="diagram">
+    <div class="stack">
+      <div class="layer d"><span class="taglbl">1</span><div><b>startFrame()</b> —— 清空所有刚体的力/力矩累加器</div></div>
+      <div class="layer blue"><span class="taglbl">2</span><div><b>施加力</b> —— ForceRegistry 遍历：重力、弹簧、翼面、浮力…（持续力每帧重加）</div></div>
+      <div class="layer t"><span class="taglbl">3</span><div><b>积分</b> —— 更新 v/ω（加速度 + 阻尼），更新 p/q（位置与朝向）</div></div>
+      <div class="layer a"><span class="taglbl">4</span><div><b>派生数据</b> —— 四元数归一化 → 变换矩阵 R → <code>I⁻¹_world = R·I⁻¹·Rᵀ</code></div></div>
+      <div class="layer v"><span class="taglbl">5</span><div><b>粗检</b> —— 包围球 / BVH 筛出候选对</div></div>
+      <div class="layer r"><span class="taglbl">6</span><div><b>细检</b> —— SAT 等算法生成 Contact[]：法线、穿透、接触点</div></div>
+      <div class="layer g"><span class="taglbl">7</span><div><b>接触准备</b> —— 建接触坐标系、算接触点速度、算目标速度变化量</div></div>
+      <div class="layer d"><span class="taglbl">8</span><div><b>解穿透</b> —— 迭代 <code>positionIterations</code> 轮，按惯量分配位移</div></div>
+      <div class="layer blue"><span class="taglbl">9</span><div><b>解速度</b> —— 迭代 <code>velocityIterations</code> 轮，逐个施加冲量 + 摩擦</div></div>
+      <div class="layer t"><span class="taglbl">10</span><div><b>休眠判定</b> —— 更新 motion，低于阈值就睡；接触传播唤醒</div></div>
+      <div class="layer a"><span class="taglbl">11</span><div><b>渲染</b> —— 取 <code>transformMatrix</code> 交给图形层</div></div>
+    </div>
+    <div class="cap">图 32 · 一个完整物理帧的 11 步</div>
+  </div>
+
+  <h3>注意第 8 步在第 9 步<strong>之前</strong></h3>
+  <p>这个顺序是刻意的：<strong>先把物体分开，再算速度</strong>。如果反过来，你会在物体还嵌在一起时算冲量，接触点位置是错的，法线方向也不可靠。Cyclone 的 <code>resolveContacts()</code> 明确按 <code>prepareContacts → adjustPositions → adjustVelocities</code> 的顺序执行。</p>
+
+  <div class="callout co-teal">
+    <span class="hd">从粒子到刚体：只多了三样东西</span>
+    <p>回头看整条路线 —— 粒子引擎主循环（图 5）和刚体主循环（图 32）<strong>结构完全一致</strong>。差别只有：① 四元数表示朝向；② 惯性张量代替标量质量；③ 力矩与平动力并行累加。其余的力发生器、接触生成、冲量求解、迭代框架，全是同一套。<br>这就是本书编排的精妙之处：<strong>先把简单情况彻底搞透，再往上加一层</strong>。</p>
+  </div>
+</section>
+
+<!-- ============ 18 ============ -->
+<section id="ch18">
+  <h2><span class="num">18</span>其他引擎与选型</h2>
+  <p class="lead">学完自己造，最后一章要回答一个现实问题：<strong>那我到底要不要造？</strong></p>
+
+  <h3>先看看现成的</h3>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th style="width:120px">引擎</th><th>维度</th><th>特点</th><th>典型用户</th></tr></thead>
+      <tbody>
+        <tr><td><b>Box2D</b></td><td>2D</td><td>本书范式的教科书级实现，代码极干净，注释详尽</td><td>2D 手游、愤怒的小鸟</td></tr>
+        <tr><td><b>Chipmunk</b></td><td>2D</td><td>C 实现，轻量，有 Python 绑定（Pymunk）</td><td>2D 独立游戏</td></tr>
+        <tr><td><b>Bullet</b></td><td>3D</td><td>开源，Sequential Impulse 求解器，功能全面</td><td>电影、机器人仿真、3A 与独立通吃</td></tr>
+        <tr><td><b>PhysX</b></td><td>3D</td><td>NVIDIA 出品，GPU 加速，Unity/Unreal 内置</td><td>主流商业游戏</td></tr>
+        <tr><td><b>Havok</b></td><td>3D</td><td>老牌商业引擎，稳定性与工具链极强</td><td>3A 大作</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>什么时候该自己写</h3>
+  <div class="grid2">
+    <div class="callout co-blue" style="margin:0">
+      <span class="hd">✓ 值得自己写</span>
+      <ul style="margin:0;padding-left:18px">
+        <li>需求很简单（只要重力 + 地面碰撞）</li>
+        <li>2D 且追求极致控制与性能</li>
+        <li>移动端 / 小游戏，不能承受几 MB 的库</li>
+        <li>需要非常规物理（风格化、非真实感）</li>
+        <li><strong>为了学习</strong> —— 这是最大的理由</li>
+      </ul>
+    </div>
+    <div class="callout co-rose" style="margin:0">
+      <span class="hd">✗ 别自己写</span>
+      <ul style="margin:0;padding-left:18px">
+        <li>需要精确稳定的堆叠（几百个箱子）</li>
+        <li>需要车辆物理、布料、流体、关节链</li>
+        <li>团队没有专职物理程序</li>
+        <li>项目周期紧，物理只是配角</li>
+        <li>需要和美术工具链深度集成</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout co-amber">
+    <span class="hd">最务实的答案</span>
+    <p><strong>用现成的引擎，但按本书的方式去理解它。</strong> 当你能看懂 Box2D 的求解器在干什么，你就能正确地调参、正确地建模、在出问题时知道该怪谁。这本书真正的价值不在于让你造引擎，而在于让你<strong>有能力驾驭别人的引擎</strong>。</p>
+  </div>
+
+  <h3>2D 物理的几个特殊之处</h3>
+  <p>第 2 版专门加了 2D 内容，因为休闲游戏和手游的爆发。2D 相比 3D 简化明显：</p>
+  <ul>
+    <li><strong>朝向从四元数退化成一个角度 θ</strong>（标量）—— 旋转数学全没了</li>
+    <li><strong>惯性张量退化成一个标量</strong> —— 不用矩阵变换了</li>
+    <li><strong>叉积退化成标量</strong>（<code>a × b = ax·by − ay·bx</code>）—— 力矩计算变成一次乘减</li>
+    <li>碰撞检测只需处理 圆、线段、多边形 三类图元</li>
+  </ul>
+  <p>所以 2D 物理引擎的代码量通常是 3D 版本的 <strong>1/5 左右</strong>，而且更容易稳定。</p>
+</section>
+
+<!-- ============ 附录 A ============ -->
+<section id="app-a">
+  <h2><span class="num">A</span>术语速查表</h2>
+  <p class="lead">读源码或官方文档时随时回来查。左边是英文原名，中间是一句话解释，右边给个类比。</p>
+
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th style="width:190px">术语</th><th>一句话</th><th style="width:200px">类比</th></tr></thead>
+      <tbody>
+        <tr><td><b>Particle</b> 粒子</td><td>只有位置和速度的点，没有体积和朝向</td><td>空气中的一粒灰尘</td></tr>
+        <tr><td><b>Rigid Body</b> 刚体</td><td>有形状、有朝向、会旋转、不会变形的物体</td><td>一块砖头</td></tr>
+        <tr><td><b>Mass-Aggregate</b> 质体</td><td>一堆粒子用约束连成的整体</td><td>一串珠子 / 一块布</td></tr>
+        <tr><td><b>Integration</b> 积分</td><td>从加速度推算出速度和位置的过程</td><td>看速度表推算跑了多远</td></tr>
+        <tr><td><b>Semi-implicit Euler</b> 半隐式欧拉</td><td>先用旧速度更新位置，再用新加速度更新速度</td><td>先走一步再想下一步往哪</td></tr>
+        <tr><td><b>Inverse Mass</b> 逆质量</td><td>1/m。为 0 表示无限质量（不可动）</td><td>"推得动吗"的程度</td></tr>
+        <tr><td><b>Force Accumulator</b> 力累加器</td><td>本帧所有力的总和，每帧末尾清空</td><td>收账单的抽屉，一天一清</td></tr>
+        <tr><td><b>Torque</b> 力矩</td><td><code>τ = r × F</code>，让物体转动的"力"</td><td>用扳手拧螺丝</td></tr>
+        <tr><td><b>Inertia Tensor</b> 惯性张量</td><td>转动版的"质量"，3×3 矩阵，各方向不同</td><td>转长棍 vs 转短棍的差别</td></tr>
+        <tr><td><b>Quaternion</b> 四元数</td><td>4 个数表示 3 自由度的朝向，无万向锁</td><td>朝向的"安全容器"</td></tr>
+        <tr><td><b>Angular Velocity</b> 角速度</td><td>ω，普通 Vector3，不是四元数</td><td>每秒转多少弧度</td></tr>
+        <tr><td><b>Damping</b> 阻尼</td><td>每帧按比例衰减速度（<code>v·d^Δt</code>）</td><td>空气阻力 + 摩擦的近似</td></tr>
+        <tr><td><b>Broad Phase</b> 粗检测</td><td>用便宜的包围体快速排除不可能相交的物体对</td><td>先用望远镜扫一遍</td></tr>
+        <tr><td><b>Narrow Phase</b> 细检测</td><td>对候选对做精确检测，算出法线/深度/接触点</td><td>再用放大镜确认</td></tr>
+        <tr><td><b>SAT</b> 分离轴定理</td><td>存在一根轴使投影不重叠 ⟺ 两凸体不相交</td><td>从各个角度照影子看有没有缝</td></tr>
+        <tr><td><b>Contact</b> 接触</td><td>一次碰撞/约束违规的抽象记录</td><td>一张"违规通知单"</td></tr>
+        <tr><td><b>Contact Normal</b> 接触法线</td><td>单位向量，约定从 body[0] 指向 body[1]</td><td>"该往哪个方向推开"</td></tr>
+        <tr><td><b>Penetration</b> 穿透深度</td><td>两个物体重叠了多少</td><td>陷进去几厘米</td></tr>
+        <tr><td><b>Separating Velocity</b> 分离速度</td><td><code>(v₀−v₁)·n</code>，负值表示正在靠近</td><td>撞上去的猛烈程度</td></tr>
+        <tr><td><b>Impulse</b> 冲量</td><td>瞬间改变速度的量，<code>Δv = J/m</code></td><td>踢一脚（而不是一直推）</td></tr>
+        <tr><td><b>Restitution</b> 弹性系数</td><td>e，0 = 完全不弹，1 = 完全弹性</td><td>篮球 vs 湿泥巴</td></tr>
+        <tr><td><b>Friction</b> 摩擦系数</td><td>μ，切向冲量上限是 μ × 法向冲量</td><td>冰面 vs 橡胶垫</td></tr>
+        <tr><td><b>Friction Cone</b> 摩擦锥</td><td>冲量必须落在以法线为轴、半角 arctan μ 的锥内</td><td>斜着推太狠就会滑</td></tr>
+        <tr><td><b>Sleeping</b> 休眠</td><td>静止物体跳过模拟以省 CPU</td><td>没人动它，就别算它</td></tr>
+        <tr><td><b>Warm Starting</b> 热启动</td><td>用上一帧的冲量作为本帧迭代初值</td><td>从上次的结果接着调</td></tr>
+        <tr><td><b>CCD</b> 连续碰撞检测</td><td>防止高速物体一帧穿过薄墙</td><td>连拍而不是单张快照</td></tr>
+        <tr><td><b>Gimbal Lock</b> 万向锁</td><td>欧拉角在某角度丢失一个自由度</td><td>两个旋钮突然变成同一个</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ 附录 B ============ -->
+<section id="app-b">
+  <h2><span class="num">B</span>关键参数默认值（Cyclone 实测）</h2>
+  <p class="lead">调参时最痛苦的是"从哪个数开始"。这张表全部照录 Cyclone 源码，可以直接当起点。</p>
+
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th style="width:220px">参数</th><th style="width:120px">默认值</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><code>velocityEpsilon</code></td><td>0.01</td><td>速度迭代的收敛容差，低于它就认为这个接触搞定了</td></tr>
+        <tr><td><code>positionEpsilon</code></td><td>0.01</td><td>位置迭代的收敛容差，同时充当"允许穿透"</td></tr>
+        <tr><td>弹性抑制阈值</td><td>0.25</td><td>分离速度低于此值就强制 e = 0（防抖动的关键）</td></tr>
+        <tr><td>旋转位移限幅</td><td>0.2</td><td>穿透修正中旋转分量的最大比例，超出补给平移</td></tr>
+        <tr><td><code>sleepEpsilon</code></td><td>0.3</td><td>运动量低于此值进入休眠</td></tr>
+        <tr><td>motion 上限</td><td>10 × ε</td><td>防止刚被撞飞的物体 motion 数值爆炸</td></tr>
+        <tr><td>motion 平滑系数</td><td>0.5^Δt</td><td>指数平滑，与帧率无关</td></tr>
+        <tr><td>SAT 近平行轴判据</td><td>0.0001</td><td>两轴几乎平行时叉积不可靠，跳过</td></tr>
+        <tr><td>接触数组上限</td><td>256</td><td>单帧最多处理多少个接触</td></tr>
+        <tr><td>demo 求解器迭代上限</td><td>2048</td><td>maxContacts × 8</td></tr>
+        <tr><td>粒子世界自动迭代数</td><td>接触数 × 2</td><td>未显式指定时的默认值</td></tr>
+        <tr><td>刚体世界自动迭代数</td><td>接触数 × 4</td><td>刚体比粒子难收敛，所以翻倍</td></tr>
+        <tr><td>demo 常用 friction</td><td>0.9</td><td>偏大，为了让物体"稳稳停住"</td></tr>
+        <tr><td>demo 常用 restitution</td><td>0.1 ~ 0.6</td><td>0.1 是钝物体，0.6 是弹球</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout co-amber">
+    <span class="hd">调参顺序建议</span>
+    <p>① 先固定时间步 → ② 调质量比（别超 100:1）→ ③ 调 <code>restitution</code> 到手感对 → ④ 调 <code>friction</code> → ⑤ 抖动就提高迭代数 → ⑥ 还抖就检查是不是忘了低速抑制弹性。<strong>一次只改一个参数</strong>，否则你永远不知道是哪个起了作用。</p>
+  </div>
+</section>
+
+<!-- ============ 附录 C ============ -->
+<section id="app-c">
+  <h2><span class="num">C</span>动手清单：12 步造一个自己的引擎</h2>
+  <p class="lead">照着做，每一步都能跑起来看到东西。建议用任何你熟悉的语言（Python/JS/C# 都行），2D 起步。</p>
+
+  <div class="diagram">
+    <div class="stack">
+      <div class="layer blue"><span class="taglbl">1-3</span><div><b>粒子与世界</b> —— 实现 <code>Particle</code>（position/velocity/inverseMass）+ <code>integrate()</code> + 一个 World 循环。让一个点自由落体，画出来</div></div>
+      <div class="layer t"><span class="taglbl">4-5</span><div><b>力与注册表</b> —— 实现重力、阻力两个力发生器 + ForceRegistry。加上阻尼，看粒子慢慢停下</div></div>
+      <div class="layer a"><span class="taglbl">6-7</span><div><b>地面接触</b> —— 实现球-地面检测 + 单接触冲量求解。粒子会弹起来了（试试不同 restitution）</div></div>
+      <div class="layer v"><span class="taglbl">8-9</span><div><b>硬约束</b> —— 实现 Rod 和 Cable，做一条绳子 / 一座吊桥。<strong>这一步会让你真正理解"约束 = 接触"</strong></div></div>
+      <div class="layer r"><span class="taglbl">10</span><div><b>布料</b> —— 用粒子网格 + Rod 搭一块布，四角固定，看它飘</div></div>
+      <div class="layer g"><span class="taglbl">11</span><div><b>刚体</b> —— 加朝向（2D 用一个角度 θ）、角速度、力矩。实现 <code>addForceAtPoint</code>，推箱子看它翻</div></div>
+      <div class="layer d"><span class="taglbl">12</span><div><b>盒-盒碰撞与迭代</b> —— 实现 SAT + 多接触迭代求解 + 摩擦。堆三个箱子，看它们稳不稳</div></div>
+    </div>
+    <div class="cap">图 33 · 12 步路线图。第 7 步和第 12 步是两个坎，跨过去就通了</div>
+  </div>
+
+  <h3>每一步的验证标准</h3>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th style="width:70px">步骤</th><th>做对了会看到</th><th>做错了会看到</th></tr></thead>
+      <tbody>
+        <tr><td>1-3</td><td>点匀加速下落，轨迹是抛物线</td><td>点不动 / 瞬间飞走</td></tr>
+        <tr><td>4-5</td><td>点最终停下，且 30fps 与 60fps 轨迹一致</td><td>永远停不下来 / 不同帧率轨迹不同</td></tr>
+        <tr><td>6-7</td><td>点落地弹几下越弹越低，最后静止</td><td>永远弹跳 / 陷进地面 / 一落地就飞</td></tr>
+        <tr><td>8-9</td><td>绳子摆动自然，不会越摆越高</td><td>抖动 / 越拉越长 / 突然绷直弹飞</td></tr>
+        <tr><td>10</td><td>布料下垂、飘动，形状保持</td><td>网格塌陷成一团 / 剧烈抖动</td></tr>
+        <tr><td>11</td><td>推箱子边缘会翻，推中间只滑</td><td>只滑不转 / 转得像陀螺停不下来</td></tr>
+        <tr><td>12</td><td>三个箱子能稳稳叠住</td><td>缓慢下滑 / 抖动 / 穿透</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ 附录 D ============ -->
+<section id="app-d">
+  <h2><span class="num">D</span>源码勘误与避坑</h2>
+  <p class="lead">读 Cyclone 源码（<code>github.com/idmillington/cyclone-physics</code>）时会撞到这些坑。它们不影响学思路，但会浪费你半天时间。</p>
+
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th style="width:200px">位置</th><th>问题</th></tr></thead>
+      <tbody>
+        <tr><td><code>body.cpp</code> — <code>hasFiniteMass()</code></td><td>写成 <code>inverseMass &gt;= 0</code>，导致无限质量的静态物体也返回 true。应为 <code>&gt; 0</code></td></tr>
+        <tr><td><code>contacts.cpp</code> — 构造函数</td><td>四参数版本的 <code>ContactResolver</code> 只把第一个迭代数传进去，<code>positionIterations</code> 形参被吞掉</td></tr>
+        <tr><td><code>contacts.h</code> — <code>isValid()</code></td><td>把 <code>positionEpsilon</code> 检查了两遍，<code>velocityEpsilon</code> 根本没检查</td></tr>
+        <tr><td><code>fgen.cpp</code> — 浮力</td><td>部分浸没公式缺括号：<code>/ 2 * maxDepth</code> 应为 <code>/ (2 * maxDepth)</code>，且分子符号应为 <code>+ maxDepth</code></td></tr>
+        <tr><td><code>fgen.cpp</code> — <code>Explosion</code></td><td><strong>空函数体</strong>。爆炸是原书的练习题，需要自己实现</td></tr>
+        <tr><td><code>fgen.h</code> — <code>AngledAero</code></td><td>只有声明没有实现</td></tr>
+        <tr><td><code>ForceRegistry</code></td><td><code>remove()</code> / <code>clear()</code> 只有声明，全仓库无定义 —— 调用会链接失败</td></tr>
+        <tr><td><code>core.h</code> — <code>setBlockInertiaTensor</code></td><td>系数写成 <code>0.3</code>，理论值应为 <code>1/3</code></td></tr>
+        <tr><td><code>body.cpp</code> — <code>_transformInertiaTensor</code></td><td>形参 <code>const Quaternion &amp;q</code> 未被使用（实际用的是 <code>orientation</code>）</td></tr>
+        <tr><td>整个仓库</td><td><strong>没有四叉树 / 八叉树实现</strong>，只有包围球 + BVH 模板。书里讲的内容需要自己补</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout co-rose">
+    <span class="hd">别试着把它编译跑起来</span>
+    <p>作者已多年不更新代码、不回应 issue，依赖的 OpenGL/GLUT 环境在现代系统上很折腾。<strong>建议：只读代码学思路，配合仓库里提供的 Windows 可执行文件看效果。</strong> 或者更好 —— 照着思路自己重写一遍 2D 版本，那个过程本身就值回票价。</p>
+  </div>
+
+  <div class="callout co-teal">
+    <span class="hd">换个角度：这些 bug 是学习资源</span>
+    <p>能看出 <code>hasFiniteMass()</code> 写错、能发现构造函数吞掉参数 —— 说明你真的懂了。<strong>把这份勘误表当成阅读理解测验</strong>，看你能独立找出几条。</p>
+  </div>
+</section>
+
+<!-- ============ 附录 E ============ -->
+<section id="app-e">
+  <h2><span class="num">E</span>思考题</h2>
+  <p class="lead">每章都有对应的练习，这里挑了 10 个最能检验理解程度的。想不出来就回去翻对应章节。</p>
+
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th style="width:40px">#</th><th>问题</th><th style="width:90px">相关章节</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>为什么半隐式欧拉稳定，而显式欧拉会让弹簧越摆越高？两者的代码差别只有一行，试试看。</td><td>02</td></tr>
+        <tr><td>2</td><td>阻尼写成 <code>v *= damping</code> 和 <code>v *= pow(damping, Δt)</code>，在 30fps 和 144fps 下分别会怎样？</td><td>03</td></tr>
+        <tr><td>3</td><td>为什么存储 <code>inverseMass</code> 而不是 <code>mass</code>？举出三个因此受益的公式。</td><td>02 / 09</td></tr>
+        <tr><td>4</td><td>要用弹簧模拟一根"几乎不可拉伸"的绳子，k 调大之后会发生什么？有哪些解法？</td><td>05 / 06</td></tr>
+        <tr><td>5</td><td>Cable 和 Rod 在"压缩时"的行为差在哪？为什么 Rod 的 restitution 必须是 0？</td><td>07</td></tr>
+        <tr><td>6</td><td>证明 <code>(R·I·Rᵀ)⁻¹ = R·I⁻¹·Rᵀ</code>，并说明它为什么能省掉每帧一次矩阵求逆。</td><td>09</td></tr>
+        <tr><td>7</td><td>推一个箱子，什么情况下它只滑不转？（两个条件）</td><td>10</td></tr>
+        <tr><td>8</td><td>两个 OBB 做 SAT 要测 15 根轴，分别是哪 15 根？为什么要取"穿透最浅"的那根？</td><td>12</td></tr>
+        <tr><td>9</td><td>为什么必须先解穿透再解速度？反过来会出什么问题？</td><td>17</td></tr>
+        <tr><td>10</td><td>一个箱子放在地上轻微抖动，列出至少 3 种可能原因和对应解法。</td><td>15 / 16</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="callout co-violet">
+    <span class="hd">全书的最后一句话</span>
+    <p><strong>游戏物理不是为了复现真实世界，而是为了让玩家相信这个世界。</strong> 任何时候当"物理正确"和"看起来对"冲突时，选后者 —— 这是本书从头到尾都在传递的工程判断。</p>
+  </div>
+</section>
+
+<footer>
+  本教程为《游戏物理引擎开发》（Ian Millington 著，徐明亮 等译）的阅读提炼笔记。<br>
+  章节结构依据原书第 2 版目录；代码级细节、公式与参数均来自官方配套引擎 Cyclone 的开源源码核对；<br>
+  全部图表为重新绘制，未使用原书插图。<br><br>
+  <span style="color:#cbd5e1">建议配合原书与 Cyclone 源码阅读 · 2026</span>
+</footer>
+
+</div>
+</body>
+</html>

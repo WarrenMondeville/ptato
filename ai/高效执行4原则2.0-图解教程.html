@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>高效执行4原则 2.0 · 图解教程</title>
+<style>
+  :root{
+    --bg:#f6f8fb; --card:#ffffff; --ink:#1e293b; --ink2:#475569; --ink3:#94a3b8;
+    --line:#e2e8f0; --line2:#cbd5e1;
+    --blue:#3b5bdb; --blue-bg:#eef2ff;
+    --teal:#0d9488; --teal-bg:#ecfdf5;
+    --amber:#b45309; --amber-bg:#fffbeb;
+    --rose:#be123c; --rose-bg:#fff1f2;
+    --violet:#6d28d9; --violet-bg:#f5f3ff;
+    --green:#15803d; --green-bg:#f0fdf4;
+    --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px -12px rgba(15,23,42,.14);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:16px; line-height:1.85; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 20px 80px}
+
+  /* ---------- hero ---------- */
+  .hero{padding:64px 0 30px;text-align:center}
+  .hero .kicker{
+    display:inline-block;font-size:12.5px;letter-spacing:.14em;color:var(--blue);
+    background:var(--blue-bg);border:1px solid #dbe3ff;border-radius:999px;padding:5px 14px;margin-bottom:20px;
+  }
+  .hero h1{font-size:clamp(26px,4.4vw,40px);line-height:1.35;margin:0 0 16px;letter-spacing:-.01em}
+  .hero h1 em{font-style:normal;color:var(--blue)}
+  .hero p.sub{color:var(--ink2);font-size:16.5px;margin:0 auto;max-width:660px}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:26px}
+  .meta span{font-size:13px;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 13px}
+
+  /* ---------- section ---------- */
+  section{margin-top:64px;scroll-margin-top:24px}
+  .sec-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:8px}
+  .badge{
+    flex:0 0 auto;width:40px;height:40px;border-radius:12px;background:var(--blue);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;
+    box-shadow:0 6px 16px -8px rgba(59,91,219,.9);
+  }
+  .badge.teal{background:var(--teal);box-shadow:0 6px 16px -8px rgba(13,148,136,.9)}
+  .badge.amber{background:var(--amber);box-shadow:0 6px 16px -8px rgba(180,83,9,.9)}
+  .badge.violet{background:var(--violet);box-shadow:0 6px 16px -8px rgba(109,40,217,.9)}
+  .badge.rose{background:var(--rose);box-shadow:0 6px 16px -8px rgba(190,18,60,.9)}
+  .sec-head h2{font-size:23px;margin:6px 0 0;letter-spacing:-.01em;line-height:1.4}
+  .sec-head .en{font-size:13px;color:var(--ink3);font-weight:500;margin-left:8px}
+  h3{font-size:17.5px;margin:34px 0 10px;padding-left:12px;border-left:3px solid var(--blue)}
+  h3.teal{border-color:var(--teal)} h3.amber{border-color:var(--amber)}
+  h3.violet{border-color:var(--violet)} h3.rose{border-color:var(--rose)}
+  h4{font-size:15.5px;margin:22px 0 6px;color:var(--ink)}
+  p{margin:12px 0}
+  a{color:var(--blue)}
+  strong{color:#0f172a}
+  code{background:#f1f5f9;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:13.5px;
+       font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#0f172a}
+  ul,ol{margin:12px 0;padding-left:22px}
+  li{margin:6px 0}
+
+  /* ---------- toc ---------- */
+  .toc{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 24px;box-shadow:var(--shadow)}
+  .toc h3{margin:0 0 12px;border:0;padding:0;font-size:15px;color:var(--ink2);letter-spacing:.05em}
+  .toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:6px 20px}
+  .toc li a{display:flex;gap:10px;text-decoration:none;color:var(--ink);font-size:14.5px;padding:6px 8px;border-radius:8px}
+  .toc li a:hover{background:var(--blue-bg)}
+  .toc li b{color:var(--blue);font-variant-numeric:tabular-nums;font-weight:600;min-width:16px}
+
+  /* ---------- card / callout ---------- */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin:18px 0;box-shadow:var(--shadow)}
+  .card h4{margin-top:0}
+  .callout{border-radius:14px;padding:16px 20px;margin:18px 0;border:1px solid;position:relative}
+  .callout .lbl{display:block;font-size:12.5px;font-weight:700;letter-spacing:.06em;margin-bottom:6px}
+  .co-blue{background:var(--blue-bg);border-color:#dbe3ff} .co-blue .lbl{color:var(--blue)}
+  .co-teal{background:var(--teal-bg);border-color:#c9f0e6} .co-teal .lbl{color:var(--teal)}
+  .co-amber{background:var(--amber-bg);border-color:#f6e3bf} .co-amber .lbl{color:var(--amber)}
+  .co-rose{background:var(--rose-bg);border-color:#fbd5dd} .co-rose .lbl{color:var(--rose)}
+  .co-violet{background:var(--violet-bg);border-color:#ddd3fb} .co-violet .lbl{color:var(--violet)}
+  .callout p{margin:6px 0}
+
+  /* ---------- diagram shell ---------- */
+  .diagram{background:linear-gradient(180deg,#fdfefe,#f8fafc);border:1px solid var(--line);border-radius:16px;padding:22px 18px;margin:22px 0}
+  .diagram .dtitle{font-size:14px;font-weight:700;color:var(--ink2);text-align:center;margin-bottom:16px}
+  .diagram .cap{font-size:13px;color:var(--ink3);text-align:center;margin-top:12px}
+  .diagram svg{display:block;max-width:100%;height:auto;margin:0 auto}
+
+  /* ---------- css flow ---------- */
+  .flow{display:flex;flex-wrap:wrap;align-items:stretch;justify-content:center;gap:8px}
+  .box{
+    background:#fff;border:1.5px solid var(--line2);border-radius:12px;padding:10px 14px;
+    font-size:13.5px;line-height:1.5;text-align:center;min-width:96px;display:flex;flex-direction:column;justify-content:center;
+  }
+  .box b{display:block;font-size:13.5px;color:#0f172a}
+  .box small{color:var(--ink3);font-size:11.5px;display:block;margin-top:2px}
+  .box.blue{border-color:#a8b8f5;background:#f3f6ff}
+  .box.teal{border-color:#8fd9cb;background:#effbf7}
+  .box.amber{border-color:#eecb8a;background:#fffaf0}
+  .box.rose{border-color:#f0a8ba;background:#fff5f7}
+  .box.violet{border-color:#c3b0f7;background:#f8f5ff}
+  .box.green{border-color:#9adcae;background:#f2fdf5}
+  .box.dark{background:#1e293b;border-color:#1e293b;color:#fff}
+  .box.dark b{color:#fff}
+  .arw{align-self:center;color:var(--ink3);font-size:17px;font-weight:700;line-height:1;padding:0 1px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:stretch}
+  .col{display:flex;flex-direction:column;gap:8px}
+
+  /* ---------- 4 principles grid ---------- */
+  .pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:20px 0}
+  .pcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px 18px 16px;box-shadow:var(--shadow);
+         border-top:4px solid var(--blue);transition:transform .15s ease}
+  .pcard:hover{transform:translateY(-2px)}
+  .pcard.t2{border-top-color:var(--teal)} .pcard.t3{border-top-color:var(--amber)} .pcard.t4{border-top-color:var(--rose)}
+  .pcard .no{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--ink3)}
+  .pcard h4{margin:4px 0 2px;font-size:17px}
+  .pcard .en{font-size:12px;color:var(--ink3)}
+  .pcard p{font-size:13.5px;color:var(--ink2);margin:8px 0 0;line-height:1.7}
+  .pcard .kw{display:inline-block;margin-top:10px;font-size:12px;background:#f1f5f9;border-radius:6px;padding:3px 9px;color:var(--ink2)}
+
+  /* ---------- table ---------- */
+  .tblwrap{overflow-x:auto;margin:20px 0;border:1px solid var(--line);border-radius:14px;background:#fff}
+  table{border-collapse:collapse;width:100%;font-size:14px;min-width:520px}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{background:#f8fafc;font-size:13px;color:var(--ink2);font-weight:600;white-space:nowrap}
+  tbody tr:last-child td{border-bottom:0}
+  tbody tr:hover{background:#fcfdff}
+  td.y{color:var(--green);font-weight:600}
+  td.n{color:var(--rose);font-weight:600}
+
+  /* ---------- scoreboard ---------- */
+  .sb{background:#fff;border:1px solid var(--line2);border-radius:14px;overflow:hidden;margin:18px 0}
+  .sb-head{background:#1e293b;color:#fff;padding:12px 16px;font-size:14px;font-weight:600;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+  .sb-head span{font-weight:400;font-size:12.5px;color:#cbd5e1}
+  .sb-row{display:grid;grid-template-columns:1.4fr .8fr .8fr 90px;gap:0;border-bottom:1px solid var(--line);font-size:13.5px;align-items:center}
+  .sb-row.head{background:#f8fafc;font-size:12.5px;color:var(--ink2);font-weight:600}
+  .sb-row > div{padding:11px 14px}
+  .sb-row .tag{font-size:11.5px;color:var(--ink3)}
+  .pill{display:inline-block;border-radius:999px;padding:2px 12px;font-size:12.5px;font-weight:600}
+  .pill.g{background:var(--green-bg);color:var(--green);border:1px solid #bbf7d0}
+  .pill.y{background:var(--amber-bg);color:var(--amber);border:1px solid #fde68a}
+  .pill.r{background:var(--rose-bg);color:var(--rose);border:1px solid #fecdd3}
+
+  /* ---------- misc ---------- */
+  .quote{border-left:3px solid var(--line2);padding:2px 0 2px 16px;color:var(--ink2);font-size:15px;margin:16px 0}
+  .quote b{color:var(--ink)}
+  .split{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:18px 0}
+  .mini{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .mini h4{margin:0 0 6px;font-size:15px}
+  .mini.good{border-color:#bbf7d0;background:#f8fdf9}
+  .mini.bad{border-color:#fecdd3;background:#fffafb}
+  .mini p{margin:6px 0 0;font-size:13.5px;color:var(--ink2);line-height:1.7}
+  .chk{list-style:none;padding:0;margin:14px 0}
+  .chk li{position:relative;padding-left:28px;margin:9px 0;font-size:14.5px}
+  .chk li::before{content:"";position:absolute;left:0;top:6px;width:16px;height:16px;border:1.5px solid var(--line2);border-radius:4px;background:#fff}
+  .src{font-size:12.5px;color:var(--ink3);margin-top:8px}
+  footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);font-size:13px;color:var(--ink3);text-align:center}
+  @media (max-width:560px){
+    .sb-row{grid-template-columns:1fr 1fr;}
+    .sb-row > div:nth-child(3){display:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ================= HERO ================= -->
+  <header class="hero">
+    <span class="kicker">读 书 图 解 教 程</span>
+    <h1>《高效执行<em>4原则 2.0</em>》<br>怎么把战略真正做完</h1>
+    <p class="sub">富兰克林柯维历时 25 年、覆盖 17 个行业近 30 万领导者的方法论。它不解决"定什么目标"，它解决"目标为什么总是死在日常琐事里"。</p>
+    <div class="meta">
+      <span>Chris McChesney 等 5 位作者</span>
+      <span>中国青年出版社 · 2023</span>
+      <span>312 页</span>
+      <span>2.0 新增 30%+ 内容</span>
+      <span>全球 10 万+ 团队在用</span>
+    </div>
+  </header>
+
+  <!-- ================= TOC ================= -->
+  <nav class="toc">
+    <h3>目 录</h3>
+    <ol>
+      <li><a href="#s1"><b>01</b>真正的敌人：旋风</a></li>
+      <li><a href="#s2"><b>02</b>四原则全景图</a></li>
+      <li><a href="#s3"><b>03</b>原则 1 · 聚焦至关重要目标</a></li>
+      <li><a href="#s4"><b>04</b>原则 2 · 贯彻引领性指标</a></li>
+      <li><a href="#s5"><b>05</b>原则 3 · 坚持激励性记分牌</a></li>
+      <li><a href="#s6"><b>06</b>原则 4 · 建立相互担责的节奏</a></li>
+      <li><a href="#s7"><b>07</b>落地五阶段与"中间 60%"</a></li>
+      <li><a href="#s8"><b>08</b>2.0 版新增了什么</a></li>
+      <li><a href="#s9"><b>09</b>个人与家庭的 4DX</a></li>
+      <li><a href="#s10"><b>10</b>常见翻车点 &amp; 速查表</a></li>
+    </ol>
+  </nav>
+
+  <!-- ================= 01 ================= -->
+  <section id="s1">
+    <div class="sec-head">
+      <div class="badge">01</div>
+      <h2>真正的敌人：旋风<span class="en">The Whirlwind</span></h2>
+    </div>
+
+    <p>书的第一句话几乎是一道诊断题：<strong>你上一个亲眼看着死掉的计划，是怎么死的？</strong>不是轰然倒塌，更常见的是被一堆"今天必须做完的事"慢慢憋死，最后没人注意到它消失了。</p>
+
+    <p>这个"今天必须做完的事"的总和，作者叫它 <strong>旋风（Whirlwind）</strong>。它不是坏事——它是你的本职工作、日常运营、救火、KPI，是让组织今天还能开门的东西。问题是：<strong>旋风紧急而喧闹，战略重要但安静</strong>。任何一次注意力的短兵相接，旋风默认获胜。</p>
+
+    <div class="diagram">
+      <div class="dtitle">为什么 90% 的战略死在半路</div>
+      <svg viewBox="0 0 680 260" role="img" aria-label="旋风与至关重要目标">
+        <defs>
+          <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+            <path d="M0,0 L9,4.5 L0,9 z" fill="#94a3b8"/>
+          </marker>
+        </defs>
+        <!-- whirlwind spiral -->
+        <path d="M150 130 C150 96 210 96 210 130 C210 172 128 172 128 130 C128 74 232 74 232 130 C232 194 106 194 106 130"
+              fill="none" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M150 130 C150 96 210 96 210 130 C210 172 128 172 128 130 C128 74 232 74 232 130 C232 194 106 194 106 130"
+              fill="none" stroke="#94a3b8" stroke-width="6" stroke-linecap="round" opacity=".18"/>
+        <text x="168" y="216" text-anchor="middle" font-size="13" fill="#475569" font-weight="600">旋风 = 你的日常本职</text>
+        <text x="168" y="234" text-anchor="middle" font-size="11.5" fill="#94a3b8">紧急、必需、永远做不完</text>
+
+        <!-- arrow -->
+        <line x1="272" y1="130" x2="330" y2="130" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah)"/>
+        <text x="301" y="118" text-anchor="middle" font-size="11.5" fill="#94a3b8">吞噬</text>
+
+        <!-- WIG -->
+        <rect x="352" y="66" width="230" height="128" rx="16" fill="#eef2ff" stroke="#a8b8f5" stroke-width="1.5"/>
+        <text x="467" y="100" text-anchor="middle" font-size="13" fill="#3b5bdb" font-weight="700">至关重要目标 WIG</text>
+        <text x="467" y="126" text-anchor="middle" font-size="12.5" fill="#1e293b">从 X 到 Y，截止某时</text>
+        <text x="467" y="148" text-anchor="middle" font-size="11.5" fill="#475569">重要、安静、回报在远方</text>
+        <rect x="392" y="160" width="150" height="18" rx="9" fill="#fff" stroke="#cbd5e1"/>
+        <text x="467" y="173" text-anchor="middle" font-size="11" fill="#475569">需要被"保护"才能活</text>
+
+        <text x="340" y="248" text-anchor="middle" font-size="11.5" fill="#94a3b8">4DX 不是用来管理旋风的，是用来在旋风中打赢一场仗的</text>
+      </svg>
+      <div class="cap">旋风不会消失，也不需要消失。4DX 的目标是：从旋风里切出一件事，把它打穿，再送回旋风。</div>
+    </div>
+
+    <div class="callout co-blue">
+      <span class="lbl">关键心智</span>
+      <p>执行失败，绝大多数不是战略错，也不是人不行，而是<strong>没有一个能扛住旋风的系统</strong>。所以 4DX 的四个原则被刻意设计得很"机械"——它必须能在人又忙又乱的时候照常运转，而不是靠大家"再努力一点"。</p>
+    </div>
+
+    <h3>先分清：这是执行问题，还是别的问题</h3>
+    <p>4DX 有适用边界。以下情况它帮不上忙，用错地方只会浪费时间：</p>
+    <div class="split">
+      <div class="mini good">
+        <h4>✅ 适合用 4DX</h4>
+        <p>战略方向已定，但推不动；团队陷在日常里，重要目标每季度都被冲掉；目标完成了但靠的是少数几个明星员工，中间层没动。</p>
+      </div>
+      <div class="mini bad">
+        <h4>❌ 不适合</h4>
+        <p>还在找方向（产品未验证、客户未明确）；结果主要由外部因素决定（监管、市场价格）；纯日常运维（需要的是标准化和质控，不是 WIG）。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 02 ================= -->
+  <section id="s2">
+    <div class="sec-head">
+      <div class="badge">02</div>
+      <h2>四原则全景图<span class="en">Focus · Leverage · Engagement · Accountability</span></h2>
+    </div>
+
+    <p>四个原则分别对应组织执行失效的四个缺口：<strong>聚焦、杠杆、投入、问责</strong>。它们是串联关系，缺任何一个，后面全部打折。</p>
+
+    <div class="diagram">
+      <div class="dtitle">4DX 四条原则：一条链，不是四个工具</div>
+      <div class="flow">
+        <div class="box blue"><b>原 则 1</b><small>聚焦至关重要目标<br>Focus</small></div>
+        <div class="arw">→</div>
+        <div class="box teal"><b>原 则 2</b><small>贯彻引领性指标<br>Leverage</small></div>
+        <div class="arw">→</div>
+        <div class="box amber"><b>原 则 3</b><small>坚持激励性记分牌<br>Engagement</small></div>
+        <div class="arw">→</div>
+        <div class="box rose"><b>原 则 4</b><small>建立相互担责的节奏<br>Accountability</small></div>
+      </div>
+      <div class="flow" style="margin-top:14px">
+        <div class="box" style="min-width:150px"><b>要什么结果</b><small>从 X 到 Y</small></div>
+        <div class="box" style="min-width:150px"><b>做什么动作</b><small>能撬动结果的杠杆</small></div>
+        <div class="box" style="min-width:150px"><b>现在赢没赢</b><small>5 秒看懂的记分牌</small></div>
+        <div class="box" style="min-width:150px"><b>下周承诺什么</b><small>每周 20–30 分钟</small></div>
+      </div>
+      <div class="cap">前三原则"造一个能赢的游戏"，原则 4 是"上场把这个游戏打下去"。</div>
+    </div>
+
+    <div class="pgrid">
+      <div class="pcard">
+        <div class="no">PRINCIPLE 1</div>
+        <h4>聚焦</h4>
+        <div class="en">Focus on the Wildly Important</div>
+        <p>少即是多。把有限产能摊到五六个目标上，是执行失败最常见的单一原因。</p>
+        <span class="kw">要事第一，全神贯注</span>
+      </div>
+      <div class="pcard t2">
+        <div class="no">PRINCIPLE 2</div>
+        <h4>杠杆</h4>
+        <div class="en">Act on the Lead Measures</div>
+        <p>盯住能预测结果、且团队今天就能控制的行为，而不是盯住结果本身。</p>
+        <span class="kw">分解目标，落实行动</span>
+      </div>
+      <div class="pcard t3">
+        <div class="no">PRINCIPLE 3</div>
+        <h4>投入</h4>
+        <div class="en">Keep a Compelling Scoreboard</div>
+        <p>人一记分就打得不一样。不知道比分，就没有真正的投入。</p>
+        <span class="kw">记分衡量，一目了然</span>
+      </div>
+      <div class="pcard t4">
+        <div class="no">PRINCIPLE 4</div>
+        <h4>问责</h4>
+        <div class="en">Create a Cadence of Accountability</div>
+        <p>每周一次、固定时间、只谈 WIG 的短会，彼此兑现承诺。</p>
+        <span class="kw">节奏跟进，相互担责</span>
+      </div>
+    </div>
+
+    <div class="callout co-amber">
+      <span class="lbl">为什么必须四个都用</span>
+      <p>有 WIG 没引领性指标 → 知道要什么，不知道干什么。<br>
+         有引领性指标没记分牌 → 干了下没反馈，两周就散。<br>
+         有记分牌没问责节奏 → 两周后就变成墙上的装饰。<br>
+         有问责没聚焦 → 每周热闹地讨论一堆事，一件也没突破。</p>
+    </div>
+  </section>
+
+  <!-- ================= 03 ================= -->
+  <section id="s3">
+    <div class="sec-head">
+      <div class="badge">03</div>
+      <h2>原则 1 · 聚焦至关重要目标<span class="en">WIG</span></h2>
+    </div>
+
+    <blockquote class="quote">
+      "如果连这个都没做到，其他所有成绩都变得无关紧要。" —— 这就是 <b>WIG（Wildly Important Goal）</b> 的定义。
+    </blockquote>
+
+    <h3>WIG 的唯一写法：从 X 到 Y，截止某时</h3>
+    <p>书里对目标的表述要求近乎偏执：<strong>必须有一条明确的终点线</strong>。模糊的"提升客户满意度""加强团队建设"在 4DX 里不算目标。</p>
+
+    <div class="diagram">
+      <div class="dtitle">WIG 公式：起点线 + 终点线 +  deadline</div>
+      <svg viewBox="0 0 680 170" role="img" aria-label="WIG 公式示意">
+        <line x1="70" y1="96" x2="610" y2="96" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round"/>
+        <line x1="70" y1="96" x2="330" y2="96" stroke="#a8b8f5" stroke-width="10" stroke-linecap="round"/>
+        <circle cx="70" cy="96" r="12" fill="#fff" stroke="#94a3b8" stroke-width="2.5"/>
+        <circle cx="610" cy="96" r="12" fill="#3b5bdb" stroke="#3b5bdb" stroke-width="2.5"/>
+        <circle cx="330" cy="96" r="9" fill="#fff" stroke="#3b5bdb" stroke-width="2.5"/>
+        <text x="70" y="132" text-anchor="middle" font-size="13" fill="#475569" font-weight="600">X 起点</text>
+        <text x="70" y="150" text-anchor="middle" font-size="11.5" fill="#94a3b8">现在在哪</text>
+        <text x="330" y="72" text-anchor="middle" font-size="12" fill="#3b5bdb" font-weight="600">今天</text>
+        <text x="330" y="132" text-anchor="middle" font-size="13" fill="#475569" font-weight="600">进展</text>
+        <text x="610" y="132" text-anchor="middle" font-size="13" fill="#3b5bdb" font-weight="700">Y 终点</text>
+        <text x="610" y="150" text-anchor="middle" font-size="11.5" fill="#94a3b8">截止某时</text>
+        <rect x="180" y="18" width="320" height="34" rx="10" fill="#f1f5f9" stroke="#cbd5e1"/>
+        <text x="340" y="40" text-anchor="middle" font-size="13" fill="#1e293b">"把续费率从 62% 提升到 80%，9 月 30 日前"</text>
+      </svg>
+      <div class="cap">Jack Welch 的要求：目标不能听起来高尚却含糊，得清晰到半夜把员工叫醒，他半梦半醒也能答出来。</div>
+    </div>
+
+    <h3>选 WIG 的四条规则</h3>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>规则</th><th>内容</th><th>它在防什么</th></tr></thead>
+        <tbody>
+          <tr><td><b>规则 1</b></td><td>任何团队同时最多 <b>两个</b> WIG</td><td>防止产能被摊薄，什么都做、什么都做不透</td></tr>
+          <tr><td><b>规则 2</b></td><td>你选的这场仗，必须是<b>能打赢的</b></td><td>防止挑一个"很重要但根本不受你控制"的目标</td></tr>
+          <tr><td><b>规则 3</b></td><td>高层可以<b>否决</b>，但不能<b>自上而下指定</b></td><td>防止团队没有主人感，目标变成上级的 KPI 摊派</td></tr>
+          <tr><td><b>规则 4</b></td><td>每个 WIG 都必须符合 <code>从 X 到 Y，截止某时</code></td><td>防止"听起来像目标"的口号混进来</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>战争与战役：分层而不失焦</h3>
+    <p>公司级目标叫 <strong>战争（War）</strong>，各团队为打赢它而各自认领的叫 <strong>战役（Battles）</strong>。每一场战役都是一条独立完整的 WIG，且必须能直接贡献于那场战争。</p>
+    <div class="diagram">
+      <div class="dtitle">战争 → 战役：一层对一层，不是层层加码</div>
+      <div class="flow">
+        <div class="box dark" style="min-width:200px"><b>战争（公司级 WIG）</b><small>年底客户留存率达到 95%</small></div>
+      </div>
+      <div class="flow" style="margin-top:12px">
+        <div class="box violet" style="min-width:170px"><b>销售团队战役</b><small>重点客户续约率<br>80% → 90%，年底前</small></div>
+        <div class="box violet" style="min-width:170px"><b>客服团队战役</b><small>平均问题关闭时长<br>24h → 12h，Q3 前</small></div>
+        <div class="box violet" style="min-width:170px"><b>产品团队战役</b><small>核心流程崩溃率<br>3% → 0.5%，年底前</small></div>
+      </div>
+      <div class="cap">每一场战役自己也要满足 WIG 四规则；战役之间加总必须能支撑战争。</div>
+    </div>
+
+    <div class="callout co-rose">
+      <span class="lbl">最难的一关</span>
+      <p>原则 1 真正的难点不是"选"，是<strong>对好点子说不</strong>。聪明又有野心的人天生想做更多，而好点子永远多于产能。聚焦的本质，是承认有些好事这季度不做。</p>
+    </div>
+  </section>
+
+  <!-- ================= 04 ================= -->
+  <section id="s4">
+    <div class="sec-head">
+      <div class="badge">04</div>
+      <h2>原则 2 · 贯彻引领性指标<span class="en">Lead &amp; Lag Measures</span></h2>
+    </div>
+
+    <p>书里最锋利的一刀在这里：<strong>大多数团队盯着的指标，恰恰是他们最不能改变的指标。</strong></p>
+
+    <div class="split">
+      <div class="mini">
+        <h4>滞后性指标 Lag</h4>
+        <p>结果本身：营收、利润、满意度、体重秤上的数字。<br><b>特点：看得到时已经晚了，改不了。</b>你为它失眠，但你不能"做"它。</p>
+      </div>
+      <div class="mini good">
+        <h4>引领性指标 Lead</h4>
+        <p>驱动结果的关键行为：每周深度客户访谈场次、每天外呼分钟数、每周运动时长。<br><b>特点：可预测结果 + 团队能直接控制。</b></p>
+      </div>
+    </div>
+
+    <div class="diagram">
+      <div class="dtitle">石头与杠杆：4DX 对"杠杆"的标准隐喻</div>
+      <svg viewBox="0 0 680 240" role="img" aria-label="石头与杠杆隐喻">
+        <!-- rock -->
+        <rect x="452" y="150" width="112" height="66" rx="10" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2"/>
+        <text x="508" y="172" text-anchor="middle" font-size="13" fill="#475569" font-weight="700">WIG</text>
+        <text x="508" y="192" text-anchor="middle" font-size="11.5" fill="#94a3b8">那块大石头</text>
+        <text x="508" y="208" text-anchor="middle" font-size="11" fill="#94a3b8">硬推推不动</text>
+        <!-- fulcrum -->
+        <path d="M404 216 L424 178 L444 216 Z" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1.5"/>
+        <!-- lever -->
+        <line x1="140" y1="196" x2="452" y2="168" stroke="#3b5bdb" stroke-width="7" stroke-linecap="round"/>
+        <!-- arrow force -->
+        <line x1="140" y1="226" x2="140" y2="200" stroke="#3b5bdb" stroke-width="2.5" marker-end="url(#ah)"/>
+        <text x="140" y="238" text-anchor="middle" font-size="12" fill="#3b5bdb" font-weight="600">团队每天施加的力</text>
+        <text x="300" y="150" text-anchor="middle" font-size="13" fill="#1e293b" font-weight="700">引领性指标 = 杠杆</text>
+        <text x="300" y="168" text-anchor="middle" font-size="11.5" fill="#475569">杠杆要移动很多，</text>
+        <text x="300" y="184" text-anchor="middle" font-size="11.5" fill="#475569">石头才移动一点点</text>
+        <!-- result arrow -->
+        <line x1="568" y1="168" x2="612" y2="140" stroke="#0d9488" stroke-width="2.5" marker-end="url(#ah)"/>
+        <text x="600" y="130" text-anchor="middle" font-size="11.5" fill="#0d9488" font-weight="600">结果移动</text>
+      </svg>
+      <div class="cap">原则 2 的全部工作：找到那根对的杠杆，然后持续压它。</div>
+    </div>
+
+    <h3 class="teal">好指标的体检：两个必须同时满足</h3>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>检验项</th><th>问什么</th><th>正例 / 反例</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>预见性</b><br><span style="font-size:12.5px;color:#94a3b8">Predictive</span></td>
+            <td>这个数字一动，滞后指标会不会跟着动？</td>
+            <td class="y">✔ 保养频次 ↑ → 故障率 ↓</td>
+          </tr>
+          <tr><td></td><td></td><td class="n">✘ 把车漆成红色 → 故障率不变</td></tr>
+          <tr>
+            <td><b>可控性</b><br><span style="font-size:12.5px;color:#94a3b8">Influenceable</span></td>
+            <td>团队能不依赖别人、直接改变它吗？</td>
+            <td class="y">✔ 施肥频次（自己能做）</td>
+          </tr>
+          <tr><td></td><td></td><td class="n">✘ 降雨量（谁也改不了）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout co-amber">
+      <span class="lbl">为什么人人都盯着滞后指标</span>
+      <p>因为它<strong>好拿数据</strong>（现成系统在跑），而且它<strong>就是你被考核的东西</strong>。引领性指标往往没有现成数据，得新建采集方式，还要靠纪律持续记——这正是它值钱的原因。</p>
+    </div>
+
+    <h3 class="teal">写得好的引领性指标长什么样</h3>
+    <div class="row" style="margin:14px 0">
+      <div class="box blue" style="min-width:120px"><b>动词</b><small>完成 / 减少 / 增加</small></div>
+      <div class="box blue" style="min-width:120px"><b>对象</b><small>对谁、对什么事</small></div>
+      <div class="box teal" style="min-width:120px"><b>频次</b><small>多久一次、谁做</small></div>
+      <div class="box teal" style="min-width:120px"><b>标准</b><small>做到什么程度</small></div>
+    </div>
+    <p>合起来就是一个能直接上记分牌的句子：<strong>"每位客服每天完成 3 通高风险客户的主动回访，通话时长不少于 5 分钟。"</strong></p>
+
+    <div class="card">
+      <h4>案例：Towne Park 的取车时间</h4>
+      <p>这家代客停车公司把"缩短取车时间"作为引领性指标去提升客户满意度。团队一开始怀疑这东西受控不了，结果自己想出了各种办法：提醒客人退房前先打电话、按离店日期预先挪车。迈阿密一个团队甚至<strong>把车库里一堵碍事的混凝土墙整个锯掉</strong>——一个周末，几吨混凝土。</p>
+      <p class="src">这正是 4DX 想要的：目标一旦可影响，团队会自己长出创造力。</p>
+    </div>
+  </section>
+
+  <!-- ================= 05 ================= -->
+  <section id="s5">
+    <div class="sec-head">
+      <div class="badge">05</div>
+      <h2>原则 3 · 坚持激励性记分牌<span class="en">Compelling Scoreboard</span></h2>
+    </div>
+
+    <p>"隔着帘子打保龄球不好玩。"——记分牌解决的就是这一件事：<strong>让人随时知道自己现在是赢还是输。</strong></p>
+
+    <div class="split">
+      <div class="mini bad">
+        <h4>教练型记分牌</h4>
+        <p>数据齐全、维度复杂、一堆表格公式。<b>适合领导者分析，不适合队员上场。</b></p>
+      </div>
+      <div class="mini good">
+        <h4>球员型记分牌</h4>
+        <p>由球员自己设计、只放几个指标、一眼看懂。<b>这才是 4DX 要的。</b></p>
+      </div>
+    </div>
+
+    <h3 class="amber">四个检验问题</h3>
+    <ul>
+      <li><strong>够简单吗？</strong>——只放打这场比赛需要的数据。</li>
+      <li><strong>容易看到吗？</strong>——要显眼、字要大、颜色要清楚。</li>
+      <li><strong>同时显示引领性和滞后性指标吗？</strong>——既有"做了什么"，也有"结果怎样"。</li>
+      <li><strong>五秒规则：能一眼看出输赢吗？</strong>——5 秒内看不出来，这块板不合格。</li>
+    </ul>
+
+    <div class="diagram">
+      <div class="dtitle">一块合格的记分牌（示意）</div>
+      <div class="sb">
+        <div class="sb-head">客户成功团队 · WIG：续费率 62% → 80%，9 月 30 日前 <span>第 14 周 / 共 26 周</span></div>
+        <div class="sb-row head">
+          <div>指标</div><div>本周</div><div>目标</div><div>状态</div>
+        </div>
+        <div class="sb-row">
+          <div><b>续费率</b> <span class="tag">滞后 · Lag</span></div><div>71%</div><div>69%</div><div><span class="pill g">领先</span></div>
+        </div>
+        <div class="sb-row">
+          <div><b>高危客户主动回访</b> <span class="tag">引领 · Lead</span></div><div>28 次</div><div>30 次</div><div><span class="pill y">接近</span></div>
+        </div>
+        <div class="sb-row">
+          <div><b>首次响应时长</b> <span class="tag">引领 · Lead</span></div><div>2.1 h</div><div>≤ 2 h</div><div><span class="pill y">接近</span></div>
+        </div>
+        <div class="sb-row">
+          <div><b>合同期内触达次数</b> <span class="tag">引领 · Lead</span></div><div>3.2</div><div>5.0</div><div><span class="pill r">落后</span></div>
+        </div>
+      </div>
+      <div class="cap">同时要有"实际值"和"目标值"——不只回答"我们在哪"，还要回答"我们该在哪"。</div>
+    </div>
+
+    <div class="callout co-teal">
+      <span class="lbl">为什么记分牌能改变行为</span>
+      <p>因为<strong>进步感本身就是最强的激励</strong>，而旋风恰恰不提供进步感。数字往上走会被庆祝，数字平了或掉了会引发解决问题而不是追责——前提是这个板是团队自己的，不是领导拿来打分的。</p>
+    </div>
+  </section>
+
+  <!-- ================= 06 ================= -->
+  <section id="s6">
+    <div class="sec-head">
+      <div class="badge">06</div>
+      <h2>原则 4 · 建立相互担责的节奏<span class="en">WIG Session</span></h2>
+    </div>
+
+    <p>前三条是在布置赛场，第四条是真正上场打。<strong>WIG 会议（WIG Session）</strong>：每周一次，同一时间，20–30 分钟，站着开完。</p>
+
+    <div class="diagram">
+      <div class="dtitle">WIG 会议三段式议程</div>
+      <div class="flow">
+        <div class="box rose" style="min-width:180px">
+          <b>① 问责 Account</b>
+          <small>上周我承诺的事做到了吗？<br>做到了→学到什么；没做到→为什么</small>
+        </div>
+        <div class="arw">→</div>
+        <div class="box amber" style="min-width:180px">
+          <b>② 回顾 Review</b>
+          <small>看记分牌：领先/滞后指标如何？<br>从成功和失败里各学一条</small>
+        </div>
+        <div class="arw">→</div>
+        <div class="box teal" style="min-width:180px">
+          <b>③ 计划 Plan</b>
+          <small>清路障 + 做出下周新承诺<br>1–2 件，能撬动引领性指标</small>
+        </div>
+      </div>
+      <div class="cap">会前每人自己想同一个问题：本周我能做的、对记分牌影响最大的一两件事是什么？</div>
+    </div>
+
+    <h3 class="rose">三条铁律，破一条就废</h3>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>铁律</th><th>要求</th><th>违反的后果</th></tr></thead>
+        <tbody>
+          <tr><td>① 固定</td><td>每周<b>同一天、同一时刻</b>，雷打不动</td><td>一旦可被挪动，就会永远被挪走</td></tr>
+          <tr><td>② 隔离</td><td><b>旋风绝不允许进入</b>；要谈日常另行开会</td><td>变成又一次例会，WIG 被挤出议程</td></tr>
+          <tr><td>③ 简短</td><td>20–30 分钟，超时说明跑题了</td><td>变长 → 大家开始逃避 → 节奏断掉</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout co-violet">
+      <span class="lbl">问责的真正对象：同事，不是老板</span>
+      <p>这里的"问责"不是自上而下追责，而是<strong>对自己向团队做出的承诺负责</strong>。人们为了不让老板失望会努力工作，但为了不让队友失望，几乎什么都愿意做。当"我们做到了我们互相承诺的事吗"连续几周答案是"是"，信任就长出来了。</p>
+    </div>
+
+    <h3 class="rose">承诺的三条准则</h3>
+    <ul>
+      <li>由<strong>本人</strong>提出，不是被分配——被分配的叫任务，不叫承诺。</li>
+      <li>每周 <strong>1–2 件</strong>，多了记不住也做不到。</li>
+      <li>必须<strong>能直接影响某个引领性指标</strong>，否则不影响记分牌。</li>
+    </ul>
+    <div class="card tint">
+      <h4>好承诺 vs 坏承诺</h4>
+      <p><span class="pill g">好</span> "本周三前，我给 3 位打了低分的客户各打一通回访电话，并在周五会上复盘他们的原话。"</p>
+      <p><span class="pill r">坏</span> "本周我继续推进客户满意度提升工作。"</p>
+    </div>
+  </section>
+
+  <!-- ================= 07 ================= -->
+  <section id="s7">
+    <div class="sec-head">
+      <div class="badge teal">07</div>
+      <h2>落地五阶段与"中间 60%"<span class="en">Adoption Curve</span></h2>
+    </div>
+
+    <p>推行 4DX 不是开关，是一条行为改变的曲线。团队通常会依次走过五个阶段，每个阶段的重点不同。</p>
+
+    <div class="diagram">
+      <div class="dtitle">4DX 落地的五个阶段</div>
+      <svg viewBox="0 0 680 250" role="img" aria-label="4DX 五阶段">
+        <defs>
+          <marker id="ah2" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+            <path d="M0,0 L9,4.5 L0,9 z" fill="#94a3b8"/>
+          </marker>
+        </defs>
+        <path d="M60 200 C160 200 200 170 250 150 C300 130 340 110 400 96 C460 82 520 74 620 70"
+              fill="none" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="6 5"/>
+        <path d="M60 200 C160 200 200 170 250 150 C300 130 340 110 400 96"
+              fill="none" stroke="#3b5bdb" stroke-width="3.5"/>
+        <g font-size="12" fill="#1e293b">
+          <circle cx="60" cy="200" r="9" fill="#3b5bdb"/><text x="60" y="224" text-anchor="middle" font-weight="700">1 理清</text><text x="60" y="240" text-anchor="middle" font-size="10.5" fill="#94a3b8">Getting Clear</text>
+          <circle cx="196" cy="182" r="9" fill="#3b5bdb"/><text x="196" y="206" text-anchor="middle" font-weight="700">2 启动</text><text x="196" y="222" text-anchor="middle" font-size="10.5" fill="#94a3b8">Launch</text>
+          <circle cx="320" cy="146" r="9" fill="#0d9488"/><text x="320" y="170" text-anchor="middle" font-weight="700">3 采纳</text><text x="320" y="186" text-anchor="middle" font-size="10.5" fill="#94a3b8">Adoption</text>
+          <circle cx="452" cy="104" r="9" fill="#0d9488"/><text x="452" y="128" text-anchor="middle" font-weight="700">4 优化</text><text x="452" y="144" text-anchor="middle" font-size="10.5" fill="#94a3b8">Optimization</text>
+          <circle cx="600" cy="74" r="9" fill="#15803d"/><text x="600" y="98" text-anchor="middle" font-weight="700">5 习惯</text><text x="600" y="114" text-anchor="middle" font-size="10.5" fill="#94a3b8">Habits</text>
+        </g>
+        <text x="248" y="42" text-anchor="middle" font-size="12" fill="#94a3b8">抗拒消退 · 主人感形成 · 行为固化</text>
+        <text x="248" y="60" text-anchor="middle" font-size="12" fill="#94a3b8">绩效不是回到原水平，而是被整体抬高</text>
+      </svg>
+      <div class="cap">启动阶段最耗能量：旋风的引力在这里最大，多数团队在这一段放弃。</div>
+    </div>
+
+    <h3 class="teal">启动期要认出三种人</h3>
+    <div class="split">
+      <div class="mini good"><h4>拥护者 Models</h4><p>主动拥抱变化。让他们先跑起来，做样板。</p></div>
+      <div class="mini"><h4>观望者 Potentials</h4><p>挣扎但能改善，占大多数。他们看到引领性指标真的有效，就会跟上来。</p></div>
+      <div class="mini bad"><h4>抵制者 Resisters</h4><p>明确抵触。不要指望说服，让他们先旁观，用结果说话。</p></div>
+    </div>
+
+    <div class="callout co-teal">
+      <span class="lbl">最大的杠杆：移动中间那 60%</span>
+      <p>本书反复强调：真正的收益不在把顶尖的人变得更强，而在<strong>把占多数的中间层往顶尖推</strong>。接受"正常水平"的组织会变得松散（left and loose）；持续推中间层的组织会变得紧密（right and tight）。<br>
+      荷兰 Erasmus 医疗中心用"搜索并摧毁"作为引领性指标，把院内感染降到接近零——这就是从"接受常态"到"拒绝常态"。</p>
+    </div>
+  </section>
+
+  <!-- ================= 08 ================= -->
+  <section id="s8">
+    <div class="sec-head">
+      <div class="badge violet">08</div>
+      <h2>2.0 版新增了什么<span class="en">What's New</span></h2>
+    </div>
+
+    <p>2.0（英文修订版 2021 / 中文版 2023）比 1.0 多了 30% 以上内容，新增议题集中在"怎么让它长期活下去、怎么在组织层面铺开"。</p>
+
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>新增议题</th><th>解决什么</th><th>对使用者的意义</th></tr></thead>
+        <tbody>
+          <tr><td><b>作为"领导者的领导者"来推行 4DX</b></td><td>你不直接带一线团队，怎么让下面几十个团队都在跑</td><td>从带一个团队，升级到带一个组织的执行体系</td></tr>
+          <tr><td><b>那个能长期维持执行的指标</b></td><td>4DX 跑三个月容易，跑三年难</td><td>给"执行本身"找一条可监控的生命体征</td></tr>
+          <tr><td><b>战略承诺所需的三种领导力心智</b></td><td>为什么同样的流程，有的领导人推得动、有的推不动</td><td>补足 1.0 偏流程、偏工具的一面</td></tr>
+          <tr><td><b>用技术做高管记分牌</b></td><td>团队板好做，跨团队的全局板难做</td><td>4DX OS 等工具如何支撑可视化</td></tr>
+          <tr><td><b>中国本土案例（中文版）</b></td><td>直接照搬美国案例水土不服</td><td>21 位国内企业领导推荐 + 5 个本土落地案例</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout co-amber">
+      <span class="lbl">阅读提示</span>
+      <p>"三种领导力心智"和"那一个长期指标"是 2.0 的专章内容，本教程只列议题，不展开具体命名——建议回到原书对应章节确认细节，避免二手转述走形。</p>
+    </div>
+
+    <h3 class="violet">4DX 与 OKR 怎么选</h3>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th></th><th>4DX</th><th>OKR</th></tr></thead>
+        <tbody>
+          <tr><td><b>核心问题</b></td><td>目标已定，怎么把它做完</td><td>怎么定出有野心的目标并对齐</td></tr>
+          <tr><td><b>数量约束</b></td><td>极严：同时最多 2 个 WIG</td><td>较松：通常 3–5 个 O</td></tr>
+          <tr><td><b>指标重心</b></td><td>引领性指标（可控行为）为王</td><td>KR 多为结果型</td></tr>
+          <tr><td><b>节奏</b></td><td>强制每周 WIG 会议</td><td>多为季度复盘 + 周会可选</td></tr>
+          <tr><td><b>互补方式</b></td><td colspan="2">OKR 定方向与对齐 → 挑出最关键的 1–2 个，用 4DX 的机制去执行</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= 09 ================= -->
+  <section id="s9">
+    <div class="sec-head">
+      <div class="badge rose">09</div>
+      <h2>个人与家庭的 4DX<span class="en">Personal 4DX</span></h2>
+    </div>
+
+    <p>这套方法不挑组织。一个人、一个家庭同样能跑，逻辑完全不变：<strong>收窄焦点 → 找到可控行为 → 让进度可见 → 每周对自己交代一次</strong>。</p>
+
+    <div class="diagram">
+      <div class="dtitle">个人版五步</div>
+      <div class="flow">
+        <div class="box violet" style="min-width:120px"><b>① 定 WIG</b><small>3 个月，只 1 个<br>从 X 到 Y</small></div>
+        <div class="arw">→</div>
+        <div class="box blue" style="min-width:120px"><b>② 找引领</b><small>1–2 个每周可控行为</small></div>
+        <div class="arw">→</div>
+        <div class="box teal" style="min-width:120px"><b>③ 做记分牌</b><small>贴在看得见的地方</small></div>
+        <div class="arw">→</div>
+        <div class="box amber" style="min-width:120px"><b>④ 周复盘</b><small>固定 15 分钟</small></div>
+        <div class="arw">→</div>
+        <div class="box rose" style="min-width:120px"><b>⑤ 守承诺</b><small>对己守信先于对人</small></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h4>书里的一个家庭案例</h4>
+      <p>附录里有一个"孩子尿床"的例子：家长没有把目标定成"不再尿床"（滞后、不可控），而是定引领性指标——孩子每天自己完成几个可控动作（睡前不喝水、自己换床单、记录干爽天数）。记分牌贴在孩子房门上，每周家庭会议只花几分钟。<strong>把羞耻变成了一场能赢的游戏。</strong></p>
+    </div>
+
+    <div class="split">
+      <div class="mini">
+        <h4>个人示例 · 写作</h4>
+        <p><b>WIG：</b>90 天内完成 6 万字初稿（当前 0）。<br><b>引领：</b>每周 5 天、每天早 7:00–8:00 写 600 字；每周读完 1 篇参考资料。<br><b>记分牌：</b>墙上日历打叉 + 字数累计折线。</p>
+      </div>
+      <div class="mini">
+        <h4>个人示例 · 健身</h4>
+        <p><b>WIG：</b>体重 82kg → 74kg，12 月 31 日前。<br><b>引领：</b>每周运动 4 次 × 30 分钟；每周 6 天热量 &lt; 2000 kcal。<br><b>记分牌：</b>冰箱门上的周格子表。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 10 ================= -->
+  <section id="s10">
+    <div class="sec-head">
+      <div class="badge">10</div>
+      <h2>常见翻车点 &amp; 一页速查<span class="en">Pitfalls &amp; Cheatsheet</span></h2>
+    </div>
+
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>症状</th><th>多半是哪条破了</th><th>怎么修</th></tr></thead>
+        <tbody>
+          <tr><td>目标列了七八条，季度末一条没成</td><td>原则 1</td><td>砍到 2 条以内，其余明确"本季度不做"</td></tr>
+          <tr><td>每周都在忙，记分牌数字不动</td><td>原则 2</td><td>检查引领性指标是否同时具备预见性 + 可控性</td></tr>
+          <tr><td>记分牌贴出来两周后就没人看了</td><td>原则 3 / 4</td><td>过一遍四问和五秒规则；给记分牌配一个固定会议</td></tr>
+          <tr><td>WIG 会议越开越长，最后变成例会</td><td>原则 4</td><td>旋风议题一律延后会后，严格 20–30 分钟</td></tr>
+          <tr><td>承诺总是完不成，开始互相抱怨</td><td>原则 4</td><td>承诺减到 1–2 件、必须本人提出、必须可影响引领指标</td></tr>
+          <tr><td>三个月后一切回到从前</td><td>落地阶段</td><td>检查是否停在"启动"没走到"习惯"；盯住中间 60% 的采纳率</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>上线前自查清单</h3>
+    <ul class="chk">
+      <li>WIG 写成"从 X 到 Y，截止某时"，且团队同时不超过 2 个</li>
+      <li>这个 WIG 是团队自己认领的，不是被摊派的</li>
+      <li>已选出 1–3 个引领性指标，每个都通过预见性 + 可控性检验</li>
+      <li>记分牌同时有引领性与滞后性指标，含目标值与实际值</li>
+      <li>5 秒内能看出输赢</li>
+      <li>记分牌由团队自己设计，放在天天看得见的地方</li>
+      <li>WIG 会议已占用日历上的固定时段，每周同一时间</li>
+      <li>每个人都带着"本周 1–2 件事"来开会</li>
+    </ul>
+
+    <div class="callout co-blue">
+      <span class="lbl">一句话带走</span>
+      <p><strong>聚焦到只剩一件，盯住你今天就能改的那个动作，把比分挂在墙上，然后每周对队友交一次账。</strong> 剩下的是旋风的噪音。</p>
+    </div>
+  </section>
+
+  <footer>
+    图解教程 · 内容整理自 FranklinCovey 官方资料、多家书评与读书笔记<br>
+    站点：ptato.github.io &nbsp;·&nbsp; 纯静态页面，无脚本依赖
+  </footer>
+</div>
+</body>
+</html>

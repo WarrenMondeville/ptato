@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>斯特朗《线性代数》图解教程 · ptato</title>
+<meta name="description" content="Gilbert Strang《Introduction to Linear Algebra》第 6 版图解读书笔记：从 Ax 是列的组合，到四个基本子空间、五大分解、SVD 与深度学习。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥔</text></svg>">
+<style>
+  :root{
+    --bg:#f6f8fb; --card:#ffffff; --ink:#1e293b; --ink2:#475569; --ink3:#94a3b8;
+    --line:#e2e8f0; --line2:#cbd5e1;
+    --blue:#3b5bdb; --blue-bg:#eef2ff;
+    --amber:#b45309; --amber-bg:#fffbeb;
+    --teal:#0d9488; --teal-bg:#ecfdf5;
+    --violet:#6d28d9; --violet-bg:#f5f3ff;
+    --rose:#e11d48; --rose-bg:#fff1f2;
+    --green:#15803d; --green-bg:#f0fdf4;
+    --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px -12px rgba(15,23,42,.14);
+    --shadow-lift:0 2px 4px rgba(15,23,42,.06),0 16px 36px -16px rgba(15,23,42,.20);
+    --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:16px; line-height:1.85; -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--blue);text-decoration:none}
+  .wrap{max-width:920px;margin:0 auto;padding:0 20px}
+  i{font-style:italic;font-family:Georgia,"Times New Roman",serif}
+  code{font-family:var(--mono);font-size:.88em;background:#f1f5f9;border:1px solid var(--line);
+       border-radius:5px;padding:1px 5px;color:#0f172a}
+
+  /* ---------- nav ---------- */
+  nav{
+    position:sticky;top:0;z-index:50;background:rgba(246,248,251,.82);
+    backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line);
+  }
+  nav .inner{max-width:920px;margin:0 auto;padding:0 20px;height:58px;display:flex;align-items:center;gap:22px}
+  nav .brand{display:flex;align-items:center;gap:9px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+  nav .brand .dot{width:26px;height:26px;border-radius:9px;background:var(--amber-bg);border:1px solid #f6e3bf;
+                  display:flex;align-items:center;justify-content:center;font-size:14px}
+  nav .links{display:flex;gap:18px;margin-left:auto;font-size:14.5px}
+  nav .links a{color:var(--ink2)}
+  nav .links a:hover{color:var(--blue)}
+
+  /* ---------- hero ---------- */
+  .hero{padding:74px 0 44px}
+  .kicker{
+    display:inline-block;font-size:12.5px;letter-spacing:.14em;color:var(--amber);
+    background:var(--amber-bg);border:1px solid #f6e3bf;border-radius:999px;padding:5px 14px;margin-bottom:22px;
+  }
+  .hero h1{font-size:clamp(30px,5.6vw,50px);line-height:1.22;margin:0 0 18px;letter-spacing:-.03em}
+  .hero h1 em{font-style:normal;color:var(--blue)}
+  .hero p.sub{color:var(--ink2);font-size:17.5px;margin:0;max-width:660px}
+  .facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+  .fact{font-size:13px;color:var(--ink2);background:var(--card);border:1px solid var(--line);
+        border-radius:999px;padding:5px 13px;box-shadow:var(--shadow)}
+  .fact b{color:var(--ink);font-weight:600}
+
+  /* ---------- section ---------- */
+  section{margin-top:60px;scroll-margin-top:70px}
+  .sec-head{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+  .sec-head h2{font-size:22px;margin:0;letter-spacing:-.01em}
+  .sec-head .en{font-size:13px;color:var(--ink3);font-weight:500}
+  .sec-head .line{flex:1;height:1px;background:var(--line)}
+
+  /* ---------- chapter ---------- */
+  .ch{margin-top:46px;scroll-margin-top:70px}
+  .ch-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:16px}
+  .ch-no{
+    flex:none;width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:16px;color:#fff;background:var(--blue);font-variant-numeric:tabular-nums;
+    box-shadow:0 6px 14px -8px rgba(59,91,219,.9);
+  }
+  .ch-no.t{background:var(--teal);box-shadow:0 6px 14px -8px rgba(13,148,136,.9)}
+  .ch-no.a{background:var(--amber);box-shadow:0 6px 14px -8px rgba(180,83,9,.9)}
+  .ch-no.v{background:var(--violet);box-shadow:0 6px 14px -8px rgba(109,40,217,.9)}
+  .ch-no.r{background:var(--rose);box-shadow:0 6px 14px -8px rgba(225,29,72,.9)}
+  .ch-no.g{background:var(--green);box-shadow:0 6px 14px -8px rgba(21,128,61,.9)}
+  .ch-head h3{margin:0;font-size:21px;letter-spacing:-.015em}
+  .ch-head .en{display:block;font-size:12.5px;color:var(--ink3);font-weight:500;margin-top:2px}
+  .lead{
+    background:var(--card);border:1px solid var(--line);border-left:3px solid var(--blue);
+    border-radius:10px;padding:12px 16px;font-size:15.5px;color:var(--ink);margin:0 0 18px;
+  }
+  .lead b{color:var(--blue)}
+  p{margin:0 0 14px;color:var(--ink2)}
+  p strong{color:var(--ink)}
+  h4.sub{font-size:16px;margin:26px 0 10px;color:var(--ink);letter-spacing:-.01em}
+
+  /* ---------- diagram ---------- */
+  .diagram{
+    background:linear-gradient(180deg,#fdfefe,#f8fafc);border:1px solid var(--line);
+    border-radius:16px;padding:22px 18px;margin:22px 0;overflow-x:auto;
+  }
+  .cap{font-size:12.8px;color:var(--ink3);text-align:center;margin-top:14px;line-height:1.6}
+  .flow{display:flex;flex-wrap:wrap;align-items:stretch;justify-content:center;gap:8px}
+  .box{
+    background:#fff;border:1.5px solid var(--line2);border-radius:12px;padding:10px 14px;
+    font-size:13.5px;text-align:center;line-height:1.55;color:var(--ink);
+  }
+  .box.blue{border-color:#a8b8f5;background:var(--blue-bg);color:#2647c4}
+  .box.teal{border-color:#9adccf;background:var(--teal-bg);color:#0b6f66}
+  .box.amber{border-color:#f0d09a;background:var(--amber-bg);color:#8a4409}
+  .box.violet{border-color:#c9bcf7;background:var(--violet-bg);color:#5b21b6}
+  .box.rose{border-color:#f8b8c8;background:var(--rose-bg);color:#b01c3c}
+  .box.green{border-color:#a9dcb8;background:var(--green-bg);color:#12693a}
+  .box.dark{background:#1e293b;border-color:#1e293b;color:#f1f5f9}
+  .box small{display:block;font-size:11.5px;color:var(--ink3);margin-top:3px}
+  .box.blue small,.box.teal small,.box.amber small,.box.violet small,.box.rose small,.box.green small{color:inherit;opacity:.75}
+  .box.dark small{color:#cbd5e1;opacity:1}
+  .arw{align-self:center;color:#94a3b8;font-size:17px;font-weight:700;flex:none}
+  .stack{display:grid;gap:8px}
+  .layer{
+    display:flex;gap:12px;align-items:center;border:1.5px solid var(--line2);border-radius:12px;
+    padding:11px 15px;background:#fff;
+  }
+  .layer .lab{flex:none;min-width:96px;font-size:13px;font-weight:700;color:var(--ink)}
+  .layer .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{font-size:12.5px;padding:3px 9px;border-radius:8px;background:#f1f5f9;border:1px solid var(--line);color:var(--ink2)}
+  .chip.b{background:var(--blue-bg);border-color:#dbe3ff;color:var(--blue)}
+  .chip.t{background:var(--teal-bg);border-color:#c9f0e6;color:var(--teal)}
+  .chip.v{background:var(--violet-bg);border-color:#ddd3fb;color:var(--violet)}
+  .lbl{font-size:12.5px;color:var(--ink3);text-align:center;margin-bottom:8px;font-weight:600;letter-spacing:.04em}
+
+  /* ---------- matrix ---------- */
+  .matwrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px}
+  .mat{
+    display:inline-grid;grid-auto-flow:column;gap:3px 16px;padding:4px 12px;position:relative;
+    font-family:var(--mono);font-size:14px;text-align:center;color:var(--ink);
+  }
+  .mat::before,.mat::after{content:"";position:absolute;top:-4px;bottom:-4px;width:8px;border:2px solid #64748b;border-radius:1px}
+  .mat::before{left:0;border-right:none}
+  .mat::after{right:0;border-left:none}
+  .mat .p{color:var(--blue);font-weight:700}
+  .mat .z{color:var(--ink3)}
+  .mat .f{color:var(--rose)}
+  .op{font-size:19px;color:var(--ink2);font-weight:600;padding:0 2px}
+  .tagm{font-size:11.5px;color:var(--ink3);text-align:center;margin-top:2px}
+
+  /* ---------- callout ---------- */
+  .callout{border-radius:12px;padding:14px 18px;margin:20px 0;font-size:14.8px;line-height:1.75;border:1px solid}
+  .callout .h{font-weight:700;display:block;margin-bottom:3px;font-size:14px}
+  .co-blue{background:var(--blue-bg);border-color:#dbe3ff;color:#2647c4}
+  .co-teal{background:var(--teal-bg);border-color:#c9f0e6;color:#0b6f66}
+  .co-amber{background:var(--amber-bg);border-color:#f6e3bf;color:#8a4409}
+  .co-rose{background:var(--rose-bg);border-color:#fbd5dd;color:#a3153a}
+  .co-violet{background:var(--violet-bg);border-color:#ddd3fb;color:#5b21b6}
+  .co-green{background:var(--green-bg);border-color:#bbf0c8;color:#12693a}
+  .callout .h::before{margin-right:6px}
+
+  /* ---------- stats ---------- */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:20px 0}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow)}
+  .stat .n{font-size:24px;font-weight:700;color:var(--blue);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .stat .n.t{color:var(--teal)} .stat .n.a{color:var(--amber)} .stat .n.v{color:var(--violet)} .stat .n.r{color:var(--rose)}
+  .stat .t{font-size:13px;color:var(--ink2);margin-top:2px}
+  .stat .d{font-size:12px;color:var(--ink3);margin-top:5px;line-height:1.55}
+
+  /* ---------- table ---------- */
+  .tblwrap{overflow-x:auto;margin:20px 0;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:var(--shadow)}
+  table{border-collapse:collapse;width:100%;min-width:520px;font-size:14px}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.65}
+  th{background:#f8fafc;font-weight:600;font-size:13px;color:var(--ink);white-space:nowrap}
+  tr:last-child td{border-bottom:none}
+  td.k{font-family:var(--mono);font-size:13px;color:var(--blue);white-space:nowrap;font-weight:600}
+  tbody tr:hover{background:#fbfcfe}
+
+  /* ---------- toc ---------- */
+  .toc{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:8px}
+  .toc a{
+    display:flex;gap:10px;align-items:baseline;background:var(--card);border:1px solid var(--line);
+    border-radius:10px;padding:10px 14px;font-size:14px;color:var(--ink);box-shadow:var(--shadow);
+    transition:transform .12s ease,border-color .12s ease;
+  }
+  .toc a:hover{transform:translateY(-1px);border-color:#cfd9ff}
+  .toc a .no{font-size:12px;color:var(--ink3);font-variant-numeric:tabular-nums;flex:none;min-width:20px}
+  .toc a .tx{flex:1}
+  .toc a .tx small{display:block;font-size:12px;color:var(--ink3);line-height:1.5}
+
+  /* ---------- misc ---------- */
+  ul.clean{margin:0 0 14px;padding-left:20px;color:var(--ink2)}
+  ul.clean li{margin-bottom:7px}
+  ol.steps{margin:0 0 14px;padding-left:22px;color:var(--ink2)}
+  ol.steps li{margin-bottom:8px}
+  .q{background:var(--card);border:1px dashed var(--line2);border-radius:12px;padding:14px 18px;margin:12px 0;font-size:14.5px;color:var(--ink2)}
+  .q b{color:var(--ink)}
+  .qa{margin-top:6px;padding-top:8px;border-top:1px dashed var(--line);color:var(--ink3);font-size:13.5px}
+  .qa b{color:var(--teal)}
+
+  footer{margin-top:80px;border-top:1px solid var(--line);padding:26px 0 60px;color:var(--ink3);font-size:13.5px;
+         display:flex;flex-wrap:wrap;gap:10px;justify-content:center;text-align:center}
+  footer a{color:var(--ink2)}
+
+  @media (max-width:600px){
+    .hero{padding:48px 0 34px}
+    .hero p.sub{font-size:16px}
+    .ch-head h3{font-size:18.5px}
+    .layer{flex-direction:column;align-items:flex-start;gap:8px}
+    .layer .lab{min-width:0}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="inner">
+    <a class="brand" href="../index.html"><span class="dot">🥔</span>ptato</a>
+    <div class="links">
+      <a href="#map">全书地图</a>
+      <a href="#appx">分解速查</a>
+      <a href="../index.html#posts">← 回首页</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <!-- ==================== HERO ==================== -->
+  <header class="hero">
+    <div class="kicker">READING NOTE · 图解教程</div>
+    <h1>线性代数：<em>矩阵不是一堆数字，<br>是四个空间和五种分解</em></h1>
+    <p class="sub">
+      Gilbert Strang 的《Introduction to Linear Algebra》第 6 版，440 页。
+      这本书最不一样的地方是：它一上来就让你把 <code>A<i>x</i></code> 看成「<i>A</i> 的列的加权组合」，
+      然后把整门课组织成「四个基本子空间 + 五大矩阵分解」这一张图。
+      这篇笔记把它压成 20 多张图，顺着第 1 章到第 10 章走一遍。
+    </p>
+    <div class="facts">
+      <span class="fact"><b>Gilbert Strang</b> · MIT</span>
+      <span class="fact">第 <b>6 版</b>（2023）</span>
+      <span class="fact"><b>440</b> 页 · 10 章 + 10 附录</span>
+      <span class="fact">配 <b>MIT 18.06</b> 公开课</span>
+      <span class="fact">阅读时长 约 <b>35 分钟</b></span>
+    </div>
+  </header>
+
+  <!-- ==================== 全书地图 ==================== -->
+  <section id="map">
+    <div class="sec-head"><h2>先看地图：这本书在讲什么</h2><span class="en">The Map</span><div class="line"></div></div>
+
+    <p>
+      Strang 自己说过一句话：别的教材从「抽象向量空间」出发，他要反着来 —— 从具体的矩阵出发，
+      从四个你能画出来的子空间出发。整本书的骨架非常清楚，一共三层：
+    </p>
+
+    <div class="diagram">
+      <div class="stack">
+        <div class="layer" style="border-color:#a8b8f5;background:var(--blue-bg)">
+          <div class="lab" style="color:var(--blue)">第 1 层 · 语言</div>
+          <div class="chips">
+            <span class="chip b">1 向量与矩阵</span>
+            <span class="chip b">2 解 Ax=b</span>
+            <span class="chip b">3 四个基本子空间</span>
+          </div>
+        </div>
+        <div class="layer" style="border-color:#9adccf;background:var(--teal-bg)">
+          <div class="lab" style="color:var(--teal)">第 2 层 · 结构</div>
+          <div class="chips">
+            <span class="chip t">4 正交性</span>
+            <span class="chip t">5 行列式</span>
+            <span class="chip t">6 特征值与特征向量</span>
+          </div>
+        </div>
+        <div class="layer" style="border-color:#c9bcf7;background:var(--violet-bg)">
+          <div class="lab" style="color:var(--violet)">第 3 层 · 应用</div>
+          <div class="chips">
+            <span class="chip v">7 奇异值分解 SVD</span>
+            <span class="chip v">8 线性变换</span>
+            <span class="chip v">9 优化</span>
+            <span class="chip v">10 从数据学习</span>
+          </div>
+        </div>
+      </div>
+      <div class="cap">第 1–3 章是「内功」，第 4–6 章是经典理论，第 7–10 章是第 6 版重笔墨的现代应用（机器学习）</div>
+    </div>
+
+    <p>
+      有一条主线贯穿全部十章，Strang 反复强调：<strong>每一个核心思想，最终都表达成一个矩阵分解</strong>。
+      不是一堆定理，而是把 <i>A</i> 拆开。这条主线长这样：
+    </p>
+
+    <div class="diagram">
+      <div class="flow">
+        <div class="box blue">A<i>x</i><small>列的组合</small></div>
+        <div class="arw">→</div>
+        <div class="box blue">A = CR<small>独立列 × 行阶梯形</small></div>
+        <div class="arw">→</div>
+        <div class="box teal">A = LU<small>消元</small></div>
+        <div class="arw">→</div>
+        <div class="box teal">A = QR<small>正交化</small></div>
+        <div class="arw">→</div>
+        <div class="box amber">S = QΛQᵀ<small>对称·特征值</small></div>
+        <div class="arw">→</div>
+        <div class="box violet">A = UΣVᵀ<small>任意矩阵·SVD</small></div>
+      </div>
+      <div class="cap">五大分解：从「哪些列是独立的」一路升级到「任何矩阵都能旋转—拉伸—旋转」</div>
+    </div>
+
+    <div class="callout co-blue">
+      <span class="h">读这本书的正确姿势</span>
+      不要背公式。拿到任何矩阵，先问四个问题：秩是多少？列空间长什么样？<i>A<i>x</i>=<i>b</i></i> 什么时候有解？
+      哪个分解最能暴露它的结构？—— 十章内容都是这四个问题的延伸。
+    </div>
+  </section>
+
+  <!-- ==================== 目录 ==================== -->
+  <section id="toc">
+    <div class="sec-head"><h2>目录</h2><span class="en">Contents</span><div class="line"></div></div>
+    <div class="toc">
+      <a href="#ch1"><span class="no">01</span><span class="tx">向量与矩阵<small>Ax 是列的线性组合</small></span></a>
+      <a href="#ch1b"><span class="no">01·4</span><span class="tx">矩阵乘法与 A = CR<small>第 6 版的开场王牌</small></span></a>
+      <a href="#ch2"><span class="no">02</span><span class="tx">解 Ax = b<small>消元、逆矩阵、A = LU</small></span></a>
+      <a href="#ch3"><span class="no">03</span><span class="tx">四个基本子空间<small>全书的心脏</small></span></a>
+      <a href="#ch4"><span class="no">04</span><span class="tx">正交性<small>投影、最小二乘、Gram-Schmidt</small></span></a>
+      <a href="#ch5"><span class="no">05</span><span class="tx">行列式<small>有符号的体积</small></span></a>
+      <a href="#ch6"><span class="no">06</span><span class="tx">特征值与特征向量<small>对角化与微分方程</small></span></a>
+      <a href="#ch7"><span class="no">07</span><span class="tx">奇异值分解 SVD<small>压缩、PCA、降噪</small></span></a>
+      <a href="#ch8"><span class="no">08</span><span class="tx">线性变换<small>换一组好基</small></span></a>
+      <a href="#ch9"><span class="no">09·10</span><span class="tx">优化与从数据学习<small>线性代数遇上深度学习</small></span></a>
+      <a href="#appx"><span class="no">A</span><span class="tx">附录：五大分解速查<small>术语表 + 自测题</small></span></a>
+      <a href="#end"><span class="no">—</span><span class="tx">结语与阅读建议<small>怎么接着学</small></span></a>
+    </div>
+  </section>
+
+  <!-- ==================== CH1 ==================== -->
+  <section class="ch" id="ch1">
+    <div class="ch-head">
+      <div class="ch-no">1</div>
+      <div>
+        <h3>向量与矩阵：A<i>x</i> 到底在做什么</h3>
+        <span class="en">Chapter 1 · Vectors and Matrices</span>
+      </div>
+    </div>
+
+    <div class="lead">
+      <b>一句话核心：</b>请把 <i>A<i>x</i></i> 读作「用 <i>x</i> 的分量去配 <i>A</i> 的各个列」——
+      它不是一个神秘的乘法规则，而是一次<b>配方</b>。
+    </div>
+
+    <p>
+      国内的教材一般从行列式开场，学生要熬好几周才见到真正有用的东西。Strang 第 6 版改了顺序：
+      第 1 章就直接给你「列图像」。这个视角的转变，是整本书的门槛。
+    </p>
+
+    <p>
+      看一个 2×2 的例子。<i>A</i> 有两列 <b><i>a</i>₁</b>、<b><i>a</i>₂</b>，<i>x</i> = (2, 1)：
+    </p>
+
+    <div class="diagram">
+      <div class="lbl">两种读法：行图像 vs 列图像</div>
+      <div class="matwrap">
+        <div>
+          <div class="mat" style="grid-template-rows:repeat(2,1fr)">
+            <span>1</span><span>4</span><span>2</span><span>5</span>
+          </div>
+          <div class="tagm">A（两列：a₁, a₂）</div>
+        </div>
+        <span class="op">×</span>
+        <div>
+          <div class="mat" style="grid-template-rows:repeat(2,1fr)">
+            <span class="p">2</span><span class="p">1</span>
+          </div>
+          <div class="tagm">x</div>
+        </div>
+        <span class="op">=</span>
+        <div>
+          <div class="mat" style="grid-template-rows:repeat(2,1fr)">
+            <span>6</span><span>9</span>
+          </div>
+          <div class="tagm">b</div>
+        </div>
+      </div>
+      <div class="cap" style="margin-top:16px">
+        行图像：两条直线 1<i>x</i>+4<i>y</i>=6 与 2<i>x</i>+5<i>y</i>=9 交于一点（适合 2×2，三维以上想象不了）<br>
+        <b>列图像：2·(1,2) + 1·(4,5) = (6,9)</b> —— 两根箭头首尾相接（任意维度都成立）
+      </div>
+    </div>
+
+    <p>
+      为什么列图像更厉害？因为当矩阵是 100×100 时，行图像变成 100 个 99 维超平面的交，人脑直接死机；
+      而列图像还是那句话：<strong>找一组系数，让 100 个列向量配出 <i>b</i></strong>。
+    </p>
+
+    <div class="callout co-teal">
+      <span class="h">最该记住的一条</span>
+      所有 <i>A<i>x</i></i> 的可能结果，构成的集合叫做 <b>列空间 <i>C</i>(<i>A</i>)</b>。
+      于是「<i>A<i>x</i>=<i>b</i></i> 有没有解」这个问题，等价于「<i>b</i> 在不在列空间里」。
+      线性代数从此从算术变成了几何。
+    </div>
+
+    <h4 class="sub">三个必须熟悉的运算</h4>
+    <ul class="clean">
+      <li><strong>点积 <i>a</i>ᵀ<i>b</i></strong> = |<i>a</i>||<i>b</i>|cos θ。它是「相似度」的代数形式：为 0 就是垂直（正交）。</li>
+      <li><strong>长度</strong> ‖<i>a</i>‖ = √(<i>a</i>ᵀ<i>a</i>)。柯西-施瓦茨不等式 |<i>a</i>ᵀ<i>b</i>| ≤ ‖<i>a</i>‖‖<i>b</i>‖ 和三角不等式都由它长出。</li>
+      <li><strong>矩阵乘向量</strong>：<i>A</i> 乘 <i>x</i> 有两种算法（行点积 / 列组合），第二种才是理解后续一切的关键。</li>
+    </ul>
+
+    <div class="diagram">
+      <div class="lbl">向量的三种"加法"，取决于你把它当什么</div>
+      <div class="flow">
+        <div class="box blue">向量 = 箭头<small>可加、可缩放</small></div>
+        <div class="arw">+</div>
+        <div class="box teal">向量 = 空间中的点<small>n 个坐标</small></div>
+        <div class="arw">+</div>
+        <div class="box amber">向量 = 一次配方<small>线性组合的权重</small></div>
+        <div class="arw">→</div>
+        <div class="box violet">张成空间 span<small>所有能配出来的结果</small></div>
+      </div>
+      <div class="cap">"张成"(span) 是本书出现频率最高的动词：几个列能张成一条线、一个平面，或整个空间</div>
+    </div>
+  </section>
+
+  <!-- ==================== CH1.4 ==================== -->
+  <section class="ch" id="ch1b">
+    <div class="ch-head">
+      <div class="ch-no t">1.4</div>
+      <div>
+        <h3>矩阵乘法与 A = CR：第 6 版的开场王牌</h3>
+        <span class="en">§1.4 · Matrix Multiplication AB and CR</span>
+      </div>
+    </div>
+
+    <div class="lead">
+      <b>一句话核心：</b>任何秩为 <i>r</i> 的矩阵 <i>A</i>，都能写成
+      <b><i>A</i> = <i>C</i><i>R</i></b> —— <i>C</i> 是 <i>A</i> 的 <i>r</i> 个真正独立的列，
+      <i>R</i> 是行阶梯形。这一句话直接证明了「列秩 = 行秩」。
+    </div>
+
+    <p>
+      这是第 6 版最重要的改动。上一版要到第 3 章才讲清楚秩，这一版在第 1 章就给你 <i>A</i>=<i>C</i><i>R</i>，
+      因为它是「独立列 / 秩 / 列空间」这三个概念的最短路径。
+    </p>
+
+    <div class="diagram">
+      <div class="lbl">A = CR 到底在说什么（书上 3×4 的例子，秩 r = 2）</div>
+      <div class="matwrap">
+        <div>
+          <div class="mat" style="grid-template-rows:repeat(3,1fr)">
+            <span>1</span><span>3</span><span>4</span>
+            <span>2</span><span>7</span><span>9</span>
+            <span>11</span><span>37</span><span>48</span>
+            <span>17</span><span>57</span><span>74</span>
+          </div>
+          <div class="tagm">A（第3行 = 第1行 + 第2行）</div>
+        </div>
+        <span class="op">=</span>
+        <div>
+          <div class="mat" style="grid-template-rows:repeat(3,1fr);border-color:#3b5bdb">
+            <span style="color:var(--blue);font-weight:700">1</span><span style="color:var(--blue);font-weight:700">3</span><span style="color:var(--blue);font-weight:700">4</span>
+            <span style="color:var(--blue);font-weight:700">2</span><span style="color:var(--blue);font-weight:700">7</span><span style="color:var(--blue);font-weight:700">9</span>
+          </div>
+          <div class="tagm">C：A 的前 2 个独立列（3×2）</div>
+        </div>
+        <span class="op">×</span>
+        <div>
+          <div class="mat" style="grid-template-rows:repeat(2,1fr);border-color:#0d9488">
+            <span style="color:var(--teal);font-weight:700">1</span><span style="color:var(--teal);font-weight:700">0</span><span style="color:var(--teal)">3</span><span style="color:var(--teal)">5</span>
+            <span style="color:var(--teal);font-weight:700">0</span><span style="color:var(--teal);font-weight:700">1</span><span style="color:var(--teal)">4</span><span style="color:var(--teal)">6</span>
+          </div>
+          <div class="tagm">R：rref(A) 的非零行（2×4）</div>
+        </div>
+      </div>
+      <div class="cap">
+        R 里的单位阵 I 指出「哪几列是独立的」，剩下的 F 块告诉你「依赖列怎么由独立列配出来」<br>
+        A 的第 3 列 = 3·(第1列) + 4·(第2列)，第 4 列 = 5·(第1列) + 6·(第2列)
+      </div>
+    </div>
+
+    <p>
+      注意 <i>C</i> 是 <i>m</i>×<i>r</i>、<i>R</i> 是 <i>r</i>×<i>n</i>。中间那个 <i>r</i> 就是秩。
+      于是「列秩 = 行秩」这个经典定理变成了一句废话：<i>A</i> 的列都在 <i>C</i> 的列空间里（最多 <i>r</i> 维），
+      <i>A</i> 的行都在 <i>R</i> 的行空间里（最多 <i>r</i> 维）—— 同一个数字 <i>r</i> 卡住了两边。
+    </p>
+
+    <h4 class="sub">矩阵乘法的四种看法（第 4 种最有杀伤力）</h4>
+
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>看法</th><th>写法</th><th>什么时候最好用</th></tr></thead>
+        <tbody>
+          <tr><td>① 行 × 列（点积）</td><td class="k">(AB)ᵢⱼ = 第 i 行 · 第 j 列</td><td>手算单个元素</td></tr>
+          <tr><td>② 列视角</td><td class="k">AB 的列 = A × (B 的列)</td><td>理解列空间</td></tr>
+          <tr><td>③ 行视角</td><td class="k">AB 的行 = (A 的行) × B</td><td>理解行空间、做消元</td></tr>
+          <tr><td>④ 列 × 行（外积和）</td><td class="k">AB = Σ (A的第k列)(B的第k行)</td><td><b>SVD、低秩近似、PCA 全靠它</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="diagram">
+      <div class="lbl">第 4 种：矩阵 = 若干个"秩 1 矩阵"之和</div>
+      <div class="flow" style="align-items:center">
+        <div class="box dark">A = σ₁<i>u</i>₁<i>v</i>₁ᵀ + σ₂<i>u</i>₂<i>v</i>₂ᵀ + … + σ<sub>r</sub><i>u</i><sub>r</sub><i>v</i><sub>r</sub>ᵀ<small>每一项都是「一列 × 一行」</small></div>
+      </div>
+      <div class="cap">
+        秩 1 矩阵是所有矩阵的「原子」：一个秩 <i>r</i> 的矩阵，恰好是 <i>r</i> 个秩 1 矩阵之和<br>
+        σ 排好序之后，只留前 <i>k</i> 项 = 最佳低秩近似 —— 这就是 SVD 压缩的原理（第 7 章）
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="n">m×r · r×n</div>
+        <div class="t">A = CR 的形状</div>
+        <div class="d">原本 mn 个数，被压成 r(m+n) 个</div>
+      </div>
+      <div class="stat">
+        <div class="n t">r</div>
+        <div class="t">秩 = 主元个数</div>
+        <div class="d">= 独立列数 = 独立行数</div>
+      </div>
+      <div class="stat">
+        <div class="n a">n − r</div>
+        <div class="t">自由变量个数</div>
+        <div class="d">= 零空间的维数，特解的个数</div>
+      </div>
+    </div>
+
+    <div class="callout co-amber">
+      <span class="h">反直觉点</span>
+      「列秩 = 行秩」一点都不显然 —— 一个 3×5 的矩阵，列的独立性（在 3 维空间里）和行的独立性（在 5 维空间里）凭什么相等？
+      但 <i>A</i>=<i>C</i><i>R</i> 一旦写出来，两边都被同一个 <i>r</i> 夹住，定理就成立了。这就是"用分解代替证明"的力量。
+    </div>
+  </section>
+
+  <!-- ==================== CH2 ==================== -->
+  <section class="ch" id="ch2">
+    <div class="ch-head">
+      <div class="ch-no">2</div>
+      <div>
+        <h3>解 A<i>x</i> = <i>b</i>：消元其实是一次分解</h3>
+        <span class="en">Chapter 2 · Solving Linear Equations</span>
+      </div>
+    </div>
+
+    <div class="lead">
+      <b>一句话核心：</b>高斯消元表面上是「把矩阵化简」，实质上是把 <i>A</i> 拆成
+      <b><i>A</i> = <i>L</i><i>U</i></b> —— 下三角 × 上三角。做一次分解，后面换一万个 <i>b</i> 都不用重算。
+    </div>
+
+    <p>
+      消元是线性代数里最古老的算法（比矩阵这个词本身还老）。它的操作只有三种：
+      用一个主元把下面的元素消成 0、换行、给某一行乘倍数。
+    </p>
+
+    <div class="diagram">
+      <div class="lbl">消元的三步（增广矩阵 [A | b] 一起动）</div>
+      <div class="flow">
+        <div class="box blue">① 选主元<small>第 k 列第 k 行不为 0</small></div>
+        <div class="arw">→</div>
+        <div class="box teal">② 向下消元<small>第 i 行 − ℓ<sub>ik</sub> × 第 k 行</small></div>
+        <div class="arw">→</div>
+        <div class="box amber">③ 回代<small>从最后一个主元往前解</small></div>
+        <div class="arw">→</div>
+        <div class="box violet">得到 U 和 L<small> multiplier ℓ<sub>ik</sub> 直接落进 L</small></div>
+      </div>
+      <div class="cap">消元的副产品才是宝藏：每一步的乘数 ℓ 原封不动填进下三角矩阵 L</div>
+    </div>
+
+    <div class="diagram">
+      <div class="lbl">A = LU：消元 = 分解</div>
+      <div class="matwrap">
+        <div>
+          <div class="mat" style="grid-template-rows:repeat(3,1fr)">
+            <span>2</span><span>1</span><span>0</span>
+            <span>1</span><span>2</span><span>1</span>
+            <span>0</span><span>1</span><span>2</span>
+          </div>
+          <div class="tagm">A</div>
+        </div>
+        <span class="op">=</span>
+        <div>
+          <div class="mat" style="grid-template-rows:repeat(3,1fr)">
+            <span>1</span><span>1</span><span>0</span>
+            <span>½</span><span>1</span><span>0</span>
+            <span>0</span><span>⅔</span><span>1</span>
+          </div>
+          <div class="tagm">L（消元乘数）</div>
+        </div>
+        <span class="op">×</span>
+        <div>
+          <div class="mat" style="grid-template-rows:repeat(3,1fr)">
+            <span class="p">2</span><span>1</span><span>0</span>
+            <span class="z">0</span><span class="p">1.5</span><span>1</span>
+            <span class="z">0</span><span class="z">0</span><span class="p">1⅓</span>
+          </div>
+          <div class="tagm">U（阶梯形，蓝色为主元）</div>
+        </div>
+      </div>
+      <div class="cap">解 Ax=b 变成两步三角方程：先 L<i>c</i>=<i>b</i>，再 U<i>x</i>=<i>c</i>，各只需 O(n²)</div>
+    </div>
+
+    <p>
+      为什么值得为一个分解这么兴奋？因为 <strong>消元的成本全在 <i>A</i> 身上（O(n³)），而回代只要 O(n²)</strong>。
+      一旦拿到 <i>L</i> 和 <i>U</i>，右侧 <i>b</i> 换多少次都是便宜的。工程上「矩阵不变、右端项变」是最常见的场景。
+    </p>
+
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>情况</th><th>几何含义</th><th>解的个数</th></tr></thead>
+        <tbody>
+          <tr><td class="k">r = m = n</td><td>列张成整个空间，且列之间独立</td><td>唯一解，<i>x</i> = <i>A</i>⁻¹<i>b</i></td></tr>
+          <tr><td class="k">r = m &lt; n</td><td>矮胖：列张成整个 Rᵐ，但有自由变量</td><td>无穷多解（一个特解 + 零空间）</td></tr>
+          <tr><td class="k">r = n &lt; m</td><td>高瘦：列独立，但张不满 Rᵐ</td><td>0 或 1 个解（看 <i>b</i> 在不在列空间）</td></tr>
+          <tr><td class="k">r &lt; m 且 r &lt; n</td><td>既张不满，又有自由变量</td><td>0 个 或 无穷多个</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout co-rose">
+      <span class="h">关于逆矩阵，Strang 的态度</span>
+      <i>x</i> = <i>A</i>⁻¹<i>b</i> 在数学上漂亮，在计算上几乎没用。<b>求逆比解方程贵，而且数值更不稳。</b>
+      他甚至开玩笑说：如果你在代码里写 <code>inv(A)*b</code>，那多半该换成 <code>A\b</code>。
+      <i>A</i>⁻¹ 存在的充要条件是 <i>A</i><i>x</i> = 0 只有零解 —— 也就是列线性无关。
+    </div>
+
+    <p>
+      最后两个「装配零件」：<strong>置换矩阵 <i>P</i></strong>（换行用，<i>P</i>⁻¹ = <i>P</i>ᵀ）
+      和 <strong>转置 <i>A</i>ᵀ</strong>（行列互换，(<i>AB</i>)ᵀ = <i>B</i>ᵀ<i>A</i>ᵀ —— 注意顺序颠倒）。
+      遇到主元为 0 需要换行时，完整写法是 <i>PA</i> = <i>LU</i>。
+      对称矩阵满足 <i>S</i>ᵀ = <i>S</i>，它在第 6 章会变得极其重要。
+    </p>
+  </section>
+
+  <!-- ==================== CH3 ==================== -->
+  <section class="ch" id="ch3">
+    <div class="ch-head">
+      <div class="ch-no t">3</div>
+      <div>
+        <h3>四个基本子空间：全书的心脏</h3>
+        <span class="en">Chapter 3 · The Four Fundamental Subspaces</span>
+      </div>
+    </div>
+
+    <div class="lead">
+      <b>一句话核心：</b>一个 <i>m</i>×<i>n</i> 的矩阵 <i>A</i>，同时定义了四个子空间 ——
+      <b>行空间与零空间</b>住在 Rⁿ 里并且正交，<b>列空间与左零空间</b>住在 Rᵐ 里并且正交。
+      这就是「线性代数基本定理」，也是这本书封面上那张图。
+    </div>
+
+    <p>
+      Strang 1993 年在《美国数学月刊》上写过一篇同名的文章，里面那句话值得抄下来：
+      <em>「我们不为了抽象而发明向量空间。子空间是为解决问题而出现的。」</em>
+      几乎所有线性代数算法和应用，都是在这四个空间之间搬运东西。
+    </p>
+
+    <div class="diagram">
+      <div class="lbl">线性代数基本定理 · 第 2 部分（正交性）</div>
+      <svg viewBox="0 0 680 330" width="100%" role="img" aria-label="四个基本子空间的正交关系图"
+           style="max-width:680px;display:block;margin:0 auto;font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+        <!-- 左框 R^n -->
+        <rect x="30" y="26" width="250" height="278" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="5 4"/>
+        <text x="155" y="48" text-anchor="middle" font-size="14" font-weight="700" fill="#1e293b">Rⁿ（输入空间 · 未知数 x）</text>
+
+        <rect x="52" y="62" width="206" height="98" rx="10" fill="#eef2ff" stroke="#a8b8f5" stroke-width="1.5"/>
+        <text x="155" y="96" text-anchor="middle" font-size="13.5" font-weight="700" fill="#2647c4">行空间 C(Aᵀ)</text>
+        <text x="155" y="116" text-anchor="middle" font-size="12" fill="#475569">A 的各行的所有组合</text>
+        <text x="155" y="140" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3b5bdb">维数 = r</text>
+
+        <rect x="52" y="176" width="206" height="110" rx="10" fill="#fff1f2" stroke="#f8b8c8" stroke-width="1.5"/>
+        <text x="155" y="210" text-anchor="middle" font-size="13.5" font-weight="700" fill="#a3153a">零空间 N(A)</text>
+        <text x="155" y="230" text-anchor="middle" font-size="12" fill="#475569">满足 Ax = 0 的全部 x</text>
+        <text x="155" y="254" text-anchor="middle" font-size="12.5" font-weight="700" fill="#e11d48">维数 = n − r</text>
+        <text x="155" y="276" text-anchor="middle" font-size="11.5" fill="#94a3b8">（特解由自由变量给出）</text>
+
+        <!-- 正交标记 -->
+        <path d="M155 160 v16" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <text x="240" y="171" text-anchor="middle" font-size="11.5" fill="#94a3b8">⊥</text>
+
+        <!-- 右框 R^m -->
+        <rect x="400" y="26" width="250" height="278" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="5 4"/>
+        <text x="525" y="48" text-anchor="middle" font-size="14" font-weight="700" fill="#1e293b">Rᵐ（输出空间 · 右端项 b）</text>
+
+        <rect x="422" y="62" width="206" height="98" rx="10" fill="#ecfdf5" stroke="#9adccf" stroke-width="1.5"/>
+        <text x="525" y="96" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0b6f66">列空间 C(A)</text>
+        <text x="525" y="116" text-anchor="middle" font-size="12" fill="#475569">A 的各列的所有组合</text>
+        <text x="525" y="140" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0d9488">维数 = r</text>
+
+        <rect x="422" y="176" width="206" height="110" rx="10" fill="#fffbeb" stroke="#f0d09a" stroke-width="1.5"/>
+        <text x="525" y="210" text-anchor="middle" font-size="13.5" font-weight="700" fill="#8a4409">左零空间 N(Aᵀ)</text>
+        <text x="525" y="230" text-anchor="middle" font-size="12" fill="#475569">满足 Aᵀy = 0 的 y</text>
+        <text x="525" y="254" text-anchor="middle" font-size="12.5" font-weight="700" fill="#b45309">维数 = m − r</text>
+        <text x="525" y="276" text-anchor="middle" font-size="11.5" fill="#94a3b8">（"误差 e 落在的地方"）</text>
+
+        <path d="M525 160 v16" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <text x="610" y="171" text-anchor="middle" font-size="11.5" fill="#94a3b8">⊥</text>
+
+        <!-- 中间箭头 -->
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b5bdb"/>
+          </marker>
+          <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#e11d48"/>
+          </marker>
+        </defs>
+        <line x1="262" y1="111" x2="418" y2="111" stroke="#3b5bdb" stroke-width="2" marker-start="url(#ar)" marker-end="url(#ar)"/>
+        <text x="340" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="#3b5bdb">A 是可逆映射</text>
+        <text x="340" y="130" text-anchor="middle" font-size="11.5" fill="#475569">行空间 ↔ 列空间，一一对应</text>
+
+        <line x1="262" y1="231" x2="340" y2="231" stroke="#e11d48" stroke-width="2" marker-end="url(#ar2)"/>
+        <text x="345" y="227" text-anchor="middle" font-size="13" font-weight="700" fill="#e11d48">A 把它全映成 0</text>
+        <text x="345" y="247" text-anchor="middle" font-size="11.5" fill="#475569">N(A) → 零向量</text>
+
+        <text x="340" y="320" text-anchor="middle" font-size="11.5" fill="#94a3b8">维数相加：r + (n−r) = n　　r + (m−r) = m</text>
+      </svg>
+      <div class="cap">Strang 封面图的文字版：A 把行空间一一对应地搬到列空间，同时把零空间碾成 0</div>
+    </div>
+
+    <div class="callout co-blue">
+      <span class="h">基本定理第 1 部分（维数）</span>
+      设 <i>A</i> 是 <i>m</i>×<i>n</i>，秩为 <i>r</i>：<br>
+      dim <i>C</i>(<i>A</i>) = <b><i>r</i></b>　·　dim <i>C</i>(<i>A</i>ᵀ) = <b><i>r</i></b>　·　
+      dim <i>N</i>(<i>A</i>) = <b><i>n</i>−<i>r</i></b>　·　dim <i>N</i>(<i>A</i>ᵀ) = <b><i>m</i>−<i>r</i></b><br>
+      而第 2 部分就是图上那两个 ⊥：<i>C</i>(<i>A</i>ᵀ) ⊥ <i>N</i>(<i>A</i>)，<i>C</i>(<i>A</i>) ⊥ <i>N</i>(<i>A</i>ᵀ)。
+    </div>
+
+    <h4 class="sub">怎么把四个空间算出来</h4>
+    <ol class="steps">
+      <li>对 <i>A</i> 做消元，得到阶梯形 <i>R</i>（或 rref）。<strong>行空间和零空间不变</strong>；列空间和左零空间会被改变（但维数不变）。</li>
+      <li><b>行空间</b>的基：<i>R</i> 的 <i>r</i> 个非零行。</li>
+      <li><b>列空间</b>的基：<i>A</i>（不是 <i>R</i>！）中对应主元列的那些列 —— 也就是 <i>C</i>。</li>
+      <li><b>零空间</b>的基：令 <i>n</i>−<i>r</i> 个自由变量轮流取 1、其余取 0，回代得到 <i>n</i>−<i>r</i> 个「特解」。</li>
+      <li><b>左零空间</b>的基：消元过程中记录的行操作，或者对 <i>A</i>ᵀ 重复一遍上面的流程。</li>
+    </ol>
+
+    <div class="diagram">
+      <div class="lbl">Ax = b 的完整解 = 一个特解 + 零空间里的任意向量</div>
+      <div class="flow">
+        <div class="box teal">x<sub>particular</sub><small>任取自由变量 = 0 解出来</small></div>
+        <div class="arw">+</div>
+        <div class="box rose">x<sub>nullspace</sub><small>c₁s₁ + … + c<sub>n−r</sub>s<sub>n−r</sub></small></div>
+        <div class="arw">=</div>
+        <div class="box blue">x = x<sub>p</sub> + x<sub>n</sub><small>A(x<sub>p</sub>+x<sub>n</sub>) = b + 0 = b</small></div>
+      </div>
+      <div class="cap">几何上：解集是零空间平移到特解处的一个「仿射子空间」—— 一条线、一个平面……</div>
+    </div>
+
+    <p>
+      顺带把三个词钉死，它们在第 4 章和第 7 章会被反复使用：
+    </p>
+
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>术语</th><th>定义</th><th>怎么判断</th></tr></thead>
+        <tbody>
+          <tr><td>线性无关</td><td>只有全 0 系数才能让组合为 0</td><td><i>A<i>x</i></i>=0 只有零解 ⇔ 列无关</td></tr>
+          <tr><td>张成 span</td><td>这些向量的所有线性组合</td><td>张成整个 Rᵐ ⇔ 行有 <i>m</i> 个主元</td></tr>
+          <tr><td>基 basis</td><td>既独立、又张成这个空间的一组向量</td><td>该空间里任何一组基，向量个数都一样 = 维数</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ==================== CH4 ==================== -->
+  <section class="ch" id="ch4">
+    <div class="ch-head">
+      <div class="ch-no a">4</div>
+      <div>
+        <h3>正交性：投影、最小二乘与 Gram-Schmidt</h3>
+        <span class="en">Chapter 4 · Orthogonality</span>
+      </div>
+    </div>
+
+    <div class="lead">
+      <b>一句话核心：</b>当 <i>A<i>x</i></i>=<i>b</i> 无解（<i>b</i> 不在列空间里）时，
+      就把 <i>b</i> <b>投影</b>到列空间得到 <i>p</i>，转而解 <i>A<i>x̂</i></i>=<i>p</i> ——
+      这就是最小二乘：<b>让误差 <i>e</i> = <i>b</i>−<i>A<i>x̂</i></i> 垂直于列空间</b>。
+    </div>
+
+    <p>
+      现实世界几乎不存在「刚好有解」的方程组。测量有噪声、方程比未知数多（<i>m</i> &gt; <i>n</i>），
+      于是 <i>b</i> 落在列空间外面。第 4 章就是专门为这种「超定系统」准备的。
+    </p>
+
+    <div class="diagram">
+      <div class="lbl">投影到一条直线：一句「垂直」就够解出 x̂</div>
+      <svg viewBox="0 0 680 260" width="100%" role="img" aria-label="向量 b 投影到直线 a 上的示意图"
+           style="max-width:680px;display:block;margin:0 auto;font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+        <!-- 直线 a -->
+        <line x1="20" y1="222" x2="470" y2="114" stroke="#3b5bdb" stroke-width="2"/>
+        <text x="492" y="112" font-size="13.5" font-weight="700" fill="#3b5bdb">a（列空间 = 这条直线）</text>
+
+        <!-- 原点 -->
+        <circle cx="110" cy="200" r="3.5" fill="#1e293b"/>
+        <text x="96" y="218" font-size="12" fill="#475569">O</text>
+
+        <!-- 误差 e -->
+        <line x1="300" y1="70" x2="319" y2="150" stroke="#e11d48" stroke-width="2" stroke-dasharray="5 4"/>
+        <text x="296" y="60" text-anchor="middle" font-size="13" font-weight="700" fill="#e11d48">e = b − p</text>
+
+        <!-- 投影向量 p -->
+        <line x1="110" y1="200" x2="319" y2="150" stroke="#0d9488" stroke-width="3"/>
+        <text x="215" y="188" font-size="13" font-weight="700" fill="#0d9488">p = x̂a</text>
+
+        <!-- 点 b -->
+        <line x1="110" y1="200" x2="300" y2="70" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <circle cx="300" cy="70" r="5" fill="#1e293b"/>
+        <text x="288" y="80" text-anchor="end" font-size="13.5" font-weight="700" fill="#1e293b">b</text>
+
+        <!-- p 点 -->
+        <circle cx="319" cy="150" r="4.5" fill="#0d9488"/>
+        <text x="330" y="145" font-size="12.5" font-weight="700" fill="#0d9488">p</text>
+
+        <!-- 直角标记 -->
+        <path d="M316 138 L305 141 L307 153" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+
+        <text x="340" y="238" text-anchor="middle" font-size="13" fill="#475569">
+          aᵀ(b − x̂a) = 0　⟹　<tspan font-weight="700" fill="#1e293b">x̂ = aᵀb / aᵀa</tspan>
+        </text>
+      </svg>
+      <div class="cap">核心只有一句话：<b>误差 e 必须垂直于投影方向</b>。一个垂直条件就解出了唯一未知数 x̂</div>
+    </div>
+
+    <p>
+      把「一条直线」换成「<i>A</i> 的列空间」，同样的推理给出线性代数里出镜率最高的一个方程。
+    </p>
+
+    <div class="diagram">
+      <div class="lbl">从「垂直」到正规方程（Normal Equations）</div>
+      <div class="flow">
+        <div class="box blue">Aᵀ(b − A<i>x̂</i>) = 0<small>误差垂直于 A 的每一列</small></div>
+        <div class="arw">⟹</div>
+        <div class="box teal">AᵀA<i>x̂</i> = Aᵀb<small>n×n 对称，可解</small></div>
+        <div class="arw">⟹</div>
+        <div class="box amber"><i>x̂</i> = (AᵀA)⁻¹Aᵀb<small>使 ‖Ax−b‖² 最小</small></div>
+        <div class="arw">⟹</div>
+        <div class="box violet">p = A<i>x̂</i> = P<i>b</i><small>P = A(AᵀA)⁻¹Aᵀ 是投影矩阵</small></div>
+      </div>
+      <div class="cap">投影矩阵 P 满足 P² = P（投影两次 = 投影一次），Pᵀ = P（对称）</div>
+    </div>
+
+    <div class="callout co-teal">
+      <span class="h">AᵀA 的一个坑（书里专门提醒）</span>
+      <i>A</i>ᵀ<i>A</i> 可逆 ⇔ <i>A</i> 的列线性无关。列相关时 <i>A</i>ᵀ<i>A</i> 奇异，<i>x̂</i> 不唯一 ——
+      这时要用<b>伪逆 <i>A</i>⁺</b>（4.5 节），它给出「既最小误差、又最短长度」的那个解。
+      另外，数值上 <i>A</i>ᵀ<i>A</i> 会把条件数平方，实际代码里更常用 QR 或 SVD 来解最小二乘。
+    </div>
+
+    <h4 class="sub">Gram-Schmidt：把一组歪基掰成正交基</h4>
+
+    <p>
+      如果 <i>A</i> 的列是歪的，投影、最小二乘全都难算。要是它们是<strong>标准正交</strong>的（<i>Q</i>ᵀ<i>Q</i> = <i>I</i>），
+      投影矩阵直接简化成 <i>P</i> = <i>QQ</i>ᵀ，正规方程退化成 <i>x̂</i> = <i>Q</i>ᵀ<i>b</i>。
+      Gram-Schmidt 就是把任意一组独立列变成 <i>Q</i> 的算法，写出来就是 <b><i>A</i> = <i>QR</i></b>。
+    </p>
+
+    <div class="diagram">
+      <div class="lbl">Gram-Schmidt 的每一步：减掉「在已有方向上的投影」</div>
+      <div class="stack">
+        <div class="layer" style="border-color:#a8b8f5;background:var(--blue-bg)">
+          <div class="lab" style="color:var(--blue)">第 1 步</div>
+          <div class="chips"><span class="chip b">q₁ = a₁ / ‖a₁‖</span><span class="chip">第一个方向直接归一化</span></div>
+        </div>
+        <div class="layer" style="border-color:#9adccf;background:var(--teal-bg)">
+          <div class="lab" style="color:var(--teal)">第 2 步</div>
+          <div class="chips"><span class="chip t">B = a₂ − (q₁ᵀa₂) q₁</span><span class="chip">减掉 a₂ 在 q₁ 上的分量</span><span class="chip t">q₂ = B / ‖B‖</span></div>
+        </div>
+        <div class="layer" style="border-color:#f0d09a;background:var(--amber-bg)">
+          <div class="lab" style="color:var(--amber)">第 3 步</div>
+          <div class="chips"><span class="chip">C = a₃ − (q₁ᵀa₃)q₁ − (q₂ᵀa₃)q₂</span><span class="chip">减掉两个方向上的分量</span><span class="chip">q₃ = C / ‖C‖</span></div>
+        </div>
+        <div class="layer" style="border-color:#c9bcf7;background:var(--violet-bg)">
+          <div class="lab" style="color:var(--violet)">结果</div>
+          <div class="chips"><span class="chip v">A = QR</span><span class="chip">Q 列正交（QᵀQ = I）</span><span class="chip">R 上三角（记录减掉了多少）</span></div>
+        </div>
+      </div>
+      <div class="cap">注意 R 是上三角：q₁ 只由 a₁ 决定，q₂ 只用到 a₁、a₂ —— 这种"只用前面的"结构就是三角</div>
+    </div>
+
+    <div class="callout co-amber">
+      <span class="h">正交矩阵 Q 为什么是「数值稳定性的天花板」</span>
+      <i>Q</i> 保持长度和角度：‖<i>Q<i>x</i></i>‖ = ‖<i>x</i>‖，(<i>Q<i>x</i></i>)ᵀ(<i>Q<i>y</i></i>) = <i>x</i>ᵀ<i>y</i>。
+      它不放大误差，也不会把小噪声放大成大灾难。这就是第 7 章 SVD 里 <i>U</i> 和 <i>V</i> 都必须是正交矩阵的原因。
+    </div>
+  </section>
+
+  <!-- ==================== CH5 ==================== -->
+  <section class="ch" id="ch5">
+    <div class="ch-head">
+      <div class="ch-no v">5</div>
+      <div>
+        <h3>行列式：一个带符号的体积</h3>
+        <span class="en">Chapter 5 · Determinants</span>
+      </div>
+    </div>
+
+    <div class="lead">
+      <b>一句话核心：</b>不要背行列式的展开公式。它真正的定义是
+      <b>三条性质</b>：det <i>I</i> = 1、换行变号、对每一行线性 —— 而这三条唯一确定的那个数，恰好就是
+      <b>列向量张成的平行体的有向体积</b>。
+    </div>
+
+    <p>
+      这本书把行列式放在第 5 章（很多教材放第 1 章）是有理由的：行列式是用来<strong>检验</strong>性质的，
+      不是用来<strong>计算</strong>的。真正算大规模问题时，用的还是消元（<i>LU</i>）。
+    </p>
+
+    <div class="diagram">
+      <div class="lbl">二维：|det| = 平行四边形的面积</div>
+      <svg viewBox="0 0 680 250" width="100%" role="img" aria-label="行列式的几何意义：平行四边形面积"
+           style="max-width:680px;display:block;margin:0 auto;font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+        <defs>
+          <marker id="arv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b5bdb"/>
+          </marker>
+          <marker id="arw2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#0d9488"/>
+          </marker>
+        </defs>
+        <!-- 平行四边形 -->
+        <polygon points="130,200 235,120 435,80 330,160" fill="#eef2ff" stroke="#a8b8f5" stroke-width="1.5"/>
+        <!-- 原点 -->
+        <circle cx="130" cy="200" r="3.5" fill="#1e293b"/>
+        <text x="112" y="218" font-size="12" fill="#475569">O</text>
+        <!-- 向量 a -->
+        <line x1="130" y1="200" x2="235" y2="120" stroke="#3b5bdb" stroke-width="2.5" marker-end="url(#arv)"/>
+        <text x="176" y="176" font-size="13" font-weight="700" fill="#3b5bdb">a = (a₁, a₂)</text>
+        <!-- 向量 b -->
+        <line x1="130" y1="200" x2="330" y2="160" stroke="#0d9488" stroke-width="2.5" marker-end="url(#arw2)"/>
+        <text x="196" y="216" font-size="13" font-weight="700" fill="#0d9488">b = (b₁, b₂)</text>
+        <!-- 面积标注 -->
+        <text x="300" y="132" text-anchor="middle" font-size="14" font-weight="700" fill="#2647c4">面积</text>
+        <text x="300" y="152" text-anchor="middle" font-size="12.5" fill="#475569">= |a₁b₂ − a₂b₁|</text>
+        <!-- 右侧公式框 -->
+        <rect x="480" y="86" width="176" height="96" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+        <text x="568" y="116" text-anchor="middle" font-size="13" font-weight="700" fill="#1e293b">det = 面积（带符号）</text>
+        <text x="568" y="140" text-anchor="middle" font-size="12.5" fill="#475569">符号 = 朝向是否被翻转</text>
+        <text x="568" y="162" text-anchor="middle" font-size="12.5" fill="#e11d48">det = 0 ⟹ 压成一条线</text>
+      </svg>
+      <div class="cap">三维就是平行六面体的体积；n 维同理。行列式为 0 ⟺ 列线性相关 ⟺ 体积被压扁 ⟺ 矩阵不可逆</div>
+    </div>
+
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>#</th><th>性质</th><th>直觉</th></tr></thead>
+        <tbody>
+          <tr><td class="k">1</td><td>det I = 1</td><td>单位立方体体积为 1，定了标尺</td></tr>
+          <tr><td class="k">2</td><td>交换两行，det 变号</td><td>朝向翻转</td></tr>
+          <tr><td class="k">3</td><td>对单行线性（可拆分、可提倍数）</td><td>体积对一条边可加、可缩放</td></tr>
+          <tr><td class="k">4</td><td>两行相等 ⟹ det = 0</td><td>由 2 推出：换了自己又变号，只能是 0</td></tr>
+          <tr><td class="k">5</td><td>行减去另一行的倍数，det 不变</td><td><b>这就是为什么消元能用它</b></td></tr>
+          <tr><td class="k">6</td><td>有一行全 0 ⟹ det = 0</td><td>体积塌了</td></tr>
+          <tr><td class="k">7</td><td>三角矩阵 det = 主对角线之积</td><td>消元的终点，也是算法的核心</td></tr>
+          <tr><td class="k">8</td><td>det A = 0 ⟺ A 奇异</td><td>与可逆性等价</td></tr>
+          <tr><td class="k">9</td><td>det(AB) = det A · det B</td><td>体积放大倍数相乘</td></tr>
+          <tr><td class="k">10</td><td>det Aᵀ = det A</td><td>行和列完全对称</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="diagram">
+      <div class="lbl">怎么真正算 det（不是背公式，而是用性质）</div>
+      <div class="flow">
+        <div class="box blue">消元成 U<small>只做「行减倍数」和换行</small></div>
+        <div class="arw">→</div>
+        <div class="box teal">det A = ±(主元之积)<small>换过奇数次行就带负号</small></div>
+        <div class="arw">→</div>
+        <div class="box violet">代数余子式<small>只适合小矩阵 / 含符号的推导</small></div>
+        <div class="arw">→</div>
+        <div class="box amber">A⁻¹ = Cᵀ / det A<small>伴随矩阵法，好看不好算</small></div>
+      </div>
+      <div class="cap">克拉默法则 x<sub>j</sub> = det(B<sub>j</sub>)/det(A)：Strang 直言它「漂亮但不实用」—— n+1 个行列式太贵了</div>
+    </div>
+
+    <div class="callout co-rose">
+      <span class="h">常见误区</span>
+      行列式的值大不代表矩阵"好"。<i>A</i> = 0.001<i>I</i> 的 det 极小但完全健康；
+      diag(1000, 0.001) 的 det = 1 但极病态。<b>判断矩阵好坏要看条件数 σ<sub>max</sub>/σ<sub>min</sub>，不是行列式。</b>
+    </div>
+  </section>
+
+  <!-- ==================== CH6 ==================== -->
+  <section class="ch" id="ch6">
+    <div class="ch-head">
+      <div class="ch-no r">6</div>
+      <div>
+        <h3>特征值与特征向量：找出矩阵不变的方向</h3>
+        <span class="en">Chapter 6 · Eigenvalues and Eigenvectors</span>
+      </div>
+    </div>
+
+    <div class="lead">
+      <b>一句话核心：</b>普通向量被 <i>A</i> 乘过之后会转向，但某些特殊方向<b>只被拉伸、不转向</b> ——
+      <b><i>A<i>x</i></i> = λ<i>x</i></b>。找到这些 <i>x</i>（特征向量）和拉伸倍数 λ（特征值），
+      矩阵就退化成一个对角阵 Λ，<i>A</i> 的幂、指数、微分方程全都变得可算。
+    </div>
+
+    <p>
+      为什么第 6 章绕不开？因为大量问题本质是「反复乘同一个矩阵」：
+      马尔可夫链的一步转移、种群增长、微分方程的解、Google PageRank 的迭代、神经网络的权重更新。
+      只要出现 <i>A</i>ᵏ 或 e<sup><i>A</i><i>t</i></sup>，特征值就是主角。
+    </p>
+
+    <div class="diagram">
+      <div class="lbl">Ax = λx：方向不变，长度变 λ 倍</div>
+      <svg viewBox="0 0 680 210" width="100%" role="img" aria-label="特征向量方向不变示意图"
+           style="max-width:680px;display:block;margin:0 auto;font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+        <defs>
+          <marker id="e1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8"/>
+          </marker>
+          <marker id="e2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b5bdb"/>
+          </marker>
+        </defs>
+        <!-- 特征方向 1 -->
+        <line x1="90" y1="170" x2="300" y2="60" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="5 4"/>
+        <line x1="90" y1="170" x2="220" y2="98" stroke="#94a3b8" stroke-width="2.5" marker-end="url(#e1)"/>
+        <text x="150" y="150" font-size="12.5" fill="#475569">x₁</text>
+        <line x1="90" y1="170" x2="300" y2="60" stroke="#3b5bdb" stroke-width="2.5" marker-end="url(#e2)"/>
+        <text x="238" y="62" font-size="12.5" font-weight="700" fill="#3b5bdb">Ax₁ = λ₁x₁</text>
+
+        <!-- 特征方向 2 -->
+        <line x1="90" y1="170" x2="330" y2="176" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="5 4"/>
+        <line x1="90" y1="170" x2="230" y2="174" stroke="#94a3b8" stroke-width="2.5" marker-end="url(#e1)"/>
+        <text x="150" y="164" font-size="12.5" fill="#475569">x₂</text>
+        <line x1="90" y1="170" x2="330" y2="176" stroke="#e11d48" stroke-width="2.5" marker-end="url(#e2)"/>
+        <text x="278" y="194" font-size="12.5" font-weight="700" fill="#e11d48">Ax₂ = λ₂x₂（λ₂ 可为负或 0）</text>
+
+        <!-- 非特征向量 -->
+        <line x1="470" y1="170" x2="560" y2="70" stroke="#94a3b8" stroke-width="2.5" marker-end="url(#e1)"/>
+        <text x="556" y="62" font-size="12.5" fill="#475569">普通 v</text>
+        <line x1="470" y1="170" x2="600" y2="140" stroke="#b45309" stroke-width="2.5" marker-end="url(#e2)"/>
+        <text x="596" y="156" font-size="12.5" font-weight="700" fill="#b45309">Av 转向了</text>
+
+        <circle cx="90" cy="170" r="3.5" fill="#1e293b"/>
+        <circle cx="470" cy="170" r="3.5" fill="#1e293b"/>
+      </svg>
+      <div class="cap">n×n 矩阵最多有 n 个线性无关的特征向量；够不够 n 个，决定了它能不能对角化</div>
+    </div>
+
+    <div class="diagram">
+      <div class="lbl">对角化：把 A 搬到"它自己的坐标系"里</div>
+      <div class="flow">
+        <div class="box blue">AS = SΛ<small>S 的列是 n 个特征向量</small></div>
+        <div class="arw">⟹</div>
+        <div class="box teal">A = SΛS⁻¹<small>Λ = diag(λ₁…λ<sub>n</sub>)</small></div>
+        <div class="arw">⟹</div>
+        <div class="box amber">A<sup>k</sup> = SΛ<sup>k</sup>S⁻¹<small>只把对角线取 k 次方</small></div>
+        <div class="arw">⟹</div>
+        <div class="box violet">k→∞ 时看 |λ|&lt;1<small>决定迭代收敛还是发散</small></div>
+      </div>
+      <div class="cap">这就是"幂法"和 PageRank 的原理：反复乘 A，最后只剩下 |λ| 最大的那个特征方向</div>
+    </div>
+
+    <h4 class="sub">两个必须分清的特殊类型</h4>
+
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th></th><th>对称矩阵 S = Sᵀ</th><th>正定矩阵（对称的特例）</th></tr></thead>
+        <tbody>
+          <tr><td>特征值</td><td><b>全是实数</b></td><td>全是<b>正数</b> λ &gt; 0</td></tr>
+          <tr><td>特征向量</td><td><b>可以选成互相正交的</b></td><td>同上，且构成一组正交基</td></tr>
+          <tr><td>分解</td><td class="k">S = QΛQᵀ（谱定理）</td><td class="k">S = QΛQᵀ，还可做 A = LᵀL / RᵀR</td></tr>
+          <tr><td>等价判据</td><td>—</td><td>所有主元 &gt; 0 ⇔ 所有 λ &gt; 0 ⇔ <i>x</i>ᵀ<i>Sx</i> &gt; 0 ⇔ 顺序主子式 &gt; 0</td></tr>
+          <tr><td>几何</td><td>沿正交轴拉伸（可能反向）</td><td>沿正交轴拉伸，方向不变、不翻转，<i>x</i>ᵀ<i>Sx</i>=1 是一个<b>椭球</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout co-violet">
+      <span class="h">谱定理是这本书最美的结论之一</span>
+      任何实对称矩阵都能写成 <b><i>S</i> = <i>Q</i>Λ<i>Q</i>ᵀ</b>，其中 <i>Q</i> 是正交矩阵。
+      注意它比 SVD 更「省」：左右用的是同一组基（<i>Q</i> 和 <i>Q</i>ᵀ）。
+      而且对称矩阵的每个 λ<sub>i</sub> 恰好是 Σ 里对应 σ<sub>i</sub> 的绝对值 —— 第 7 章会接上这个梗。
+    </div>
+
+    <p>
+      第 6 章还处理了两个「现实问题」：<strong>复数特征值</strong>（旋转矩阵的特征值是 ±<i>i</i>，
+      于是引出复向量、Hermite 矩阵 <i>A</i>ᴴ、酉矩阵 <i>U</i>ᴴ<i>U</i>=<i>I</i>）
+      和 <strong>微分方程 d<i>u</i>/d<i>t</i> = <i>A</i><i>u</i></strong>。
+      后者是把矩阵指数 e<sup><i>A</i><i>t</i></sup> 展开在特征基上：每个 λ 对应一个 e<sup>λ<i>t</i></sup> 模式，
+      λ 的实部决定衰减还是爆炸，虚部决定振荡 —— 稳定性分析的全部秘密就在这里。
+    </p>
+  </section>
+
+  <!-- ==================== CH7 ==================== -->
+  <section class="ch" id="ch7">
+    <div class="ch-head">
+      <div class="ch-no g">7</div>
+      <div>
+        <h3>奇异值分解 SVD：线性代数的巅峰</h3>
+        <span class="en">Chapter 7 · The Singular Value Decomposition</span>
+      </div>
+    </div>
+
+    <div class="lead">
+      <b>一句话核心：</b>特征值只对<b>方阵</b>有效，而现实中的数据矩阵几乎都是长方形的。
+      SVD 补上了这个洞：<b>任何</b>矩阵 <i>A</i>（不管什么形状）都能写成
+      <b><i>A</i> = <i>U</i>Σ<i>V</i>ᵀ</b> = 旋转 → 沿轴拉伸 → 再旋转。
+    </div>
+
+    <p>
+      Strang 在很多场合说过：如果只能留一个分解，那就是 SVD。原因是它同时给出两件事 ——
+      <strong>四个基本子空间各自的最佳正交基</strong>（这就是基本定理的第 3、4 部分），
+      以及 <strong>任何矩阵的最佳低秩近似</strong>。
+    </p>
+
+    <div class="diagram">
+      <div class="lbl">SVD 的几何：任何线性变换 = 旋转 → 拉伸 → 旋转</div>
+      <svg viewBox="0 0 680 210" width="100%" role="img" aria-label="SVD 把单位圆变成椭圆的三步示意"
+           style="max-width:680px;display:block;margin:0 auto;font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+        <defs>
+          <marker id="s1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#1e293b"/>
+          </marker>
+          <marker id="s2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b5bdb"/>
+          </marker>
+        </defs>
+        <!-- 面板 1 -->
+        <text x="110" y="24" text-anchor="middle" font-size="13" font-weight="700" fill="#1e293b">① 输入：单位圆 + 正交基 v₁, v₂</text>
+        <circle cx="110" cy="115" r="62" fill="#eef2ff" stroke="#a8b8f5" stroke-width="1.5"/>
+        <line x1="110" y1="115" x2="172" y2="115" stroke="#3b5bdb" stroke-width="2.5" marker-end="url(#s2)"/>
+        <line x1="110" y1="115" x2="110" y2="53" stroke="#3b5bdb" stroke-width="2.5" marker-end="url(#s2)"/>
+        <text x="176" y="120" font-size="12" fill="#2647c4">v₁</text>
+        <text x="104" y="46" text-anchor="middle" font-size="12" fill="#2647c4">v₂</text>
+        <text x="110" y="198" text-anchor="middle" font-size="11.5" fill="#94a3b8">在 Rⁿ 里 · V 正交</text>
+
+        <!-- 箭头 1 -->
+        <line x1="200" y1="115" x2="252" y2="115" stroke="#94a3b8" stroke-width="2" marker-end="url(#s1)"/>
+        <text x="226" y="104" text-anchor="middle" font-size="11.5" fill="#475569">Vᵀ</text>
+
+        <!-- 面板 2 -->
+        <text x="390" y="24" text-anchor="middle" font-size="13" font-weight="700" fill="#1e293b">② Σ 沿坐标轴拉伸成椭圆</text>
+        <ellipse cx="390" cy="115" rx="98" ry="26" fill="#ecfdf5" stroke="#9adccf" stroke-width="1.5"/>
+        <line x1="390" y1="115" x2="488" y2="115" stroke="#0d9488" stroke-width="2.5" marker-end="url(#s2)"/>
+        <line x1="390" y1="115" x2="390" y2="89" stroke="#0d9488" stroke-width="2.5" marker-end="url(#s2)"/>
+        <text x="452" y="132" font-size="12" fill="#0b6f66">σ₁v₁（长轴）</text>
+        <text x="384" y="82" text-anchor="middle" font-size="12" fill="#0b6f66">σ₂v₂</text>
+        <text x="390" y="198" text-anchor="middle" font-size="11.5" fill="#94a3b8">σ₁ ≥ σ₂ ≥ … ≥ 0</text>
+
+        <!-- 箭头 2 -->
+        <line x1="516" y1="115" x2="562" y2="115" stroke="#94a3b8" stroke-width="2" marker-end="url(#s1)"/>
+        <text x="539" y="104" text-anchor="middle" font-size="11.5" fill="#475569">U</text>
+
+        <!-- 面板 3 -->
+        <text x="622" y="24" text-anchor="middle" font-size="13" font-weight="700" fill="#1e293b">③ 转到 Rᵐ</text>
+        <g transform="rotate(-25 622 115)">
+          <ellipse cx="622" cy="115" rx="52" ry="20" fill="#f5f3ff" stroke="#c9bcf7" stroke-width="1.5"/>
+          <line x1="622" y1="115" x2="674" y2="115" stroke="#6d28d9" stroke-width="2.5" marker-end="url(#s2)"/>
+        </g>
+        <text x="622" y="198" text-anchor="middle" font-size="11.5" fill="#94a3b8">u₁, u₂ 在 Rᵐ 里</text>
+      </svg>
+      <div class="cap">Σ 的对角元就是椭圆的半轴长。σ₁ 最大的那个方向，就是数据"最主要的方差方向" —— 这就是 PCA</div>
+    </div>
+
+    <p>
+      SVD 与四个基本子空间的对应关系，要背下来 —— 它把第 3 章那张图配上了「最好的基」：
+    </p>
+
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>子空间</th><th>维数</th><th>最佳正交基来自</th></tr></thead>
+        <tbody>
+          <tr><td>行空间 <i>C</i>(<i>A</i>ᵀ)</td><td class="k">r</td><td><i>V</i> 的前 <i>r</i> 列：v₁…v<sub>r</sub></td></tr>
+          <tr><td>零空间 <i>N</i>(<i>A</i>)</td><td class="k">n − r</td><td><i>V</i> 的后 <i>n</i>−<i>r</i> 列</td></tr>
+          <tr><td>列空间 <i>C</i>(<i>A</i>)</td><td class="k">r</td><td><i>U</i> 的前 <i>r</i> 列：u₁…u<sub>r</sub></td></tr>
+          <tr><td>左零空间 <i>N</i>(<i>A</i>ᵀ)</td><td class="k">m − r</td><td><i>U</i> 的后 <i>m</i>−<i>r</i> 列</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 class="sub">低秩近似：为什么 SVD 能压缩</h4>
+
+    <p>
+      SVD 可以写成 r 个秩 1 矩阵之和：<i>A</i> = σ₁<i>u</i>₁<i>v</i>₁ᵀ + … + σ<sub>r</sub><i>u</i><sub>r</sub><i>v</i><sub>r</sub>ᵀ。
+      只留前 <i>k</i> 项，就得到 <i>A</i><sub>k</sub>。
+      <strong>Eckart–Young 定理</strong>保证：这是所有秩 <i>k</i> 矩阵里离 <i>A</i> 最近的那个（在 2-范数和 Frobenius 范数下都是）。
+    </p>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="n">m·n</div>
+        <div class="t">原图存储量</div>
+        <div class="d">每个像素一个数字</div>
+      </div>
+      <div class="stat">
+        <div class="n t">k(m+n+1)</div>
+        <div class="t">秩 k 近似的存储量</div>
+        <div class="d">存 U<sub>k</sub>、Σ<sub>k</sub>、V<sub>k</sub>ᵀ 三部分</div>
+      </div>
+      <div class="stat">
+        <div class="n v">σ<sub>k+1</sub></div>
+        <div class="t">截断造成的误差</div>
+        <div class="d">‖A − A<sub>k</sub>‖₂ 恰好等于它</div>
+      </div>
+      <div class="stat">
+        <div class="n a">σ₁ / σ<sub>r</sub></div>
+        <div class="t">条件数 κ(A)</div>
+        <div class="d">越大越病态，误差越容易被放大</div>
+      </div>
+    </div>
+
+    <div class="diagram">
+      <div class="lbl">奇异值衰减曲线（典型的真实数据，前几项吃掉绝大部分能量）</div>
+      <svg viewBox="0 0 680 200" width="100%" role="img" aria-label="奇异值快速衰减的折线图"
+           style="max-width:680px;display:block;margin:0 auto;font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+        <line x1="60" y1="160" x2="640" y2="160" stroke="#cbd5e1" stroke-width="1.5"/>
+        <line x1="60" y1="160" x2="60" y2="30" stroke="#cbd5e1" stroke-width="1.5"/>
+        <text x="34" y="36" font-size="11.5" fill="#94a3b8">σ</text>
+        <text x="640" y="178" text-anchor="end" font-size="11.5" fill="#94a3b8">序号 i →</text>
+        <polyline points="60,44 122,86 184,116 246,132 308,142 370,148 432,152 494,155 556,157 618,158"
+                  fill="none" stroke="#3b5bdb" stroke-width="2.5" stroke-linejoin="round"/>
+        <circle cx="60" cy="44" r="4" fill="#3b5bdb"/>
+        <circle cx="122" cy="86" r="4" fill="#3b5bdb"/>
+        <circle cx="184" cy="116" r="4" fill="#3b5bdb"/>
+        <circle cx="246" cy="132" r="4" fill="#3b5bdb"/>
+        <line x1="60" y1="44" x2="60" y2="160" stroke="#3b5bdb" stroke-width="1" stroke-dasharray="4 3" opacity=".35"/>
+        <line x1="184" y1="116" x2="184" y2="160" stroke="#0d9488" stroke-width="1" stroke-dasharray="4 3" opacity=".5"/>
+        <text x="196" y="132" font-size="12" font-weight="700" fill="#0d9488">k = 3 就够</text>
+        <text x="500" y="150" font-size="11.5" fill="#94a3b8">尾巴 ≈ 噪声</text>
+        <text x="350" y="20" text-anchor="middle" font-size="12" fill="#475569">前 k 项的"能量占比" = Σ<sub>1..k</sub>σ² / Σ<sub>1..r</sub>σ²</text>
+      </svg>
+      <div class="cap">现实中奇异值掉得极快：图像、用户评分矩阵、词频矩阵都是这样，这就是压缩和降噪能成立的根本原因</div>
+    </div>
+
+    <div class="diagram">
+      <div class="lbl">PCA：把 SVD 用在「中心化后的数据矩阵」上</div>
+      <div class="flow">
+        <div class="box blue">数据矩阵 X<small>每行一个样本，每列一个特征</small></div>
+        <div class="arw">→</div>
+        <div class="box teal">减去均值<small>把点云中心搬到原点</small></div>
+        <div class="arw">→</div>
+        <div class="box amber">X = UΣVᵀ<small>做 SVD</small></div>
+        <div class="arw">→</div>
+        <div class="box violet">主成分 = V 的前 k 列<small>方差 = σ<sub>i</sub>²/(m−1)</small></div>
+        <div class="arw">→</div>
+        <div class="box green">降维：X·V<sub>k</sub><small>投影到前 k 个主成分</small></div>
+      </div>
+      <div class="cap">工程上永远用 SVD 做 PCA，而不是去求协方差矩阵 XᵀX 的特征值 —— 后者会把条件数平方，数值上更糟</div>
+    </div>
+
+    <div class="callout co-teal">
+      <span class="h">伪逆 A⁺：最小二乘的终极形态</span>
+      <i>A</i>⁺ = <i>V</i>Σ⁺<i>U</i>ᵀ，其中 Σ⁺ 就是把每个非零 σ<sub>i</sub> 取倒数 1/σ<sub>i</sub> 再转置。
+      它给出 <b>最小范数的最小二乘解</b> <i>x̂</i> = <i>A</i>⁺<i>b</i>（同时属于行空间）。
+      不管 <i>A</i> 是长方形、奇异还是秩亏，伪逆都有定义 —— 这是 SVD 最实用的副产品。
+    </div>
+  </section>
+
+  <!-- ==================== CH8 ==================== -->
+  <section class="ch" id="ch8">
+    <div class="ch-head">
+      <div class="ch-no">8</div>
+      <div>
+        <h3>线性变换：换一组好基，问题就消失了</h3>
+        <span class="en">Chapter 8 · Linear Transformations</span>
+      </div>
+    </div>
+
+    <div class="lead">
+      <b>一句话核心：</b>矩阵只是线性变换在某一组基下的「照片」。
+      换基，同一件事的照片就变了 —— <b><i>B</i> = <i>M</i>⁻¹<i>AM</i></b>。
+      所谓「找一组好基」，就是找一张让矩阵变成对角的、或正交的、或稀疏的照片。
+    </div>
+
+    <p>
+      这一章是全书唯一的「抽象」章节，但动机非常实在：求导 d/d<i>x</i> 是线性变换，
+      积分是线性变换，傅里叶变换是线性变换，卷积也是。
+      一旦承认它们是线性的，前面所有关于子空间和分解的工具就都能搬过去用。
+    </p>
+
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>变换 T</th><th>输入空间</th><th>选定基后的矩阵</th><th>"好基"是什么</th></tr></thead>
+        <tbody>
+          <tr><td>求导 d/d<i>x</i></td><td>多项式 1, <i>x</i>, <i>x</i>²…</td><td class="k">次对角线填 1,2,3…</td><td>傅里叶基（让它对角）</td></tr>
+          <tr><td>二阶差分</td><td>离散信号</td><td class="k">三对角 [-1 2 -1]</td><td>正弦/余弦向量（特征向量）</td></tr>
+          <tr><td>循环卷积</td><td>周期序列</td><td class="k">循环矩阵</td><td>傅里叶基 → FFT 把它对角化</td></tr>
+          <tr><td>平面旋转</td><td>R²</td><td class="k">[cos −sin; sin cos]</td><td>复特征值 e<sup>iθ</sup></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="diagram">
+      <div class="lbl">换基的完整流程（相似变换 B = M⁻¹AM）</div>
+      <div class="flow">
+        <div class="box blue">输入向量 v<small>在旧基下的坐标</small></div>
+        <div class="arw">→</div>
+        <div class="box teal">乘 M⁻¹<small>换成新基坐标</small></div>
+        <div class="arw">→</div>
+        <div class="box amber">乘 A<small>在新基下做变换</small></div>
+        <div class="arw">→</div>
+        <div class="box violet">乘 M<small>换回旧基</small></div>
+        <div class="arw">=</div>
+        <div class="box green">B = M⁻¹AM<small>B 与 A 相似：同特征值</small></div>
+      </div>
+      <div class="cap">相似矩阵共享特征值、行列式、秩 —— 变的只是"看起来乱不乱"</div>
+    </div>
+
+    <div class="callout co-blue">
+      <span class="h">8.3 节「寻找好基」是这一章的题眼</span>
+      什么样的基算好？Strang 给了三个答案：<br>
+      ① <b>特征向量基</b> → 矩阵变成 Λ（对角，可算 <i>A</i>ᵏ）；<br>
+      ② <b>正交基</b> → 矩阵变成 <i>Q</i>Λ<i>Q</i>ᵀ 或 <i>U</i>Σ<i>V</i>ᵀ（数值稳定，可截断）；<br>
+      ③ <b>小波基 / 傅里叶基</b> → 矩阵变稀疏（可压缩，算得快）。<br>
+      过去五十年的数值线性代数，本质上就是在为不同问题寻找第 ③ 种基。
+    </div>
+  </section>
+
+  <!-- ==================== CH9-10 ==================== -->
+  <section class="ch" id="ch9">
+    <div class="ch-head">
+      <div class="ch-no r">9·10</div>
+      <div>
+        <h3>优化与从数据学习：线性代数遇上深度学习</h3>
+        <span class="en">Chapters 9–10 · Optimization &amp; Learning from Data</span>
+      </div>
+    </div>
+
+    <div class="lead">
+      <b>一句话核心：</b>这两章是第 6 版新加的，也是 Strang 认为「今天最值得学的应用」：
+      <b>深度网络 = 一堆矩阵权重 + 逐元素的 ReLU</b>，于是它就是一个<b>分段线性函数</b>；
+      训练 = 在这些矩阵构成的参数空间里做大规模优化，用<b>反向传播</b>算梯度、<b>SGD</b> 走下坡。
+    </div>
+
+    <p>
+      第 9 章先补上「线性代数与微积分的接口」。单变量求极值是导数 = 0；多变量 <i>F</i>(<i>x</i>) 的极小点，
+      条件是<strong>梯度 ∇<i>F</i> = 0</strong>，再加上二阶项 <i>x</i>ᵀ<i>Hx</i> &gt; 0（<i>H</i> 是 Hessian 矩阵，
+      也就是二阶偏导组成的对称矩阵）。正定、半正定、鞍点这些概念，全靠第 6 章。
+    </p>
+
+    <div class="diagram">
+      <div class="lbl">多变量最小化的判据（全是前面章节的组合）</div>
+      <div class="stack">
+        <div class="layer" style="border-color:#a8b8f5;background:var(--blue-bg)">
+          <div class="lab" style="color:var(--blue)">一阶</div>
+          <div class="chips"><span class="chip b">∇F = 0</span><span class="chip">n 个方程，n 个未知数 —— 又是一个线性/非线性方程组</span></div>
+        </div>
+        <div class="layer" style="border-color:#9adccf;background:var(--teal-bg)">
+          <div class="lab" style="color:var(--teal)">二阶</div>
+          <div class="chips"><span class="chip t">H 正定 → 极小</span><span class="chip t">H 负定 → 极大</span><span class="chip">H 有正有负 → 鞍点</span></div>
+        </div>
+        <div class="layer" style="border-color:#f0d09a;background:var(--amber-bg)">
+          <div class="lab" style="color:var(--amber)">迭代</div>
+          <div class="chips"><span class="chip">x<sub>k+1</sub> = x<sub>k</sub> − s·∇F</span><span class="chip">步长 s 太大发散、太小学不动</span></div>
+        </div>
+      </div>
+      <div class="cap">深度学习里最常见的坑不是局部极小，而是<b>鞍点</b> —— 高维空间里鞍点远比极小点多</div>
+    </div>
+
+    <h4 class="sub">神经网络：把矩阵叠起来</h4>
+
+    <p>
+      Strang 给深度学习下的定义非常干净。一层的计算是
+      <i>F</i>(<i>v</i>) = ReLU(<i>A<i>v</i></i> + <i>b</i>)，其中 ReLU 逐元素取 max(0, <i>x</i>)。
+      一个 <i>L</i> 层的网络就是把这事重复 <i>L</i> 次：
+    </p>
+
+    <div class="diagram">
+      <div class="lbl">深度网络 = 线性（矩阵）× 非线性（ReLU）交替</div>
+      <div class="flow">
+        <div class="box blue">输入 v₀<small>一张图 / 一句话</small></div>
+        <div class="arw">→</div>
+        <div class="box teal">A₁v₀ + b₁<small>矩阵乘法（线性）</small></div>
+        <div class="arw">→</div>
+        <div class="box amber">ReLU<small>逐元素非线性，造出折点</small></div>
+        <div class="arw">→</div>
+        <div class="box teal">A₂v₁ + b₂</div>
+        <div class="arw">→</div>
+        <div class="box amber">ReLU</div>
+        <div class="arw">→</div>
+        <div class="box violet">输出<small>分类 / 回归</small></div>
+      </div>
+      <div class="cap">每个 ReLU 都在输入空间切一刀：n 个折点把空间分成许多线性区域 → 整体是<b>分段线性函数</b></div>
+    </div>
+
+    <div class="diagram">
+      <div class="lbl">训练：反向传播就是链式法则 + 矩阵转置</div>
+      <div class="flow">
+        <div class="box blue">前向：算出预测 ŷ<small>缓存每层的中间值</small></div>
+        <div class="arw">→</div>
+        <div class="box rose">损失 L(ŷ, y)<small>预测与真值的差距</small></div>
+        <div class="arw">→</div>
+        <div class="box amber">反向：∂L/∂A<sub>ℓ</sub><small>从最后一层往前乘，复用缓存</small></div>
+        <div class="arw">→</div>
+        <div class="box green">A<sub>ℓ</sub> ← A<sub>ℓ</sub> − s·∂L/∂A<sub>ℓ</sub><small>梯度下降一步</small></div>
+      </div>
+      <div class="cap">反向传播的成本和前向同阶 —— 这就是为什么"深"网络也能训练。SGD 则是每步只用一小批样本估梯度</div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="n">Σ n<sub>ℓ</sub>·n<sub>ℓ+1</sub></div>
+        <div class="t">权重参数个数</div>
+        <div class="d">每层两个尺寸相乘，再求和</div>
+      </div>
+      <div class="stat">
+        <div class="n t">O(1) 倍前向</div>
+        <div class="t">反向传播的代价</div>
+        <div class="d">链式法则复用中间结果</div>
+      </div>
+      <div class="stat">
+        <div class="n v">∇<sub>A</sub>L = δ·vᵀ</div>
+        <div class="t">权重梯度</div>
+        <div class="d">外积形式，和第 1 章的列×行呼应</div>
+      </div>
+      <div class="stat">
+        <div class="n a">ReLU</div>
+        <div class="t">非线性的来源</div>
+        <div class="d">没有它，再多层也只是 Ax 一个矩阵</div>
+      </div>
+    </div>
+
+    <p>
+      第 9 章剩下的部分是约束优化：<strong>拉格朗日乘子</strong>（∇<i>f</i> = λ∇<i>g</i>，几何上是两个函数的等高线相切）
+      和 <strong>最小范数解</strong>（在 <i>A<i>x</i></i>=<i>b</i> 的所有解里挑 ‖<i>x</i>‖ 最小的 —— 又回到伪逆 <i>A</i>⁺<i>b</i>）。
+      第 9.4 节还讲了线性规划与博弈论的对偶，那里「对偶问题」的思路和第 3 章的左零空间是一回事。
+    </p>
+
+    <p>
+      第 10 章把镜头转向<strong>数据本身</strong>：一个样本矩阵 <i>X</i> 的均值 <i>m</i>、样本方差 <i>S</i>、
+      以及<strong>协方差矩阵</strong> <i>C</i> = <i>X</i>ᵀ<i>X</i>/(<i>N</i>−1)。
+      协方差矩阵一定是对称半正定的，它的特征值分解就是 PCA 的另一条路径 ——
+      而 <i>C</i> 的非对角元「两个特征一起波动」，正是多元统计的全部内容。
+      这一章的落点是：为什么高维数据常常能被压到很低的维度 —— 因为协方差矩阵的特征值（= σ²）掉得飞快。
+    </p>
+
+    <div class="callout co-violet">
+      <span class="h">学完这两章你会改变一个看法</span>
+      「机器学习」并不是和线性代数并列的另一个学科。
+      在 Strang 的叙述里，它<b>就是</b>线性代数 + 一点点微积分：网络结构是矩阵，
+      前向传播是矩阵乘法，反向传播是转置矩阵，PCA 是 SVD，正则化是最小范数解，
+      过拟合是低秩近似保留了噪声。<br>
+      第 6 版之所以把这两章加进来，就是为了说清这件事。
+    </div>
+  </section>
+
+  <!-- ==================== APPENDIX ==================== -->
+  <section id="appx">
+    <div class="sec-head"><h2>附录：五分钟速查</h2><span class="en">Cheat Sheet</span><div class="line"></div></div>
+
+    <h4 class="sub">五大分解（全书的主干，一张表看完）</h4>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>分解</th><th>适用</th><th>它回答的问题</th><th>章节</th></tr></thead>
+        <tbody>
+          <tr><td class="k">A = CR</td><td>任何矩阵</td><td>哪些列是独立的？列秩 = 行秩</td><td>1.4</td></tr>
+          <tr><td class="k">A = LU</td><td>消元（方阵为主）</td><td>怎么解 Ax=b？一次分解反复用</td><td>2.3</td></tr>
+          <tr><td class="k">A = QR</td><td>列独立</td><td>怎么得到正交基？最小二乘最稳</td><td>4.4</td></tr>
+          <tr><td class="k">S = QΛQᵀ</td><td>对称矩阵</td><td>主轴在哪？正定吗？</td><td>6.3</td></tr>
+          <tr><td class="k">A = UΣVᵀ</td><td><b>任何</b>矩阵</td><td>最佳低秩近似？最佳正交基？</td><td>7.1</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 class="sub">中英术语对照</h4>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>中文</th><th>英文</th><th>一句话</th></tr></thead>
+        <tbody>
+          <tr><td>列空间</td><td class="k">column space C(A)</td><td>A 各列的所有组合，dim = r</td></tr>
+          <tr><td>零空间</td><td class="k">nullspace N(A)</td><td>Ax=0 的全部解，dim = n−r</td></tr>
+          <tr><td>行空间</td><td class="k">row space C(Aᵀ)</td><td>消元不改变它，dim = r</td></tr>
+          <tr><td>左零空间</td><td class="k">left nullspace N(Aᵀ)</td><td>最小二乘的误差住在里面，dim = m−r</td></tr>
+          <tr><td>秩</td><td class="k">rank r</td><td>主元个数 = 独立列数 = 独立行数</td></tr>
+          <tr><td>线性无关</td><td class="k">independence</td><td>Ax=0 只有零解</td></tr>
+          <tr><td>标准正交</td><td class="k">orthonormal</td><td>QᵀQ = I，长度角度都不变</td></tr>
+          <tr><td>投影矩阵</td><td class="k">projection P</td><td>P² = P，Pᵀ = P</td></tr>
+          <tr><td>正规方程</td><td class="k">normal equations</td><td>AᵀAx̂ = Aᵀb</td></tr>
+          <tr><td>伪逆</td><td class="k">pseudoinverse A⁺</td><td>VΣ⁺Uᵀ，最小范数最小二乘解</td></tr>
+          <tr><td>条件数</td><td class="k">condition number</td><td>σ₁/σᵣ，衡量矩阵有多病态</td></tr>
+          <tr><td>低秩近似</td><td class="k">low-rank approximation</td><td>截断 SVD，Eckart–Young 保证最优</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 class="sub">自测：给自己的六个问题</h4>
+
+    <div class="q">
+      <b>Q1.</b> 一个 5×7 的矩阵 A，秩 r = 3。四个基本子空间的维数分别是多少？
+      <div class="qa"><b>A.</b> C(A)=3，C(Aᵀ)=3，N(A)=7−3=4，N(Aᵀ)=5−3=2。检查：3+4=7 ✓，3+2=5 ✓。</div>
+    </div>
+    <div class="q">
+      <b>Q2.</b> 消元之后，哪两个子空间会变、哪两个不会变？
+      <div class="qa"><b>A.</b> 行空间和零空间不变；列空间和左零空间通常会被改变（但维数不变）。所以求列空间的基要回到原矩阵 A 里取主元列。</div>
+    </div>
+    <div class="q">
+      <b>Q3.</b> 为什么最小二乘的解满足 Aᵀ(b − Ax̂) = 0？
+      <div class="qa"><b>A.</b> 因为误差 e = b − Ax̂ 必须垂直于 A 的每一列，也就是垂直于整个列空间；写成矩阵形式就是 Aᵀe = 0，展开即得正规方程。</div>
+    </div>
+    <div class="q">
+      <b>Q4.</b> 对称矩阵的特征值和 SVD 的奇异值是什么关系？
+      <div class="qa"><b>A.</b> 对实对称 S，特征值 λ<sub>i</sub> 是实数，奇异值就是 σ<sub>i</sub> = |λ<sub>i</sub>|，而 U、V 取的是同一组正交特征向量（符号可能不同）。</div>
+    </div>
+    <div class="q">
+      <b>Q5.</b> 一张 1000×1000 的灰度图，用秩 k=50 的 SVD 近似，要存多少个数？压缩比多少？
+      <div class="qa"><b>A.</b> 原始 10⁶ 个；秩 50 需要 50×(1000+1000+1) ≈ 100,050 个，约 <b>10 倍</b>压缩。</div>
+    </div>
+    <div class="q">
+      <b>Q6.</b> 神经网络去掉所有 ReLU，会变成什么？
+      <div class="qa"><b>A.</b> 一堆矩阵相乘 A<sub>L</sub>…A₂A₁ = 一个矩阵。整个网络退化成一个线性变换 —— 深度完全没有意义。非线性才是"深"的前提。</div>
+    </div>
+  </section>
+
+  <!-- ==================== END ==================== -->
+  <section id="end">
+    <div class="sec-head"><h2>结语与下一步</h2><span class="en">What's Next</span><div class="line"></div></div>
+
+    <p>
+      这本书读完，你手上会留下三样东西：<strong>一张图</strong>（四个基本子空间）、
+      <strong>五个分解</strong>（CR / LU / QR / QΛQᵀ / UΣVᵀ）、
+      和 <strong>一个习惯</strong>（看到矩阵先问秩和列空间）。
+      Strang 花了五十年把课越讲越薄，核心就是这三样。
+    </p>
+
+    <div class="diagram">
+      <div class="lbl">如果想继续往下走</div>
+      <div class="stack">
+        <div class="layer" style="border-color:#a8b8f5;background:var(--blue-bg)">
+          <div class="lab" style="color:var(--blue)">看视频</div>
+          <div class="chips"><span class="chip b">MIT 18.06（Strang 本人，入门）</span><span class="chip">MIT 18.065（矩阵方法与机器学习，进阶）</span></div>
+        </div>
+        <div class="layer" style="border-color:#9adccf;background:var(--teal-bg)">
+          <div class="lab" style="color:var(--teal)">动手算</div>
+          <div class="chips"><span class="chip t">numpy.linalg.svd / qr / lstsq</span><span class="chip">拿自己的照片做一遍 rank-k 压缩</span></div>
+        </div>
+        <div class="layer" style="border-color:#c9bcf7;background:var(--violet-bg)">
+          <div class="lab" style="color:var(--violet)">接着读</div>
+          <div class="chips"><span class="chip v">《Linear Algebra and Learning from Data》</span><span class="chip">同一作者，把第 9–10 章展开成一本书</span></div>
+        </div>
+      </div>
+      <div class="cap">书里的习题不要跳过 —— 尤其是每章末尾的 Review Problems，那是 Strang 精心挑的"概念检查点"</div>
+    </div>
+
+    <div class="callout co-amber">
+      <span class="h">最后一句</span>
+      线性代数难，几乎从来不是因为计算，而是因为<b>对象太多、层次太高</b>。
+      Strang 的解法是把一切都落到「空间 + 分解」这两件事上：只要你能画出那四个子空间，
+      并且知道该用哪个分解，剩下的就都只是算术。
+    </div>
+  </section>
+
+  <footer>
+    <span>© 2026 ptato</span><span>·</span>
+    <span>阅读提炼自 Gilbert Strang《Introduction to Linear Algebra》第 6 版（Wellesley-Cambridge Press, 2023）</span><span>·</span>
+    <span><a href="../index.html#posts">← 回首页</a></span>
+  </footer>
+
+  <p style="text-align:center;font-size:12.5px;color:var(--ink3);margin:0 0 50px">
+    本页为读书笔记，图表均为重新绘制；章节结构、术语与例子对照原书及 MIT 官方章节样章核对。
+  </p>
+
+</div>
+</body>
+</html>
