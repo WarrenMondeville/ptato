@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>《重构：改善既有代码的设计》· 图解教程</title>
+<meta name="description" content="Martin Fowler《重构》第 2 版图解教程：24 种代码坏味道、60 多个重构手法、两顶帽子与戏剧团计费案例的完整重构路径。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
+<style>
+  :root{
+    --bg:#f6f8fb; --card:#ffffff; --ink:#1e293b; --ink2:#475569; --ink3:#94a3b8;
+    --line:#e2e8f0; --line2:#cbd5e1;
+    --blue:#3b5bdb; --blue-bg:#eef2ff;
+    --teal:#0d9488; --teal-bg:#ecfdf5;
+    --amber:#b45309; --amber-bg:#fffbeb;
+    --rose:#be123c; --rose-bg:#fff1f2;
+    --violet:#6d28d9; --violet-bg:#f5f3ff;
+    --green:#15803d; --green-bg:#f0fdf4;
+    --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px -12px rgba(15,23,42,.14);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:16px; line-height:1.85; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 20px 80px}
+
+  /* ---------- hero ---------- */
+  .hero{padding:64px 0 30px;text-align:center}
+  .hero .kicker{
+    display:inline-block;font-size:12.5px;letter-spacing:.14em;color:var(--teal);
+    background:var(--teal-bg);border:1px solid #c9f0e6;border-radius:999px;padding:5px 14px;margin-bottom:20px;
+  }
+  .hero h1{font-size:clamp(26px,4.4vw,40px);line-height:1.35;margin:0 0 16px;letter-spacing:-.01em}
+  .hero h1 em{font-style:normal;color:var(--blue)}
+  .hero p.sub{color:var(--ink2);font-size:16.5px;margin:0 auto;max-width:660px}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:26px}
+  .meta span{font-size:13px;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 13px}
+
+  /* ---------- section ---------- */
+  section{margin-top:64px;scroll-margin-top:24px}
+  .sec-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:8px}
+  .badge{
+    flex:0 0 auto;width:40px;height:40px;border-radius:12px;background:var(--blue);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;
+    box-shadow:0 6px 16px -8px rgba(59,91,219,.9);
+  }
+  .badge.teal{background:var(--teal);box-shadow:0 6px 16px -8px rgba(13,148,136,.9)}
+  .badge.amber{background:var(--amber);box-shadow:0 6px 16px -8px rgba(180,83,9,.9)}
+  .badge.violet{background:var(--violet);box-shadow:0 6px 16px -8px rgba(109,40,217,.9)}
+  .badge.rose{background:var(--rose);box-shadow:0 6px 16px -8px rgba(190,18,60,.9)}
+  .badge.green{background:var(--green);box-shadow:0 6px 16px -8px rgba(21,128,61,.9)}
+  .sec-head h2{font-size:23px;margin:6px 0 0;letter-spacing:-.01em;line-height:1.4}
+  .sec-head .en{font-size:13px;color:var(--ink3);font-weight:500;margin-left:8px}
+  h3{font-size:17.5px;margin:34px 0 10px;padding-left:12px;border-left:3px solid var(--blue)}
+  h3.teal{border-color:var(--teal)} h3.amber{border-color:var(--amber)}
+  h3.violet{border-color:var(--violet)} h3.rose{border-color:var(--rose)}
+  h3.green{border-color:var(--green)}
+  h4{font-size:15.5px;margin:22px 0 6px;color:var(--ink)}
+  p{margin:12px 0}
+  a{color:var(--blue)}
+  strong{color:#0f172a}
+  em.hl{font-style:normal;background:#eef2ff;color:#3b5bdb;border-radius:4px;padding:0 5px;font-weight:600}
+  code{background:#f1f5f9;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:13.5px;
+       font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#0f172a}
+  ul,ol{margin:12px 0;padding-left:22px}
+  li{margin:6px 0}
+
+  /* ---------- toc ---------- */
+  .toc{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 24px;box-shadow:var(--shadow)}
+  .toc h3{margin:0 0 12px;border:0;padding:0;font-size:15px;color:var(--ink2);letter-spacing:.05em}
+  .toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:6px 20px}
+  .toc li a{display:flex;gap:10px;text-decoration:none;color:var(--ink);font-size:14.5px;padding:6px 8px;border-radius:8px}
+  .toc li a:hover{background:var(--blue-bg)}
+  .toc li b{color:var(--blue);font-variant-numeric:tabular-nums;font-weight:600;min-width:16px}
+
+  /* ---------- card / callout ---------- */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin:18px 0;box-shadow:var(--shadow)}
+  .card h4{margin-top:0}
+  .callout{border-radius:14px;padding:16px 20px;margin:18px 0;border:1px solid}
+  .callout .lbl{display:block;font-size:12.5px;font-weight:700;letter-spacing:.06em;margin-bottom:6px}
+  .co-blue{background:var(--blue-bg);border-color:#dbe3ff} .co-blue .lbl{color:var(--blue)}
+  .co-teal{background:var(--teal-bg);border-color:#c9f0e6} .co-teal .lbl{color:var(--teal)}
+  .co-amber{background:var(--amber-bg);border-color:#f6e3bf} .co-amber .lbl{color:var(--amber)}
+  .co-rose{background:var(--rose-bg);border-color:#fbd5dd} .co-rose .lbl{color:var(--rose)}
+  .co-violet{background:var(--violet-bg);border-color:#ddd3fb} .co-violet .lbl{color:var(--violet)}
+  .callout p{margin:6px 0}
+
+  /* ---------- diagram shell ---------- */
+  .diagram{background:linear-gradient(180deg,#fdfefe,#f8fafc);border:1px solid var(--line);border-radius:16px;padding:22px 18px;margin:22px 0;text-align:center}
+  .diagram .dtitle{font-size:14px;font-weight:700;color:var(--ink2);text-align:center;margin-bottom:16px}
+  .diagram .cap{font-size:13px;color:var(--ink3);text-align:center;margin-top:12px;line-height:1.7}
+  .diagram svg{display:block;max-width:100%;height:auto;margin:0 auto}
+  /* 内联样式竖向卡片流（微信友好，不依赖 flex/grid） */
+  .nbox{display:inline-block;max-width:470px;min-width:190px;padding:9px 16px;font-size:14px;text-align:left;line-height:1.6}
+  .nbox b{color:#0f172a}
+  .narw{color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0}
+
+  /* ---------- code ---------- */
+  pre{margin:16px 0;padding:16px 18px;background:#0f172a;color:#e2e8f0;border-radius:14px;overflow-x:auto;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.75}
+  pre .c{color:#94a3b8}
+  pre .k{color:#93c5fd}
+  pre .s{color:#86efac}
+  pre .f{color:#fcd34d}
+
+  /* ---------- table ---------- */
+  .tblwrap{overflow-x:auto;margin:20px 0;border:1px solid var(--line);border-radius:14px;background:#fff}
+  table{border-collapse:collapse;width:100%;font-size:14px;min-width:520px}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{background:#f8fafc;font-size:13px;color:var(--ink2);font-weight:600;white-space:nowrap}
+  tbody tr:last-child td{border-bottom:0}
+  tbody tr:hover{background:#fcfdff}
+  td.y{color:var(--green);font-weight:600}
+  td.n{color:var(--rose);font-weight:600}
+
+  /* ---------- smell cards ---------- */
+  .smells{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:20px 0}
+  .smell{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow);
+         border-left:4px solid var(--line2)}
+  .smell h4{margin:0 0 2px;font-size:15px}
+  .smell .en2{font-size:11.5px;color:var(--ink3);font-family:ui-monospace,Menlo,monospace}
+  .smell p{margin:8px 0 0;font-size:13.3px;color:var(--ink2);line-height:1.7}
+
+  /* ---------- misc ---------- */
+  .quote{border-left:3px solid var(--line2);padding:2px 0 2px 16px;color:var(--ink2);font-size:15px;margin:16px 0}
+  .quote b{color:var(--ink)}
+  .split{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:18px 0}
+  .mini{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .mini h4{margin:0 0 6px;font-size:15px}
+  .mini.good{border-color:#bbf7d0;background:#f8fdf9}
+  .mini.bad{border-color:#fecdd3;background:#fffafb}
+  .mini.info{border-color:#dbe3ff;background:#fafbff}
+  .mini p{margin:6px 0 0;font-size:13.5px;color:var(--ink2);line-height:1.7}
+  .chk{list-style:none;padding:0;margin:14px 0}
+  .chk li{position:relative;padding-left:28px;margin:9px 0;font-size:14.5px}
+  .chk li::before{content:"";position:absolute;left:0;top:6px;width:16px;height:16px;border:1.5px solid var(--line2);border-radius:4px;background:#fff}
+  .steps{counter-reset:st;list-style:none;padding:0;margin:16px 0}
+  .steps li{counter-increment:st;position:relative;padding:10px 0 10px 44px;border-bottom:1px dashed var(--line);font-size:14.5px}
+  .steps li:last-child{border-bottom:0}
+  .steps li::before{content:counter(st);position:absolute;left:0;top:11px;width:26px;height:26px;border-radius:8px;
+                    background:var(--blue-bg);color:var(--blue);font-size:13px;font-weight:700;
+                    display:flex;align-items:center;justify-content:center}
+  .src{font-size:12.5px;color:var(--ink3);margin-top:8px}
+  footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);font-size:13px;color:var(--ink3);text-align:center;line-height:2}
+  @media (max-width:560px){
+    .hero{padding:44px 0 20px}
+    .toc ol{grid-template-columns:1fr}
+  }
+
+.toclist{list-style:none;margin:8px 0 0;padding:0}
+.toclist li{padding:6px 2px;font-size:14px;line-height:1.6;color:var(--ink);border-bottom:1px dashed var(--line)}
+.toclist li:last-child{border-bottom:none}
+.tocpart{font-weight:700;color:var(--blue);margin-top:14px;font-size:13px;letter-spacing:.04em}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ================= HERO ================= -->
+  <header class="hero">
+    <span class="kicker">读 书 图 解 教 程</span>
+    <h1>《重构 · 改善既有代码的<em>设计</em>》<br>把“改代码”变成一门有纪律的手艺</h1>
+    <p class="sub">这本书不教你怎么写代码，它教你<strong>怎么在代码已经跑起来之后，依然敢动它</strong>。答案不是勇气，是一套可以照着做的、每一步都不会把它弄坏的机械步骤。</p>
+    <div class="meta">
+      <span>Martin Fowler 著</span>
+      <span>第 2 版 · 中文版 2019 · 人民邮电</span>
+      <span>熊节 / 林从羽 译</span>
+      <span>60+ 重构手法</span>
+      <span>24 种代码坏味道</span>
+      <span>示例全部改用 JavaScript</span>
+    </div>
+  </header>
+
+  <!-- ================= TOC ================= -->
+  <nav class="toc">
+<h3>目 录</h3>
+<ul class="toclist">
+<li>01 · 什么叫重构：两顶帽子</li>
+<li>02 · 为什么值得重构：设计耐久性假说</li>
+<li>03 · 什么时候动手：三次法则</li>
+<li>04 · 安全绳：没有测试就没有重构</li>
+<li>05 · 24 种代码坏味道：全景</li>
+<li>06 · 坏味道精讲 · 膨胀与变化阻碍</li>
+<li>07 · 坏味道精讲 · 可有可无与耦合</li>
+<li>08 · 重构名录怎么读：四段式卡片</li>
+<li>09 · 基本功：提炼、内联、改名</li>
+<li>10 · 搬移与封装：代码该待在哪</li>
+<li>11 · 简化条件逻辑：干掉 switch</li>
+<li>12 · 完整走一遍：戏剧团计费案例</li>
+<li>13 · 在真实项目里重构 + 速查</li>
+</ul>
+</nav>
+
+  <!-- ================= 01 ================= -->
+  <section id="s1">
+    <div class="sec-head">
+      <div class="badge">01</div>
+      <h2>什么叫重构：两顶帽子<span class="en">What is Refactoring</span></h2>
+    </div>
+
+    <p>先给结论。Fowler 把“重构”当成两个词来定义，缺一个都容易走偏：</p>
+
+    <div class="split">
+      <div class="mini info">
+        <h4>重构（名词）</h4>
+        <p>对软件<strong>内部结构</strong>的一种调整，目的是在<strong>不改变软件可观察行为</strong>的前提下，提高它的可理解性，降低修改成本。</p>
+      </div>
+      <div class="mini info">
+        <h4>重构（动词）</h4>
+        <p>使用<strong>一系列重构手法</strong>，在不改变软件可观察行为的前提下，调整它的结构。</p>
+      </div>
+    </div>
+
+    <p>两个定义都咬住同一句话：<em class="hl">不改变可观察行为</em>。这不是修辞，这是分界线。</p>
+
+    <div class="callout co-rose">
+      <span class="lbl">一条硬判据</span>
+      <p>如果你顺手改了外部行为，那你<strong>不是在重构，你只是在写代码</strong>。如果你没有自动化测试，你根本不知道行为有没有变——那么严格来说，你也没有在重构。</p>
+    </div>
+
+    <div class="diagram">
+      <div class="dtitle">重构改的是哪一层</div>
+      <svg viewBox="0 0 680 252" role="img" aria-label="重构只改内部结构">
+        <rect x="60" y="34" width="560" height="46" rx="12" fill="#eef2ff" stroke="#a8b8f5" stroke-width="1.6"/>
+        <text x="340" y="56" text-anchor="middle" font-size="13.5" fill="#3b5bdb" font-weight="700">外部接口 / 可观察行为</text>
+        <text x="340" y="73" text-anchor="middle" font-size="11.5" fill="#64748b">输入、输出、副作用、抛出的异常 —— 这里一个字不动</text>
+
+        <line x1="60" y1="92" x2="620" y2="92" stroke="#fecdd3" stroke-width="2" stroke-dasharray="7 6"/>
+        <text x="618" y="86" text-anchor="end" font-size="11" fill="#be123c" font-weight="600">↑ 这条线不能碰</text>
+
+        <rect x="60" y="106" width="560" height="106" rx="12" fill="#f0fbf9" stroke="#8fd3cb" stroke-width="1.6"/>
+        <text x="340" y="128" text-anchor="middle" font-size="13.5" fill="#0f766e" font-weight="700">内部结构</text>
+
+        <g fill="#fff" stroke="#5eead4" stroke-width="1.6">
+          <rect x="88" y="144" width="112" height="48" rx="8"/>
+          <rect x="212" y="144" width="112" height="48" rx="8"/>
+          <rect x="336" y="144" width="112" height="48" rx="8"/>
+          <rect x="460" y="144" width="132" height="48" rx="8"/>
+        </g>
+        <g font-size="11.5" fill="#0f766e" text-anchor="middle">
+          <text x="144" y="164">函数边界</text><text x="144" y="181">怎么切</text>
+          <text x="268" y="164">类与模块</text><text x="268" y="181">谁跟谁一组</text>
+          <text x="392" y="164">名称</text><text x="392" y="181">它到底叫什么</text>
+          <text x="526" y="164">数据流</text><text x="526" y="181">从哪来、到哪去</text>
+        </g>
+
+        <text x="340" y="240" text-anchor="middle" font-size="11.5" fill="#94a3b8">重构的全部工作都发生在虚线以下 —— 它是一次内部装修，不是改建</text>
+      </svg>
+      <div class="cap">为什么强调“不改变行为”？因为它把一次大改动拆成了<strong>无数个可验证的小步</strong>，每一步做完，系统都还是能跑的那个系统。</div>
+    </div>
+
+    <h3>两顶帽子：Kent Beck 的心法</h3>
+    <p>重构最容易被搞砸的地方，是<strong>把“改结构”和“加功能”混在一起做</strong>。于是你一口气改了 200 行，测试红了，你不知道是哪一步坏的。</p>
+
+    <div class="diagram">
+      <div class="dtitle">两顶帽子：一次只戴一顶</div>
+      <svg viewBox="0 0 680 208" role="img" aria-label="两顶帽子">
+        <rect x="48" y="40" width="264" height="140" rx="16" fill="#eef2ff" stroke="#a8b8f5" stroke-width="1.6"/>
+        <text x="180" y="72" text-anchor="middle" font-size="15" fill="#3b5bdb" font-weight="700">👷 添加功能帽</text>
+        <text x="180" y="102" text-anchor="middle" font-size="12.5" fill="#1e293b">写新代码、加新测试</text>
+        <text x="180" y="126" text-anchor="middle" font-size="12.5" fill="#1e293b">让新功能跑起来</text>
+        <line x1="76" y1="146" x2="284" y2="146" stroke="#dbe3ff" stroke-width="1.4"/>
+        <text x="180" y="166" text-anchor="middle" font-size="11.5" fill="#be123c">不动既有结构</text>
+
+        <rect x="368" y="40" width="264" height="140" rx="16" fill="#f0fbf9" stroke="#8fd3cb" stroke-width="1.6"/>
+        <text x="500" y="72" text-anchor="middle" font-size="15" fill="#0f766e" font-weight="700">🔧 重构帽</text>
+        <text x="500" y="102" text-anchor="middle" font-size="12.5" fill="#1e293b">只调整结构、只改名、只搬移</text>
+        <text x="500" y="126" text-anchor="middle" font-size="12.5" fill="#1e293b">功能一个字不增</text>
+        <line x1="396" y1="146" x2="604" y2="146" stroke="#c9f0e6" stroke-width="1.4"/>
+        <text x="500" y="166" text-anchor="middle" font-size="11.5" fill="#be123c">不加功能、不加测试</text>
+
+        <text x="340" y="26" text-anchor="middle" font-size="12" fill="#94a3b8">随时可以换帽子，但同一时刻只能戴一顶</text>
+        <text x="340" y="200" text-anchor="middle" font-size="11.5" fill="#94a3b8">混着戴 = 测试红了以后你查不出是谁干的</text>
+      </svg>
+      <div class="cap">你正在写的这段代码，是“我要它做件新事”还是“我要它更好懂”？如果答案是“两个都要”，停一下，先摘一顶。</div>
+    </div>
+
+    <div class="callout co-blue">
+      <span class="lbl">真实工作流是这样的</span>
+      <p>你想加个新功能 → 发现现在的代码结构<strong>不好加</strong> → 摘下功能帽，戴上重构帽，把它整理成“容易加”的样子 → 换回功能帽，三下五除二把功能加上去。<br>
+      所以重构不是额外的工作，它是<strong>加功能的前置动作</strong>。</p>
+    </div>
+  </section>
+
+  <!-- ================= 02 ================= -->
+  <section id="s2">
+    <div class="sec-head">
+      <div class="badge teal">02</div>
+      <h2>为什么值得重构：设计耐久性假说<span class="en">Why Refactor</span></h2>
+    </div>
+
+    <p>反对重构最常见的说法是“没时间”。Fowler 的回应是四个理由，其中最后一个最狠：</p>
+
+    <div class="smells">
+      <div class="smell" style="border-left-color:var(--blue)"><h4>改进设计</h4><p>代码腐化是默认状态，不是意外。重构是唯一持续对抗它的手段：它消除重复，把“能跑但乱”拉回“干净”。</p></div>
+      <div class="smell" style="border-left-color:var(--teal)"><h4>让代码更容易理解</h4><p>代码是写给人看的。你花二十分钟把一段费解的逻辑改成能读懂的样子，下一个人省下的是两小时。</p></div>
+      <div class="smell" style="border-left-color:var(--amber)"><h4>帮你找到 bug</h4><p>“要真正理解代码在干什么，你不得不重构它。”整理结构的过程本身就是一次代码审查，bug 往往在这时候自己冒出来。</p></div>
+      <div class="smell" style="border-left-color:var(--rose)"><h4>提高编程速度（最重要）</h4><p>前三条都服务于这条。重构不是牺牲速度换美感，它是<strong>唯一能让速度长期维持在高位的方法</strong>。</p></div>
+    </div>
+
+    <div class="diagram">
+      <div class="dtitle">设计耐久性假说：两条速度曲线</div>
+      <svg viewBox="0 0 680 268" role="img" aria-label="设计耐久性假说">
+        <line x1="82" y1="218" x2="628" y2="218" stroke="#cbd5e1" stroke-width="1.4"/>
+        <line x1="82" y1="36" x2="82" y2="218" stroke="#cbd5e1" stroke-width="1.4"/>
+        <text x="60" y="130" text-anchor="middle" font-size="11.5" fill="#94a3b8" transform="rotate(-90,60,130)">开发速度</text>
+        <text x="600" y="240" text-anchor="middle" font-size="11.5" fill="#94a3b8">时间 →</text>
+
+        <path d="M92,74 C170,66 220,86 300,124 C380,162 460,190 596,210"
+              fill="none" stroke="#be123c" stroke-width="3" stroke-linecap="round"/>
+        <path d="M92,132 C160,126 230,110 320,92 C410,74 500,64 596,58"
+              fill="none" stroke="#0d9488" stroke-width="3" stroke-linecap="round"/>
+
+        <circle cx="92" cy="74" r="5" fill="#be123c"/>
+        <circle cx="92" cy="132" r="5" fill="#0d9488"/>
+
+        <text x="330" y="196" font-size="12.5" fill="#be123c" font-weight="600">不重构：现在跑得快，越往后越慢</text>
+        <text x="330" y="213" font-size="11" fill="#94a3b8">改动一处崩三处，最后没人敢动</text>
+
+        <text x="330" y="50" font-size="12.5" fill="#0f766e" font-weight="600">持续重构：起点稍微慢一点，之后一直在加速</text>
+        <text x="330" y="68" font-size="11" fill="#94a3b8">结构干净 → 加功能快 → 找 bug 快 → 更快</text>
+
+        <line x1="92" y1="74" x2="92" y2="132" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4 4"/>
+        <text x="108" y="108" font-size="11" fill="#475569">这 20% 的“额外”投入</text>
+      </svg>
+      <div class="cap">红线和绿线交叉的位置，就是“这破系统没法维护了”和“这系统还行”的分界线。它不会突然出现，是从第一次“先这样吧”开始积累的。</div>
+    </div>
+
+    <div class="callout co-teal">
+      <span class="lbl">一个反直觉的推论</span>
+      <p>如果重构真能加速，那“没时间重构”这个理由就站不住——你只是把<strong>今天的成本</strong>挪到了<strong>下周的高利贷</strong>上。Fowler 说得更不客气：如果不重构也能轻松加功能，那说明设计本来就够好，确实不用重构；可一旦你开始觉得“每次改这里都提心吊胆”，那笔账已经在还了。</p>
+    </div>
+
+    <h3 class="teal">顺便说清两件容易混的事</h3>
+    <div class="split">
+      <div class="mini">
+        <h4>重构 ≠ 性能优化</h4>
+        <p>重构让代码<strong>更好懂</strong>，性能优化让代码<strong>更快</strong>——两者目标不同，甚至会互相打架（优化常引入缓存、特化分支，破坏结构的清晰）。所以：<strong>先重构到清晰，再针对 profiler 报出的热点做优化</strong>，分开做。</p>
+      </div>
+      <div class="mini">
+        <h4>重构 ≠ 预先设计</h4>
+        <p>Fowler 现在更倾向 YAGNI（You Aren't Gonna Need It）：<strong>只按当前需求构建，把设计质量做高，等需求真来了再重构去应对。</strong>唯一例外——当你判断“以后再重构会非常困难”时，才值得现在就留那个灵活的钩子。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 03 ================= -->
+  <section id="s3">
+    <div class="sec-head">
+      <div class="badge amber">03</div>
+      <h2>什么时候动手：三次法则<span class="en">When to Refactor</span></h2>
+    </div>
+
+    <p>Don Roberts 给了一条流传最广的判据，Fowler 把它放在“何时重构”的第一句：</p>
+
+    <div class="diagram">
+      <div class="dtitle">三次法则 The Rule of Three</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>第一次做这件事</b><br><span style="color:#475569;font-size:13px">直接做，别想太多</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>第二次做类似的事</b><br><span style="color:#475569;font-size:13px">有点烦，但还是照做一遍</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>第三次再做</b><br><span style="color:#b45309;font-weight:700">停，重构</span></div>
+      <div class="cap">重复出现“第三次”，就是在告诉你：这里有一个还没被命名、还没被提取出来的抽象。</div>
+    </div>
+
+    <h3 class="amber">五种重构时机，按价值排序</h3>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">时机</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">怎么做</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">为什么排这个位置</th></tr></thead>
+<tbody>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>① 预备性重构</b><br/><span style="font-size:12.5px;color:#94a3b8">加功能之前</span></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">先把代码整理成“新功能容易插进去”的形状，再动手写功能</td>
+<td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">性价比最高。整理完你会惊讶地发现新功能只要几行</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>② 帮助理解的重构</b><br/><span style="font-size:12.5px;color:#94a3b8">读不懂的时候</span></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">先重构到你读得懂，再做你本来要做的修改</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">读不懂还硬改，是把“没搞清的东西”变成“改坏的东西”</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>③ 捡垃圾式重构</b><br/><span style="font-size:12.5px;color:#94a3b8">路过的时候</span></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">顺手把眼前这一小块收拾干净，不刻意扩大范围</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">童子军军规：<b>让营地比你到达时更干净</b>。不贪心，才做得久</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>④ 有计划的重构</b><br/><span style="font-size:12.5px;color:#94a3b8">还技术债</span></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">专门排时间，针对长期积累的结构问题做系统性调整</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">应该有，但<b>应该很少</b>。绝大多数重构是见机行事的</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>⑤ 复审代码时</b><br/><span style="font-size:12.5px;color:#94a3b8">Code Review</span></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">review 出坏味道就地重构，而不是只留一句“这里不太好”</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Fowler 认为这是<b>最好的重构时机</b>：有人已经读过并理解了这段代码</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+    <div class="callout co-blue">
+      <span class="lbl">“先往北开 20 公里”</span>
+      <p>Fowler 用开车比喻预备性重构：你要往东开 100 公里，但没有从当前位置向东的路。于是你先向北开 20 公里上高速，再从高速向东 100 公里——<strong>绕了路，总用时反而更短</strong>。<br>
+      重构看起来是“先做了一件不是需求的事”，实际上是把后面的路铺平了。</p>
+    </div>
+
+    <h3 class="amber">什么时候<em class="hl">不</em>该重构</h3>
+    <div class="split">
+      <div class="mini bad">
+        <h4>代码一团乱麻，改不动了</h4>
+        <p>如果代码已经烂到重构无从下手，<strong>重写可能比重构更划算</strong>。重构的前提是你还能理解它、还能小步走。</p>
+      </div>
+      <div class="mini bad">
+        <h4>这段代码不需要改，也没人需要读懂它</h4>
+        <p>比如一段稳定得像块石头的底层库、一段只被调用一次且永不修改的脚本。没有修改需求，重构就没有回报。</p>
+      </div>
+      <div class="mini bad">
+        <h4>你还没搞懂自己的设计</h4>
+        <p>如果你连“这段代码应该长什么样”都还不知道，先停下来想清楚。盲目重构 = 换个姿势继续乱。</p>
+      </div>
+      <div class="mini bad">
+        <h4>项目在交付死线上</h4>
+        <p>最后冲刺阶段强行重构，是在赌。可以先记录下来，等这一轮交付完再回头处理。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 04 ================= -->
+  <section id="s4">
+    <div class="sec-head">
+      <div class="badge rose">04</div>
+      <h2>安全绳：没有测试就没有重构<span class="en">Self-Testing Code</span></h2>
+    </div>
+
+    <p>这一条必须单独成节，因为它决定了重构能不能做。</p>
+
+    <div class="callout co-rose">
+      <span class="lbl">重构的第一块基石</span>
+      <p>重构的整个逻辑建立在“<strong>行为没有变</strong>”之上。而“行为没有变”这句话，你只有靠自动化测试才有资格说。没有测试，你只是在<strong>满怀希望地改代码</strong>。</p>
+    </div>
+
+    <div class="diagram">
+      <div class="dtitle">重构的循环：小步 + 绿测试</div>
+      <svg viewBox="0 0 680 216" role="img" aria-label="重构循环">
+        <defs>
+          <marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+            <path d="M0,0 L9,4.5 L0,9 z" fill="#94a3b8"/>
+          </marker>
+        </defs>
+        <rect x="40" y="76" width="128" height="62" rx="12" fill="#eef2ff" stroke="#a8b8f5" stroke-width="1.6"/>
+        <text x="104" y="102" text-anchor="middle" font-size="13" fill="#1e293b" font-weight="600">改一小步</text>
+        <text x="104" y="122" text-anchor="middle" font-size="11" fill="#64748b">只做一个手法</text>
+
+        <rect x="196" y="76" width="128" height="62" rx="12" fill="#fffbeb" stroke="#f0c48a" stroke-width="1.6"/>
+        <text x="260" y="102" text-anchor="middle" font-size="13" fill="#1e293b" font-weight="600">跑测试</text>
+        <text x="260" y="122" text-anchor="middle" font-size="11" fill="#64748b">几分钟内出结果</text>
+
+        <rect x="352" y="76" width="128" height="62" rx="12" fill="#ecfdf5" stroke="#8fd3cb" stroke-width="1.6"/>
+        <text x="416" y="102" text-anchor="middle" font-size="13" fill="#0f766e" font-weight="600">绿灯 → 继续</text>
+        <text x="416" y="122" text-anchor="middle" font-size="11" fill="#64748b">红灯 → 撤回这一步</text>
+
+        <rect x="508" y="76" width="132" height="62" rx="12" fill="#f5f3ff" stroke="#c4b0f5" stroke-width="1.6"/>
+        <text x="574" y="102" text-anchor="middle" font-size="13" fill="#6d28d9" font-weight="600">提交 / 下一步</text>
+        <text x="574" y="122" text-anchor="middle" font-size="11" fill="#64748b">代码始终可运行</text>
+
+        <g stroke="#94a3b8" stroke-width="1.8" marker-end="url(#ar)">
+          <line x1="170" y1="107" x2="192" y2="107"/>
+          <line x1="326" y1="107" x2="348" y2="107"/>
+          <line x1="482" y1="107" x2="504" y2="107"/>
+        </g>
+        <path d="M574,140 C574,182 104,182 104,142" fill="none" stroke="#cbd5e1" stroke-width="1.6" stroke-dasharray="6 5"/>
+        <text x="340" y="200" text-anchor="middle" font-size="11.5" fill="#94a3b8">一次只走一小步，所以出错时你立刻知道是哪一步 —— 这就是“可撤销”的底气</text>
+        <text x="340" y="46" text-anchor="middle" font-size="12" fill="#475569">撤回的成本 = 一分钟。这就是为什么敢往前闯</text>
+      </svg>
+      <div class="cap">注意“改一小步”的措辞：不是“改一块”，是<strong>一个手法</strong>。手法小到“改个名字”“把三行提成一个函数”这种程度。</div>
+    </div>
+
+    <h3 class="rose">没有测试的遗留代码怎么办</h3>
+    <p>现实里更多的是“一坨没人敢动的老代码，还没有测试”。Fowler 给的路径是找接缝：</p>
+    <ol class="steps">
+      <li><strong>找接缝（seam）</strong>——哪里有可以插入测试而不牵动全局的边界？一个对外函数、一个纯计算模块、一段没有副作用的逻辑。</li>
+      <li><strong>在接缝处插测试</strong>——不用覆盖全部，先锁住你<strong>即将要改的那部分行为</strong>。</li>
+      <li><strong>用重构造接缝</strong>——如果压根找不到接缝，就用重构手法造一个。这一步有风险（此时还没有测试保护），但它是取得进展必须付出的代价。</li>
+      <li><strong>让它变好一点点</strong>——每次触碰一块代码，就顺手改善它一点点。频繁使用的代码，改善可理解性的回报最大。</li>
+    </ol>
+
+    <div class="callout co-amber">
+      <span class="lbl">关于测试的一句话</span>
+      <p>书里第 4 章专门讲怎么搭测试体系：从待测代码出发，写出<strong>第一个会失败的测试</strong>，再补第二个，再改测试夹具。核心不是覆盖率数字，而是<strong>你改完之后敢不敢按提交键</strong>。</p>
+    </div>
+  </section>
+
+  <!-- ================= 05 ================= -->
+  <section id="s5">
+    <div class="sec-head">
+      <div class="badge violet">05</div>
+      <h2>24 种代码坏味道：全景<span class="en">Code Smells</span></h2>
+    </div>
+
+    <p>坏味道不是 bug。它是<strong>症状</strong>——你闻到它，说明深处多半有个结构问题。它是重构的入口：<em class="hl">先闻到味，再选手法</em>。</p>
+
+    <div class="callout co-violet">
+      <span class="lbl">先管理预期</span>
+      <p>Fowler 自己说得很清楚：<strong>什么是坏味道是主观的</strong>，跟语言、团队、开发方法都有关。这份清单是<strong>词汇表</strong>，不是法律条文。它的价值在于，让你和同事能在 review 时用同一个词指代同一个问题——“这里有依恋情结”比“这里感觉不太对”高效一百倍。</p>
+    </div>
+
+    <div class="diagram">
+      <div class="dtitle">24 种坏味道的五个家族</div>
+      <svg viewBox="0 0 680 330" role="img" aria-label="坏味道五类分组">
+        <circle cx="340" cy="165" r="46" fill="#1e293b"/>
+        <text x="340" y="160" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">代码</text>
+        <text x="340" y="178" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">坏味道</text>
+
+        <g stroke="#e2e8f0" stroke-width="1.6">
+          <line x1="298" y1="140" x2="130" y2="66"/>
+          <line x1="382" y1="140" x2="550" y2="66"/>
+          <line x1="294" y1="165" x2="118" y2="165"/>
+          <line x1="386" y1="165" x2="562" y2="165"/>
+          <line x1="340" y1="212" x2="340" y2="272"/>
+        </g>
+
+        <rect x="24" y="34" width="196" height="66" rx="12" fill="#fffaf0" stroke="#eecb8a" stroke-width="1.6"/>
+        <text x="122" y="56" text-anchor="middle" font-size="12.5" fill="#b45309" font-weight="700">① 膨胀类 Bloaters</text>
+        <text x="122" y="76" text-anchor="middle" font-size="10.8" fill="#64748b">过长函数 · 过大类 · 基本类型偏执</text>
+        <text x="122" y="91" text-anchor="middle" font-size="10.8" fill="#64748b">过长参数列表 · 数据泥团</text>
+
+        <rect x="460" y="34" width="196" height="66" rx="12" fill="#f8f5ff" stroke="#c4b0f5" stroke-width="1.6"/>
+        <text x="558" y="56" text-anchor="middle" font-size="12.5" fill="#6d28d9" font-weight="700">② OO 滥用</text>
+        <text x="558" y="76" text-anchor="middle" font-size="10.8" fill="#64748b">重复 switch · 临时字段</text>
+        <text x="558" y="91" text-anchor="middle" font-size="10.8" fill="#64748b">被拒绝的遗赠 · 异曲同工的类</text>
+
+        <rect x="12" y="132" width="196" height="66" rx="12" fill="#fff1f2" stroke="#f0a8ba" stroke-width="1.6"/>
+        <text x="110" y="154" text-anchor="middle" font-size="12.5" fill="#be123c" font-weight="700">③ 变化阻碍</text>
+        <text x="110" y="174" text-anchor="middle" font-size="10.8" fill="#64748b">发散式变化 · 霰弹式修改</text>
+        <text x="110" y="189" text-anchor="middle" font-size="10.8" fill="#64748b">平行继承体系</text>
+
+        <rect x="472" y="132" width="196" height="66" rx="12" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.6"/>
+        <text x="570" y="154" text-anchor="middle" font-size="12.5" fill="#475569" font-weight="700">④ 可有可无</text>
+        <text x="570" y="174" text-anchor="middle" font-size="10.8" fill="#64748b">重复代码 · 冗余元素 · 纯数据类</text>
+        <text x="570" y="189" text-anchor="middle" font-size="10.8" fill="#64748b">夸夸其谈通用性 · 注释 · 死代码</text>
+
+        <rect x="242" y="272" width="196" height="52" rx="12" fill="#ecfdf5" stroke="#8fd3cb" stroke-width="1.6"/>
+        <text x="340" y="294" text-anchor="middle" font-size="12.5" fill="#0f766e" font-weight="700">⑤ 耦合 Couplers</text>
+        <text x="340" y="313" text-anchor="middle" font-size="10.8" fill="#64748b">依恋情结 · 内幕交易 · 过长消息链 · 中间人</text>
+
+        <rect x="24" y="224" width="196" height="46" rx="12" fill="#eef2ff" stroke="#a8b8f5" stroke-width="1.6" stroke-dasharray="5 4"/>
+        <text x="122" y="244" text-anchor="middle" font-size="12" fill="#3b5bdb" font-weight="700">第 2 版新面孔</text>
+        <text x="122" y="262" text-anchor="middle" font-size="10.6" fill="#64748b">神秘命名 · 全局数据 · 可变数据 · 循环语句</text>
+
+        <rect x="460" y="224" width="196" height="46" rx="12" fill="#eef2ff" stroke="#a8b8f5" stroke-width="1.6" stroke-dasharray="5 4"/>
+        <text x="558" y="244" text-anchor="middle" font-size="12" fill="#3b5bdb" font-weight="700">老面孔被重新分类</text>
+        <text x="558" y="262" text-anchor="middle" font-size="10.6" fill="#64748b">如「重复代码」从膨胀类移到可有可无</text>
+      </svg>
+      <div class="cap">分类本身不重要，重要的是：<strong>你能不能在 10 秒内给眼前这段代码安上一个名字</strong>。叫得出名字，就知道该用哪个手法。</div>
+    </div>
+
+    <h3 class="violet">第 2 版和 1999 年那版的差别</h3>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left"></th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">第 1 版（1999）</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">第 2 版（2018）</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>示例语言</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Java</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">JavaScript（强调重构与 OO 并不强绑定）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>手法数量</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">约 72 个</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">约 60+ 个，但<b>重新分组、去重、合并同类项</b></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>组织方式</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">按“哪一层”分类，比较散</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">按处理对象高度内聚：函数 / 封装 / 搬移 / 数据 / 条件 / API / 继承</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>新增内容</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">—</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">函数式风格的重构（管道取代循环、拆分阶段）、第 1 章改成完整长案例</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>不变的内核</b></td><td colspan="2" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">两顶帽子 · 小步前进 · 自测试代码 · 坏味道驱动 · 名录的四段式写法</td></tr>
+</tbody>
+</table>
+</div>
+  </section>
+
+  <!-- ================= 06 ================= -->
+  <section id="s6">
+    <div class="sec-head">
+      <div class="badge amber">06</div>
+      <h2>坏味道精讲 · 膨胀与变化阻碍<span class="en">Bloaters &amp; Change Preventers</span></h2>
+    </div>
+
+    <p>这七种味道是最常见、也最该优先处理的：<strong>它们让代码变大、变难懂，并且让每一次改动的代价成倍增长</strong>。</p>
+
+    <h3 class="amber">① 过长函数 Long Function</h3>
+    <p>Fowler 的立场非常鲜明：<em class="hl">如果你觉得需要写注释来解释一段代码在做什么，就该把它提炼成一个函数，用注释当函数名。</em></p>
+    <ul>
+      <li>越长的函数越难理解，越难理解就越不敢改，越不敢改就越长——正向反馈的死亡螺旋。</li>
+      <li>哪怕是<strong>只有一行</strong>的代码，只要它需要解释，就值得被提炼出来。</li>
+      <li>小函数带来的真正好处是：<strong>命名</strong>。函数名本身就是一层可以读的文档。</li>
+    </ul>
+    <div class="card">
+      <h4>处方</h4>
+      <p><b>提炼函数</b>（Extract Function）是首选。如果函数里有大量局部变量和参数互相纠缠、提不动，改用 <b>以查询取代临时变量</b> 拆掉临时变量，再 <b>引入参数对象</b> 收拢参数，最后还有终极手段：<b>以函数对象取代函数</b>（Replace Method with Method Object）。如果只是条件分支和循环太长，直接 <b>分解条件表达式</b> / <b>提炼循环</b>。</p>
+    </div>
+
+    <h3 class="amber">② 过大类 Large Class</h3>
+    <p>一个类里塞了太多字段、太多方法、太多职责。它通常是“什么都能干”的上帝类，也是<b>发散式变化</b>的温床。</p>
+    <div class="callout co-amber">
+      <span class="lbl">识别信号</span>
+      <p>看字段：<strong>几个字段总是成组出现、成组被使用</strong>，说明它们其实属于另一个还没被创建出来的类。看方法：如果一组方法只操作同一批字段，那就是一个天然的 <b>提炼类</b> 候选。</p>
+    </div>
+
+    <h3 class="amber">③ 基本类型偏执 Primitive Obsession</h3>
+    <p>该有自己的类型时，却一直用 <code>int</code>、<code>string</code>、<code>float</code> 硬撑。典型场景：</p>
+    <ul>
+      <li><strong>钱</strong>用 <code>int cents</code> 存，汇率和币种散落在各处判断；</li>
+      <li><strong>坐标</strong>用两个 <code>float</code> 到处传；</li>
+      <li><strong>区号 / 电话号码 / 温度区间</strong> 全用字符串，校验逻辑重复十几遍。</li>
+    </ul>
+    <p>处方是 <b>以对象取代基本类型</b>。如果这个基本类型其实是个类型码、还控制着条件分支，那就更进一步：<b>以子类取代类型码</b> → 再 <b>以多态取代条件表达式</b>。</p>
+
+    <h3 class="amber">④ 过长参数列表 Long Parameter List</h3>
+    <p>参数多到调用的时候要数着位置、还容易传错顺序。</p>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">症状</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">处方</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">参数可以从另一个对象身上问到</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>以查询取代参数</b>，别让调用者替你查</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">传进来的是一堆“筛选项”布尔值</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>移除标记参数</b>，按行为拆成两个函数</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">参数是同一个对象被拆散的几个字段</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>保持对象完整</b>，整个传进去</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">几个参数总是成群结队一起出现</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>引入参数对象</b></td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3 class="amber">⑤ 数据泥团 Data Clumps</h3>
+    <p>同样的三四个数据项，成天在好多地方一起出现：既作为几个类的字段，又作为好几个方法的参数。</p>
+    <blockquote class="quote">判断方法很简单：<b>把其中一个删掉，其他几个还有意义吗？</b>如果没有，它们就该被打包成一个对象。—— 这其实就是“提炼类”和“引入参数对象”的标准触发信号。</blockquote>
+
+    <h3 class="rose">⑥ 发散式变化 Divergent Change</h3>
+    <div class="diagram">
+      <div class="dtitle">发散式变化：一个类，多种原因的修改</div>
+      <svg viewBox="0 0 680 200" role="img" aria-label="发散式变化">
+        <rect x="256" y="66" width="168" height="70" rx="14" fill="#fff1f2" stroke="#f0a8ba" stroke-width="1.8"/>
+        <text x="340" y="96" text-anchor="middle" font-size="14" fill="#be123c" font-weight="700">一个类 / 模块</text>
+        <text x="340" y="118" text-anchor="middle" font-size="11.5" fill="#64748b">它被反复修改</text>
+
+        <g stroke="#f0a8ba" stroke-width="1.8">
+          <line x1="256" y1="86" x2="96" y2="44"/>
+          <line x1="256" y1="101" x2="96" y2="101"/>
+          <line x1="256" y1="116" x2="96" y2="158"/>
+        </g>
+        <g font-size="11.5" fill="#475569" text-anchor="end">
+          <text x="88" y="40">数据库字段加了一个</text>
+          <text x="88" y="97">报表格式改了一版</text>
+          <text x="88" y="154">业务规则调整了阈值</text>
+        </g>
+        <text x="560" y="90" text-anchor="middle" font-size="12" fill="#be123c" font-weight="600">三个完全不同的原因，</text>
+        <text x="560" y="108" text-anchor="middle" font-size="12" fill="#be123c" font-weight="600">都改同一个类</text>
+        <text x="560" y="132" text-anchor="middle" font-size="11.5" fill="#94a3b8">说明它身兼数职</text>
+        <text x="340" y="186" text-anchor="middle" font-size="11.5" fill="#94a3b8">处方：提炼类 / 提炼超类，把不同原因的修改分开</text>
+      </svg>
+      <div class="cap">“一个类应该只因<strong>同一种原因</strong>被修改” —— 这就是单一职责原则在重构语境下的说法。</div>
+    </div>
+
+    <h3 class="rose">⑦ 霰弹式修改 Shotgun Surgery</h3>
+    <p>它是发散式变化的<strong>反面</strong>。发散式变化是“一个类因为很多原因被改”，霰弹式修改是“<strong>一个原因让很多类都被改</strong>”。你加一个字段，结果要在七八个文件里各补一小段——这就是“霰弹”，改动像散弹一样打得到处都是。</p>
+    <div class="split">
+      <div class="mini bad"><h4>发散式变化</h4><p>某个类很忙，什么都改它。<br><b>处方：拆开它</b>（提炼类）</p></div>
+      <div class="mini bad"><h4>霰弹式修改</h4><p>某个改动很忙，到处都要动。<br><b>处方：合并进来</b>（搬移函数/字段、内联类）</p></div>
+    </div>
+    <p class="src">两者的处方正好相反，这也说明：坏味道清单是用来<strong>帮你判断方向</strong>的，不是拿来对着抄答案的。</p>
+  </section>
+
+  <!-- ================= 07 ================= -->
+  <section id="s7">
+    <div class="sec-head">
+      <div class="badge teal">07</div>
+      <h2>坏味道精讲 · 可有可无与耦合<span class="en">Dispensables &amp; Couplers</span></h2>
+    </div>
+
+    <h3>⑧ 重复代码 Duplicated Code</h3>
+    <p>所有坏味道里最出名的一个。它意味着<strong>一次业务规则的变更要在多个地方同步</strong>，而人一定会漏掉一处。</p>
+    <ul>
+      <li>同一个类里两段相似代码 → <b>提炼函数</b>；</li>
+      <li>两个兄弟类里相似代码 → <b>提炼函数</b> + <b>函数上移</b>；</li>
+      <li>只有算法结构相同但细节不同 → <b>提炼超类</b> 或 <b>塑造模板函数</b>；</li>
+      <li>两种方式表达同一件事 → 选一种，另一种用<b>替换算法</b>清掉。</li>
+    </ul>
+
+    <h3>⑨ 冗余的元素 Lazy Element</h3>
+    <p>一个类、一个函数、一个变量<strong>没做够事来证明自己存在的价值</strong>。典型：只转发一层的方法、只被用一次的类、名字比内容还长的工具函数。</p>
+    <p>处方很简单：<b>内联函数 / 内联类 / 折叠继承体系</b>，把它拆掉。Fowler 的态度是：<em class="hl">结构不是越多越好，多余的结构本身就是成本。</em></p>
+
+    <h3>⑩ 夸夸其谈通用性 Speculative Generality</h3>
+    <p>为了“以后可能会用到”，提前加了一堆钩子、抽象层、特殊分支。结果是：现在没人用，将来也没人用，但所有人都得读它、绕过它、维护它。</p>
+    <div class="callout co-teal">
+      <span class="lbl">这是 YAGNI 的反面教材</span>
+      <p>处方：<b>折叠继承体系</b>、<b>内联类</b>、<b>移除参数</b>、<b>改名</b>（把“万能”的名字改回它真正做的事）。<br>判断标准是 Fowler 的原话：只有当<strong>“以后再重构会很困难”</strong>时，才值得现在就加灵活性。否则——现在就删。</p>
+    </div>
+
+    <h3>⑪ 临时字段 Temporary Field</h3>
+    <p>一个实例变量只在特定情况下被赋值，其他时候是 <code>null</code>。读代码的人看到这个字段，会困惑“它到底什么时候有值”。这通常说明：<strong>这个字段其实属于一个还没被提炼出来的对象</strong>。</p>
+
+    <h3>⑫ 注释 Comments</h3>
+    <div class="callout co-amber">
+      <span class="lbl">Fowler 最容易被误解的一条</span>
+      <p>他<strong>不是</strong>说注释是坏味道。他说的是：注释常常被用来<strong>遮盖代码的坏味道</strong>——当你想写“这里是在计算折扣”的时候，其实应该把那段代码提炼成一个叫 <code>计算折扣()</code> 的函数。<br>
+      注释真正的正当用途，是<strong>记录你无法在代码里表达的东西</strong>：为什么这里必须这么写、这段历史为什么绕开了一个坑、这个看似多余的判断在防哪种数据。这些不是遮盖，是补充。</p>
+    </div>
+
+    <h3 class="teal">⑬ 依恋情结 Feature Envy</h3>
+    <p>一个函数<strong>跟另一个模块的数据/函数打得火热</strong>，跟自己所在的模块反而不怎么说话。最经典的形态：一个函数调了另一个对象的一堆 getter 来算出某个值。</p>
+
+    <div class="diagram">
+      <div class="dtitle">模组化的目标：内部多说话，之间少说话</div>
+      <svg viewBox="0 0 680 216" role="img" aria-label="依恋情结">
+        <rect x="44" y="52" width="150" height="100" rx="14" fill="#fffafb" stroke="#f0a8ba" stroke-width="1.8"/>
+        <text x="119" y="78" text-anchor="middle" font-size="12.5" fill="#be123c" font-weight="700">模块 A</text>
+        <text x="119" y="98" text-anchor="middle" font-size="11" fill="#64748b">它自己的数据</text>
+        <text x="119" y="126" text-anchor="middle" font-size="12" fill="#1e293b">计算函数在这</text>
+
+        <rect x="486" y="52" width="150" height="100" rx="14" fill="#f0fbf9" stroke="#8fd3cb" stroke-width="1.8"/>
+        <text x="561" y="78" text-anchor="middle" font-size="12.5" fill="#0f766e" font-weight="700">模块 B</text>
+        <text x="561" y="98" text-anchor="middle" font-size="11" fill="#64748b">数据其实住在这</text>
+
+        <line x1="194" y1="102" x2="486" y2="102" stroke="#be123c" stroke-width="3" stroke-dasharray="7 5"/>
+        <text x="340" y="92" text-anchor="middle" font-size="11.5" fill="#be123c" font-weight="600">疯狂 get / 疯狂调</text>
+        <text x="340" y="122" text-anchor="middle" font-size="11" fill="#94a3b8">跨越边界的通信 = 耦合</text>
+        <text x="340" y="186" text-anchor="middle" font-size="12" fill="#0f766e" font-weight="600">处方：把函数搬到数据那边去 —— 搬移函数 Move Function</text>
+        <text x="340" y="204" text-anchor="middle" font-size="11" fill="#94a3b8">只有一部分函数犯病？先提炼函数，把生病的那部分单独搬过去</text>
+      </svg>
+      <div class="cap">如果数据真的跨两个模块都要用，那答案可能是<b>提炼类</b>，而不是硬搬。手法选择永远取决于“为什么”，不是“套模板”。</div>
+    </div>
+
+    <h3 class="teal">⑭⑮⑯ 剩下的三种耦合味道</h3>
+    <div class="smells">
+      <div class="smell" style="border-left-color:var(--teal)">
+        <h4>内幕交易</h4>
+        <div class="en2">Insider Trading</div>
+        <p>两个类私下里交换太多数据，明明可以光明正大地做成一个体系。处方：<b>搬移函数/字段</b>，或<b>以委托取代继承</b>。</p>
+      </div>
+      <div class="smell" style="border-left-color:var(--teal)">
+        <h4>过长的消息链</h4>
+        <div class="en2">Message Chains</div>
+        <p><code>a.b().c().d().e()</code> —— 客户代码追着一串对象问下去，中间任何一段关系变动，客户就得跟着改。处方：<b>隐藏委托关系</b>，或<b>提炼函数</b>把这条链包起来。</p>
+      </div>
+      <div class="smell" style="border-left-color:var(--teal)">
+        <h4>中间人</h4>
+        <div class="en2">Middle Man</div>
+        <p>一个类里大半方法都只是转发给另一个对象。封装是好的，但过度委托就成了纯粹的噪音。处方：<b>移除中间人</b>——如果只剩少量转发，干脆<b>内联函数</b>掉。</p>
+      </div>
+    </div>
+
+    <div class="callout co-rose">
+      <span class="lbl">注意这组味道的张力</span>
+      <p>“过长的消息链”让你<strong>加一层</strong>（隐藏委托），“中间人”让你<strong>减一层</strong>（移除中间人）。它们是一对拔河——<strong>层数没有绝对正确的值，只有当前这段代码看起来更好懂的那个值</strong>。这句话几乎可以作为整本书的方法论：手法之间会互相抵消，判断永远依赖上下文。</p>
+    </div>
+
+    <h3>第 2 版新增的四个</h3>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">味道</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">症状</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">处方</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>神秘命名</b><br/><span style="font-size:12px;color:#94a3b8">Mysterious Name</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">函数名、变量名、类名看不出意图，要靠读实现才能猜</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>改名</b>。如果改不出好名字，说明这段代码的职责还没想清楚——那先重构结构，再回头命名</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>全局数据</b><br/><span style="font-size:12px;color:#94a3b8">Global Data</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">任何地方都能改它，而且无法查出是谁改的。包括全局变量、类变量、单例</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>封装变量</b>。先把它包进函数里，你至少能看到谁在改；再尽量收窄作用域到某个类或模块内</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>可变数据</b><br/><span style="font-size:12px;color:#94a3b8">Mutable Data</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一块数据在 A 处被改，B 处读到时已经不是你期望的值</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>封装变量</b>；考虑<b>以查询取代派生变量</b>；趋向不可变——更新时返回新副本，旧数据保持不动</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>循环语句</b><br/><span style="font-size:12px;color:#94a3b8">Loops</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">用 for/while 手工做筛选、映射、累加，循环体里塞了一堆控制逻辑</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>以管道取代循环</b>（filter / map / reduce），把“做什么”和“怎么遍历”分开</td></tr>
+</tbody>
+</table>
+</div>
+  </section>
+
+  <!-- ================= 08 ================= -->
+  <section id="s8">
+    <div class="sec-head">
+      <div class="badge">08</div>
+      <h2>重构名录怎么读：四段式卡片<span class="en">How to Read the Catalog</span></h2>
+    </div>
+
+    <p>第 5 章很短，但很关键：它告诉你<strong>这本书剩下的几百页是用同一个格式写的</strong>。学会读这个格式，整本书就从“小说”变成了“手册”。</p>
+
+    <div class="diagram">
+      <div class="dtitle">每个重构手法的四段式结构</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>① 名称</b><br><span style="color:#475569;font-size:13px">给这个手法一个准确的名字，方便你和同事在讨论时说同一个词</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>② 动机</b><br><span style="color:#475569;font-size:13px">为什么用它、什么时候用它、以及——什么时候不该用它</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>③ 做法</b><br><span style="color:#475569;font-size:13px">一步一步的机械步骤，细到“安全得可以照着盲抄”</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7"><b>④ 范例</b><br><span style="color:#475569;font-size:13px">一段真实的代码，走完整个前后对比</span></div>
+      <div class="cap">“做法”那一段是这本书最值钱的部分。它不是建议，是<b>操作手册</b>——Fowler 刻意把它写成机械的，就是为了让你在脑子不清醒的时候也能安全地执行。</div>
+    </div>
+
+    <div class="callout co-blue">
+      <span class="lbl">怎么用这本书</span>
+      <p><strong>不要从头读到尾。</strong>正确的用法是：读到坏味道那一章建立起词汇表 → 工作中闻到味 → 翻到对应手法 → 照着“做法”那几步走 → 遇到不确定的地方再看“动机”和“范例”。<br>
+      这本书的定位是<strong>字典</strong>，不是教材。</p>
+    </div>
+
+    <div class="split">
+      <div class="mini info">
+        <h4>写给自己的做法清单</h4>
+        <p>Fowler 建议：当你反复用同一个手法时，把它简化成一张属于自己的小卡片。手法本身会演化——<strong>你的团队习惯、你的语言特性，都会让它长得和书上不一样</strong>。这很正常，也不是离经叛道。</p>
+      </div>
+      <div class="mini info">
+        <h4>关于自动化重构</h4>
+        <p>IDE 里的 Rename、Extract Method 等一键操作，是“自动化重构”。它们<strong>减少手工失误，但不能替代判断</strong>——工具知道怎么搬，不知道应不应该搬。搬不搬，仍然是你的事。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 09 ================= -->
+  <section id="s9">
+    <div class="sec-head">
+      <div class="badge green">09</div>
+      <h2>基本功：提炼、内联、改名<span class="en">Composing Functions</span></h2>
+    </div>
+
+    <p>第 6 章“第一组重构”里的这一批，是<strong>日常使用频率最高</strong>的手法。如果只学五个，就学这五个。</p>
+
+    <h3 class="green">提炼函数 Extract Function</h3>
+    <p>整本书最基础、也最常用的一个。它的做法值得完整看一遍，因为它示范了“机械步骤”到底是什么感觉：</p>
+    <ol class="steps">
+      <li>创建一个新函数，<strong>以“它做什么”命名</strong>（不是“它怎么做”）。</li>
+      <li>把要提炼的代码复制进新函数，调整其中的变量引用为参数。</li>
+      <li>处理局部变量：<strong>只被读的当参数传入，被赋值的当返回值传出</strong>。如果被赋值的变量不止一个，说明这段代码做了不止一件事，考虑拆成多次提炼。</li>
+      <li>在原位置调用新函数。</li>
+      <li><strong>跑测试。</strong></li>
+      <li>检查新函数里有没有可以继续提炼的部分，以及新函数名是否准确反映了它的行为；必要时改名。</li>
+    </ol>
+
+    <div class="diagram">
+      <div class="dtitle">提炼函数前后</div>
+      <svg viewBox="0 0 680 250" role="img" aria-label="提炼函数前后对比">
+        <defs>
+          <marker id="a2" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#94a3b8"/></marker>
+        </defs>
+        <rect x="28" y="40" width="256" height="170" rx="12" fill="#fffafb" stroke="#f0a8ba" stroke-width="1.6"/>
+        <text x="156" y="64" text-anchor="middle" font-size="12.5" fill="#be123c" font-weight="700">改动前：一坨</text>
+        <g font-size="10.6" font-family="ui-monospace,Menlo,monospace" fill="#475569">
+          <text x="44" y="88">function 打印账单(invoice) {</text>
+          <text x="56" y="106">let 结果 = '';</text>
+          <text x="56" y="124">for (...) {</text>
+          <text x="68" y="142">…12 行算钱…</text>
+          <text x="68" y="160">…6 行算积分…</text>
+          <text x="68" y="178">…4 行拼字符串…</text>
+          <text x="56" y="196">}</text>
+          <text x="44" y="206">}</text>
+        </g>
+
+        <line x1="300" y1="125" x2="356" y2="125" stroke="#94a3b8" stroke-width="2" marker-end="url(#a2)"/>
+        <text x="328" y="112" text-anchor="middle" font-size="11" fill="#94a3b8">提炼</text>
+
+        <rect x="374" y="40" width="278" height="170" rx="12" fill="#f8fdf9" stroke="#bbf7d0" stroke-width="1.6"/>
+        <text x="513" y="64" text-anchor="middle" font-size="12.5" fill="#15803d" font-weight="700">改动后：一段可读的流程</text>
+        <g font-size="10.6" font-family="ui-monospace,Menlo,monospace" fill="#1e293b">
+          <text x="390" y="88">function 打印账单(invoice) {</text>
+          <text x="402" y="106">let 结果 = 表头(invoice);</text>
+          <text x="402" y="124">for (每个演出) {</text>
+          <text x="414" y="142">结果 += 单据行(演出);</text>
+          <text x="402" y="160">}</text>
+          <text x="402" y="178">结果 += 合计(invoice);</text>
+          <text x="402" y="194">return 结果;</text>
+          <text x="390" y="206">}</text>
+        </g>
+        <text x="513" y="232" text-anchor="middle" font-size="11" fill="#94a3b8">细节搬进了 表头 / 单据行 / 合计 —— 读主函数就知道流程</text>
+      </svg>
+      <div class="cap">注意：代码量<strong>没有变少，甚至变多了</strong>。重构买的不是行数，是“能不能在三秒内看懂这段在干什么”。</div>
+    </div>
+
+    <h3 class="green">内联函数 / 内联变量：反方向的清理</h3>
+    <p>它们和提炼是一对反向操作，用来对付“冗余的元素”：</p>
+    <div class="split">
+      <div class="mini">
+        <h4>内联函数 Inline Function</h4>
+        <p>当函数体比它的名字还清楚，或者一堆函数被拆得过于零碎、看不出整体逻辑时，<strong>把它们合并回去</strong>。典型场景：一堆只做简单委托的转发函数。</p>
+      </div>
+      <div class="mini">
+        <h4>内联变量 Inline Variable</h4>
+        <p>当变量名并不比它所赋的表达式更能说明问题时，直接内联掉。命名确实是好的，但<strong>一个名不副实的名字比没有名字更糟</strong>。</p>
+      </div>
+    </div>
+
+    <h3 class="green">提炼变量与拆分变量</h3>
+    <pre><span class="c">// 改动前：这个表达式什么鬼</span>
+<span class="k">if</span> (order.quantity * order.itemPrice &gt; <span class="s">1000</span>) <span class="k">return</span> <span class="s">0.05</span>;
+
+<span class="c">// 提炼变量：给表达式一个名字，意义立刻显形</span>
+<span class="k">const</span> basePrice = order.quantity * order.itemPrice;
+<span class="k">if</span> (basePrice &gt; <span class="s">1000</span>) <span class="k">return</span> <span class="s">0.05</span>;</pre>
+
+    <div class="callout co-amber">
+      <span class="lbl">提炼变量有一个陷阱</span>
+      <p>如果这个变量<strong>被赋值了不止一次</strong>（比如在循环里累加、在条件分支里改），千万别急着提炼——先做 <b>拆分变量</b>（Split Variable）：给每个不同的赋值含义各起一个独立的名字。一个变量被赋了三次不同含义的值，是 bug 的高发区。</p>
+    </div>
+
+    <h3 class="green">改变函数声明 Change Function Declaration</h3>
+    <p>也就是改名、加参数、删参数、调整参数顺序。听起来最无聊，实际威力最大——<strong>因为名字是代码里成本最低、收益最高的文档</strong>。</p>
+    <div class="callout co-blue">
+      <span class="lbl">一个好用的技巧</span>
+      <p>如果改名字会牵动很多调用点怎么办？先<strong>用旧名字创建新函数</strong>，内部委托给老的实现；把调用点一个个迁到新名字；全部迁完后再删掉旧的。这样整个过程随时可停、随时可回滚。</p>
+    </div>
+
+    <h3 class="green">三个“组合”手法</h3>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">手法</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">什么时候用</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">效果</th></tr></thead>
+<tbody>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>引入参数对象</b><br/><span style="font-size:12px;color:#94a3b8">Introduce Parameter Object</span></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">几个参数总是成组出现（数据泥团）</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把一团参数变成一个概念，函数签名立刻变短、变清楚</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>函数组合成类</b><br/><span style="font-size:12px;color:#94a3b8">Combine Functions into Class</span></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一组函数<strong>总是在操作同一份数据</strong>，把这份数据传来传去</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把数据变成字段，函数变成方法 —— 少传参数，多一层内聚</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>函数组合成变换</b><br/><span style="font-size:12px;color:#94a3b8">Combine Functions into Transform</span></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一份原始数据被多个函数反复加工，每次都重新算一遍派生值</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一次算好，把派生数据附加到数据本身，后续函数直接读</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>拆分阶段</b><br/><span style="font-size:12px;color:#94a3b8">Split Phase</span></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一段代码里混了<strong>两类不同的事</strong>（如“算”和“展示”）</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">切分成两个阶段，中间用一个明确的数据结构沟通 —— 案例的主角</td>
+</tr>
+</tbody>
+</table>
+</div>
+  </section>
+
+  <!-- ================= 10 ================= -->
+  <section id="s10">
+    <div class="sec-head">
+      <div class="badge">10</div>
+      <h2>搬移与封装：代码该待在哪<span class="en">Moving &amp; Encapsulating</span></h2>
+    </div>
+
+    <p>第 7、8 两章合起来的主题是一个问题：<em class="hl">这段逻辑放对地方了吗？</em>搬移解决“放错位置”，封装解决“暴露太多”。</p>
+
+    <h3>搬移函数 Move Function</h3>
+    <p>这是面向对象设计里最重要的一次动作之一。判断标准只有一条：<strong>这个函数引用了谁的数据最多，它就该住在谁那里。</strong></p>
+
+    <div class="diagram">
+      <div class="dtitle">搬家决策：往哪搬</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>这个函数里，哪个类的数据被引用得最多？</b></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>是另一个类 → 搬过去</b><br><span style="color:#475569;font-size:13px">「依恋情结」的标准处方。搬完你会发现它用到的参数少了一大半</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>散落在好几个类 → 先看它是不是在协调</b><br><span style="color:#475569;font-size:13px">如果它主要是在编排多个对象的动作，那它本来就是“服务层”，留在原地是对的</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7"><b>哪边都不合适 → 提炼一个新类</b><br><span style="color:#475569;font-size:13px">把数据一起搬进去。这已经不是搬移，是提炼类了</span></div>
+      <div class="cap">注意最后两档：手法会在半路变成另一个手法。这是常态，不是走偏。</div>
+    </div>
+
+    <h3>另外几种搬移</h3>
+    <div class="smells">
+      <div class="smell"><h4>搬移字段 Move Field</h4><p>字段住错了类。判断方式和搬函数一样：<strong>哪个类的方法最常用它，它就搬去哪</strong>。搬字段通常要用封装变量先把读写都收进函数，再整体迁移。</p></div>
+      <div class="smell"><h4>移动语句 Slide Statements</h4><p>把相关的代码<strong>凑到一起</strong>。这是所有重构里最不起眼、却最常用的一步：把变量声明挪到第一次使用它之前，把相关的几行聚拢，为后续的提炼铺路。</p></div>
+      <div class="smell"><h4>拆分循环 Split Loop</h4><p>一个循环里做了两件不相干的事。拆成两个循环——<strong>性能上的那点损耗，换来的是每一步都能被独立理解、独立提炼</strong>。Fowler 明确说：先拆，真成为瓶颈了再合并优化。</p></div>
+      <div class="smell"><h4>以管道取代循环<br><span class="en2">Replace Loop with Pipeline</span></h4><p>用 <code>filter</code> / <code>map</code> / <code>reduce</code> 表达“做什么”，把“怎么遍历”交给语言。适合那种“筛一遍、转一下、加起来”的循环。</p></div>
+    </div>
+
+    <pre><span class="c">// 拆分循环 + 以管道取代循环</span>
+<span class="c">// 改动前：一个循环干三件事，每件事都得通读整段才能看懂</span>
+<span class="k">let</span> total = <span class="s">0</span>, count = <span class="s">0</span>, cheapest = <span class="k">null</span>;
+<span class="k">for</span> (<span class="k">const</span> p <span class="k">of</span> products) {
+  total += p.price;
+  <span class="k">if</span> (p.quantity &gt; <span class="s">0</span>) count++;
+  <span class="k">if</span> (!cheapest || p.price &lt; cheapest.price) cheapest = p;
+}
+
+<span class="c">// 改动后：三件事，各说各的</span>
+<span class="k">const</span> total    = products.reduce((s, p) =&gt; s + p.price, <span class="s">0</span>);
+<span class="k">const</span> count    = products.filter(p =&gt; p.quantity &gt; <span class="s">0</span>).length;
+<span class="k">const</span> cheapest = products.reduce((a, b) =&gt; a.price &lt; b.price ? a : b);</pre>
+
+    <h3 class="teal">封装：把“能改的地方”收窄</h3>
+    <div class="diagram">
+      <div class="dtitle">封装变量：真正要封住的是什么</div>
+      <svg viewBox="0 0 680 224" role="img" aria-label="封装变量">
+        <rect x="40" y="46" width="270" height="140" rx="14" fill="#fffafb" stroke="#f0a8ba" stroke-width="1.6"/>
+        <text x="175" y="72" text-anchor="middle" font-size="12.5" fill="#be123c" font-weight="700">封装前</text>
+        <text x="175" y="100" text-anchor="middle" font-size="11.5" fill="#64748b">字段是公开的，谁都能改</text>
+        <g font-size="11.5" fill="#475569" text-anchor="middle">
+          <text x="100" y="134">A 处</text><text x="175" y="134">B 处</text><text x="250" y="134">C 处</text>
+        </g>
+        <g stroke="#f0a8ba" stroke-width="1.8">
+          <line x1="100" y1="144" x2="150" y2="166"/>
+          <line x1="175" y1="144" x2="175" y2="166"/>
+          <line x1="250" y1="144" x2="200" y2="166"/>
+        </g>
+        <rect x="124" y="162" width="102" height="20" rx="6" fill="#fff1f2" stroke="#f0a8ba"/>
+        <text x="175" y="177" text-anchor="middle" font-size="11" fill="#be123c">一个裸字段</text>
+
+        <rect x="370" y="46" width="270" height="140" rx="14" fill="#f0fbf9" stroke="#8fd3cb" stroke-width="1.6"/>
+        <text x="505" y="72" text-anchor="middle" font-size="12.5" fill="#0f766e" font-weight="700">封装后</text>
+        <text x="505" y="100" text-anchor="middle" font-size="11.5" fill="#64748b">只能通过两道口子进出</text>
+        <g font-size="11.5" fill="#475569" text-anchor="middle">
+          <text x="428" y="134">读</text><text x="582" y="134">写</text>
+        </g>
+        <g stroke="#8fd3cb" stroke-width="1.8">
+          <line x1="428" y1="144" x2="470" y2="166"/>
+          <line x1="582" y1="144" x2="540" y2="166"/>
+        </g>
+        <rect x="446" y="162" width="118" height="20" rx="6" fill="#ecfdf5" stroke="#8fd3cb"/>
+        <text x="505" y="177" text-anchor="middle" font-size="11" fill="#0f766e">取值 / 设值 函数</text>
+
+        <text x="340" y="214" text-anchor="middle" font-size="11.5" fill="#94a3b8">封装的收益不是“更安全”，是你能看见谁在改它 —— 于是有了收窄作用域的可能</text>
+      </svg>
+      <div class="cap">尤其对<b>集合</b>：不要只封装集合本身，还要<b>封装集合里元素的增删</b>（提供 <code>add</code>/<code>remove</code> 而不是返回裸数组）。否则调用者仍然可以随意改内部。</div>
+    </div>
+
+    <h3 class="teal">以查询取代临时变量 Replace Temp with Query</h3>
+    <p>把只算一次的临时变量，换成每次调用都重算一遍的函数。</p>
+    <pre><span class="c">// 改动前</span>
+<span class="k">const</span> basePrice = quantity * itemPrice;
+<span class="k">if</span> (basePrice &gt; <span class="s">1000</span>) <span class="k">return</span> basePrice * <span class="s">0.95</span>;
+<span class="k">return</span> basePrice * <span class="s">0.98</span>;
+
+<span class="c">// 改动后：变量没了，但这段逻辑可以被别处复用了</span>
+<span class="k">function</span> <span class="f">basePrice</span>() { <span class="k">return</span> quantity * itemPrice; }
+<span class="k">if</span> (basePrice() &gt; <span class="s">1000</span>) <span class="k">return</span> basePrice() * <span class="s">0.95</span>;
+<span class="k">return</span> basePrice() * <span class="s">0.98</span>;</pre>
+    <div class="callout co-amber">
+      <span class="lbl">性能怎么办</span>
+      <p>这是最常被质疑的手法：本来算一次，现在算三次。<br>Fowler 的回答很直接：<strong>先让它可读，绝大多数情况下这点开销无感；真的成为热点，再把它改回去。</strong>重构和优化是两件事，别在这里打架。</p>
+    </div>
+  </section>
+
+  <!-- ================= 11 ================= -->
+  <section id="s11">
+    <div class="sec-head">
+      <div class="badge violet">11</div>
+      <h2>简化条件逻辑：干掉 switch<span class="en">Simplifying Conditional Logic</span></h2>
+    </div>
+
+    <p>条件逻辑是复杂度最集中的地方。第 10 章给的六个手法，几乎覆盖了所有“if 写得看不清”的情况。</p>
+
+    <h3 class="violet">四步阶梯：从最轻到最重</h3>
+
+    <div class="diagram">
+      <div class="dtitle">条件逻辑的化简阶梯</div>
+      <svg viewBox="0 0 680 300" role="img" aria-label="简化条件逻辑的阶梯">
+        <rect x="60" y="236" width="150" height="40" rx="10" fill="#f0fbf9" stroke="#8fd3cb" stroke-width="1.6"/>
+        <text x="135" y="255" text-anchor="middle" font-size="12" fill="#0f766e" font-weight="700">分解条件表达式</text>
+        <text x="135" y="270" text-anchor="middle" font-size="10.5" fill="#64748b">太长 → 提炼成函数</text>
+
+        <rect x="196" y="188" width="150" height="40" rx="10" fill="#f3f6ff" stroke="#a8b8f5" stroke-width="1.6"/>
+        <text x="271" y="207" text-anchor="middle" font-size="12" fill="#3b5bdb" font-weight="700">合并条件表达式</text>
+        <text x="271" y="222" text-anchor="middle" font-size="10.5" fill="#64748b">一串同类判断 → 合成一条</text>
+
+        <rect x="332" y="140" width="150" height="40" rx="10" fill="#fffaf0" stroke="#f0c48a" stroke-width="1.6"/>
+        <text x="407" y="159" text-anchor="middle" font-size="12" fill="#b45309" font-weight="700">以卫语句取代嵌套</text>
+        <text x="407" y="174" text-anchor="middle" font-size="10.5" fill="#64748b">四层 if → 一句句挡回去</text>
+
+        <rect x="468" y="92" width="150" height="40" rx="10" fill="#fff5f7" stroke="#f2aab8" stroke-width="1.6"/>
+        <text x="543" y="111" text-anchor="middle" font-size="12" fill="#be123c" font-weight="700">以多态取代条件</text>
+        <text x="543" y="126" text-anchor="middle" font-size="10.5" fill="#64748b">按类型分支 → 交给子类</text>
+
+        <path d="M135,236 L135,208 L271,208 L271,160 L407,160 L407,112 L543,112"
+              fill="none" stroke="#cbd5e1" stroke-width="1.6" stroke-dasharray="5 5"/>
+        <text x="340" y="286" text-anchor="middle" font-size="11.5" fill="#94a3b8">越往右越“彻底”，也越重 —— 不要一步跳到最右，按需要选最轻的那一档</text>
+        <text x="340" y="60" text-anchor="middle" font-size="12" fill="#475569">先试最轻的；轻的解决不了，再往上走</text>
+        <text x="340" y="42" text-anchor="middle" font-size="12" fill="#be123c" font-weight="600">另外两个：引入特例（空对象）· 引入断言</text>
+      </svg>
+    </div>
+
+    <h3 class="violet">以卫语句取代嵌套条件表达式</h3>
+    <p>把“正常情况埋在 if 里面、异常情况写在 else”的写法，翻成“异常情况先挡掉，正常情况走直线”。</p>
+    <pre><span class="c">// 改动前：要读到最里面才知道正常流程是什么</span>
+<span class="k">function</span> <span class="f">payAmount</span>() {
+  <span class="k">let</span> result;
+  <span class="k">if</span> (isDead) {
+    result = <span class="s">0</span>;
+  } <span class="k">else</span> {
+    <span class="k">if</span> (isSeparated) {
+      result = separatedAmount();
+    } <span class="k">else</span> {
+      <span class="k">if</span> (isRetired) result = retiredAmount();
+      <span class="k">else</span> result = normalPayAmount();
+    }
+  }
+  <span class="k">return</span> result;
+}
+
+<span class="c">// 改动后：特殊情况一句句挡掉，最后一行就是主流程</span>
+<span class="k">function</span> <span class="f">payAmount</span>() {
+  <span class="k">if</span> (isDead)      <span class="k">return</span> <span class="s">0</span>;
+  <span class="k">if</span> (isSeparated) <span class="k">return</span> separatedAmount();
+  <span class="k">if</span> (isRetired)   <span class="k">return</span> retiredAmount();
+  <span class="k">return</span> normalPayAmount();
+}</pre>
+
+    <h3 class="violet">以多态取代条件表达式</h3>
+    <p>这是这一章的重头戏，也是第 1 章案例的终点。它的目标：<strong>把“按类型分支”这种散落各处的 switch，变成一次分发。</strong></p>
+
+    <div class="diagram">
+      <div class="dtitle">为什么 switch 是坏味道</div>
+      <svg viewBox="0 0 680 244" role="img" aria-label="重复 switch">
+        <g>
+          <rect x="46" y="46" width="150" height="150" rx="12" fill="#fffafb" stroke="#f0a8ba" stroke-width="1.6"/>
+          <text x="121" y="70" text-anchor="middle" font-size="12" fill="#be123c" font-weight="700">算金额()</text>
+          <text x="121" y="94" text-anchor="middle" font-size="10.5" font-family="ui-monospace,Menlo,monospace" fill="#475569">switch (type)</text>
+          <text x="121" y="112" text-anchor="middle" font-size="10.5" font-family="ui-monospace,Menlo,monospace" fill="#475569">case 悲剧: …</text>
+          <text x="121" y="130" text-anchor="middle" font-size="10.5" font-family="ui-monospace,Menlo,monospace" fill="#475569">case 喜剧: …</text>
+          <text x="121" y="148" text-anchor="middle" font-size="10.5" font-family="ui-monospace,Menlo,monospace" fill="#475569">case 历史剧: …</text>
+        </g>
+        <g>
+          <rect x="266" y="46" width="150" height="150" rx="12" fill="#fffafb" stroke="#f0a8ba" stroke-width="1.6"/>
+          <text x="341" y="70" text-anchor="middle" font-size="12" fill="#be123c" font-weight="700">算积分()</text>
+          <text x="341" y="94" text-anchor="middle" font-size="10.5" font-family="ui-monospace,Menlo,monospace" fill="#475569">switch (type)</text>
+          <text x="341" y="112" text-anchor="middle" font-size="10.5" font-family="ui-monospace,Menlo,monospace" fill="#475569">case 悲剧: …</text>
+          <text x="341" y="130" text-anchor="middle" font-size="10.5" font-family="ui-monospace,Menlo,monospace" fill="#475569">case 喜剧: …</text>
+          <text x="341" y="148" text-anchor="middle" font-size="10.5" font-family="ui-monospace,Menlo,monospace" fill="#475569">case 历史剧: …</text>
+        </g>
+        <g>
+          <rect x="486" y="46" width="150" height="150" rx="12" fill="#fffafb" stroke="#f0a8ba" stroke-width="1.6"/>
+          <text x="561" y="70" text-anchor="middle" font-size="12" fill="#be123c" font-weight="700">打印行()</text>
+          <text x="561" y="94" text-anchor="middle" font-size="10.5" font-family="ui-monospace,Menlo,monospace" fill="#475569">switch (type)</text>
+          <text x="561" y="112" text-anchor="middle" font-size="10.5" font-family="ui-monospace,Menlo,monospace" fill="#475569">case 悲剧: …</text>
+          <text x="561" y="130" text-anchor="middle" font-size="10.5" font-family="ui-monospace,Menlo,monospace" fill="#475569">case 喜剧: …</text>
+          <text x="561" y="148" text-anchor="middle" font-size="10.5" font-family="ui-monospace,Menlo,monospace" fill="#475569">case 历史剧: …</text>
+        </g>
+        <text x="340" y="222" text-anchor="middle" font-size="12" fill="#be123c" font-weight="600">加一个“历史剧”：三个 switch 都要改，漏一个就是 bug</text>
+        <text x="340" y="240" text-anchor="middle" font-size="11" fill="#94a3b8">这就是「重复的 switch」—— 霰弹式修改的典型来源</text>
+      </svg>
+      <div class="cap">多态的解法：把“类型”变成一个对象，把“每个类型下该怎么做”<strong>各自关进自己的类里</strong>。新增一个剧种 = 新增一个子类，一个 switch 都不用碰。</div>
+    </div>
+
+    <pre><span class="c">// 以多态取代条件：把分支收进子类</span>
+<span class="k">class</span> <span class="f">PerformanceCalculator</span> {
+  <span class="k">get</span> amount()        { <span class="k">throw new</span> Error(<span class="s">"子类负责"</span>); }
+  <span class="k">get</span> volumeCredits() { <span class="k">return</span> Math.max(<span class="k">this</span>.performance.audience - <span class="s">30</span>, <span class="s">0</span>); }
+}
+
+<span class="k">class</span> <span class="f">TragedyCalculator</span> <span class="k">extends</span> PerformanceCalculator {
+  <span class="k">get</span> amount() {
+    <span class="k">let</span> result = <span class="s">40000</span>;
+    <span class="k">if</span> (<span class="k">this</span>.performance.audience &gt; <span class="s">30</span>)
+      result += <span class="s">1000</span> * (<span class="k">this</span>.performance.audience - <span class="s">30</span>);
+    <span class="k">return</span> result;
+  }
+}
+
+<span class="k">class</span> <span class="f">ComedyCalculator</span> <span class="k">extends</span> PerformanceCalculator {
+  <span class="k">get</span> amount() { <span class="c">/* 喜剧的算法 */</span> }
+  <span class="k">get</span> volumeCredits() {
+    <span class="k">return</span> <span class="k">super</span>.volumeCredits
+         + Math.floor(<span class="k">this</span>.performance.audience / <span class="s">5</span>);   <span class="c">// 复用父类 + 自己的差异</span>
+  }
+}</pre>
+
+    <div class="callout co-violet">
+      <span class="lbl">还有一个更轻的替代品</span>
+      <p><b>引入特例</b>（Introduce Special Case，旧称“引入 Null 对象”）：当一个特殊值让调用方到处写 <code>if (customer === null)</code> 的时候，创造出一个“不存在的客户”对象，它也响应同样的消息，只是行为是“什么都不做”。<br>
+      <strong>它做不到多态那么彻底，但便宜得多。</strong>又回到了那条方法论：选最轻的那一档。</p>
+    </div>
+  </section>
+
+  <!-- ================= 12 ================= -->
+  <section id="s12">
+    <div class="sec-head">
+      <div class="badge amber">12</div>
+      <h2>完整走一遍：戏剧团计费案例<span class="en">The First Example</span></h2>
+    </div>
+
+    <p>第 1 章是全书最值得反复读的一章。Fowler 没有讲任何理论，而是<strong>打开一个真实的程序，从头改到尾</strong>——用了大约 30 分钟、改了二十来处，全程测试都是绿的。</p>
+
+    <h3 class="amber">起点：一个函数，三件事</h3>
+    <p>一个给剧团打印账单的函数。输入是<strong>账单发票</strong>（客户的每一次演出、观众人数）和<strong>剧目表</strong>（每个剧的 ID、名称、类型），输出是一段文本账单。</p>
+
+    <pre><span class="c">// 起点：约 40 行，把三件事混在一个函数里</span>
+<span class="k">function</span> <span class="f">statement</span>(invoice, plays) {
+  <span class="k">let</span> totalAmount = <span class="s">0</span>;
+  <span class="k">let</span> volumeCredits = <span class="s">0</span>;
+  <span class="k">let</span> result = <span class="s">`账单：${invoice.customer}\n`</span>;
+  <span class="k">const</span> format = <span class="k">new</span> Intl.NumberFormat(<span class="s">"en-US"</span>,
+    { style: <span class="s">"currency"</span>, currency: <span class="s">"USD"</span> }).format;
+
+  <span class="k">for</span> (<span class="k">let</span> perf <span class="k">of</span> invoice.performances) {
+    <span class="k">const</span> play = plays[perf.playID];
+    <span class="k">let</span> thisAmount = <span class="s">0</span>;
+
+    <span class="c">// ① 按剧种算这一场的钱</span>
+    <span class="k">switch</span> (play.type) {
+      <span class="k">case</span> <span class="s">"tragedy"</span>: <span class="c">/* 40000 + 超 30 人每人 1000 */</span>
+      <span class="k">case</span> <span class="s">"comedy"</span>:  <span class="c">/* 30000 + ... + 每人 300 */</span>
+      <span class="k">default</span>: <span class="k">throw new</span> Error(<span class="s">`未知剧种：${play.type}`</span>);
+    }
+
+    <span class="c">// ② 攒积分（喜剧规则不同）</span>
+    volumeCredits += Math.max(perf.audience - <span class="s">30</span>, <span class="s">0</span>);
+    <span class="k">if</span> (<span class="s">"comedy"</span> === play.type) volumeCredits += Math.floor(perf.audience / <span class="s">5</span>);
+
+    <span class="c">// ③ 拼这一行的文本</span>
+    result += <span class="s">`  ${play.name}：${format(thisAmount / 100)}`</span>
+            + <span class="s">`（${perf.audience} 人）\n`</span>;
+    totalAmount += thisAmount;
+  }
+
+  result += <span class="s">`应付：${format(totalAmount / 100)}\n`</span>;
+  result += <span class="s">`积分：${volumeCredits}\n`</span>;
+  <span class="k">return</span> result;
+}</pre>
+
+    <p>Fowler 对这个起点的评价很有意思：<strong>它不算烂。</strong>不重复、命名还行、结构清楚、长度也就一屏。他写这段话的目的恰恰是——<em class="hl">如果连这样“还行”的代码都能被重构变得更好，那你手上那些真正难看的代码就更没有理由不动。</em></p>
+
+    <p>真正的问题有三个：</p>
+    <div class="smells">
+      <div class="smell" style="border-left-color:var(--amber)"><h4>问题 1 · 三件事混在一起</h4><p>算钱、算积分、拼字符串。任何一件变化，都要在同一个函数里小心地动刀。</p></div>
+      <div class="smell" style="border-left-color:var(--amber)"><h4>问题 2 · 逻辑无法复用</h4><p>如果现在要出一个 HTML 版账单，<strong>整个函数得复制一份再改</strong>——重复代码的经典开场。</p></div>
+      <div class="smell" style="border-left-color:var(--violet)"><h4>问题 3 · switch 会越长越多</h4><p>剧情类型分支散在函数里，加一个剧种就要改多处，而且每处都得记得改。</p></div>
+    </div>
+
+    <h3 class="amber">重构路径：五步走完</h3>
+
+    <div class="diagram">
+      <div class="dtitle">从 40 行单函数，到可扩展的多态结构</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>第 1 步 · 提炼函数</b><br><span style="color:#475569;font-size:13px">把“算一场的钱”“算积分”“取剧目”分别提炼出去。一个手法、一次测试、一次提交</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>第 2 步 · 拆掉临时变量</b><br><span style="color:#475569;font-size:13px">用「以查询取代临时变量」把 format、play 等变量清掉，让结构浮出水面</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff"><b>第 3 步 · 拆分阶段（最关键的一刀）</b><br><span style="color:#475569;font-size:13px">切出「组装数据」阶段 createStatementData()，与原函数的「渲染文本」阶段分离。中间的账单数据用一份明确的中间结构传递</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>第 4 步 · 按类型重组计算</b><br><span style="color:#475569;font-size:13px">把「按剧种算钱/算积分」的逻辑搬进一个计算器，再用工厂函数根据剧种返回不同的计算器</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>第 5 步 · 让计算器变成多态</b><br><span style="color:#475569;font-size:13px">提炼出父类，把差异放进子类；switch 消失，只剩一次分发</span></div>
+      <div class="cap">每一步都是一个独立的重构手法，每一步之后测试都是绿的 —— 所以整个过程随时可以停下来。</div>
+    </div>
+
+    <h3 class="amber">终点：statement 只剩两行</h3>
+    <pre><span class="c">// 计算与渲染分家：statement 只负责"渲染"</span>
+<span class="k">function</span> <span class="f">statement</span>(invoice, plays) {
+  <span class="k">return</span> renderPlainText(createStatementData(invoice, plays));
+}
+
+<span class="c">// 组装数据的阶段：把所有派生值一次算好，交给渲染阶段</span>
+<span class="k">function</span> <span class="f">createStatementData</span>(invoice, plays) {
+  <span class="k">const</span> result = {};
+  result.customer  = invoice.customer;
+  result.performances = invoice.performances.map(enrichPerformance);
+  result.totalAmount        = total(result.performances, <span class="s">"amount"</span>);
+  result.totalVolumeCredits = total(result.performances, <span class="s">"volumeCredits"</span>);
+  <span class="k">return</span> result;
+
+  <span class="k">function</span> <span class="f">enrichPerformance</span>(aPerformance) {
+    <span class="k">const</span> calculator = createPerformanceCalculator(aPerformance, playFor(aPerformance));
+    <span class="k">const</span> result = Object.assign({}, aPerformance);   <span class="c">// 浅拷贝，别改原对象</span>
+    result.play          = calculator.play;
+    result.amount        = calculator.amount;
+    result.volumeCredits = calculator.volumeCredits;
+    <span class="k">return</span> result;
+  }
+}
+
+<span class="c">// 唯一的那个"switch"，而且只有它知道有哪些剧种</span>
+<span class="k">function</span> <span class="f">createPerformanceCalculator</span>(aPerformance, aPlay) {
+  <span class="k">switch</span> (aPlay.type) {
+    <span class="k">case</span> <span class="s">"tragedy"</span>: <span class="k">return new</span> TragedyCalculator(aPerformance, aPlay);
+    <span class="k">case</span> <span class="s">"comedy"</span>:  <span class="k">return new</span> ComedyCalculator(aPerformance, aPlay);
+    <span class="k">default</span>: <span class="k">throw new</span> Error(<span class="s">`未知剧种：${aPlay.type}`</span>);
+  }
+}</pre>
+
+    <div class="split">
+      <div class="mini bad">
+        <h4>改动前：要出 HTML 账单</h4>
+        <p>把整个 statement 复制一份，改掉字符串拼接部分——<strong>算钱和算积分的逻辑从此有了两份，从此开始分叉。</strong></p>
+      </div>
+      <div class="mini good">
+        <h4>改动后：要出 HTML 账单</h4>
+        <p>写一个 <code>htmlStatement()</code>，同样调用 <code>createStatementData()</code>，只换渲染部分。<strong>计算逻辑一份，不重复。</strong></p>
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="mini bad">
+        <h4>改动前：要加“历史剧”</h4>
+        <p>找到那个 switch，加一个 case；再去改积分逻辑里的 if；如果别处还有按类型的分支，也得一个个找。漏一处就是 bug。</p>
+      </div>
+      <div class="mini good">
+        <h4>改动后：要加“历史剧”</h4>
+        <p>写一个 <code>HistoryCalculator</code> 继承父类，实现 <code>amount</code>（和可选的 <code>volumeCredits</code>），在工厂函数里加一行。<strong>其他代码一行不用碰。</strong></p>
+      </div>
+    </div>
+
+    <div class="callout co-amber">
+      <span class="lbl">这一章真正想教的东西</span>
+      <p>不是“多态很好”，而是——<strong>这个漂亮的终点，是一步一步走出来的，中间没有哪一步需要你先想清楚终点。</strong><br>
+      Fowler 在过程中好几次走岔了（比如一开始把 play 变量删得过头，后来发现不合适又加回来），这些都是真实的。他的原话大意是：<strong>重构的过程就是这样，你会来回试探；有测试保护，试探的成本极低，所以你可以放心地走错再走回来。</strong></p>
+    </div>
+  </section>
+
+  <!-- ================= 13 ================= -->
+  <section id="s13">
+    <div class="sec-head">
+      <div class="badge green">13</div>
+      <h2>在真实项目里重构 + 速查<span class="en">Challenges &amp; Cheatsheet</span></h2>
+    </div>
+
+    <p>书里的例子永远是干净的。现实里有六个绕不过去的障碍，第 2 章专门讨论了它们。</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">障碍</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">为什么会卡住</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">Fowler 的回应</th></tr></thead>
+<tbody>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>被认为拖慢进度</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">产品经理看到你在“改代码”而不是“做功能”</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">重构的唯一目的就是<b>让开发更快</b>。沟通时不要讲“我在整理代码”，要讲“我在把这块整理成好加新功能的样子”</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>代码所有权</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">这块代码归另一个团队，你说不上话</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">保留旧接口、标记为废弃，新旧并存逐步迁移（新东西用新的，老调用点慢慢改）</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>长期分支</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">你的重构和别人的改动在两条分支上各自跑了三个月</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">分支持续得越久，合并越痛。<b>倾向持续集成</b>，每天向主干合并</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>没有测试</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">改完不知道有没有坏</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>没有测试就不要做大规模重构。</b>先补测试，哪怕是覆盖即将改动的那一小块</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>遗留系统</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一坨巨大、没有测试、没人完全懂的老代码</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">找<b>接缝</b> → 在接缝处插测试 → 小步重构。<b>每次触碰就改善一点点</b>，让营地比你到达时更干净</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>数据库</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">数据结构一改，全世界的代码和线上数据都受影响</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">用<b>数据迁移脚本</b>把结构改动和代码改动绑在一起；每次迁移都很小且完整，迁移后系统仍可运行；串联多次小迁移完成大改造。<b>能拆到多次生产发布就拆开</b>，一次出问题容易回滚</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+    <h3 class="green">如果你的项目是 Unity / C#</h3>
+    <div class="callout co-blue">
+      <span class="lbl">几条对游戏工程特别对得上的建议</span>
+      <p><strong>① 先给纯逻辑层加测试。</strong>MonoBehaviour 难测不是借口——把伤害计算、掉落表、商店定价、数值公式从 MonoBehaviour 里提炼成普通 C# 类，这些就能直接单测。<strong>“提炼类”这个手法在 Unity 里往往就是“把逻辑从 MonoBehaviour 挪到 POCO”，收益极高。</strong><br>
+      <strong>② Prefab 和序列化是隐形的接口。</strong>改字段名会打断 Prefab 引用、动画曲线、ScriptableObject 资产。所以改名前先确认引用范围——这相当于书里“代码所有权”问题在 Unity 里的变体。<br>
+      <strong>③ “万能管理器”是过大类重灾区</strong>：上千行的 GameManager、UIManager。用<b>提炼类</b>把职责切出去（音频 / 存档 / 输入各归各处），比整篇重写安全得多。<br>
+      <strong>④ 枚举 + switch 的配置表就是“重复的 switch”</strong>：按类型分支的玩法逻辑，最值得用<b>以多态取代条件表达式</b>或策略对象整理一遍，加新玩法时才不用改核心代码。</p>
+    </div>
+
+    <h3>一页速查：闻到味 → 用哪个手法</h3>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">你闻到的味道</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">首选手法</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">再重一档</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">函数太长、要写注释解释</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">提炼函数</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">以函数对象取代函数</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">表达式难懂</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">提炼变量</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">分解条件表达式</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">名字看不出意图</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">改名 / 改变函数声明</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">先重构结构，再回头命名</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">参数太多、总分不清</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">引入参数对象</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">保持对象完整 / 以查询取代参数</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">同一段代码出现在多处</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">提炼函数</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">函数上移 + 提炼超类</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">函数老在用别人的数据</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">搬移函数</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">提炼类</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">改一处要动一堆文件</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">搬移函数/字段</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">内联类</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一个类因很多原因被改</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">提炼类</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">提炼超类</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">按类型码分支、还散落几处</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">以子类取代类型码</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">以多态取代条件表达式</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">嵌套 if 深到看不清主流程</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">以卫语句取代嵌套条件</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">分解条件表达式</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">到处 <code>if (x === null)</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">引入特例（空对象）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">—</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一堆 getter 被外面疯狂调用</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">封装变量</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">封装集合（连增删一起封）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">全局变量谁都能改</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">封装变量</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">收窄作用域 / 移到类里</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">类只会转发、什么都不做</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">内联类</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">移除中间人</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">为“以后可能需要”加了一堆抽象</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">折叠继承体系</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">内联类 / 移除参数</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">循环里手工筛/映射/累加</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">以管道取代循环</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">拆分循环</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一个循环做了几件不相干的事</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">拆分循环</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">移动语句先聚拢相关行</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一大段“算”和“展示”混着</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">拆分阶段</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">函数组合成类</td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3>动手之前，过一遍这份清单</h3>
+    <ul class="chk">
+      <li>这段代码<strong>有测试保护</strong>吗？没有就先补，或者只做最小的、能立刻验证的那一步</li>
+      <li>我<strong>现在戴的是哪顶帽子</strong>？是在改结构，还是在加功能</li>
+      <li>我能不能说出<strong>这次重构对应哪个手法</strong>？说不出名字，多半是没想清楚</li>
+      <li>这一步<strong>多大</strong>？大到不能一分钟内回滚，就该再切小一点</li>
+      <li>我改完之后<strong>行为真的一点没变</strong>吗？（如果变了，那这不是重构，得按加功能的方式验收）</li>
+      <li>如果这次重构<strong>做到一半被打断</strong>，仓库里的代码是能跑的吗</li>
+    </ul>
+
+    <div class="callout co-teal">
+      <span class="lbl">一句话带走</span>
+      <p><strong>把大改动拆成一个个小到“不值得做”的步骤，每一步之后代码都还能跑，于是你永远有退路。</strong>
+      重构的全部魔力就在这里——它不是让你更勇敢，而是让“动老代码”这件事，终于不再需要勇敢。</p>
+    </div>
+  </section>
+
+  <footer>
+    图解教程 · 内容整理自《重构：改善既有代码的设计》第 2 版及相关公开书评、读书笔记<br>
+    原书：Martin Fowler 著 · 熊节 / 林从羽 译 · 人民邮电出版社<br>
+    站点：ptato.github.io &nbsp;·&nbsp; 纯静态页面，无脚本依赖
+  </footer>
+</div>
+</body>
+</html>

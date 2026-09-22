@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>面向对象设计原则 · 图解教程</title>
+<meta name="description" content="SOLID 五条 + 迪米特法则 + 合成复用原则的图解教程：从设计腐烂的七个症状出发，讲清每条原则要解决的具体问题、违反时的代码信号、以及它的代价。最后用一个订单案例从 120 行的上帝类走到可扩展结构。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧩</text></svg>">
+<style>
+  :root{
+    --bg:#f6f8fb; --card:#ffffff; --ink:#1e293b; --ink2:#475569; --ink3:#94a3b8;
+    --line:#e2e8f0; --line2:#cbd5e1;
+    --blue:#3b5bdb; --blue-bg:#eef2ff;
+    --teal:#0d9488; --teal-bg:#ecfdf5;
+    --amber:#b45309; --amber-bg:#fffbeb;
+    --rose:#be123c; --rose-bg:#fff1f2;
+    --violet:#6d28d9; --violet-bg:#f5f3ff;
+    --green:#15803d; --green-bg:#f0fdf4;
+    --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px -12px rgba(15,23,42,.14);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:16px; line-height:1.85; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 20px 80px}
+
+  /* ---------- hero ---------- */
+  .hero{padding:64px 0 30px;text-align:center}
+  .hero .kicker{
+    display:inline-block;font-size:12.5px;letter-spacing:.14em;color:var(--violet);
+    background:var(--violet-bg);border:1px solid #ddd3fb;border-radius:999px;padding:5px 14px;margin-bottom:20px;
+  }
+  .hero h1{font-size:clamp(26px,4.4vw,40px);line-height:1.35;margin:0 0 16px;letter-spacing:-.01em}
+  .hero h1 em{font-style:normal;color:var(--blue)}
+  .hero p.sub{color:var(--ink2);font-size:16.5px;margin:0 auto;max-width:680px}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:26px}
+  .meta span{font-size:13px;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 13px}
+
+  /* ---------- section ---------- */
+  section{margin-top:64px;scroll-margin-top:24px}
+  .sec-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:8px}
+  .badge{
+    flex:0 0 auto;width:40px;height:40px;border-radius:12px;background:var(--blue);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;
+    box-shadow:0 6px 16px -8px rgba(59,91,219,.9);
+  }
+  .badge.teal{background:var(--teal);box-shadow:0 6px 16px -8px rgba(13,148,136,.9)}
+  .badge.amber{background:var(--amber);box-shadow:0 6px 16px -8px rgba(180,83,9,.9)}
+  .badge.violet{background:var(--violet);box-shadow:0 6px 16px -8px rgba(109,40,217,.9)}
+  .badge.rose{background:var(--rose);box-shadow:0 6px 16px -8px rgba(190,18,60,.9)}
+  .badge.green{background:var(--green);box-shadow:0 6px 16px -8px rgba(21,128,61,.9)}
+  .sec-head h2{font-size:23px;margin:6px 0 0;letter-spacing:-.01em;line-height:1.4}
+  .sec-head .en{font-size:13px;color:var(--ink3);font-weight:500;margin-left:8px}
+  h3{font-size:17.5px;margin:34px 0 10px;padding-left:12px;border-left:3px solid var(--blue)}
+  h3.teal{border-color:var(--teal)} h3.amber{border-color:var(--amber)}
+  h3.violet{border-color:var(--violet)} h3.rose{border-color:var(--rose)}
+  h3.green{border-color:var(--green)}
+  h4{font-size:15.5px;margin:22px 0 6px;color:var(--ink)}
+  p{margin:12px 0}
+  a{color:var(--blue)}
+  strong{color:#0f172a}
+  em.hl{font-style:normal;background:#eef2ff;color:#3b5bdb;border-radius:4px;padding:0 5px;font-weight:600}
+  code{background:#f1f5f9;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:13.5px;
+       font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#0f172a;overflow-wrap:anywhere}
+  ul,ol{margin:12px 0;padding-left:22px}
+  li{margin:6px 0}
+
+  /* ---------- toc ---------- */
+  .toc{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 24px;box-shadow:var(--shadow)}
+  .toc h3{margin:0 0 12px;border:0;padding:0;font-size:15px;color:var(--ink2);letter-spacing:.05em}
+  .toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:6px 20px}
+  .toc li a{display:flex;gap:10px;text-decoration:none;color:var(--ink);font-size:14.5px;padding:6px 8px;border-radius:8px}
+  .toc li a:hover{background:var(--blue-bg)}
+  .toc li b{color:var(--blue);font-variant-numeric:tabular-nums;font-weight:600;min-width:16px}
+
+  /* ---------- card / callout ---------- */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin:18px 0;box-shadow:var(--shadow)}
+  .card h4{margin-top:0}
+  .callout{border-radius:14px;padding:16px 20px;margin:18px 0;border:1px solid}
+  .callout .lbl{display:block;font-size:12.5px;font-weight:700;letter-spacing:.06em;margin-bottom:6px}
+  .co-blue{background:var(--blue-bg);border-color:#dbe3ff} .co-blue .lbl{color:var(--blue)}
+  .co-teal{background:var(--teal-bg);border-color:#c9f0e6} .co-teal .lbl{color:var(--teal)}
+  .co-amber{background:var(--amber-bg);border-color:#f6e3bf} .co-amber .lbl{color:var(--amber)}
+  .co-rose{background:var(--rose-bg);border-color:#fbd5dd} .co-rose .lbl{color:var(--rose)}
+  .co-violet{background:var(--violet-bg);border-color:#ddd3fb} .co-violet .lbl{color:var(--violet)}
+  .co-green{background:var(--green-bg);border-color:#bbf7d0} .co-green .lbl{color:var(--green)}
+  .callout p{margin:6px 0}
+
+  /* ---------- diagram shell ---------- */
+  .diagram{background:linear-gradient(180deg,#fdfefe,#f8fafc);border:1px solid var(--line);border-radius:16px;padding:22px 18px;margin:22px 0;text-align:center}
+  .diagram .dtitle{font-size:14px;font-weight:700;color:var(--ink2);text-align:center;margin-bottom:16px}
+  .diagram .cap{font-size:13px;color:var(--ink3);text-align:center;margin-top:12px;line-height:1.7}
+  .diagram svg{display:block;max-width:100%;height:auto;margin:0 auto}
+  /* 内联样式竖向卡片流（微信友好，不依赖 flex/grid） */
+  .nbox{display:inline-block;max-width:470px;min-width:190px;padding:9px 16px;font-size:14px;text-align:left;line-height:1.6}
+  .nbox b{color:#0f172a}
+  .narw{color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0}
+
+  /* ---------- code ---------- */
+  pre{margin:16px 0;padding:16px 18px;background:#0f172a;color:#e2e8f0;border-radius:14px;overflow-x:auto;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.75}
+  pre .c{color:#94a3b8}
+  pre .k{color:#93c5fd}
+  pre .s{color:#86efac}
+  pre .f{color:#fcd34d}
+  pre.bad{background:#1f1216;box-shadow:inset 3px 0 0 #be123c}
+  pre.good{background:#0d1a1a;box-shadow:inset 3px 0 0 #0d9488}
+
+  /* ---------- table ---------- */
+  .tblwrap{overflow-x:auto;margin:20px 0;border:1px solid var(--line);border-radius:14px;background:#fff}
+  table{border-collapse:collapse;width:100%;font-size:14px;min-width:520px}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{background:#f8fafc;font-size:13px;color:var(--ink2);font-weight:600;white-space:nowrap}
+  tbody tr:last-child td{border-bottom:0}
+  tbody tr:hover{background:#fcfdff}
+  td.y{color:var(--green);font-weight:600}
+  td.n{color:var(--rose);font-weight:600}
+  td code{font-size:12.5px;padding:0 4px}
+
+  /* ---------- smell cards ---------- */
+  .smells{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:20px 0}
+  .smell{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow);
+         border-left:4px solid var(--line2)}
+  .smell h4{margin:0 0 2px;font-size:15px}
+  .smell .en2{font-size:11.5px;color:var(--ink3);font-family:ui-monospace,Menlo,monospace}
+  .smell p{margin:8px 0 0;font-size:13.3px;color:var(--ink2);line-height:1.7}
+
+  /* ---------- misc ---------- */
+  .quote{border-left:3px solid var(--line2);padding:2px 0 2px 16px;color:var(--ink2);font-size:15px;margin:16px 0}
+  .quote b{color:var(--ink)}
+  .quote .who{display:block;font-size:12.5px;color:var(--ink3);margin-top:6px}
+  .split{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:18px 0}
+  .mini{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .mini h4{margin:0 0 6px;font-size:15px}
+  .mini.good{border-color:#bbf7d0;background:#f8fdf9}
+  .mini.bad{border-color:#fecdd3;background:#fffafb}
+  .mini.info{border-color:#dbe3ff;background:#fafbff}
+  .mini p{margin:6px 0 0;font-size:13.5px;color:var(--ink2);line-height:1.7}
+  .mini p:first-of-type{margin-top:0}
+  .chk{list-style:none;padding:0;margin:14px 0}
+  .chk li{position:relative;padding-left:28px;margin:9px 0;font-size:14.5px}
+  .chk li::before{content:"";position:absolute;left:0;top:6px;width:16px;height:16px;border:1.5px solid var(--line2);border-radius:4px;background:#fff}
+  .steps{counter-reset:st;list-style:none;padding:0;margin:16px 0}
+  .steps li{counter-increment:st;position:relative;padding:10px 0 10px 44px;border-bottom:1px dashed var(--line);font-size:14.5px}
+  .steps li:last-child{border-bottom:0}
+  .steps li::before{content:counter(st);position:absolute;left:0;top:11px;width:26px;height:26px;border-radius:8px;
+                    background:var(--blue-bg);color:var(--blue);font-size:13px;font-weight:700;
+                    display:flex;align-items:center;justify-content:center}
+  .src{font-size:12.5px;color:var(--ink3);margin-top:8px}
+  .keyline{font-size:15px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 18px;margin:16px 0;box-shadow:var(--shadow)}
+  .keyline b{color:var(--blue)}
+  footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);font-size:13px;color:var(--ink3);text-align:center;line-height:2}
+  @media (max-width:560px){
+    .hero{padding:44px 0 20px}
+    .toc ol{grid-template-columns:1fr}
+  }
+
+.toclist{list-style:none;margin:8px 0 0;padding:0}
+.toclist li{padding:6px 2px;font-size:14px;line-height:1.6;color:var(--ink);border-bottom:1px dashed var(--line)}
+.toclist li:last-child{border-bottom:none}
+.tocpart{font-weight:700;color:var(--blue);margin-top:14px;font-size:13px;letter-spacing:.04em}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ================= HERO ================= -->
+  <header class="hero">
+    <span class="kicker">编 程 图 解 教 程</span>
+    <h1>面向对象设计原则：<br>七条规则，其实只有<em>一个目标</em></h1>
+    <p class="sub">它们看起来是七条并列的口诀，实际上一半在回答<strong>「边界该切在哪」</strong>，一半在回答<strong>「箭头该指向谁」</strong>。想清楚这两件事，口诀就不用背了。</p>
+    <div class="meta">
+      <span>SOLID 五条 + 迪米特法则 + 合成复用</span>
+      <span>出处考据 1987 – 2004</span>
+      <span>示例语言 C#</span>
+      <span>16 张图 · 13 个易违例信号</span>
+      <span>约 30 分钟</span>
+    </div>
+  </header>
+
+  <!-- ================= TOC ================= -->
+  <nav class="toc">
+<h3>目 录</h3>
+<ul class="toclist">
+<li>01 · 敌人在哪：腐烂软件的七个症状</li>
+<li>02 · 全景：七条原则不是七条平行线</li>
+<li>03 · SRP 单一职责：一个类几个老板</li>
+<li>04 · OCP 开闭原则：加功能要动几个文件</li>
+<li>05 · LSP 里氏替换：能被替换才叫子类</li>
+<li>06 · ISP 接口隔离：那些抛异常的方法</li>
+<li>07 · DIP 依赖倒置：倒过来的到底是什么</li>
+<li>08 · LoD 迪米特法则：数一数你的点号</li>
+<li>09 · CRP 合成复用：白箱与黑箱</li>
+<li>10 · 边界：什么时候该停下来</li>
+<li>11 · 完整走一遍：120 行的上帝类</li>
+<li>12 · 速查：违例信号 → 修复手法</li>
+<li>13 · 结语：原则是工具，不是法律</li>
+</ul>
+</nav>
+
+  <!-- ================= 01 ================= -->
+  <section id="s1">
+    <div class="sec-head">
+      <div class="badge rose">01</div>
+      <h2>敌人在哪：腐烂软件的七个症状<span class="en">Design Smells</span></h2>
+    </div>
+
+    <p>先说结论：设计原则本身不产生价值，<strong>消除症状才产生价值</strong>。所以在背诵任何一条原则之前，得先知道它是对着哪种病开的药。</p>
+
+    <p>Robert C. Martin 在《敏捷软件开发》里列了七种「设计腐烂」的症状。它们和 Fowler 的「代码坏味道」是同一类东西，只是<strong>层级更高</strong>——代码坏味道出现在某一段代码里，设计症状弥漫在整个系统结构上。</p>
+
+    <div class="smells">
+      <div class="smell" style="border-left-color:var(--rose)"><h4>僵化</h4><div class="en2">Rigidity</div><p>系统难以修改。你动手做一个看起来很小的改动，结果发现它影响到的地方远超预期；你改完那些地方，又牵出更多模块。</p></div>
+      <div class="smell" style="border-left-color:var(--amber)"><h4>脆弱</h4><div class="en2">Fragility</div><p>系统容易被改坏。改动导致程序中<strong>毫无概念关联</strong>的地方出错。修好这些地方，又给以后埋了更大的雷。</p></div>
+      <div class="smell" style="border-left-color:var(--violet)"><h4>不动性</h4><div class="en2">Immobility</div><p>系统难以复用。某一块代码其实在别的系统里也用得上，但要把它拆出来比重新写一遍还费劲，于是大家都选择重写。</p></div>
+      <div class="smell" style="border-left-color:var(--blue)"><h4>粘滞</h4><div class="en2">Viscosity</div><p>做正确的事比做错误的事更难。面对一个改动需求，保持设计原貌的路走起来很吃力，而 hack 一下很轻松——于是 hack 总是赢。</p></div>
+      <div class="smell" style="border-left-color:var(--teal)"><h4>不必要的复杂</h4><div class="en2">Needless Complexity</div><p>设计里包含当前并不需要的结构。典型来源是「以后可能会用到」——开发者提前为想象中的需求搭好了基础设施。</p></div>
+      <div class="smell" style="border-left-color:var(--green)"><h4>不必要的重复</h4><div class="en2">Needless Repetition</div><p>设计里存在本可以统一到同一个抽象下的重复结构。最常见的来源是复制粘贴。</p></div>
+      <div class="smell" style="border-left-color:var(--line2)"><h4>晦涩</h4><div class="en2">Opacity</div><p>难以阅读和理解，表达不出意图。代码会随时间越来越晦涩，因为再没有人真正熟悉它了。</p></div>
+    </div>
+
+    <p>这七条里，<strong>僵化</strong>和<strong>脆弱</strong>是最容易被感受到的——它们直接表现为「我不敢动这段代码」。而它们有个共同机制：</p>
+
+    <div class="diagram">
+      <div class="dtitle">僵化是怎么形成的：一次改动，一圈涟漪</div>
+      <svg viewBox="0 0 660 260" role="img" aria-label="僵化与脆弱：改动的涟漪扩散">
+        <circle cx="150" cy="130" r="102" fill="#fff7f9" stroke="#fbd5dd" stroke-width="1.4"/>
+        <circle cx="150" cy="130" r="68" fill="#fff1f2" stroke="#f9c2cd" stroke-width="1.4"/>
+        <circle cx="150" cy="130" r="34" fill="#ffe4e9" stroke="#f2aab8" stroke-width="1.4"/>
+        <circle cx="150" cy="130" r="8" fill="#be123c"/>
+        <text x="150" y="119" text-anchor="middle" font-size="11" fill="#be123c" font-weight="700">你改的</text>
+        <text x="150" y="152" text-anchor="middle" font-size="11" fill="#be123c" font-weight="700">那一行</text>
+
+        <text x="248" y="66" font-size="11.5" fill="#9f1239">直接依赖它的 4 个模块</text>
+        <text x="290" y="126" font-size="11.5" fill="#9f1239">间接依赖的 11 个模块</text>
+        <text x="330" y="196" font-size="11.5" fill="#9f1239">再往外：测试、配置、同事的预期</text>
+
+        <line x1="150" y1="130" x2="252" y2="130" stroke="#f2aab8" stroke-width="1.2" stroke-dasharray="3 3"/>
+        <line x1="150" y1="130" x2="292" y2="126" stroke="#f9c2cd" stroke-width="1.2" stroke-dasharray="3 3"/>
+        <line x1="150" y1="130" x2="332" y2="192" stroke="#fbd5dd" stroke-width="1.2" stroke-dasharray="3 3"/>
+
+        <rect x="430" y="46" width="200" height="168" rx="14" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.4"/>
+        <text x="530" y="70" text-anchor="middle" font-size="12.5" fill="#475569" font-weight="700">失去的是什么</text>
+        <text x="530" y="98" text-anchor="middle" font-size="11.5" fill="#64748b">不是一次改动的耗时</text>
+        <text x="530" y="122" text-anchor="middle" font-size="11.5" fill="#64748b">是你对改动后果的</text>
+        <text x="530" y="146" text-anchor="middle" font-size="11.5" fill="#64748b">预判能力</text>
+        <text x="530" y="180" text-anchor="middle" font-size="11.5" fill="#be123c" font-weight="600">预判不了 → 只剩推诿和</text>
+        <text x="530" y="198" text-anchor="middle" font-size="11.5" fill="#be123c" font-weight="600">「别动那个文件」</text>
+      </svg>
+      <div class="cap">设计原则干的全部事情，就是<strong>把涟漪圈住</strong>：让一次改动只在一个圈里扩散，而这个圈的大小是可预测的。</div>
+    </div>
+
+    <div class="callout co-rose">
+      <span class="lbl">一句话记住这一节</span>
+      <p>七种症状里，有五种都能归到一个根因：<strong>变化的影响范围大于变化的意图范围</strong>。设计原则不是在追求「优雅」，是在追求「改一处，只崩一处」。</p>
+    </div>
+
+    <h3 class="rose">为什么「能跑」从来不是及格线</h3>
+    <p>软件和硬件的根本差别在于：硬件的成本主要在制造，软件的成本主要在<strong>修改</strong>。一个能跑的系统，生命周期里 70% 到 90% 的成本发生在它第一次上线之后。</p>
+    <p>所以「代码能跑」只说明它通过了第一关。真正的评分项是：<strong>半年后，一个没写过这段代码的人，加一个新功能需要多久，需要多大的心理准备</strong>。</p>
+  </section>
+
+  <!-- ================= 02 ================= -->
+  <section id="s2">
+    <div class="sec-head">
+      <div class="badge">02</div>
+      <h2>全景：七条原则不是七条平行线<span class="en">The Big Picture</span></h2>
+    </div>
+
+    <p>先交代来历，因为这件事直接决定了它们之间的关系。</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">时间</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">事件</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">谁</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">1987</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">提出「行为子类型」：子类型必须能替换基类型</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Barbara Liskov（后于 2008 年获图灵奖）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">1987</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">美国东北大学 Demeter 项目提出「只和直接朋友说话」</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Ian Holland / Karl Lieberherr</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">1988</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">《面向对象软件构造》首次提出「对扩展开放，对修改关闭」</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Bertrand Meyer</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">1996</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">在 Xerox 咨询时总结出接口隔离、依赖倒置；并重新诠释开闭原则</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Robert C. Martin</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">2000</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">论文《Design Principles and Design Patterns》把五条原则放到一起讲</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Robert C. Martin</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">约 2004</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把这五条的首字母拼成 <strong>SOLID</strong> 这个助记词</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Michael Feathers</td></tr>
+</tbody>
+</table>
+</div>
+
+    <p>注意一个关键事实：<em class="hl">SOLID 这个缩写是一个助记词，不是一套理论</em>。五条原则来自不同的人、不同的年代、不同的失败案例。Martin 只是把它们收拢到一起，因为它们在实践里互相咬合。</p>
+
+    <p>而中文教材通常还会再加两条——迪米特法则和合成复用原则，凑成「七大设计原则」。这两条同样是几十年前的真金白银，不该被漏掉。</p>
+
+    <h3>真正的关系：一个目标，四种手段</h3>
+    <p>绝大多数教程把它们写成七条并列的清单，于是读者只能靠背诵和意志力去遵守。但换个角度看，这七条其实有明确的分工：</p>
+
+    <div class="diagram">
+      <div class="dtitle">七条原则的分工</div>
+      <div class="nbox" style="border:1.5px solid #ddd3fb;border-radius:11px;background:#f5f3ff;min-width:340px;text-align:center"><b>🎯 目标：开闭原则 OCP</b><br><span style="color:#475569;font-size:13px">让「加一个新功能」的边际成本接近于「只写字，不改字」</span></div>
+      <div class="narw">↑ 靠下面四组手段共同支撑</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>① 切分粒度：SRP 单一职责</b><br><span style="color:#475569;font-size:13px">先把系统切成「一个变化原因 = 一个单元」。这是地基——单元没切对，后面所有原则都没有作用对象</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #c4b5fd;border-radius:11px;background:#faf5ff"><b>② 继承的形态：LSP 里氏替换</b><br><span style="color:#475569;font-size:13px">子类必须能替换基类，否则「扩展」这个动作本身就不安全</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>③ 接口的形态：ISP 接口隔离</b><br><span style="color:#475569;font-size:13px">接口要按客户端的角色切，不能按方法的集合切，否则抽象会变成一个更大的枷锁</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #bbf7d0;border-radius:11px;background:#f0fdf4"><b>④ 依赖的方向：DIP 依赖倒置 + LoD 迪米特法则</b><br><span style="color:#475569;font-size:13px">DIP 管「依赖指向抽象还是指向实现」，LoD 管「依赖要不要穿过对象去够别人的内部」。方向定错，扩展点和复用都无从谈起</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>⑤ 复用的方式：CRP 合成复用</b><br><span style="color:#475569;font-size:13px">同样能实现扩展，用继承还是用组合，代价差一个数量级</span></div>
+      <div class="cap">读的时候记住这张分工表：<b>SRP 是地基，LSP / ISP / CRP 决定边界的形态，DIP / LoD 决定依赖的方向，OCP 是所有努力最终要换来的那个结果。</b></div>
+    </div>
+
+    <p>中文教材里有一句话总结得很准：<strong>开闭原则是目标，里氏替换原则是基础，依赖倒转原则是手段</strong>。这就是为什么违反任何一条，最终都会表现为「加功能变难了」——因为所有路都通向 OCP。</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">原则</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">一句话</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">违反时最典型的信号</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>SRP</strong> 单一职责</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一个类只应有一个引起它变化的原因</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一个类里同时出现业务规则、SQL 语句、邮件发送</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>OCP</strong> 开闭原则</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对扩展开放，对修改关闭</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">加一个新类型，必须回到同一个 <code>switch</code> 里加分支</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>LSP</strong> 里氏替换</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">子类型必须能替换它们的基类型</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">调用处出现 <code>if (x is XxxSub)</code> 判断</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>ISP</strong> 接口隔离</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不应强迫客户端依赖它不使用的方法</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">实现接口时写出抛异常或空的空方法</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>DIP</strong> 依赖倒置</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">依赖抽象，而不是依赖具体实现</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">业务代码里直接 <code>new</code> 数据库/HTTP 客户端</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>LoD</strong> 迪米特法则</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只和你的直接朋友说话</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>a.GetB().GetC().Do()</code> 这样的长链</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>CRP</strong> 合成复用</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">优先用组合/聚合，而不是继承来复用</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">为了拿到一个方法而继承一个语义不相关的类</td></tr>
+</tbody>
+</table>
+</div>
+
+    <div class="callout co-blue">
+      <span class="lbl">这张表怎么用</span>
+      <p>把它当成<strong>体检表</strong>而不是考纲。你不需要记住定义，只需要在写完一段代码之后，用右边那列去扫一眼自己的代码——这七个信号里，有没有出现哪怕一个。</p>
+    </div>
+  </section>
+
+  <!-- ================= 03 ================= -->
+  <section id="s3">
+    <div class="sec-head">
+      <div class="badge">03</div>
+      <h2>SRP 单一职责：一个类几个老板<span class="en">Single Responsibility Principle</span></h2>
+    </div>
+
+    <div class="keyline">
+      <b>一句话：</b>一个类应该只有一个引起它变化的原因。<br>
+      <span style="font-size:14px;color:var(--ink2)">Martin 在后来的《架构整洁之道》里把它改写得更精确：<strong>一个模块应该只对一个角色（actor）负责。</strong></span>
+    </div>
+
+    <p>这条原则被误解的次数，大概是其他六条的总和。最常见的误解是把它读成「一个类只能干一件事」——于是写出几百个 5 行的类，谁也不敢碰。</p>
+
+    <p><strong>「原因」指的是谁在提要求，不是代码有几行。</strong>Martin 自己给过一个非常实用的口诀：</p>
+
+    <div class="quote">
+      <b>Gather together the things that change for the same reasons. Separate those things that change for different reasons.</b><br>
+      把因相同原因而变化的东西聚在一起，把因不同原因而变化的东西分离开。
+      <span class="who">—— Robert C. Martin，《敏捷软件开发》</span>
+    </div>
+
+    <h3>一个真实代价：被偷偷焊死的两条变更路径</h3>
+    <p>Martin 举过一个教科书级的例子。公司里有个 <code>Employee</code> 类，三个方法分别服务于三个不同的部门：</p>
+
+    <ul>
+      <li><code>CalculatePay()</code> —— 计算薪资，规则由<strong>财务部门</strong>（汇报给 CFO）制定</li>
+      <li><code>ReportHours()</code> —— 统计工时，规则由<strong>人事部门</strong>（汇报给 COO）制定</li>
+      <li><code>Save()</code> —— 持久化，由<strong>数据库管理员</strong>（汇报给 CTO）制定</li>
+    </ul>
+
+    <p>看起来还算合理，对吧？真正的问题藏在暗处：<code>CalculatePay()</code> 和 <code>ReportHours()</code> 内部都调用了同一个私有方法 <code>RegularHours()</code>（计算非加班工时）。这个共享，看上去是消除重复——其实是<strong>灾难的开始</strong>。</p>
+
+    <div class="diagram">
+      <div class="dtitle">一次看似无关的改动，半年后炸在另一个部门</div>
+      <div class="nbox" style="border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7"><b>财务团队要调整加班口径</b><br><span style="color:#475569;font-size:13px">负责人改了 <code>CalculatePay()</code>，顺手也改了它依赖的私有方法 <code>RegularHours()</code></span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>但他没注意到 <code>ReportHours()</code> 也在用同一个方法</b><br><span style="color:#475569;font-size:13px">没有任何编译错误，没有任何测试变红——因为两边都由测试覆盖，而它们<strong>看起来</strong>是独立的</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #c4b5fd;border-radius:11px;background:#faf5ff"><b>财务测完，一切正常；人事毫不知情</b><br><span style="color:#475569;font-size:13px">工时报表已经算错了，但没人去看</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #e2e8f0;border-radius:11px;background:#f1f5f9"><b>某个深夜，工资算错了，或者审计发现了工时对不上</b><br><span style="color:#be123c;font-size:13px;font-weight:700">根因追溯到半年前那行改动</span></div>
+      <div class="cap">共享一个私有方法，就是<b>把两条本来独立的变更路径偷偷焊在了一起</b>。SRP 要防的就是这个：不是类太大，而是它同时被多个「老板」指挥。</div>
+    </div>
+
+    <div class="callout co-rose">
+      <span class="lbl">SRP 的真正定义</span>
+      <p>一个类之所以违反 SRP，<strong>不是因为它方法多</strong>，而是因为它必须服务于多个变化动因（actor）。判断方法只有一个：<strong>能用两个不同的主语给「这个类要改」造句吗？</strong><br>
+      「因为<strong>财务</strong>改了薪资规则，所以要改它」 + 「因为<strong>数据库</strong>换了表结构，所以要改它」——两个主语，两个原因，违反。</p>
+    </div>
+
+    <h3>代码里的样子</h3>
+
+    <h4 style="color:var(--rose)">违例：一个方法伺候四个老板</h4>
+<pre class="bad">public class OrderService
+{
+    public void Submit(Order order)
+    {
+        <span class="c">// ① 校验规则变化 —— 产品经理说了算</span>
+        <span class="k">if</span> (order.Items.Count == 0)
+            <span class="k">throw new</span> <span class="f">ArgumentException</span>(<span class="s">"订单不能为空"</span>);
+
+        <span class="c">// ② 计价规则变化 —— 财务说了算</span>
+        <span class="k">var</span> total = order.Items.Sum(i =&gt; i.Price * i.Qty) * 0.9m;
+
+        <span class="c">// ③ 表结构变化 —— DBA 说了算</span>
+        _conn.Execute(<span class="s">"INSERT INTO orders (id, total) VALUES (?, ?)"</span>, order.Id, total);
+
+        <span class="c">// ④ 触达策略变化 —— 运营说了算</span>
+        <span class="k">new</span> <span class="f">SmtpClient</span>(<span class="s">"smtp.corp.com"</span>).Send(order.Customer.Email, <span class="s">"下单成功"</span>);
+
+        <span class="c">// ⑤ 日志格式变化 —— 运维说了算</span>
+        _logger.Info($<span class="s">"order {order.Id} submitted"</span>);
+    }
+}</pre>
+
+    <p>五个部门，五个变化原因，全挤在一个方法里。任何一个部门改需求，这段代码都要动，而它同时又被其他四个部门依赖着——<em class="hl">这就是僵化（Rigidity）的最小可复现样本</em>。</p>
+
+    <h4 style="color:var(--green)">拆完：Service 只做编排</h4>
+<pre class="good"><span class="c">// 每个类一个变化原因，互不知晓</span>
+<span class="k">public class</span> <span class="f">OrderValidator</span>   { <span class="c">/* 只关心规则变化 */</span> }
+<span class="k">public class</span> <span class="f">PriceCalculator</span>  { <span class="c">/* 只关心计价变化 */</span> }
+<span class="k">public class</span> <span class="f">OrderRepository</span>   { <span class="c">/* 只关心存取变化 */</span> }
+<span class="k">public class</span> <span class="f">OrderNotifier</span>     { <span class="c">/* 只关心触达变化 */</span> }
+
+<span class="c">// Service 的职责只剩一件事：按顺序协调它们</span>
+<span class="k">public class</span> <span class="f">OrderService</span>
+{
+    <span class="k">public void</span> Submit(Order order)
+    {
+        _validator.Validate(order);
+        order.Total = _calculator.Calculate(order);
+        _repository.Save(order);
+        _notifier.OrderSubmitted(order);
+    }
+}</pre>
+
+    <div class="callout co-teal">
+      <span class="lbl">注意 OrderService 没有被删掉</span>
+      <p>它留下了，而且它自己的职责非常单一：<strong>编排顺序</strong>。如果某天「先发货再通知」变成「先通知再发货」，改了它也不违反 SRP——因为变的始终是同一件事（流程顺序），只有一个原因。<br>
+      很多人拆 SRP 时会把这类「协调者」也拆掉，结果是调用方被迫自己按顺序调用四个对象——<strong>编排逻辑被复制到了每一个调用点</strong>。那才是更大的灾难。</p>
+    </div>
+
+    <h3 class="teal">职责的三个层次</h3>
+    <p>SRP 说的「单元」可以是三种粒度，中文教材据此把它和另一条原则区分开：</p>
+
+    <div class="split">
+      <div class="mini info"><h4>类级：SRP</h4><p>一个类一个变化原因。这是最常被讨论的一层。</p></div>
+      <div class="mini info"><h4>接口级：ISP</h4><p>接口按客户端角色切。当「职责」落在接口上时，SRP 就变成了接口隔离原则。</p></div>
+      <div class="mini info"><h4>方法级</h4><p>一个方法只做一件事——这正是《重构》里「提炼函数」的判据：如果一段代码能用一句不含「和」的话描述它，就不用拆。</p></div>
+    </div>
+
+    <div class="callout co-amber">
+      <span class="lbl">反向警告</span>
+      <p>Martin 本人也提醒过：这条原则很容易走过头，<strong>类太多也是坏味道</strong>。判断标准永远是「变化原因是否相同」，而不是「类是不是够小」。<br>
+      一个 300 行、但全部服务于同一件事的类，是好设计；十个各 30 行、但每次改需求都要同时改这十个的类，是坏设计。</p>
+    </div>
+  </section>
+
+  <!-- ================= 04 ================= -->
+  <section id="s4">
+    <div class="sec-head">
+      <div class="badge teal">04</div>
+      <h2>OCP 开闭原则：加功能要动几个文件<span class="en">Open-Closed Principle</span></h2>
+    </div>
+
+    <div class="keyline">
+      <b>一句话：</b>软件实体（类、模块、函数）应该<strong>对扩展开放，对修改关闭</strong>。<br>
+      <span style="font-size:14px;color:var(--ink2)">能靠「新增代码」实现的，就不要靠「修改已有代码」实现。</span>
+    </div>
+
+    <p>这一条是七条里唯一称得上「目标」的原则——前面那节的分工图里，其他六条最终都在为它服务。原因很朴素：</p>
+
+    <div class="callout co-teal">
+      <span class="lbl">修改已有代码的真实成本</span>
+      <p>改一行代码，成本不是「打字的时间」，而是三件事：<strong>① 回归风险</strong>（原本能用的功能可能被改坏）、<strong>② 重新验证成本</strong>（所有依赖它的模块都要重测）、<strong>③ 认知负担</strong>（读代码的人必须先理解这段逻辑的<em>全部</em>历史用途，才敢动手）。<br>
+      而新增一个类，这三项成本几乎都是零。</p>
+    </div>
+
+    <h3>一个几乎没人提的事实：OCP 有两个版本</h3>
+    <p>这条原则在几十年里被重新定义过一次，两个版本的实现手段完全不同：</p>
+
+    <div class="split">
+      <div class="mini bad">
+        <h4>Meyer 版（1988）</h4>
+        <p><strong>靠实现继承。</strong>一个类编译好、放进库里、被客户使用，它就是「关闭」的；但任何人都可以继承它来添加新特性，所以它同时是「开放」的。</p>
+        <p>问题：子类依赖父类的实现细节，父类一改，子类跟着遭殃。</p>
+      </div>
+      <div class="mini good">
+        <h4>Martin 版（1990s）</h4>
+        <p><strong>靠抽象接口 + 多态。</strong>接口的<em>规约</em>是关闭的，任何人都不能改；而<em>实现</em>是开放的，谁都可以提供新的实现。</p>
+        <p>这是今天绝大多数人说的 OCP，也是更耐用的那个版本。</p>
+      </div>
+    </div>
+
+    <p>知道这段历史的价值在于：当有人说「用继承就能满足 OCP」时，你清楚那只说对了一半——<strong>继承只是 Meyer 的答案，而且是个有副作用的答案</strong>。</p>
+
+    <h3>代码里的样子：一条永远在长的 if-else</h3>
+
+    <h4 style="color:var(--rose)">违例：每加一种方式，都要回到这里</h4>
+<pre class="bad">public PaymentResult Pay(string method, decimal amount)
+{
+    <span class="k">if</span> (method == <span class="s">"alipay"</span>)   { <span class="c">/* 支付宝 SDK 调用 */</span> }
+    <span class="k">else if</span> (method == <span class="s">"wechat"</span>) { <span class="c">/* 微信 SDK 调用 */</span> }
+    <span class="k">else if</span> (method == <span class="s">"card"</span>)  { <span class="c">/* 银行卡网关调用 */</span> }
+    <span class="k">else throw new</span> <span class="f">NotSupportedException</span>(method);
+    <span class="c">// 明天要接 Apple Pay —— 又要回来改这个已经测试过的函数</span>
+}</pre>
+
+    <p>问题不在于它写得不好看，而在于<strong>每次扩展都在修改一段所有人都依赖的代码</strong>。它每被改一次，之前所有的测试结果都作废。</p>
+
+    <h4 style="color:var(--green)">改完：扩展 = 新增一个文件</h4>
+<pre class="good"><span class="k">public interface</span> <span class="f">IPaymentGateway</span>
+{
+    <span class="k">string</span> Method { <span class="k">get</span>; }
+    PaymentResult Pay(<span class="k">decimal</span> amount);
+}
+
+<span class="k">public class</span> <span class="f">AlipayGateway</span> : IPaymentGateway { <span class="c">/* ... */</span> }
+<span class="k">public class</span> <span class="f">WechatGateway</span> : IPaymentGateway { <span class="c">/* ... */</span> }
+
+<span class="c">// 接入 Apple Pay：只新增 ApplePayGateway.cs</span>
+<span class="c">// 下面这个函数一个字都不会变</span>
+<span class="k">public</span> PaymentResult Pay(<span class="k">string</span> method, <span class="k">decimal</span> amount)
+    =&gt; _gateways[method].Pay(amount);</pre>
+
+    <div class="callout co-blue">
+      <span class="lbl">最实用的一条判据</span>
+      <p>不要问「这个类是否符合 OCP」。要问：<strong>「加一个新功能，我需要修改几个已经测试过的文件？」</strong><br>
+      答案里每多一个数字，就是一处 OCP 债务。<strong>理想值是 0</strong>。<br>
+      这个方法比任何定义都好用，因为它可以量化：下次需求来了，数一下 diff 里改动的文件数。</p>
+    </div>
+
+    <h3 class="teal">OCP 的常见实现手段</h3>
+    <p>设计模式里有一大半其实都是「怎么在某个具体场景下做到 OCP」的答案：</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">场景</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">典型手段</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">扩展点在哪</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">算法/策略有多个变体，运行时切换</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">策略模式 Strategy</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">新增一个策略实现类</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">流程骨架固定，某些步骤可变</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">模板方法 Template Method</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">子类重写钩子方法</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一个变动需要通知多个下游</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">观察者模式 Observer</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">新增订阅者</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">需要在不改原类的前提下叠加功能</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">装饰器模式 Decorator</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">新增一个装饰器</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对稳定类型集合反复添加新操作</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">访问者模式 Visitor</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">新增一个访问者（代价是类型集合必须稳定）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">宿主程序加载外部模块</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">插件架构 / 事件驱动</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">外部提供实现并注册</td></tr>
+</tbody>
+</table>
+</div>
+
+    <div class="callout co-rose">
+      <span class="lbl">但这条原则的陷阱最深</span>
+      <p><strong>你无法为所有维度预留扩展点。</strong>为想象中可能发生的扩展而建的抽象，正是第 01 节里那个「不必要的复杂」症状。<br>
+      判断依据不是「将来可能会变」，而是「<em class="hl">它已经变过两三次了</em>」。<strong>OCP 应该开在已经被验证过的变化方向上，而不是开在想象里。</strong>这条界限的具体划法，在第 10 节展开。</p>
+    </div>
+  </section>
+
+  <!-- ================= 05 ================= -->
+  <section id="s5">
+    <div class="sec-head">
+      <div class="badge amber">05</div>
+      <h2>LSP 里氏替换：能被替换才叫子类<span class="en">Liskov Substitution Principle</span></h2>
+    </div>
+
+    <div class="keyline">
+      <b>一句话：</b>子类型必须能够替换它们的基类型，而不改变程序的正确性。<br>
+      <span style="font-size:14px;color:var(--ink2)">所有引用父类的地方，换成一个子类对象，程序都应该照常工作——<strong>而且不需要知道换过</strong>。</span>
+    </div>
+
+    <p>它来自 Barbara Liskov 1987 年在 OOPSLA 上的主题演讲《Data Abstraction and Hierarchy》，1994 年她与 Jeannette Wing 给出了形式化版本，2008 年 Liskov 因此获得图灵奖。</p>
+
+    <p>注意原文里最关键的那个词：<strong>行为子类型（behavioral subtyping）</strong>。LSP 说的从来不是语法上的继承关系，而是<em class="hl">行为契约的兼容性</em>。</p>
+
+    <h3 class="amber">契约的四条规矩</h3>
+    <p>把父类方法看成一纸合同：<strong>调用方有义务满足「前置条件」，方法方有责任兑现「后置条件」</strong>。子类重写方法时，只能让合同变得更宽松，不能更苛刻：</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">规矩</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">允许</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">违反</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>前置条件</strong><br/>不能加强</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">父类要求「传个正数」，子类放宽成「传任意整数」</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">父类说「正数就行」，子类说「必须大于 100」</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>后置条件</strong><br/>不能减弱</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">父类承诺「返回一条记录」，子类承诺「返回一个非 null 的完整对象」</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">父类保证「一定有结果」，子类可能返回 null</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>异常</strong><br/>不能新引入</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">子类不抛异常，或只抛父类已声明的异常的子类</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">父类方法没声明异常，子类抛出 <code>NotSupportedException</code></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>不变式</strong><br/>必须保持</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">子类维持父类的所有恒定约束</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">父类保证「宽高独立可变」，子类让它们互相影响</td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3 class="amber">那个被讲烂、但依然最准的例子</h3>
+    <p>正方形继承长方形。数学上正方形<strong>是</strong>长方形，所以很多人的第一反应是「这继承天经地义」。但把它放到代码里：</p>
+
+<pre class="bad"><span class="k">public class</span> <span class="f">Rectangle</span>
+{
+    <span class="k">public virtual int</span> Width  { <span class="k">get</span>; <span class="k">set</span>; }
+    <span class="k">public virtual int</span> Height { <span class="k">get</span>; <span class="k">set</span>; }
+    <span class="k">public int</span> Area =&gt; Width * Height;
+    <span class="c">// 隐含契约：设置 Width 不会影响 Height</span>
+}
+
+<span class="k">public class</span> <span class="f">Square</span> : <span class="f">Rectangle</span>
+{
+    <span class="k">public override int</span> Width  { <span class="k">set</span> { base.Width = <span class="k">value</span>; base.Height = <span class="k">value</span>; } }
+    <span class="k">public override int</span> Height { <span class="k">set</span> { base.Width = <span class="k">value</span>; base.Height = <span class="k">value</span>; } }
+    <span class="c">// 为了保住「四边相等」，它必须破坏父类的契约</span>
+}</pre>
+
+    <p>然后某段代码这样用：</p>
+
+<pre class="bad"><span class="c">// 这段代码只认识 Rectangle，它会以为自己拿到的是矩形</span>
+<span class="k">void</span> Resize(<span class="f">Rectangle</span> r)
+{
+    r.Width  = 4;
+    r.Height = 5;
+    <span class="f">Assert</span>(r.Area == 20);   <span class="c">// 传 Square 进来 → 实际是 25</span>
+}</pre>
+
+    <div class="diagram">
+      <div class="dtitle">替换之后，谁的预期被打破了</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>调用方 <code>Resize()</code> 的预期</b><br><span style="color:#475569;font-size:13px">我拿到的是 Rectangle。<code>Width = 4</code> 之后，<code>Height</code> 还是原来那个值</span></div>
+      <div class="narw">↓ 传入 Square 之后</div>
+      <div class="nbox" style="border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7"><b>实际发生</b><br><span style="color:#475569;font-size:13px"><code>Width = 4</code> 把 Height 也改成了 4；<code>Height = 5</code> 又把 Width 也改成了 5</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #e2e8f0;border-radius:11px;background:#f1f5f9"><b>代码没有报错，没有编译警告</b><br><span style="color:#be123c;font-size:13px;font-weight:700">只是结果悄悄错了</span></div>
+      <div class="cap">契约视角看得很清楚：Square 的<b>前置条件更强</b>（必须 width == height），<b>后置条件更弱</b>（setWidth 不再保证 height 不变）。两头都违规。</div>
+    </div>
+
+    <div class="callout co-amber">
+      <span class="lbl">根因一句话</span>
+      <p>面向对象里的继承表达的是<strong>行为契约的可替换性</strong>，不是<strong>数学集合的包含关系</strong>。<br>
+      「正方形是长方形」在集合论里成立，在代码契约里不成立——因为长方形的契约核心是「宽高独立可变」，而这恰恰是正方形无法兑现的。</p>
+    </div>
+
+    <p>同理还有那个经典的鸟类例子：<code>Ostrich : Bird</code>，但 <code>Fly()</code> 只能抛异常或什么都不做。只要代码里有一处 <code>foreach (var b in birds) b.Fly();</code>，这个继承体系就塌了。</p>
+
+    <h3 class="amber">最灵的报警器：类型判断</h3>
+
+    <div class="callout co-rose">
+      <span class="lbl">LSP 违例的伤口长什么样</span>
+      <p>代码里出现这类写法，基本可以直接判定 LSP 已经破了：</p>
+      <p><code>if (x is Square)</code>　<code>if (x.GetType() == typeof(...))</code><br>
+      <code>var s = x as SpecialSub;</code>　<code>if (bird is Ostrich) { /* 不让它飞 */ }</code></p>
+      <p>逻辑很直白：<strong>调用方不得不回头确认「你到底是哪一种」，说明它已经不能信任基类的契约了。</strong>本来多态的目的就是让调用方不用做这个判断。</p>
+    </div>
+
+    <h3 class="amber">修法：三条路，按优先级</h3>
+    <ol class="steps">
+      <li><strong>抽出真正的共同抽象。</strong>让 <code>Shape</code> 只声明两者都诚实做到的事（<code>Area()</code>），<code>Rectangle</code> 和 <code>Square</code> 各自独立实现。注意：这样它们之间不再是继承关系——因为本来就不该是。</li>
+      <li><strong>把可变性拿掉，改成不可变值对象。</strong><code>WithWidth(4)</code> 返回一个新矩形，任何一次设置都不会有副作用。副作用一消失，契约冲突自然消失——这也是函数式设计里最常用的解法。</li>
+      <li><strong>改用组合（见第 09 节）。</strong>如果继承只是为了白拿几个方法，那它从一开始就不该存在。</li>
+    </ol>
+
+    <div class="callout co-teal">
+      <span class="lbl">这条原则真正的工程含义</span>
+      <p>LSP 实际在说：<strong>继承绝不应该是「代码复用的便利工具」，而必须是一种严格的行为子类型关系。</strong><br>
+      如果你只是因为「B 想用 A 里的那几个方法」而让 B 继承 A，同时又得在 B 里禁用或覆盖 A 的部分方法——那你已经违约了，改用组合。</p>
+    </div>
+  </section>
+
+  <!-- ================= 06 ================= -->
+  <section id="s6">
+    <div class="sec-head">
+      <div class="badge violet">06</div>
+      <h2>ISP 接口隔离：那些抛异常的方法<span class="en">Interface Segregation Principle</span></h2>
+    </div>
+
+    <div class="keyline">
+      <b>一句话：</b>不应该强迫客户端依赖它不使用的方法。<br>
+      <span style="font-size:14px;color:var(--ink2)">多个客户专用的接口，好过一个通用的总接口。</span>
+    </div>
+
+    <h3 class="violet">它是被一台打印机逼出来的</h3>
+    <p>ISP 不是坐在书桌前想出来的，是 Martin 在 Xerox 做咨询时从一个真实的烂摊子里总结的。这个故事的细节值得完整讲一遍，因为它是「设计问题如何变成工程灾难」的范本：</p>
+
+    <div class="diagram">
+      <div class="dtitle">Xerox 打印机系统：一台机器，九个功能，一个 Job 类</div>
+      <div class="nbox" style="border:1.5px solid #c4b5fd;border-radius:11px;background:#faf5ff"><b>背景</b><br><span style="color:#475569;font-size:13px">Xerox 开发新的打印机系统，要支持打印、装订、传真等多种任务。软件从头写起，早期跑得挺好</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #c4b5fd;border-radius:11px;background:#faf5ff"><b>问题</b><br><span style="color:#475569;font-size:13px">几乎所有任务都经由同一个 <code>Job</code> 类。它逐渐长成一个「胖类」，塞满了面向各种不同客户的方法</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7"><b>后果</b><br><span style="color:#475569;font-size:13px">一个装订任务也得「知道」打印任务的全部方法。改这里的任何一处，都要把整个 <code>Job</code> 重新编译、重新部署 —— <b>一次部署循环长达一小时</b>，开发几乎停摆</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>Martin 的解法</b><br><span style="color:#475569;font-size:13px">在 Job 和它的客户之间加一层接口，按<b>任务类型</b>切开：打印任务只看到 <code>IPrintJob</code>，装订任务只看到 <code>IStapleJob</code>。这就是今天的 ISP —— 而他用的手段，正是 DIP</span></div>
+      <div class="cap">注意这个因果链：<b>设计缺陷 → 部署代价飙升 → 开发效率归零</b>。ISP 不是为了好看，是为了让无关的客户之间不互相牵连。</div>
+    </div>
+
+    <h3 class="violet">代码里的样子</h3>
+
+    <h4 style="color:var(--rose)">违例：胖接口</h4>
+<pre class="bad"><span class="k">public interface</span> <span class="f">IWorker</span>
+{
+    <span class="k">void</span> Work();
+    <span class="k">void</span> Eat();      <span class="c">// 机器人员工不需要</span>
+    <span class="k">void</span> Sleep();    <span class="c">// 机器人员工也不需要</span>
+}
+
+<span class="k">public class</span> <span class="f">Robot</span> : IWorker
+{
+    <span class="k">public void</span> Work()  { <span class="c">/* ... */</span> }
+
+    <span class="c">// 这两行就是 ISP 在报警</span>
+    <span class="k">public void</span> Eat()   =&gt; <span class="k">throw new</span> <span class="f">NotSupportedException</span>();
+    <span class="k">public void</span> Sleep() =&gt; <span class="k">throw new</span> <span class="f">NotSupportedException</span>();
+}</pre>
+
+    <h4 style="color:var(--green)">改完：按角色切，不按方法切</h4>
+<pre class="good"><span class="k">public interface</span> <span class="f">IWorkable</span> { <span class="k">void</span> Work(); }
+<span class="k">public interface</span> <span class="f">IFeedable</span> { <span class="k">void</span> Eat(); <span class="k">void</span> Sleep(); }
+
+<span class="k">public class</span> <span class="f">Robot</span> : IWorkable                       <span class="c">// 只实现它真正能兑现的</span>
+{ <span class="k">public void</span> Work() { <span class="c">/* ... */</span> } }
+
+<span class="k">public class</span> <span class="f">Human</span> : IWorkable, IFeedable
+{ <span class="k">public void</span> Work()  { <span class="c">/* ... */</span> }
+  <span class="k">public void</span> Eat()   { <span class="c">/* ... */</span> }
+  <span class="k">public void</span> Sleep() { <span class="c">/* ... */</span> } }</pre>
+
+    <div class="callout co-rose">
+      <span class="lbl">两个最好用的违例信号</span>
+      <p><strong>信号一：</strong>实现接口时写出 <code>throw new NotImplementedException()</code> / <code>NotSupportedException</code> / 一个空方法体。空实现不是「占位」，是在告诉你「这个接口里混进了不属于这个客户端的东西」。<br>
+      <strong>信号二：</strong>同一个接口被多个客户端依赖，而每个客户端都只用其中两三个方法。这说明它其实已经是好几个接口叠在一起了。</p>
+    </div>
+
+    <h3 class="violet">游戏开发里最常踩的版本</h3>
+    <p>写游戏时这条特别容易踩，因为大家都想搞一个万能的 <code>IEntity</code>：</p>
+
+<pre class="bad"><span class="c">// ❌ 万能接口：炮台和宝箱都被迫实现一堆用不上的东西</span>
+<span class="k">public interface</span> <span class="f">IEntity</span>
+{
+    <span class="k">void</span> TakeDamage(<span class="k">int</span> dmg);
+    <span class="k">void</span> Heal(<span class="k">int</span> hp);
+    <span class="k">void</span> Interact(Player p);
+    <span class="k">void</span> PickUp(Item item);
+}
+
+<span class="c">// ✅ 按角色切：谁能挨打、谁能被治疗、谁能交互，是三种独立能力</span>
+<span class="k">public interface</span> <span class="f">IDamageable</span>   { <span class="k">void</span> TakeDamage(<span class="k">int</span> dmg); }
+<span class="k">public interface</span> <span class="f">IHealable</span>     { <span class="k">void</span> Heal(<span class="k">int</span> hp); }
+<span class="k">public interface</span> <span class="f">IInteractable</span> { <span class="k">void</span> Interact(Player p); }
+
+<span class="c">// 炮台：只挨打     宝箱：只交互     可破坏的治疗点：挨打 + 可治疗</span>
+<span class="k">public class</span> <span class="f">Turret</span>   : IDamageable { }
+<span class="k">public class</span> <span class="f">Treasure</span> : IInteractable { }
+<span class="k">public class</span> <span class="f">HealPad</span>  : IDamageable, IHealable { }</pre>
+
+    <p>这样做的直接收益是：碰撞检测写 <code>if (col is IDamageable d)</code>，交互系统写 <code>if (col is IInteractable i)</code>——每个系统只认识自己需要的那一种能力，<strong>加一种新实体类型时，所有已有系统的代码都不用动</strong>。这又回到 OCP 了。</p>
+
+    <div class="callout co-amber">
+      <span class="lbl">但别切碎</span>
+      <p>ISP 的目标是<strong>高内聚的分组</strong>，不是「粒度最大化」。把每个方法都拆成一个单方法接口，会带来接口数量爆炸、难以发现和组合的问题。<br>
+      正确的切法只有一个依据：<em class="hl">客户端是谁，它们各自需要哪一组能力</em>。切分的依据是<strong>调用方的角色</strong>，不是方法的数量。<br>
+      这也是 ISP 常被称作「角色接口（role interface）」的原因。</p>
+    </div>
+
+    <h3 class="violet">ISP 和 SRP 的关系</h3>
+    <div class="quote">
+      <b>SRP 管类，ISP 管接口。</b>同样一句「一个变化原因」，落在类上是单一职责，落在接口上是接口隔离。
+      <span class="who">—— 这也是中文教材里把两者分开列的原因</span>
+    </div>
+    <p>另外注意它们和 DIP 的连带关系：ISP 提供的那些窄接口，正好就是 DIP 需要的抽象——<strong>越窄的接口越容易替换，也越容易测试</strong>。这三条在实践里几乎总是一起出现的。</p>
+  </section>
+
+  <!-- ================= 07 ================= -->
+  <section id="s7">
+    <div class="sec-head">
+      <div class="badge green">07</div>
+      <h2>DIP 依赖倒置：倒过来的到底是什么<span class="en">Dependency Inversion Principle</span></h2>
+    </div>
+
+    <div class="keyline">
+      <b>两句话，缺一不可：</b><br>
+      ① 高层模块不应该依赖低层模块，两者都应该依赖抽象。<br>
+      ② 抽象不应该依赖细节，细节应该依赖抽象。
+    </div>
+
+    <p>这是七条里名字起得最糟的一条——「倒置」这个词让无数人以为它说的是调用顺序反过来，或者控制流反转。不是。</p>
+
+    <div class="callout co-green">
+      <span class="lbl">倒的是「编译期的依赖方向」</span>
+      <p>传统分层里，业务代码必须 <code>import</code> 数据库驱动的类型才能写 SQL。于是<strong>业务层在编译期依赖了基础设施层</strong>——数据库换版本、换厂商、换 ORM，业务层就要跟着改。<br>
+      DIP 之后，业务层<strong>自己定义</strong>它需要的接口（<code>IOrderRepository</code>），数据库层来<strong>实现</strong>这个接口。依赖箭头反过来了：<strong>不是业务层依赖基础设施，而是基础设施依赖业务层定下的契约。</strong><br>
+      调用方向一点没变（业务层照样调用数据库），变的是<em class="hl">谁在编译期认识谁</em>。</p>
+    </div>
+
+    <div class="diagram">
+      <div class="dtitle">依赖倒置前 vs 后</div>
+      <svg viewBox="0 0 680 322" role="img" aria-label="依赖倒置前后对比">
+        <defs>
+          <marker id="dip-ar" markerWidth="9" markerHeight="9" refX="7" refY="3.2" orient="auto">
+            <path d="M0,0 L7,3.2 L0,6.4 z" fill="#be123c"/>
+          </marker>
+          <marker id="dip-ab" markerWidth="9" markerHeight="9" refX="7" refY="3.2" orient="auto">
+            <path d="M0,0 L7,3.2 L0,6.4 z" fill="#3b5bdb"/>
+          </marker>
+          <marker id="dip-at" markerWidth="9" markerHeight="9" refX="7" refY="3.2" orient="auto">
+            <path d="M0,0 L7,3.2 L0,6.4 z" fill="#0d9488"/>
+          </marker>
+        </defs>
+
+        <text x="170" y="28" text-anchor="middle" font-size="12.5" fill="#be123c" font-weight="700">① 倒置前：高层依赖细节</text>
+        <rect x="45" y="46" width="250" height="50" rx="11" fill="#fff1f2" stroke="#f9c2cd" stroke-width="1.6"/>
+        <text x="170" y="68" text-anchor="middle" font-size="12.5" fill="#9f1239" font-weight="700">OrderService</text>
+        <text x="170" y="85" text-anchor="middle" font-size="11" fill="#64748b">高层业务逻辑</text>
+
+        <line x1="170" y1="96" x2="170" y2="166" stroke="#be123c" stroke-width="2" marker-end="url(#dip-ar)"/>
+        <text x="178" y="132" font-size="11" fill="#be123c">编译期直接引用</text>
+
+        <rect x="45" y="168" width="250" height="50" rx="11" fill="#fff5f7" stroke="#f2aab8" stroke-width="1.6"/>
+        <text x="170" y="190" text-anchor="middle" font-size="12.5" fill="#9f1239" font-weight="700">MySqlOrderRepository</text>
+        <text x="170" y="207" text-anchor="middle" font-size="11" fill="#64748b">低层实现细节</text>
+
+        <line x1="340" y1="34" x2="340" y2="286" stroke="#e2e8f0" stroke-width="1.4" stroke-dasharray="6 6"/>
+
+        <text x="510" y="28" text-anchor="middle" font-size="12.5" fill="#0d9488" font-weight="700">② 倒置后：两边都依赖抽象</text>
+        <rect x="385" y="46" width="250" height="50" rx="11" fill="#f3f6ff" stroke="#a8b8f5" stroke-width="1.6"/>
+        <text x="510" y="68" text-anchor="middle" font-size="12.5" fill="#3b5bdb" font-weight="700">OrderService</text>
+        <text x="510" y="85" text-anchor="middle" font-size="11" fill="#64748b">高层业务逻辑</text>
+
+        <line x1="510" y1="96" x2="510" y2="116" stroke="#3b5bdb" stroke-width="2" marker-end="url(#dip-ab)"/>
+        <text x="518" y="110" font-size="11" fill="#3b5bdb">依赖</text>
+
+        <rect x="385" y="120" width="250" height="46" rx="11" fill="#eef2ff" stroke="#a8b8f5" stroke-width="1.6" stroke-dasharray="7 5"/>
+        <text x="510" y="140" text-anchor="middle" font-size="12" fill="#3b5bdb" font-weight="700">interface IOrderRepository</text>
+        <text x="510" y="157" text-anchor="middle" font-size="10.5" fill="#64748b">抽象层 —— 由高层定义</text>
+
+        <line x1="510" y1="222" x2="510" y2="172" stroke="#0d9488" stroke-width="2" marker-end="url(#dip-at)"/>
+        <text x="518" y="200" font-size="11" fill="#0d9488">实现</text>
+
+        <rect x="385" y="224" width="250" height="50" rx="11" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.6"/>
+        <text x="510" y="246" text-anchor="middle" font-size="12.5" fill="#15803d" font-weight="700">MySqlOrderRepository</text>
+        <text x="510" y="263" text-anchor="middle" font-size="11" fill="#64748b">低层实现细节</text>
+
+        <text x="340" y="306" text-anchor="middle" font-size="11.5" fill="#94a3b8">调用方向没变（业务依然调用数据库），变的是编译期谁认识谁</text>
+      </svg>
+      <div class="cap">左边那个箭头是「焊死」的：换数据库要改业务代码。右边那个箭头是「插拔」的：换实现只需要提供一个新的实现类，业务代码一个字都不动 —— 又一次回到 OCP。</div>
+    </div>
+
+    <h3 class="green">代码里的样子</h3>
+
+<pre class="bad"><span class="c">// ❌ 高层模块自己决定了要用什么</span>
+<span class="k">public class</span> <span class="f">OrderService</span>
+{
+    <span class="k">private readonly</span> <span class="f">MySqlOrderRepository</span> _repo = <span class="k">new</span> <span class="f">MySqlOrderRepository</span>();
+
+    <span class="k">public void</span> Submit(Order order)
+    {
+        _repo.Save(order);      <span class="c">// 业务代码里出现了 SQL 专属类型</span>
+    }
+}
+<span class="c">// 后果：单测必须连真数据库；换 ORM 要改业务层；换云厂商要改业务层</span></pre>
+
+<pre class="good"><span class="c">// ① 由高层定义它需要的契约（放在业务/领域层）</span>
+<span class="k">public interface</span> <span class="f">IOrderRepository</span>
+{
+    <span class="k">void</span> Save(Order order);
+    Order FindById(<span class="k">string</span> id);
+}
+
+<span class="c">// ② 高层只认识抽象，具体实现从外面送进来（构造器注入）</span>
+<span class="k">public class</span> <span class="f">OrderService</span>
+{
+    <span class="k">private readonly</span> <span class="f">IOrderRepository</span> _repo;
+
+    <span class="k">public</span> OrderService(<span class="f">IOrderRepository</span> repo) =&gt; _repo = repo;
+
+    <span class="k">public void</span> Submit(Order order) =&gt; _repo.Save(order);
+}
+
+<span class="c">// ③ 低层实现去实现它（放在基础设施层）</span>
+<span class="k">public class</span> <span class="f">MySqlOrderRepository</span> : <span class="f">IOrderRepository</span> { <span class="c">/* ... */</span> }
+<span class="k">public class</span> <span class="f">InMemoryOrderRepository</span> : <span class="f">IOrderRepository</span> { <span class="c">/* 单元测试用 */</span> }</pre>
+
+    <div class="callout co-rose">
+      <span class="lbl">必须澄清的一组混淆：DIP ≠ DI ≠ IoC 容器</span>
+      <p>这三个词被混用得极其严重，但它们不在一个层面上：</p>
+      <p><strong>DIP 是设计原则</strong>——规定依赖应该指向抽象。它管的是「谁认识谁」。<br>
+      <strong>DI（依赖注入）是实现手段</strong>——把依赖从外部传进来，而不是在内部创建。它管的是「对象怎么拿到它的协作者」。<br>
+      <strong>IoC 容器是工具</strong>——自动帮你完成装配。它管的是「谁来 new」。</p>
+      <p>关键推论：<em class="hl">你完全可以不引入任何容器、手写构造器注入，就完整地满足 DIP</em>；反过来，一个用了 Spring / 各种 DI 框架的项目，如果业务类里到处 <code>new</code> 具体实现，它照样违反 DIP。<strong>装了容器不等于做对了设计。</strong></p>
+    </div>
+
+    <h3 class="green">判据与实践收益</h3>
+    <p><strong>扫描方法：</strong>在业务层/领域层的代码里搜索 <code>new</code>，看它后面跟的是什么。如果跟的是 <code>SqlConnection</code>、<code>HttpClient</code>、<code>FileStream</code>、某个云厂商 SDK 的 Client——那就是 DIP 违例。另一个信号：业务方法的参数或返回值里出现了第三方 SDK 的类型。</p>
+
+    <div class="split">
+      <div class="mini good"><h4>可测试</h4><p>单测时注入内存实现或 mock，测试跑在毫秒级，不依赖任何外部环境。这是最立竿见影的收益。</p></div>
+      <div class="mini good"><h4>可替换</h4><p>换数据库、换消息队列、换云厂商，改的只是基础设施层的一个实现类。</p></div>
+      <div class="mini good"><h4>可并行</h4><p>接口一旦定下，两个人可以同时开工——一个写业务，一个写实现，互不阻塞。</p></div>
+    </div>
+
+    <div class="callout co-amber">
+      <span class="lbl">反过来的代价</span>
+      <p>抽象的引入是有成本的：多一层间接、多一个文件、新人需要多跳一次才能看懂调用链。<br>
+      所以<strong>不是所有依赖都值得倒置</strong>。判断标准是那条依赖<strong>是否稳定、是否可能被替换</strong>：领域模型依赖 <code>string</code>、<code>DateTime</code> 这类语言内置类型完全合理，没有人会去为它们抽接口。<strong>抽象应该开在真正会变、或者需要被隔离的地方。</strong></p>
+    </div>
+  </section>
+
+  <!-- ================= 08 ================= -->
+  <section id="s8">
+    <div class="sec-head">
+      <div class="badge rose">08</div>
+      <h2>LoD 迪米特法则：数一数你的点号<span class="en">Law of Demeter</span></h2>
+    </div>
+
+    <div class="keyline">
+      <b>一句话：</b>只和你的直接朋友说话。<br>
+      <span style="font-size:14px;color:var(--ink2)">也叫<strong>最少知识原则</strong>（Principle of Least Knowledge）——一个软件实体应当尽可能少地与其他实体发生相互作用。</span>
+    </div>
+
+    <p>它的出身很特别，不是从设计理论里推出来的，而是一个学术项目的副产品：1987 年秋，美国东北大学的 Demeter 项目里，研究者 Ian Holland 提出了这条风格规则；1989 年 Karl Lieberherr 与 Holland 在 IEEE Software 上将它正式发表。</p>
+
+    <p>名字的由来有个小八卦：项目组当时用的硬件描述语言叫 <strong>Zeus</strong>（宙斯），于是这个工具就顺手取了宙斯姐姐的名字 —— 希腊神话里的农业女神得墨忒耳（Demeter），寓意软件像作物一样「生长」。</p>
+
+    <h3 class="rose">谁是「朋友」</h3>
+    <p>一个方法 <code>f</code> 里，允许调用的对象只有四类，其余全算「陌生人」：</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">可以调</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">例子</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">为什么</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象自己</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>this.Method()</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">自己的方法当然可以调</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>f</code> 的参数</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">方法签名里传进来的对象</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">调用方主动交到你手上的，关系明确</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>f</code> 里自己创建的对象</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>var tmp = new Foo();</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">生命周期完全由你掌握</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象的直接成员</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>_repository.Save()</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">它就是你的一部分</td></tr>
+<tr><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">✗ 成员对象的内部对象</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>_customer.GetAddress().GetCity()</code></td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">这是陌生人，你正在伸手掏别人的口袋</td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3 class="rose">代码里的样子：火车残骸</h3>
+
+<pre class="bad"><span class="c">// ❌ 一串点号组成的「火车残骸」（train wreck）</span>
+<span class="k">var</span> city = order.GetCustomer().GetAddress().GetCity();
+
+<span class="c">// 这一行代码，让 OrderService 知道了三件事：</span>
+<span class="c">//   1. Order 里有一个 Customer</span>
+<span class="c">//   2. Customer 里有一个 Address</span>
+<span class="c">//   3. Address 上有个 GetCity()</span>
+<span class="c">// 任何一条变了，这行都会崩 —— 而且崩在一个离得很远的类里</span></pre>
+
+<pre class="good"><span class="c">// ✅ 让 Order 自己回答这个问题</span>
+<span class="k">public class</span> <span class="f">Order</span>
+{
+    <span class="k">public string</span> GetShippingCity() =&gt; _customer.GetShippingCity();
+}
+
+<span class="c">// Customer 再往下委托一层，每一层只知道自己的直接伙伴</span>
+<span class="k">public class</span> <span class="f">Customer</span>
+{
+    <span class="k">public string</span> GetShippingCity() =&gt; _address.GetCity();
+}
+
+<span class="c">// 调用方一句话，且完全不关心内部结构</span>
+<span class="k">var</span> city = order.GetShippingCity();</pre>
+
+    <p>现在如果 <code>Customer</code> 改成支持多个地址（收货地址、账单地址），需要改的只是 <code>Customer.GetShippingCity()</code> 一处——<strong>所有调用方毫发无伤</strong>。这就是 LoD 的全部价值。</p>
+
+    <div class="callout co-rose">
+      <span class="lbl">判据：数点号</span>
+      <p>很多面向对象语言用 <code>.</code> 表示成员访问，所以这条原则可以被压成一句极简的口诀：<strong>一个方法里，尽量只用一个 <code>.</code>。</strong><br>
+      <code>a.Method()</code> —— 不违反。<br>
+      <code>a.GetB().Method()</code> —— 违反。<br>
+      <code>a.GetB().GetC().Method()</code> —— 严重违反。<br>
+      <span style="font-size:13.5px;color:var(--ink2)">（严格来说这不是官方判据，但它异常好用，因为它可以机械地执行。）</span></p>
+    </div>
+
+    <div class="callout co-amber">
+      <span class="lbl">但别教条化：点号不是罪证</span>
+      <p>Fluent API、Builder、LINQ 查询都是刻意的链式设计，它们完全合法。区别在于：<strong>链上每一步返回的对象，是不是「同一个逻辑对象的延续」，还是「另一个对象的内部零件」。</strong><br>
+      <code>query.Where(x).OrderBy(y).ToList()</code> —— 这是同一条查询流水线的延续，没问题。<br>
+      <code>order.GetCustomer().GetAddress().GetCity()</code> —— 这是穿越了三层对象去掏出别人的内部结构，有问题。<br>
+      LoD 的本意是<strong>不要穿越对象去访问它内部的零件</strong>，不是「禁止点号」。</p>
+    </div>
+
+    <h3 class="rose">代价也要说清楚</h3>
+    <p>LoD 在方法层面会让接口变窄（每个方法只需要知道很少几个伙伴），但在<strong>类层面会让接口变宽</strong>——因为你必须为每种转发需求写一个包装方法。<code>Order</code> 上会多出 <code>GetShippingCity()</code>、<code>GetShippingZip()</code>、<code>GetCustomerLevel()</code>……</p>
+    <p>所以它有时会被抱怨「写了一堆无脑转发」。这确实是成本，但换来的是<strong>封装边界不被击穿</strong>。经验做法是：为<em class="hl">真实存在的业务问题</em>写转发，而不是为了「把所有点号都消掉」而写。</p>
+
+    <div class="callout co-blue">
+      <span class="lbl">一个顺手的好处</span>
+      <p>很多分层架构（Controller / Service / Repository、MVC 的三层）本质上就是<strong>在系统级别执行迪米特法则</strong>：每层只能调用自己这层和下一层，跨层调用（跳层）被视为违规。<br>
+      所以当你在代码规范里写「Controller 不许直接调 Repository」时，你其实是在引用 LoD。</p>
+    </div>
+  </section>
+
+  <!-- ================= 09 ================= -->
+  <section id="s9">
+    <div class="sec-head">
+      <div class="badge teal">09</div>
+      <h2>CRP 合成复用：白箱与黑箱<span class="en">Composite Reuse Principle</span></h2>
+    </div>
+
+    <div class="keyline">
+      <b>一句话：</b>优先使用对象组合/聚合，而不是继承，来达到复用的目的。<br>
+      <span style="font-size:14px;color:var(--ink2)">注意它说的是<strong>「复用」</strong>，不是「禁止继承」。</span>
+    </div>
+
+    <p>为什么复用要分两种？因为「拿到一段现成的实现」这件事，有两种完全不同的拿法，代价差一个数量级。</p>
+
+    <div class="diagram">
+      <div class="dtitle">白箱复用 vs 黑箱复用</div>
+      <div class="nbox" style="border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7"><b>继承 = 白箱复用</b><br><span style="color:#475569;font-size:13px">父类的内部细节对子类<strong>可见</strong>。就像把一个零件的内部结构图交给你，你可以改它，但它一改，你也得跟着改</span></div>
+      <div class="narw">vs</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>组合/聚合 = 黑箱复用</b><br><span style="color:#475569;font-size:13px">成员对象的内部细节<strong>不可见</strong>，只能通过公开接口交互。就像拿到一个封装好的模块，你只管插上、只管调，它内部怎么实现与你无关</span></div>
+      <div class="cap">「白箱 / 黑箱」说的就是<b>可视性</b>：你能不能看到、进而依赖上对方的实现细节。</div>
+    </div>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">对比维度</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">继承（白箱复用）</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">组合 / 聚合（黑箱复用）</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">封装性</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">破坏——基类实现细节对子类可见</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">保持——只通过公开接口交互</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">耦合度</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">高，编译期强耦合</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">低，可面向抽象</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">绑定时机</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">静态，编译期就定死</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">可动态，运行时替换组件</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">复用范围</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">全盘继承——用不上的方法也得扛着</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">按需取用——只用需要的那几个方法</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">基类/成员变化的影响</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">基类一改，所有子类都可能被波及</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">成员对象变化对使用方影响很小</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">灵活性</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">低</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">高</td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3 class="teal">继承的四个坑</h3>
+    <ol class="steps">
+      <li><strong>破坏封装。</strong>子类可以看到 <code>protected</code> 成员，于是基类的内部细节变成了「事实上公开的 API」。你以后想重构基类内部，得先问问所有子类答不答应。</li>
+      <li><strong>静态绑定。</strong>继承关系在编译期就定死了，运行时换不了。而组合可以在运行时注入不同实现——这正是策略模式、装饰器模式的基础。</li>
+      <li><strong>全盘接收。</strong>继承是「全部拿走」，没有选择余地。你为了复用基类里一个方法，得连它另外十个方法一起继承过来——而这十个方法你一个都不用。</li>
+      <li><strong>脆弱基类（Fragile Base Class）。</strong>基类改一个看起来人畜无害的方法，所有子类的行为都可能悄悄变掉。这是继承体系里最难排查的一类 bug。</li>
+    </ol>
+
+    <h3 class="teal">代码里的样子</h3>
+
+<pre class="bad"><span class="c">// ❌ 为了白拿「发通知」的代码而继承 —— 短信不是一个邮件</span>
+<span class="k">public class</span> <span class="f">EmailNotifier</span>
+{
+    <span class="k">public void</span> Send(<span class="k">string</span> to, <span class="k">string</span> msg) { <span class="c">/* SMTP 逻辑 */</span> }
+}
+
+<span class="k">public class</span> <span class="f">SmsNotifier</span> : <span class="f">EmailNotifier</span>   <span class="c">// 语义上完全不成立</span>
+{
+    <span class="k">public new void</span> Send(<span class="k">string</span> to, <span class="k">string</span> msg) { <span class="c">/* 短信逻辑 */</span> }
+    <span class="c">// 顺带继承了 EmailNotifier 全部内部细节，包括那些只有邮件才需要的字段</span>
+}</pre>
+
+<pre class="good"><span class="c">// ✅ 抽出「通知方式」这个抽象，用组合 + 注入</span>
+<span class="k">public interface</span> <span class="f">INotifier</span> { <span class="k">void</span> Send(<span class="k">string</span> to, <span class="k">string</span> msg); }
+
+<span class="k">public class</span> <span class="f">EmailNotifier</span> : <span class="f">INotifier</span> { <span class="k">public void</span> Send(<span class="k">string</span> to, <span class="k">string</span> msg) { } }
+<span class="k">public class</span> <span class="f">SmsNotifier</span>   : <span class="f">INotifier</span> { <span class="k">public void</span> Send(<span class="k">string</span> to, <span class="k">string</span> msg) { } }
+
+<span class="k">public class</span> <span class="f">OrderService</span>
+{
+    <span class="k">private readonly</span> <span class="f">INotifier</span> _notifier;      <span class="c">// 组合，而且依赖的是抽象</span>
+    <span class="k">public</span> OrderService(<span class="f">INotifier</span> notifier) =&gt; _notifier = notifier;
+}</pre>
+
+    <h3 class="teal">Is-A 与 Has-A</h3>
+    <p>教材给的判断标准是：<strong>「是一个」用继承，「有一个」用组合</strong>。</p>
+    <ul>
+      <li>狗<strong>是</strong>一种动物 → 可以用继承</li>
+      <li>汽车<strong>有一个</strong>发动机 → 必须用组合</li>
+    </ul>
+
+    <div class="callout co-rose">
+      <span class="lbl">但 Is-A 还不够，必须再过 LSP 那一关</span>
+      <p>这是最容易漏掉的一步。即使确实是 Is-A，也要问一句：<strong>子类能不能完全兑现父类的契约？</strong></p>
+      <p>「圆是一种椭圆」——数学上成立<strong>（Is-A ✓）</strong>，但椭圆类宣称「长轴短轴独立可变」，圆做不到<strong>（LSP ✗）</strong>，所以「圆不该继承椭圆」。<br>
+      同理「正方形是一种长方形」也是 Is-A 成立、LSP 不成立。</p>
+      <p><strong>所以完整的判断是两步：先问 Is-A，再问 LSP。两步都过，才用继承；否则用组合。</strong></p>
+    </div>
+
+    <div class="callout co-teal">
+      <span class="lbl">用一句人话来记</span>
+      <p><strong>继承是「生下来就定了」</strong>——你是这种船，你这辈子就是这种船。<br>
+      <strong>组合是「出门前再挑」</strong>——今天装蒸汽机，明天换核动力，船还是那条船。<br>
+      另一句关键区别：<em class="hl">继承是「全部拿走」，组合是「按需取用」</em>。</p>
+    </div>
+
+    <p>顺带一提，「优先使用对象组合，而不是类继承」这个建议在《设计模式》（GoF）那本书的开篇就写着了——它比 SOLID 的流行还早。</p>
+  </section>
+
+  <!-- ================= 10 ================= -->
+  <section id="s10">
+    <div class="sec-head">
+      <div class="badge amber">10</div>
+      <h2>边界：什么时候该停下来<span class="en">When Not To</span></h2>
+    </div>
+
+    <p>前面九节讲的都是「该怎么做」。但只讲这一半是不负责任的——<strong>这些原则被滥用时造成的破坏，和违反它们时一样大。</strong>Martin 自己列的设计症状里就有两条（不必要的复杂、不必要的重复），专门用来形容「太努力遵守原则」的后果。</p>
+
+    <h3 class="amber">刹车一：YAGNI —— 别为想象的需求留口子</h3>
+    <p>YAGNI（You Aren't Gonna Need It，你不会需要它）是极限编程的口号。它针对的正是 OCP 最常见的误用：</p>
+
+    <div class="callout co-amber">
+      <span class="lbl">「以后可能会用到」是最贵的五个字</span>
+      <p>为想象中的扩展点建抽象，代价是<strong>现在就要支付</strong>（多一层间接、多一个接口、多一份认知负担），而收益<strong>可能永远不发生</strong>。更糟的是，抽象一旦落地，它就会<em class="hl">绑架真实需求</em>——后来的需求会被硬塞进这个形状不对的抽象里，于是走向第 10 节下面那个「错误的抽象」。</p>
+      <p><strong>判断标准：这个扩展点，被真实需求验证过两次了吗？</strong>没有的话，就先写直白的 <code>if</code>，等第三次出现时再抽象。</p>
+    </div>
+
+    <h3 class="amber">刹车二：DRY 的误用 —— 长得一样 ≠ 该合并</h3>
+    <p>DRY（Don't Repeat Yourself）的原意是<strong>「每一份知识，在系统里只应该有一个权威的表述」</strong>。它说的是<em class="hl">知识</em>不要重复，不是<em class="hl">代码文本</em>不要重复。</p>
+
+    <p>这两者的差别是致命的：两段代码今天看起来一模一样，但如果它们的<strong>变化方向不同</strong>——比如一段跟着税率变，另一段跟着汇率变——把它们合并成一个函数，就是在制造一颗定时炸弹。</p>
+
+    <div class="quote">
+      <b>Duplication is far cheaper than the wrong abstraction.</b><br>
+      重复远比错误的抽象便宜。宁可重复，也不要错误的抽象。
+      <span class="who">—— Sandi Metz，RailsConf 2014 演讲 / 2016 博客《The Wrong Abstraction》</span>
+    </div>
+
+    <p>她描述的那个过程，几乎每个团队都经历过一遍：</p>
+
+    <div class="diagram">
+      <div class="dtitle">一个抽象是怎么烂掉的</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>程序员 A 看到了重复</b><br><span style="color:#475569;font-size:13px">提取出来，起个名字，替换掉所有重复。代码很完美，A 愉快地走了</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>程序员 B 接到一个新需求</b><br><span style="color:#475569;font-size:13px">这个抽象「几乎正好合适」。B 觉得自己有义务维护它，于是给它加了个参数，再加个条件分支</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>又来一个需求，又一个人</b><br><span style="color:#475569;font-size:13px">再加一个参数，再加一个条件分支…… 循环下去</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7"><b>直到代码变得无法理解</b><br><span style="color:#be123c;font-size:13px">「它已经不是一个抽象了，而是一段布满条件的流程，把一堆隐约相关的想法交织在一起，难以理解，且极易改坏」</span></div>
+      <div class="cap">Metz 指出的关键机制是<b>沉没成本谬误</b>：代码越复杂、越难以理解，我们越舍不得删它——「能搞成这样肯定花了不少功夫，删掉太可惜了」。<b>但正确的做法恰恰是往回走。</b></div>
+    </div>
+
+    <div class="callout co-green">
+      <span class="lbl">错误的抽象怎么修：往回走</span>
+      <p>Metz 给的方子非常具体，只有三步：</p>
+      <p><strong>① 把抽象重新内联回每一个调用方</strong>；<strong>② 在每个调用方里，根据它实际传的参数，只保留它真正需要的那部分代码</strong>，把用不到的删掉；<strong>③ 删完再重新观察</strong>——你会发现那些调用方其实跑的是相当不同的代码，然后从干净的状态重新提取抽象。</p>
+      <p>「面对错误的抽象，最快的前进方式是往回走。」</p>
+    </div>
+
+    <h3 class="amber">刹车三：抽象税</h3>
+    <p>每一层接口、每一个工厂、每一个容器都有认知成本。当一个新人需要跨 5 个文件才能看懂「保存订单」这件事时，你收的税已经超过了收益。</p>
+
+    <div class="keyline">
+      <b>一条定调的话：</b>设计原则描述的是<strong>代价的方向</strong>，不是<strong>必须执行的命令</strong>。<br>
+      <span style="font-size:14.5px;color:var(--ink2)">违反原则不犯法——它意味着你选择<strong>把成本挪到未来</strong>去支付。如果你清楚自己在借这笔债、并且知道利息是多少，那这就是一个合格的工程决策。<strong>真正危险的是不知道自己借了债。</strong></span>
+    </div>
+
+    <h3 class="amber">一张决策图：这里到底该不该抽抽象</h3>
+    <div class="diagram">
+      <div class="dtitle">抽象决策流程</div>
+      <div class="nbox" style="border:1.5px solid #ddd3fb;border-radius:11px;background:#f5f3ff"><b>① 这段代码，你确定它会变吗？</b><br><span style="color:#475569;font-size:13px">不确定 → 别抽象，先写直白；确定 → 往下</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #ddd3fb;border-radius:11px;background:#f5f3ff"><b>② 它已经真实变过两次以上吗？</b><br><span style="color:#475569;font-size:13px">没有（只是「将来可能」）→ 别抽象；有 → 往下</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #ddd3fb;border-radius:11px;background:#f5f3ff"><b>③ 这些变化是同一个原因引起的吗？</b><br><span style="color:#475569;font-size:13px">不同原因 → 别合并（DRY 误用），分开；相同原因 → 往下</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>④ 抽象出来之后，调用方会变简单吗？</b><br><span style="color:#475569;font-size:13px">会不会只是把复杂度从调用方搬到了接口层？如果是，再想想</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #bbf7d0;border-radius:11px;background:#f0fdf4"><b>⑤ 那就抽象它 —— 并且只抽象这一个维度</b><br><span style="color:#475569;font-size:13px">不要顺手为「别的可能变化」也留口子。留下一个你自己都说不清用途的扩展点，等于留下一个 bug 温床</span></div>
+      <div class="cap">这五问其实就是 <b>「三次法则」</b>（Refactoring 里那条）在抽象层面的展开：第一次直接做，第二次照做一遍，<b>第三次</b>才抽象。</div>
+    </div>
+  </section>
+
+  <!-- ================= 11 ================= -->
+  <section id="s11">
+    <div class="sec-head">
+      <div class="badge violet">11</div>
+      <h2>完整走一遍：120 行的上帝类<span class="en">A Full Walkthrough</span></h2>
+    </div>
+
+    <p>前面每节都是单独讲一条。但真实的重构不是逐条打卡，而是<strong>一条原则的修复会自然牵引出下一条</strong>。这一节用一个订单提交的案例，完整走一遍这个过程。</p>
+
+    <h3 class="violet">起点：一个方法干六件事</h3>
+
+<pre class="bad"><span class="k">public class</span> <span class="f">OrderProcessor</span>
+{
+    <span class="k">public void</span> Submit(<span class="f">Order</span> order, <span class="k">string</span> payMethod)
+    {
+        <span class="c">// 1. 校验</span>
+        <span class="k">if</span> (order.Items.Count == 0) <span class="k">throw new</span> <span class="f">Exception</span>(<span class="s">"空订单"</span>);
+        <span class="k">if</span> (order.Customer == <span class="k">null</span>) <span class="k">throw new</span> <span class="f">Exception</span>(<span class="s">"缺客户"</span>);
+
+        <span class="c">// 2. 计价</span>
+        <span class="k">decimal</span> total = 0;
+        <span class="k">foreach</span> (<span class="k">var</span> item <span class="k">in</span> order.Items)
+            total += item.Price * item.Qty;
+        <span class="k">if</span> (order.Customer.IsVip) total *= 0.9m;
+        order.Total = total;
+
+        <span class="c">// 3. 支付 —— 每接一家就要回来加一个分支</span>
+        <span class="k">if</span> (payMethod == <span class="s">"alipay"</span>)       { <span class="c">/* ... */</span> }
+        <span class="k">else if</span> (payMethod == <span class="s">"wechat"</span>)  { <span class="c">/* ... */</span> }
+        <span class="k">else if</span> (payMethod == <span class="s">"card"</span>)    { <span class="c">/* ... */</span> }
+
+        <span class="c">// 4. 持久化</span>
+        <span class="k">var</span> conn = <span class="k">new</span> <span class="f">SqlConnection</span>(<span class="s">"Server=..."</span>);
+        conn.Execute(<span class="s">"INSERT INTO orders ..."</span>);
+
+        <span class="c">// 5. 通知</span>
+        <span class="k">var</span> email = order.Customer.GetAddress().GetEmail();   <span class="c">// 伸手掏了三层</span>
+        <span class="k">new</span> <span class="f">SmtpClient</span>().Send(email, <span class="s">"下单成功"</span>);
+
+        <span class="c">// 6. 日志</span>
+        <span class="f">Console</span>.WriteLine(<span class="s">"submitted: "</span> + order.Id);
+    }
+}</pre>
+
+    <p>这段代码能跑，测试也挺好写。但把它放到六个变化方向上来检验，全中：产品改校验规则要改它、财务改折扣要改它、接新的支付渠道要改它、DBA 换表要改它、运营改通知文案要改它、运维改日志格式也要改它。</p>
+
+    <h3 class="violet">第 1 步：按「变化原因」切开 —— SRP</h3>
+    <p>这是所有工作的起点。先给每个变化原因找一个落脚点：</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">变化原因（谁在提要求）</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">落到哪个类</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">校验规则 —— 产品</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>OrderValidator</code></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">计价规则 —— 财务</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>PriceCalculator</code></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">支付渠道 —— 商务</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>IPaymentGateway</code> 的实现</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">表结构 —— DBA</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>OrderRepository</code></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">触达策略 —— 运营</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>INotifier</code> 的实现</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">流程顺序 —— 业务本身</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>OrderService</code>（唯一保留的编排者）</td></tr>
+</tbody>
+</table>
+</div>
+
+    <p>注意最后一行：<strong>流程顺序本身就是一个独立的变化原因</strong>。所以 <code>OrderService</code> 不是「没拆干净的残留」，它是一个职责明确的协调者。</p>
+
+    <h3 class="violet">第 2 步：支付渠道要从「分支」变成「可扩展」—— OCP</h3>
+    <p>拆完之后立刻撞上下一个问题：<code>if (payMethod == ...)</code> 这条链还在。每接一家新渠道，都要回来改这个已经测试过的函数——违反 OCP。</p>
+
+<pre class="good"><span class="k">public interface</span> <span class="f">IPaymentGateway</span>
+{
+    <span class="k">string</span> Method { <span class="k">get</span>; }
+    PaymentResult Pay(<span class="f">Order</span> order);
+}
+
+<span class="c">// 接入 Apple Pay 只需新增一个文件，上面这段代码完全不动</span>
+<span class="k">public class</span> <span class="f">ApplePayGateway</span> : <span class="f">IPaymentGateway</span> { <span class="c">/* ... */</span> }</pre>
+
+    <h3 class="violet">第 3 步：通知接口不要长胖 —— ISP</h3>
+    <p>做通知时一个很自然的冲动是写个万能接口：<code>SendEmail()</code> + <code>SendSms()</code> + <code>SendPush()</code>。但短信渠道根本不需要实现推送——于是又出现抛异常的空方法。</p>
+
+<pre class="good"><span class="c">// 按「通知渠道的能力」切，而不是按「通知」这个概念切一个大的</span>
+<span class="k">public interface</span> <span class="f">IOfflineNotifier</span> { <span class="k">void</span> Send(<span class="f">Contact</span> to, <span class="k">string</span> msg); }   <span class="c">// 邮件/短信</span>
+<span class="k">public interface</span> <span class="f">IPushNotifier</span>    { <span class="k">void</span> Push(<span class="k">string</span> deviceId, <span class="k">string</span> msg); } <span class="c">// 推送</span></pre>
+
+    <h3 class="violet">第 4 步：让业务层不再认识数据库 —— DIP</h3>
+
+<pre class="good"><span class="k">public class</span> <span class="f">OrderService</span>
+{
+    <span class="k">private readonly</span> <span class="f">OrderValidator</span>  _validator;
+    <span class="k">private readonly</span> <span class="f">PriceCalculator</span> _calculator;
+    <span class="k">private readonly</span> <span class="f">IOrderRepository</span> _repo;      <span class="c">// 抽象</span>
+    <span class="k">private readonly</span> <span class="f">IPaymentGateway</span>  _payment;   <span class="c">// 抽象</span>
+    <span class="k">private readonly</span> <span class="f">INotifier</span>        _notifier;  <span class="c">// 抽象</span>
+
+    <span class="k">public void</span> Submit(<span class="f">Order</span> order)
+    {
+        _validator.Validate(order);
+        order.Total = _calculator.Calculate(order);
+        _payment.Pay(order);
+        _repo.Save(order);
+        _notifier.Send(order.Customer.Contact, <span class="s">"下单成功"</span>);
+    }
+}</pre>
+
+    <p>注意 <code>Submit</code> 现在只有四行，而且<strong>只能通过接口看到协作者</strong>。这段代码可以直接跑单元测试——注入假实现即可，不需要数据库、不需要网络、不需要邮件服务器。</p>
+
+    <h3 class="violet">第 5 步：收尾的两个小修</h3>
+    <p><strong>LoD：</strong><code>order.Customer.GetAddress().GetEmail()</code> 这条链穿过三层。改成让 <code>Order</code> 自己回答：</p>
+
+<pre class="good"><span class="c">// Order 上提供语义化的方法，内部结构变化不外泄</span>
+<span class="k">public</span> Contact GetCustomerContact() =&gt; _customer.Contact;
+
+<span class="c">// 调用方</span>
+_notifier.Send(order.GetCustomerContact(), <span class="s">"下单成功"</span>);</pre>
+
+    <p><strong>CRP：</strong>如果 <code>SmsNotifier</code> 当时是继承 <code>EmailNotifier</code> 拿到的代码，把它改成实现 <code>INotifier</code>。同时这也顺手修掉了一个 LSP 隐患——一个「短信不是邮件」的类继承邮件类，迟早会有调用方踩坑。</p>
+
+    <h3 class="violet">改完之后的账</h3>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">来一个需求</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">改之前要动</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">改之后要动</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">接入一家新支付渠道</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">1 个方法 + 重测整条下单链路</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">新增 1 个文件，已有代码 0 改动</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">改折扣规则</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">同一段大方法，需确认不影响其他 5 件事</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只改 <code>PriceCalculator</code></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">换数据库</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">改业务代码里的 SQL</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">新增一个 Repository 实现</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">加一种通知方式</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">改下单流程</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">新增一个 <code>INotifier</code> 实现</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">给下单流程写单元测试</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">需要真数据库 + SMTP + 支付沙箱</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">注入 5 个假对象，毫秒级跑完</td></tr>
+</tbody>
+</table>
+</div>
+
+    <div class="callout co-violet">
+      <span class="lbl">最后的结构长这样</span>
+      <p>一个薄薄的编排层 <code>OrderService</code>，下面挂着五个各管一件事的协作者，其中三个是接口（<code>IOrderRepository</code> / <code>IPaymentGateway</code> / <code>INotifier</code>）。<br>
+      <strong>没有一行代码知道另一行代码的具体实现是什么</strong>——这既是 DIP 的定义，也是 OCP 能成立的前提，还是所有测试能跑得飞快的原因。</p>
+    </div>
+
+    <div class="callout co-amber">
+      <span class="lbl">顺带说：这个例子不需要一次性做完</span>
+      <p>真实项目里，你几乎不可能有时间把这五步一口气做完。正确做法是<strong>按需要做</strong>：接到「要接 Apple Pay」的需求时，顺便做第 2 步；要给下单流程补测试时，顺便做第 4 步。<br>
+      这就是《重构》里说的「加功能之前先把它整理成好加的样子」——<em class="hl">原则的落地方式是搭便车，不是专门开一场重构大会</em>。</p>
+    </div>
+  </section>
+
+  <!-- ================= 12 ================= -->
+  <section id="s12">
+    <div class="sec-head">
+      <div class="badge">12</div>
+      <h2>速查：违例信号 → 修复手法<span class="en">Cheat Sheet</span></h2>
+    </div>
+
+    <p>这张表是全文的压缩版。实际工作中你不需要回忆定义，只需要<strong>认出信号</strong>。</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">原则</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">一句话</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">代码里的违例信号</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">典型修复</th></tr></thead>
+<tbody>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>SRP</strong><br/>单一职责</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一个类只有一个引起它变化的原因</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">能用两个不同主语给「这个类要改」造句；类名里带 <code>And</code>、<code>Manager</code>、<code>Util</code>；同一文件里出现 SQL + 邮件 + 日志</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">按变化原因拆类，保留一个薄编排层</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>OCP</strong><br/>开闭原则</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对扩展开放，对修改关闭</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">加新类型要回到同一个 <code>switch</code> / <code>if-else</code> 链加分支；<code>else throw new NotSupportedException</code></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">抽接口 + 多态；策略 / 模板方法 / 观察者</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>LSP</strong><br/>里氏替换</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">子类型必须能替换基类型</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">调用处出现 <code>is</code> / <code>as</code> / <code>GetType()</code> 判断；子类把继承来的方法抛异常或留空；覆盖方法时加强了参数校验</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">抽真正的共同抽象；改不可变值对象；改用组合</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>ISP</strong><br/>接口隔离</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不强迫客户端依赖它不用到的方法</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">实现接口时写空方法或抛异常；多个客户端依赖一个大接口但各只用其中两三个方法</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">按<strong>客户端角色</strong>拆接口（不是按方法逐个拆）</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>DIP</strong><br/>依赖倒置</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">依赖抽象，而不是依赖具体实现</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">业务层里 <code>new SqlConnection()</code> / <code>new HttpClient()</code>；业务方法的签名里出现第三方 SDK 类型</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">高层定义接口，构造器注入实现</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>LoD</strong><br/>迪米特法则</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只和直接朋友说话</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>a.GetB().GetC().Do()</code> 这种火车残骸；一个方法里点号超过两个</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">在中间对象上提供语义化方法；逐层委托</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>CRP</strong><br/>合成复用</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">优先组合，而不是继承来复用</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">为了拿几个方法而继承一个语义不相关的类；子类里出现 <code>public new</code> 覆盖；继承层次超过三层</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">抽接口 + 组合注入；只在 Is-A 且过 LSP 时才用继承</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+    <h3>反向表：先看到坏味道，再找它违反了谁</h3>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">你看到的坏味道</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">通常违反了</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">先动哪一步</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一个类几千行，改起来到处是坑</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">SRP</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">先按变化原因切，别急着抽接口</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">同一个 <code>switch</code> 在多个文件里重复出现</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">OCP + SRP</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把它挪到一个地方，再换成多态</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">到处是 <code>instanceof</code> / <code>is</code> 判断</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">LSP</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">检查那个继承体系是否本来就该用组合</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">接口里的方法一半实现是空的</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">ISP</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">按客户端的使用情况拆接口</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">单元测试必须启动数据库</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">DIP</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把持久化抽成接口，构造器注入</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一行代码里五个点号</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">LoD</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">在中间那层加一个语义化方法</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">继承树三层以上，还在继续长</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">CRP + LSP</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把变化的部分抽成可注入的组件</td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3>一页自检清单</h3>
+    <ul class="chk">
+      <li>这个类里，有没有两个方法会因为<strong>不同的部门</strong>提要求而改变？（SRP）</li>
+      <li>加一个新功能，我改了几个<strong>已经测试过</strong>的文件？（OCP —— 理想 0 个）</li>
+      <li>有没有哪个子类，让调用方不得不回头判断「你到底是哪一种」？（LSP）</li>
+      <li>实现某个接口时，我写过空方法或抛异常的方法吗？（ISP）</li>
+      <li>业务代码里，有没有 <code>new</code> 后面跟着具体的基础设施类型？（DIP）</li>
+      <li>有没有一行代码，让我知道了三个对象之间的嵌套结构？（LoD）</li>
+      <li>这处继承，是因为真的 Is-A，还是只是想白拿几个方法？（CRP）</li>
+      <li>这个抽象，是<strong>已经被验证过的变化</strong>逼出来的，还是我<strong>猜</strong>出来的？（YAGNI）</li>
+      <li>如果我违反上面某一条，我清楚自己在向未来借什么债吗？</li>
+    </ul>
+  </section>
+
+  <!-- ================= 13 ================= -->
+  <section id="s13">
+    <div class="sec-head">
+      <div class="badge green">13</div>
+      <h2>结语：原则是工具，不是法律<span class="en">Closing</span></h2>
+    </div>
+
+    <p>如果这篇教程只留下一句话，我希望是这句：</p>
+
+    <div class="quote">
+      <b>Gather together the things that change for the same reasons. Separate those things that change for different reasons.</b><br>
+      把因相同原因而变化的东西聚在一起，把因不同原因而变化的东西分离开——<strong>剩下六条原则，都是这句话在不同层面的展开。</strong>
+      <span class="who">—— Robert C. Martin</span>
+    </div>
+
+    <h3 class="green">三个必须说清楚的提醒</h3>
+
+    <ol class="steps">
+      <li><strong>它们是权衡工具，不是法律条文。</strong>Martin 自己反复强调这些是 guidelines 不是 laws。真正成熟的设计能力，不是「严格遵守所有原则」，而是<strong>知道每违反一条要付多少利息</strong>，然后选择在哪个位置付。</li>
+      <li><strong>不要试图一次性全满足。</strong>它们之间有依赖顺序：① 先用 SRP 把单元切对（地基）→ ② 再用 DIP 把依赖方向定好（方向）→ ③ 然后才可能有 OCP（结果）。反过来做，你会得到一个「接口满天飞、但每个类还是一团乱」的系统——那比不做更难维护。</li>
+      <li><strong>所有这一切的前提，是有测试。</strong>没有自动化测试，你既不敢重构，也无法验证「行为没变」——那么这七条原则就只是一套无法落地的美学主张。<em class="hl">测试是设计原则的执行环境</em>。</li>
+    </ol>
+
+    <h3 class="green">最后一句反直觉的话</h3>
+    <p>回头看第 01 节那七个症状。你会发现，设计原则其实都没在许诺「代码会变漂亮」——它们许诺的是一件更实际的事：</p>
+
+    <div class="keyline">
+      <b>让「改一处，只崩一处」成为默认状态。</b><br>
+      <span style="font-size:15px;color:var(--ink2)">每一次改动的影响范围，都在你的预期之内。这件事比优雅重要得多，因为它决定了你敢不敢继续改——而软件的生命力，就藏在「还敢改」这三个字里。</span>
+    </div>
+
+    <div class="callout co-blue">
+      <span class="lbl">本教程的资料基础</span>
+      <p>原则定义与出处综合自：Robert C. Martin《敏捷软件开发》（2002）与论文《Design Principles and Design Patterns》（2000）、Bertrand Meyer《面向对象软件构造》（1988）、Barbara Liskov《Data Abstraction and Hierarchy》（1987）及 Liskov &amp; Wing（1994）、Robert C. Martin《The Interface Segregation Principle》（C++ Report, 1996）、Lieberherr &amp; Holland 关于迪米特法则的论文（1989）、以及 Sandi Metz《The Wrong Abstraction》（2016）。<br>
+      Xerox 打印机案例、Employee 类的共享方法事故、正方形/长方形反例均为上述文献中的经典论述；代码示例与图示为本文为便于理解而重新编写和绘制。</p>
+    </div>
+
+    <div class="card">
+      <h4>如果还想往下走</h4>
+      <p>这套原则的下游有两个方向，都值得继续：</p>
+      <ul style="margin-bottom:0">
+        <li><strong>设计模式</strong>——它们大多是「在某个具体场景里实现这些原则」的成套答案。学模式的时候带着这七条去看，会比背 23 个名字有用得多。</li>
+        <li><strong>重构手法</strong>——原则告诉你「应该长成什么样」，重构手法告诉你「从现在的样子怎么走过去」。本站的《重构》图解教程正好可以接上。</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <span>面向对象设计原则 · 图解教程</span><br>
+    <span>本教程为学习提炼笔记，图表为重新绘制；原则定义与案例出处见正文标注，代码示例为说明性伪代码。</span>
+  </footer>
+
+</div>
+</body>
+</html>

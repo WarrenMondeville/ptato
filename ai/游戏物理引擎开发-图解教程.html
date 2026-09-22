@@ -155,6 +155,11 @@ pre .n{color:#fcd34d}
 .q{border-left:3px solid var(--line2);padding:2px 0 2px 16px;color:var(--ink2);font-size:14.5px;margin:16px 0}
 footer{text-align:center;color:var(--ink3);font-size:13px;padding:30px 20px 0;line-height:1.9}
 .divider{height:1px;background:var(--line);margin:34px 0}
+
+.toclist{list-style:none;margin:8px 0 0;padding:0}
+.toclist li{padding:6px 2px;font-size:14px;line-height:1.6;color:var(--ink);border-bottom:1px dashed var(--line)}
+.toclist li:last-child{border-bottom:none}
+.tocpart{font-weight:700;color:var(--blue);margin-top:14px;font-size:13px;letter-spacing:.04em}
 </style>
 </head>
 <body>
@@ -174,39 +179,39 @@ footer{text-align:center;color:var(--ink3);font-size:13px;padding:30px 20px 0;li
 </div>
 
 <div class="toc">
-  <h2>目 录</h2>
-  <div class="tocgrid">
-    <div class="part">开篇</div>
-    <a href="#ch0">0 · 物理引擎到底是什么</a>
-    <a href="#ch1">1 · 三种实现方案与取舍</a>
-    <div class="part">第一部分 · 粒子物理</div>
-    <a href="#ch2">2 · 粒子数学：向量与积分</a>
-    <a href="#ch3">3 · 运动定律与积分算式</a>
-    <a href="#ch4">4 · 第一个粒子引擎</a>
-    <a href="#ch5">5 · 合力：D'Alembert 与力发生器</a>
-    <a href="#ch6">6 · 弹力：弹簧与蹦极绳</a>
-    <a href="#ch7">7 · 硬约束：缆绳与杆</a>
-    <a href="#ch8">8 · 质体引擎：布料与破碎</a>
-    <div class="part">第二部分 · 刚体物理</div>
-    <a href="#ch9">9 · 旋转的数学：四元数与惯性张量</a>
-    <a href="#ch10">10 · 刚体运算定律：力矩</a>
-    <a href="#ch11">11 · 刚体引擎主循环</a>
-    <div class="part">第三部分 · 碰撞检测</div>
-    <a href="#ch12">12 · 碰撞检测：粗检与细检</a>
-    <a href="#ch13">13 · 生成碰撞：7 种图元对</a>
-    <div class="part">第四部分 · 接触物理</div>
-    <a href="#ch14">14 · 碰撞处理：冲量求解</a>
-    <a href="#ch15">15 · 静态接触与摩擦力</a>
-    <a href="#ch16">16 · 稳定性与优化</a>
-    <a href="#ch17">17 · 整合：完整的一帧</a>
-    <a href="#ch18">18 · 其他引擎与选型</a>
-    <div class="part">附录</div>
-    <a href="#app-a">A · 术语速查表</a>
-    <a href="#app-b">B · 关键参数默认值</a>
-    <a href="#app-c">C · 动手清单：12 步造引擎</a>
-    <a href="#app-d">D · 源码勘误与避坑</a>
-    <a href="#app-e">E · 思考题</a>
-  </div>
+<h2>目 录</h2>
+<ul class="toclist">
+<li class="tocpart">开篇</li>
+<li>0 · 物理引擎到底是什么</li>
+<li>1 · 三种实现方案与取舍</li>
+<li class="tocpart">第一部分 · 粒子物理</li>
+<li>2 · 粒子数学：向量与积分</li>
+<li>3 · 运动定律与积分算式</li>
+<li>4 · 第一个粒子引擎</li>
+<li>5 · 合力：D'Alembert 与力发生器</li>
+<li>6 · 弹力：弹簧与蹦极绳</li>
+<li>7 · 硬约束：缆绳与杆</li>
+<li>8 · 质体引擎：布料与破碎</li>
+<li class="tocpart">第二部分 · 刚体物理</li>
+<li>9 · 旋转的数学：四元数与惯性张量</li>
+<li>10 · 刚体运算定律：力矩</li>
+<li>11 · 刚体引擎主循环</li>
+<li class="tocpart">第三部分 · 碰撞检测</li>
+<li>12 · 碰撞检测：粗检与细检</li>
+<li>13 · 生成碰撞：7 种图元对</li>
+<li class="tocpart">第四部分 · 接触物理</li>
+<li>14 · 碰撞处理：冲量求解</li>
+<li>15 · 静态接触与摩擦力</li>
+<li>16 · 稳定性与优化</li>
+<li>17 · 整合：完整的一帧</li>
+<li>18 · 其他引擎与选型</li>
+<li class="tocpart">附录</li>
+<li>A · 术语速查表</li>
+<li>B · 关键参数默认值</li>
+<li>C · 动手清单：12 步造引擎</li>
+<li>D · 源码勘误与避坑</li>
+<li>E · 思考题</li>
+</ul>
 </div>
 
 <!-- ============ 0 ============ -->

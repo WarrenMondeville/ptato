@@ -154,6 +154,11 @@ button.on:hover{color:#fff}
 .tag{font-size:11.5px;background:#f1f5f9;border:1px solid var(--line);border-radius:6px;padding:2px 9px;color:var(--ink2)}
 .q{border-left:3px solid var(--line2);padding:2px 0 2px 16px;color:var(--ink2);font-size:14.5px;margin:16px 0}
 footer{text-align:center;color:var(--ink3);font-size:13px;padding:30px 20px 0;line-height:1.9}
+
+.toclist{list-style:none;margin:8px 0 0;padding:0}
+.toclist li{padding:6px 2px;font-size:14px;line-height:1.6;color:var(--ink);border-bottom:1px dashed var(--line)}
+.toclist li:last-child{border-bottom:none}
+.tocpart{font-weight:700;color:var(--blue);margin-top:14px;font-size:13px;letter-spacing:.04em}
 </style>
 </head>
 <body>
@@ -173,31 +178,31 @@ footer{text-align:center;color:var(--ink3);font-size:13px;padding:30px 20px 0;li
 </div>
 
 <div class="toc">
-  <h2>目 录</h2>
-  <div class="tocgrid">
-    <div class="part">第一部分 · 积分器</div>
-    <a href="#ch0">0 · Verlet 到底是什么</a>
-    <a href="#ch1">1 · 欧拉的困境：能量从哪来</a>
-    <a href="#ch2">2 · 位置 Verlet：公式与三行代码</a>
-    <a href="#ch3">3 · 隐式速度：稳定性从哪来</a>
-    <div class="part">第二部分 · 约束</div>
-    <a href="#ch4">4 · 距离约束与 Jakobsen 松弛</a>
-    <a href="#ch5">5 · 迭代次数决定刚性</a>
-    <a href="#ch6">6 · 固定点、不等式与自碰撞</a>
-    <div class="part">第三部分 · 三种经典结构</div>
-    <a href="#ch7">7 · 绳子：悬链线是算出来的</a>
-    <a href="#ch8">8 · 布料：三类约束织成一张网</a>
-    <a href="#ch9">9 · 布娃娃：Hitman 的火柴人</a>
-    <div class="part">第四部分 · 碰撞与工程</div>
-    <a href="#ch10">10 · 投影式碰撞与摩擦</a>
-    <a href="#ch11">11 · 固定步长、substep 与变步长</a>
-    <a href="#ch12">12 · PBD 与 XPBD：给刚度一个物理量纲</a>
-    <a href="#ch13">13 · 完整实现：120 行的迷你引擎</a>
-    <div class="part">附录</div>
-    <a href="#app-a">A · 调参表与踩坑清单</a>
-    <a href="#app-b">B · 术语速查</a>
-    <a href="#app-c">C · 延伸阅读</a>
-  </div>
+<h2>目 录</h2>
+<ul class="toclist">
+<li class="tocpart">第一部分 · 积分器</li>
+<li>0 · Verlet 到底是什么</li>
+<li>1 · 欧拉的困境：能量从哪来</li>
+<li>2 · 位置 Verlet：公式与三行代码</li>
+<li>3 · 隐式速度：稳定性从哪来</li>
+<li class="tocpart">第二部分 · 约束</li>
+<li>4 · 距离约束与 Jakobsen 松弛</li>
+<li>5 · 迭代次数决定刚性</li>
+<li>6 · 固定点、不等式与自碰撞</li>
+<li class="tocpart">第三部分 · 三种经典结构</li>
+<li>7 · 绳子：悬链线是算出来的</li>
+<li>8 · 布料：三类约束织成一张网</li>
+<li>9 · 布娃娃：Hitman 的火柴人</li>
+<li class="tocpart">第四部分 · 碰撞与工程</li>
+<li>10 · 投影式碰撞与摩擦</li>
+<li>11 · 固定步长、substep 与变步长</li>
+<li>12 · PBD 与 XPBD：给刚度一个物理量纲</li>
+<li>13 · 完整实现：120 行的迷你引擎</li>
+<li class="tocpart">附录</li>
+<li>A · 调参表与踩坑清单</li>
+<li>B · 术语速查</li>
+<li>C · 延伸阅读</li>
+</ul>
 </div>
 
 <!-- ============ 0 ============ -->

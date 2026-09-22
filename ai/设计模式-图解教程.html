@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>设计模式 · 图解教程</title>
+<meta name="description" content="GoF《设计模式》23 个模式的图解教程：不做名词背诵，而是把每个模式还原成「它在防哪一种变化」。含 8 类重新设计及其对策、23 张结构图、最容易选错的六组对照、Lexi 文档编辑器完整案例，以及模式的代价与批评。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏗️</text></svg>">
+<style>
+  :root{
+    --bg:#f6f8fb; --card:#ffffff; --ink:#1e293b; --ink2:#475569; --ink3:#94a3b8;
+    --line:#e2e8f0; --line2:#cbd5e1;
+    --blue:#3b5bdb; --blue-bg:#eef2ff;
+    --teal:#0d9488; --teal-bg:#ecfdf5;
+    --amber:#b45309; --amber-bg:#fffbeb;
+    --rose:#be123c; --rose-bg:#fff1f2;
+    --violet:#6d28d9; --violet-bg:#f5f3ff;
+    --green:#15803d; --green-bg:#f0fdf4;
+    --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px -12px rgba(15,23,42,.14);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:16px; line-height:1.85; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 20px 80px}
+
+  /* ---------- hero ---------- */
+  .hero{padding:64px 0 30px;text-align:center}
+  .hero .kicker{
+    display:inline-block;font-size:12.5px;letter-spacing:.14em;color:var(--violet);
+    background:var(--violet-bg);border:1px solid #ddd3fb;border-radius:999px;padding:5px 14px;margin-bottom:20px;
+  }
+  .hero h1{font-size:clamp(26px,4.4vw,40px);line-height:1.35;margin:0 0 16px;letter-spacing:-.01em}
+  .hero h1 em{font-style:normal;color:var(--blue)}
+  .hero p.sub{color:var(--ink2);font-size:16.5px;margin:0 auto;max-width:700px}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:26px}
+  .meta span{font-size:13px;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 13px}
+
+  /* ---------- section ---------- */
+  section{margin-top:64px;scroll-margin-top:24px}
+  .sec-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:8px}
+  .badge{
+    flex:0 0 auto;width:40px;height:40px;border-radius:12px;background:var(--blue);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;
+    box-shadow:0 6px 16px -8px rgba(59,91,219,.9);
+  }
+  .badge.teal{background:var(--teal);box-shadow:0 6px 16px -8px rgba(13,148,136,.9)}
+  .badge.amber{background:var(--amber);box-shadow:0 6px 16px -8px rgba(180,83,9,.9)}
+  .badge.violet{background:var(--violet);box-shadow:0 6px 16px -8px rgba(109,40,217,.9)}
+  .badge.rose{background:var(--rose);box-shadow:0 6px 16px -8px rgba(190,18,60,.9)}
+  .badge.green{background:var(--green);box-shadow:0 6px 16px -8px rgba(21,128,61,.9)}
+  .sec-head h2{font-size:23px;margin:6px 0 0;letter-spacing:-.01em;line-height:1.4}
+  .sec-head .en{font-size:13px;color:var(--ink3);font-weight:500;margin-left:8px}
+  h3{font-size:17.5px;margin:34px 0 10px;padding-left:12px;border-left:3px solid var(--blue)}
+  h3.teal{border-color:var(--teal)} h3.amber{border-color:var(--amber)}
+  h3.violet{border-color:var(--violet)} h3.rose{border-color:var(--rose)}
+  h3.green{border-color:var(--green)}
+  h3 small{font-size:12.5px;color:var(--ink3);font-weight:500;margin-left:6px;font-family:ui-monospace,Menlo,monospace}
+  h4{font-size:15.5px;margin:22px 0 6px;color:var(--ink)}
+  p{margin:12px 0}
+  a{color:var(--blue)}
+  strong{color:#0f172a}
+  em.hl{font-style:normal;background:#eef2ff;color:#3b5bdb;border-radius:4px;padding:0 5px;font-weight:600}
+  code{background:#f1f5f9;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:13.5px;
+       font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#0f172a;overflow-wrap:anywhere}
+  ul,ol{margin:12px 0;padding-left:22px}
+  li{margin:6px 0}
+
+  /* ---------- toc ---------- */
+  .toc{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 24px;box-shadow:var(--shadow)}
+  .toc h3{margin:0 0 12px;border:0;padding:0;font-size:15px;color:var(--ink2);letter-spacing:.05em}
+  .toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:6px 20px}
+  .toc li a{display:flex;gap:10px;text-decoration:none;color:var(--ink);font-size:14.5px;padding:6px 8px;border-radius:8px}
+  .toc li a:hover{background:var(--blue-bg)}
+  .toc li b{color:var(--blue);font-variant-numeric:tabular-nums;font-weight:600;min-width:16px}
+
+  /* ---------- card / callout ---------- */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin:18px 0;box-shadow:var(--shadow)}
+  .card h4{margin-top:0}
+  .callout{border-radius:14px;padding:16px 20px;margin:18px 0;border:1px solid}
+  .callout .lbl{display:block;font-size:12.5px;font-weight:700;letter-spacing:.06em;margin-bottom:6px}
+  .co-blue{background:var(--blue-bg);border-color:#dbe3ff} .co-blue .lbl{color:var(--blue)}
+  .co-teal{background:var(--teal-bg);border-color:#c9f0e6} .co-teal .lbl{color:var(--teal)}
+  .co-amber{background:var(--amber-bg);border-color:#f6e3bf} .co-amber .lbl{color:var(--amber)}
+  .co-rose{background:var(--rose-bg);border-color:#fbd5dd} .co-rose .lbl{color:var(--rose)}
+  .co-violet{background:var(--violet-bg);border-color:#ddd3fb} .co-violet .lbl{color:var(--violet)}
+  .co-green{background:var(--green-bg);border-color:#bbf7d0} .co-green .lbl{color:var(--green)}
+  .callout p{margin:6px 0}
+
+  /* ---------- 意图条 ---------- */
+  .intent{background:#f8fafc;border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:0 12px 12px 0;
+          padding:11px 16px;margin:14px 0;font-size:15px}
+  .intent b{color:var(--blue)}
+  .intent.teal{border-left-color:var(--teal)} .intent.teal b{color:var(--teal)}
+  .intent.violet{border-left-color:var(--violet)} .intent.violet b{color:var(--violet)}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+  .tags span{font-size:12px;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+  .pit{background:#fffafb;border:1px solid #fecdd3;border-radius:12px;padding:12px 16px;margin:12px 0;font-size:14.2px;line-height:1.8}
+  .pit .lbl{display:block;font-size:12.5px;font-weight:700;letter-spacing:.06em;color:var(--rose);margin-bottom:4px}
+  .pit p{margin:4px 0}
+
+  /* ---------- diagram shell ---------- */
+  .diagram{background:linear-gradient(180deg,#fdfefe,#f8fafc);border:1px solid var(--line);border-radius:16px;padding:22px 18px;margin:22px 0;text-align:center}
+  .diagram .dtitle{font-size:14px;font-weight:700;color:var(--ink2);text-align:center;margin-bottom:16px}
+  .diagram .cap{font-size:13px;color:var(--ink3);text-align:center;margin-top:12px;line-height:1.7}
+  .diagram svg{display:block;max-width:100%;height:auto;margin:0 auto}
+  /* 内联样式竖向卡片流（微信友好，不依赖 flex/grid） */
+  .nbox{display:inline-block;max-width:470px;min-width:190px;padding:9px 16px;font-size:14px;text-align:left;line-height:1.6}
+  .nbox b{color:#0f172a}
+  .narw{color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0}
+
+  /* ---------- code ---------- */
+  pre{margin:16px 0;padding:16px 18px;background:#0f172a;color:#e2e8f0;border-radius:14px;overflow-x:auto;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.75}
+  pre .c{color:#94a3b8}
+  pre .k{color:#93c5fd}
+  pre .s{color:#86efac}
+  pre .f{color:#fcd34d}
+  pre.bad{background:#1f1216;box-shadow:inset 3px 0 0 #be123c}
+  pre.good{background:#0d1a1a;box-shadow:inset 3px 0 0 #0d9488}
+
+  /* ---------- table ---------- */
+  .tblwrap{overflow-x:auto;margin:20px 0;border:1px solid var(--line);border-radius:14px;background:#fff}
+  table{border-collapse:collapse;width:100%;font-size:14px;min-width:520px}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{background:#f8fafc;font-size:13px;color:var(--ink2);font-weight:600;white-space:nowrap}
+  tbody tr:last-child td{border-bottom:0}
+  tbody tr:hover{background:#fcfdff}
+  td.y{color:var(--green);font-weight:600}
+  td.n{color:var(--rose);font-weight:600}
+  td code{font-size:12.5px;padding:0 4px}
+
+  /* ---------- misc ---------- */
+  .quote{border-left:3px solid var(--line2);padding:2px 0 2px 16px;color:var(--ink2);font-size:15px;margin:16px 0}
+  .quote b{color:var(--ink)}
+  .quote .who{display:block;font-size:12.5px;color:var(--ink3);margin-top:6px}
+  .split{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin:18px 0}
+  .mini{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .mini h4{margin:0 0 6px;font-size:15px}
+  .mini.good{border-color:#bbf7d0;background:#f8fdf9}
+  .mini.bad{border-color:#fecdd3;background:#fffafb}
+  .mini.info{border-color:#dbe3ff;background:#fafbff}
+  .mini p{margin:6px 0 0;font-size:13.5px;color:var(--ink2);line-height:1.7}
+  .mini p:first-of-type{margin-top:0}
+  .chk{list-style:none;padding:0;margin:14px 0}
+  .chk li{position:relative;padding-left:28px;margin:9px 0;font-size:14.5px}
+  .chk li::before{content:"";position:absolute;left:0;top:6px;width:16px;height:16px;border:1.5px solid var(--line2);border-radius:4px;background:#fff}
+  .steps{counter-reset:st;list-style:none;padding:0;margin:16px 0}
+  .steps li{counter-increment:st;position:relative;padding:10px 0 10px 44px;border-bottom:1px dashed var(--line);font-size:14.5px}
+  .steps li:last-child{border-bottom:0}
+  .steps li::before{content:counter(st);position:absolute;left:0;top:11px;width:26px;height:26px;border-radius:8px;
+                    background:var(--blue-bg);color:var(--blue);font-size:13px;font-weight:700;
+                    display:flex;align-items:center;justify-content:center}
+  .src{font-size:12.5px;color:var(--ink3);margin-top:8px}
+  .keyline{font-size:15px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 18px;margin:16px 0;box-shadow:var(--shadow)}
+  .keyline b{color:var(--blue)}
+  .grid23{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:20px 0}
+  .g23{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 15px;border-top:3px solid var(--line2)}
+  .g23 h4{margin:0 0 2px;font-size:14.5px}
+  .g23 .en2{font-size:11.5px;color:var(--ink3);font-family:ui-monospace,Menlo,monospace}
+  .g23 p{margin:7px 0 0;font-size:13px;color:var(--ink2);line-height:1.65}
+  footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);font-size:13px;color:var(--ink3);text-align:center;line-height:2}
+  @media (max-width:560px){
+    .hero{padding:44px 0 20px}
+    .toc ol{grid-template-columns:1fr}
+  }
+
+.toclist{list-style:none;margin:8px 0 0;padding:0}
+.toclist li{padding:6px 2px;font-size:14px;line-height:1.6;color:var(--ink);border-bottom:1px dashed var(--line)}
+.toclist li:last-child{border-bottom:none}
+.tocpart{font-weight:700;color:var(--blue);margin-top:14px;font-size:13px;letter-spacing:.04em}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ================= HERO ================= -->
+  <header class="hero">
+    <span class="kicker">编 程 图 解 教 程</span>
+    <h1>设计模式：<br>23 个名字，其实在防<em>同一种病</em></h1>
+    <p class="sub">GoF 那本书不是一本「模式食谱」，而是一份<strong>变化清单</strong>。每个模式都在回答同一个问题：<strong>这里会变的是什么，怎样让它变的时候别牵连别处</strong>。抓着这条线索，23 个名词就不用背了。</p>
+    <div class="meta">
+      <span>GoF《设计模式：可复用面向对象软件的基础》</span>
+      <span>创建型 5 · 结构型 7 · 行为型 11</span>
+      <span>23 张结构图 · 8 类变化清单</span>
+      <span>约 45 分钟</span>
+    </div>
+  </header>
+
+  <!-- ================= TOC ================= -->
+  <nav class="toc">
+<h3>目 录</h3>
+<ul class="toclist">
+<li>01 · 先问一句：什么时候不该用模式</li>
+<li>02 · 全景：23 个模式的两条坐标轴</li>
+<li>03 · 核心武器：8 类「重新设计」与对策</li>
+<li>04 · 创建型（5）：把 new 赶出业务代码</li>
+<li>05 · 结构型（7）：不动源码，改外形</li>
+<li>06 · 行为型（11）：让请求和对象脱钩</li>
+<li>07 · 最容易选错的六组对照</li>
+<li>08 · 完整走一遍：Lexi 文档编辑器</li>
+<li>09 · 代价：模式被批评，以及语言在吃掉模式</li>
+<li>10 · 速查：从问题直接查模式</li>
+<li>11 · 结语：模式是词汇，不是建材</li>
+</ul>
+</nav>
+
+  <!-- ================= 01 ================= -->
+  <section id="s1">
+    <div class="sec-head">
+      <div class="badge rose">01</div>
+      <h2>先问一句：什么时候不该用模式<span class="en">When NOT to Use</span></h2>
+    </div>
+
+    <p>绝大多数教程从「什么是设计模式」开始。这个顺序是错的——它让人以为模式是一套应该尽量用上的好东西。事实相反：</p>
+
+    <div class="callout co-rose">
+      <span class="lbl">先立一条规矩</span>
+      <p>设计模式几乎总是<strong>增加一层间接</strong>：多一个接口、多一个类、多一跳调用。你付出的是「今天更难读懂」，换来的是「以后某类改动更便宜」。<strong>如果那类改动根本不会发生，你只有付出，没有换来。</strong></p>
+    </div>
+
+    <p>GoF 自己在书里就写了这个警告，原文的语气比后来所有转载都更谨慎：模式只有在<strong>你确实需要它提供的那种灵活性</strong>时才该用，不要过度设计。第 2 章讲 Lexi 案例时也反复强调，模式带来的是间接层，间接层是有代价的。</p>
+
+    <p>所以更实用的入口不是「这个模式怎么实现」，而是这三个问题：</p>
+
+    <div class="diagram">
+      <div class="dtitle">套用任何模式之前，先过这三关</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>① 这里会变吗？</b><br><span style="color:#475569;font-size:13px">问的是「已经变过几次」或「需求方明确说了还会变」，不是「理论上可能变」。<b>猜出来的变化不配消耗一个抽象。</b></span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>② 语言或框架已经给了吗？</b><br><span style="color:#475569;font-size:13px">事件机制、迭代器、函数是一等公民——很多模式已经是标准库里的一个关键字。自己再手写一遍是倒退。</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>③ 更笨的写法撑得住吗？</b><br><span style="color:#475569;font-size:13px">如果一段 <b>switch</b> 能说清、而且半年才动一次，就让它留着。<b>模式是重构的方向，不是起手的默认姿势。</b></span></div>
+      <div class="cap">三关里任何一关过不了，就停手。这条纪律带来的收益，比多记住十个模式更大。</div>
+    </div>
+
+    <h3 class="rose">真正的敌人不是「不会模式」，是「为了模式而模式」</h3>
+    <p>实践里最贵的错误不是漏用模式，而是<strong>在小问题上摆大架子</strong>。典型症状：一个只有两种支付方式、且两年没变化的功能，被做成了「支付工厂 → 支付策略 → 支付适配器」三层结构，读代码的人要开六个文件才能看清一行业务逻辑。</p>
+
+    <div class="split">
+      <div class="mini bad">
+        <h4>过度设计的信号</h4>
+        <p>接口的实现类永远只有一个；抽象类的子类从来没被写过第二个；某个 <code>Factory</code> 里只有一行 <code>return new X()</code>；为了加一个字段，新建了三个文件。</p>
+      </div>
+      <div class="mini good">
+        <h4>用得合适的信号</h4>
+        <p>上一个真实需求确实只改了新增的文件，没动老文件；某个 <code>switch</code> 因为加了分支而被替换掉了；新同事能指着某个接口说「这是为了替换掉内部实现」。</p>
+      </div>
+    </div>
+
+    <p>有一种说法值得记住：<strong>模式是在重构中长出来的，不是在设计会上画出来的</strong>。先写能跑的简单代码，当同一处修改第三次找上门时，再把它提炼成模式。那时候你已经知道变化的真实形状了——而这正是所有模式真正需要的信息。</p>
+
+    <div class="callout co-amber">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>判断该不该用模式，标准只有一个：<em class="hl">这个抽象是现实里的变化逼出来的，还是我猜出来的？</em>被逼出来的抽象会被持续使用；猜出来的抽象会成为下一批人的阅读负担。</p>
+    </div>
+  </section>
+
+  <!-- ================= 02 ================= -->
+  <section id="s2">
+    <div class="sec-head">
+      <div class="badge">02</div>
+      <h2>全景：23 个模式的两条坐标轴<span class="en">The Map</span></h2>
+    </div>
+
+    <p>GoF 用的是两个维度来给模式分类，理解这两个维度比记住 23 个名字有用得多。</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">维度</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">取值</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">问的是什么</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>目的</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Purpose</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">创建型/结构型/行为型</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">这个模式是管<strong>对象怎么被造出来</strong>、<strong>对象怎么拼在一起</strong>，还是<strong>对象之间怎么交互与分配职责</strong></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>范围</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Scope</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">类模式/对象模式</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">它主要靠<strong>继承</strong>起作用（编译期定死），还是靠<strong>对象组合</strong>起作用（运行期可换）</td></tr>
+</tbody>
+</table>
+</div>
+
+    <p>第二个维度特别值得留意：23 个模式里绝大多数是<strong>对象模式</strong>。这不是巧合——GoF 在书里把「优先使用对象组合，而不是类继承」当作两条核心原则之一。原因很直接：继承在编译期就定死了，组合可以运行期换。</p>
+
+    <div class="diagram">
+      <div class="dtitle">只有这两个模式靠「类」工作，其余 21 个都靠「对象」</div>
+      <div class="nbox" style="border:1.5px solid #c4b5fd;border-radius:11px;background:#faf5ff"><b>类模式（2 个）</b><br><span style="color:#475569;font-size:13px">工厂方法 · 解释器<br>—— 靠子类override来改变行为，一变就得加类</span></div>
+      <div class="narw">↓ 其余 21 个</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>对象模式（21 个）</b><br><span style="color:#475569;font-size:13px">靠对象之间的引用和委派，运行期可以换、可以叠、可以组合<br>—— 这也是为什么它们更像「装配」而不是「继承」</span></div>
+      <div class="cap">看到「类模式」这三个字，就该意识到它的灵活性上限：它靠编译期的继承关系，做不到运行期替换。</div>
+    </div>
+
+    <h3>按目的分的三组，各自管什么</h3>
+
+    <div class="grid23">
+      <div class="g23" style="border-top-color:var(--blue)">
+        <h4>创建型 · 5 个</h4>
+        <div class="en2">Creational</div>
+        <p>核心动作：<strong>把「造什么对象」和「怎么用对象」分开</strong>。让系统不再依赖具体类名，也不需要知道对象是怎么造出来的。</p>
+      </div>
+      <div class="g23" style="border-top-color:var(--teal)">
+        <h4>结构型 · 7 个</h4>
+        <div class="en2">Structural</div>
+        <p>核心动作：<strong>把类或对象拼成更大的结构</strong>。让新功能、新接口、新平台可以在不改（或少改）老代码的前提下接进来。</p>
+      </div>
+      <div class="g23" style="border-top-color:var(--violet)">
+        <h4>行为型 · 11 个</h4>
+        <div class="en2">Behavioral</div>
+        <p>核心动作：<strong>定义对象之间怎么通信、职责怎么分</strong>。让「谁来做」和「做什么」可以各自独立地变。</p>
+      </div>
+    </div>
+
+    <p>注意一个数量上的事实：<strong>行为型有 11 个，几乎占了一半</strong>。这不是凑数，而是说明 GoF 认为最难、最多样的问题出在「协作」上，而不是「造对象」或「拼结构」上。初学时常觉得三个分类差不多重要，实际上是：创建型最容易懂、结构型最直观、<strong>行为型最需要花时间</strong>。</p>
+
+    <h3>23 个模式的中文名，以及它们的出身</h3>
+    <p>下面这张表用机械工业出版社中文版（刘建中译）的正式译名。要留意几个和日常叫法不一致的地方：<strong>生成器</strong>（日常叫「建造者」）、<strong>单件</strong>（日常叫「单例」）、<strong>组合</strong>（也有译「组成」）、<strong>职责链</strong>（日常叫「责任链」）。</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">类别</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">模式（中文/原名）</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">一句话意图</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">范围</th></tr></thead>
+<tbody>
+<tr><td rowspan="5" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>创建型</strong><br/><span style="font-size:12.5px;color:var(--ink3)">5 个</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">抽象工厂 <code>Abstract Factory</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">创建一系列相关对象，不必指定具体类</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">生成器 <code>Builder</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把复杂对象的构建与表示分离，分步装配</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">工厂方法 <code>Factory Method</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把实例化的决定推迟到子类</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">类</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">原型 <code>Prototype</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">通过复制已有实例来创建新对象</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">单件 <code>Singleton</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">保证一个类只有一个实例，并提供全局访问点</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象</td></tr>
+<tr><td rowspan="7" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>结构型</strong><br/><span style="font-size:12.5px;color:var(--ink3)">7 个</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">适配器 <code>Adapter</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把不兼容的接口转换成客户端期望的接口</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">类/对象</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">桥接 <code>Bridge</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把抽象与实现分离，让两者可独立变化</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">组合 <code>Composite</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把单个对象和对象容器统一对待</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">装饰 <code>Decorator</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">动态给对象附加职责，不改原对象</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">外观 <code>Facade</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">为一组子系统提供统一的高层接口</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">享元 <code>Flyweight</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">共享细粒度对象，减少对象数量</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">代理 <code>Proxy</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">为对象提供替身，控制对它的访问</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象</td></tr>
+<tr><td rowspan="11" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>行为型</strong><br/><span style="font-size:12.5px;color:var(--ink3)">11 个</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">职责链 <code>Chain of Responsibility</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">让多个对象都有机会处理请求，解除发送者与接收者的耦合</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">命令 <code>Command</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把请求封装成对象，可排队、记录、撤销</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">解释器 <code>Interpreter</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">给定语言，定义其文法的表示和解释执行</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">类</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">迭代器 <code>Iterator</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">顺序访问集合元素，不暴露内部表示</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">中介者 <code>Mediator</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">用中介对象封装一组对象之间的交互</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">备忘录 <code>Memento</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">在不破坏封装的前提下捕获并恢复对象状态</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">观察者 <code>Observer</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一对多的依赖，一个变全部被通知</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">状态 <code>State</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象行为随内部状态改变，看起来像换了类</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">策略 <code>Strategy</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把可互换的算法族封装起来</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">模板方法 <code>Template Method</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">父类定流程骨架，个别步骤交给子类</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">类</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">访问者 <code>Visitor</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">在不改数据结构的前提下定义新操作</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象</td></tr>
+</tbody>
+</table>
+</div>
+
+    <div class="callout co-blue">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>23 个模式里，<strong>只有工厂方法、解释器、模板方法三个是「类模式」</strong>，其余都靠对象组合。所以如果你发现自己在靠「加子类」解决问题，那多半不是 GoF 推荐的方向——先想想能不能靠「抱一个对象进去」解决。</p>
+    </div>
+  </section>
+
+  <!-- ================= 03 ================= -->
+  <section id="s3">
+    <div class="sec-head">
+      <div class="badge violet">03</div>
+      <h2>核心武器：8 类「重新设计」与对策<span class="en">Causes of Redesign</span></h2>
+    </div>
+
+    <p>这一节是整本《设计模式》里最实用、却最常被跳过的部分。GoF 在第 1 章列了<strong>八类导致系统需要重新设计的原因</strong>，然后立刻给出每一类的对策模式。等于把「什么问题用什么模式」这件事，直接做成了对照表。</p>
+
+    <p>它的价值在于：你不需要先知道模式，只需要先认出自己踩的是第几类坑。</p>
+
+    <div class="diagram">
+      <div class="dtitle">八类重新设计的原因（GoF 第 1 章原表）</div>
+      <div class="nbox" style="border:1.5px solid #fbd5dd;border-radius:11px;background:#fff7f9"><b>1 显式指定类名来创建对象</b><br><span style="color:#475569;font-size:13px">写了 <code>new ConcreteX()</code>，就绑定了实现而不是接口</span></div>
+      <div class="narw">↓ 对策</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>抽象工厂 · 工厂方法 · 原型</b><br><span style="color:#475569;font-size:13px">把创建动作<strong>间接化</strong>：不再点名，改为向一个接口要</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #fbd5dd;border-radius:11px;background:#fff7f9"><b>2 依赖具体的操作</b><br><span style="color:#475569;font-size:13px">把「谁来做这件事」写死在调用里，无法改成别的做法</span></div>
+      <div class="narw">↓ 对策</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>职责链 · 命令</b><br><span style="color:#475569;font-size:13px">把请求本身变成可传递、可排队的东西</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #fbd5dd;border-radius:11px;background:#fff7f9"><b>3 依赖硬件和软件平台</b><br><span style="color:#475569;font-size:13px">代码里写着 Windows 的 API，就移植不到别处</span></div>
+      <div class="narw">↓ 对策</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>抽象工厂 · 桥接</b><br><span style="color:#475569;font-size:13px">把平台差异<b>收进一个可替换的实现层</b></span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #fbd5dd;border-radius:11px;background:#fff7f9"><b>4 依赖对象的表示或实现</b><br><span style="color:#475569;font-size:13px">调用方知道对象内部怎么存的、怎么算的</span></div>
+      <div class="narw">↓ 对策</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>抽象工厂 · 桥接 · 备忘录 · 代理</b><br><span style="color:#475569;font-size:13px">把内部信息藏起来，改动不再逐层外溢</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #fbd5dd;border-radius:11px;background:#fff7f9"><b>5 依赖具体算法</b><br><span style="color:#475569;font-size:13px">算法会被优化、被替换，但依赖它的人不能跟着改</span></div>
+      <div class="narw">↓ 对策</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>生成器 · 迭代器 · 策略 · 模板方法 · 访问者</b><br><span style="color:#475569;font-size:13px">让易变的算法<b>单独住一个类</b></span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #fbd5dd;border-radius:11px;background:#fff7f9"><b>6 紧耦合</b><br><span style="color:#475569;font-size:13px">类之间互相知道太多，拆不开也搬不走</span></div>
+      <div class="narw">↓ 对策</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>抽象工厂 · 桥接 · 职责链 · 命令 · 外观 · 中介者 · 观察者</b><br><span style="color:#475569;font-size:13px">这七个模式是 <b>解耦的主力</b>，数量最多</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #fbd5dd;border-radius:11px;background:#fff7f9"><b>7 通过生成子类来扩展功能</b><br><span style="color:#475569;font-size:13px">每加一个变体就加一个类，类数量指数爆炸</span></div>
+      <div class="narw">↓ 对策</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>桥接 · 职责链 · 组合 · 装饰 · 观察者 · 策略</b><br><span style="color:#475569;font-size:13px">用<b>对象组合</b>代替继承：一层包装换一批行为</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #fbd5dd;border-radius:11px;background:#fff7f9"><b>8 无法方便地修改类</b><br><span style="color:#475569;font-size:13px">第三方库、没有源码、或者改了会波及一堆子类</span></div>
+      <div class="narw">↓ 对策</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>适配器 · 装饰 · 访问者</b><br><span style="color:#475569;font-size:13px">从<b>外面套一层</b>，不动里面那行代码</span></div>
+      <div class="cap">这张清单是从「症状」出发的。比起背 23 个模式的定义，先在这里找到自己那一行更划算。</div>
+    </div>
+
+    <h3 class="violet">为什么这八条能覆盖大部分场景</h3>
+    <p>把它们翻译成一句人话：<strong>所有让人想重新设计的原因，都可以归结为「某个东西变了，而太多地方依赖它」</strong>。八条只是「谁在依赖什么」的八个具体样本：依赖类名、依赖操作、依赖平台、依赖内部表示、依赖算法、依赖彼此、依赖继承、依赖改不动的代码。</p>
+
+    <p>所以对策也永远只有三个方向：</p>
+
+    <div class="split">
+      <div class="mini info">
+        <h4>① 把变化的地方包起来</h4>
+        <p>让它单独住着，改动不外溢。策略、桥接、生成器、命令都属于这一类。</p>
+      </div>
+      <div class="mini info">
+        <h4>② 把依赖换成指向抽象的箭头</h4>
+        <p>调用方只认识接口，实现换了它不知道。抽象工厂、观察者、模板方法属于这一类。</p>
+      </div>
+      <div class="mini info">
+        <h4>③ 从外面套一层，不动里面</h4>
+        <p>当被改的东西你改不了，就在边界上加一层翻译或包装。适配器、装饰、代理、外观属于这一类。</p>
+      </div>
+    </div>
+
+    <div class="callout co-violet">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>模式不是按「结构」选的，是按<strong>「哪种变化找上了你」</strong>选的。看到上面的表，你会发现很多模式反复出现在同一行——那不是巧合，它们本来就是同一个问题的不同解法。<strong>先确诊，再开药。</strong></p>
+    </div>
+  </section>
+
+  <!-- ================= 04 ================= -->
+  <section id="s4">
+    <div class="sec-head">
+      <div class="badge">04</div>
+      <h2>创建型（5）：把 new 赶出业务代码<span class="en">Creational Patterns</span></h2>
+    </div>
+
+    <p>创建型模式要解决的问题只有一句话：<strong>业务代码里那句 <code>new 具体类()</code>，是整份代码中最硬的一根钉子。</strong>它把调用者钉死在某个具体实现上——想换成另一个实现、想在测试里换成假的、想按配置决定用哪个，都得改这一行。</p>
+
+    <div class="diagram">
+      <div class="dtitle">创建型模式共同的动作：让「要什么」和「是什么」分开</div>
+      <div class="nbox" style="border:1.5px solid #fbd5dd;border-radius:11px;background:#fff7f9"><b>没有模式时</b><br><span style="color:#475569;font-size:13px"><code>var log = new FileLogger(&quot;/var/log&quot;);</code><br>调用者知道具体类、知道构造参数、知道初始化细节</span></div>
+      <div class="narw">↓ 把创建这件事挪走</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>有了模式之后</b><br><span style="color:#475569;font-size:13px"><code>var log = factory.CreateLogger();</code><br>调用者只知道一个接口，其余全在工厂里</span></div>
+      <div class="cap">五种创建型模式的差别，只在于<strong>「由谁来决定造哪一个」</strong>：子类、另一个工厂对象、还是原型自己。</div>
+    </div>
+
+    <h3>4.1 抽象工厂<span class="en">Abstract Factory</span></h3>
+    <div class="intent"><b>意图：</b>提供一个接口，用于创建<strong>一系列相关或相互依赖的对象</strong>，而无需指定它们的具体类。</div>
+    <div class="tags"><span>变化点：产品族的实现</span><span>范围：对象模式</span><span>关键词：一整套</span></div>
+
+    <p>它和工厂方法最容易混。一句话区分：<strong>工厂方法造「一个东西」，抽象工厂造「一套东西」</strong>。真正的画面是：我要一套按钮 + 滚动条 + 菜单，它们必须是<em class="hl">同一个风格家族</em>，不能出现 Windows 按钮配 Mac 滚动条。</p>
+
+    <div class="diagram">
+      <div class="dtitle">结构：一扇门进去，出来是一整套互不串味的部件</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>客户端</b><br><span style="color:#475569;font-size:13px">只认识 <code>WidgetFactory</code> 这个接口<br>调 <code>CreateScrollBar()</code> / <code>CreateButton()</code></span></div>
+      <div class="narw">↓ 运行期注入某一个具体工厂</div>
+      <div class="nbox" style="border:1.5px solid #c4b5fd;border-radius:11px;background:#faf5ff"><b>三个具体工厂（同一接口）</b><br><span style="color:#475569;font-size:13px">MotifFactory · PMFactory · WindowsFactory</span></div>
+      <div class="narw">↓ 每个工厂只造自己这一族</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>产品族（同族之间保证搭配）</b><br><span style="color:#475569;font-size:13px">MotifScrollBar + MotifButton + MotifMenu<br><b>混搭在类型层面就被挡住了</b></span></div>
+      <div class="cap">最大的收益不是「能换皮肤」，而是<strong>「换皮肤时不可能漏掉某个部件」</strong>——产品族的约束被编码进了类型系统。</div>
+    </div>
+
+    <p>GoF 在 Lexi 案例里用它解决「支持多种视感标准」；在「支持多种窗口系统」那一节，作者还专门讨论过「这里能不能用抽象工厂」，结论是不能——因为窗口系统的差异不是「一套部件的风格差异」，而是「一层实现细节的差异」，那个问题属于桥接。这个对照本身就是很好的教材。</p>
+
+    <div class="pit">
+      <span class="lbl">常见误用</span>
+      <p>产品族只有一个（只有一套按钮和滚动条），还是硬做了一个抽象工厂 + 一个具体工厂。<strong>只有一个实现类的抽象工厂是纯粹的噪音</strong>——它不提供任何可替换性，只提供阅读成本。</p>
+    </div>
+
+    <h3>4.2 生成器<span class="en">Builder</span> <small>日常叫「建造者」</small></h3>
+    <div class="intent"><b>意图：</b>将一个<strong>复杂对象的构建过程</strong>与它的表示分离，使得同样的构建过程可以创建不同的表示。</div>
+    <div class="tags"><span>变化点：装配步骤不变，产物形态变化</span><span>范围：对象模式</span><span>关键词：分步装配</span></div>
+
+    <p>它的画面感最强：一个导游（<code>Director</code>）拿着固定的行程单，带着不同的建造者走一遍，产出不同的东西。同一串 <code>BuildPartA(); BuildPartB(); BuildPartC();</code> 调用，交给 HTML 建造者出来是 HTML，交给 PDF 建造者出来是 PDF。</p>
+
+    <div class="diagram">
+      <div class="dtitle">结构：不变的步骤，可换的装配工</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>Director（导演）</b><br><span style="color:#475569;font-size:13px">只写步骤顺序：先标题 → 再正文 → 最后页脚<br><b>它不知道产物是什么格式</b></span></div>
+      <div class="narw">↓ 拿一个 Builder 走一遍步骤</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>Builder 接口</b><br><span style="color:#475569;font-size:13px">BuildTitle() · BuildBody() · BuildFooter() · GetResult()</span></div>
+      <div class="narw">↓ 换成不同实现，步骤一行不改</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>三种产物</b><br><span style="color:#475569;font-size:13px">HTMLBuilder → 一个字符串<br>PDFBuilder → 一个字节流<br>PlainBuilder → 一个纯文本</span></div>
+      <div class="cap">注意：<strong>生成器解决的是「步骤固定、产物多变」</strong>。如果步骤本身也在变，它就不合适了。</div>
+    </div>
+
+    <p>日常工程里见得最多的是它的「退化版」：链式调用构造器，也就是常说的 <code>StringBuilder.Append(...).Append(...)</code> 那种写法。严格说那不算 GoF 的生成器（缺了 Director），但精神是一样的：<strong>把「拼装过程」变成可读的一串动作，而不是一个塞了八个参数的构造函数</strong>。</p>
+
+    <h3>4.3 工厂方法<span class="en">Factory Method</span></h3>
+    <div class="intent"><b>意图：</b>定义一个用于创建对象的接口，但<strong>让子类决定实例化哪一个类</strong>。工厂方法使一个类的实例化延迟到其子类。</div>
+    <div class="tags"><span>变化点：造哪个产品</span><span>范围：类模式</span><span>关键词：推迟到子类</span></div>
+
+    <p>这是三个「类模式」之一——它靠继承工作。父类里写着 <code>var doc = CreateDocument();</code>，<code>CreateDocument</code> 是个抽象方法；<code>MyApp</code> 子类返回自己的文档，<code>DrawingApp</code> 子类返回画图文档。父类的流程代码完全不用改。</p>
+
+    <div class="diagram">
+      <div class="dtitle">结构：父类留一个洞，子类来填</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>Application（父类，写流程）</b><br><span style="color:#475569;font-size:13px">NewDocument() { ...; var d = <b>CreateDocument()</b>; ... }<br>CreateDocument() <span style="color:#94a3b8">← 抽象，没人知道是什么</span></span></div>
+      <div class="narw">↓ 子类实现那个洞</div>
+      <div class="nbox" style="border:1.5px solid #c4b5fd;border-radius:11px;background:#faf5ff"><b>MyApplication</b> → 返回 TextDocument<br><b>DrawingApplication</b> → 返回 DrawingDocument</div>
+      <div class="cap">父类的流程代码是「一次写成、永不修改」的，变化的只是那一行返回什么。<strong>这就是开闭原则最朴素的样子。</strong></div>
+    </div>
+
+    <p>它和生成器的区别可以用一句话记住：<strong>工厂方法管「造哪一个」，生成器管「怎么一步步造」</strong>。两者经常同时出现——生成器负责装配过程，工厂方法负责决定拿哪个生成器。</p>
+
+    <div class="pit">
+      <span class="lbl">常见误用</span>
+      <p>把它和「简单工厂」混为一谈。简单工厂（一个类里放一堆 if-else 返回不同对象）不是 GoF 模式，它没有解决「新增产品要改工厂」这个问题。<strong>区别在于：加一个新类型时，简单工厂必须回去改那个 if，工厂方法只需新增一个子类。</strong></p>
+    </div>
+
+    <h3>4.4 原型<span class="en">Prototype</span></h3>
+    <div class="intent"><b>意图：</b>用原型实例指定创建对象的种类，并且<strong>通过拷贝这些原型</strong>来创建新的对象。</div>
+    <div class="tags"><span>变化点：从「构造」变成「克隆」</span><span>范围：对象模式</span><span>关键词：复制</span></div>
+
+    <p>适用场景非常具体：<strong>对象的构造过程比复制一遍贵得多，或者构造过程你根本不想知道。</strong>比如一个已经配置好的、连好连接的、缓存已预热的对象，你要的是一个「配置相同的新实例」，而不是从头 new 一遍再配一遍。</p>
+
+    <div class="diagram">
+      <div class="dtitle">结构：把「怎么造」换成「照着抄」</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>客户端</b><br><span style="color:#475569;font-size:13px">调 <code>prototype.Clone()</code> —— 它不关心具体类</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #c4b5fd;border-radius:11px;background:#faf5ff"><b>原型注册表（可选但常用）</b><br><span style="color:#475569;font-size:13px">用名字查原型：registry[&quot;staff&quot;].Clone()<br><b>新增类型 = 注册一个新原型，零代码改动</b></span></div>
+      <div class="cap">关键收益：客户端<strong>完全不需要知道 ConcreteProduct 这个类名</strong>。这也是 GoF 表里「显式指定类名创建对象」那一行的解法之一。</div>
+    </div>
+
+    <div class="pit">
+      <span class="lbl">它真正的难点不是结构，是「深拷贝还是浅拷贝」</span>
+      <p>克隆出来的对象如果和原对象共享内部的可变对象，你改一个会神秘地影响另一个——这类 bug 极难定位。GoF 明确讨论过这个问题：成员是引用类型时必须做深拷贝，或者引入「克隆后再初始化」的钩子。<strong>所以原型模式的使用成本，主要花在克隆语义的正确性上，而不是结构上。</strong></p>
+    </div>
+
+    <h3>4.5 单件<span class="en">Singleton</span> <small>日常叫「单例」</small></h3>
+    <div class="intent"><b>意图：</b>保证一个类仅有一个实例，并提供一个访问它的全局访问点。</div>
+    <div class="tags"><span>变化点：无</span><span>范围：对象模式</span><span>关键词：唯一 + 全局可达</span></div>
+
+    <p>这是 23 个模式里<strong>最简单、也最有争议</strong>的一个。它的实现只有几行，但它带来的两个后果——全局状态和隐藏依赖——恰恰是软件设计最想避免的东西。</p>
+
+    <div class="diagram">
+      <div class="dtitle">它换来了什么，又欠下了什么</div>
+      <div class="nbox" style="border:1.5px solid #bbf7d0;border-radius:11px;background:#f0fdf4"><b>换来的</b><br><span style="color:#475569;font-size:13px">任何地方都能拿到同一个实例；构造时机可控（首次访问时创建，不像全局变量在 main 之前）；能挡住拷贝</span></div>
+      <div class="narw">⇅ 代价几乎等价</div>
+      <div class="nbox" style="border:1.5px solid #fecdd3;border-radius:11px;background:#fffafb"><b>欠下的</b><br><span style="color:#475569;font-size:13px">类的构造函数里看不出它依赖谁（<b>隐藏依赖</b>）；测试之间通过单件串味（<b>不可隔离</b>）；任何地方都能改它（<b>全局可变状态</b>）</span></div>
+      <div class="cap">最要命的一条：<strong>「类自己决定自己依赖谁」</strong>，于是任何一个测试都没法替它换上一份假实现。</div>
+    </div>
+
+    <p>它被批评到什么程度？GoF 作者之一 Erich Gamma 在 2009 年的一次访谈里说，2005 年四位作者讨论过如果重写这本书会怎么改，他<strong>想删掉单件模式</strong>，但四人没有达成一致。同一个访谈里，他们一致认为应该补上的是另外几个当时没写的模式：<code>extension object</code>、<code>dependency injection</code>、<code>type object</code>、<code>null object</code>。</p>
+
+    <p>现代实践里的共识是：<strong>「唯一」应该是一个部署决策，不是一个类的设计。</strong>在 <code>main</code> 里构造一份，往下用构造参数传引用——类的代码里看不出任何单件痕迹，可测试性就回来了。这就是依赖注入在做的事。</p>
+
+    <div class="callout co-teal">
+      <span class="lbl">那什么时候它仍然是合理的</span>
+      <p>当「唯一」是被<strong>外部约束</strong>强制的，而不是你图省事选的：一台机器上只有一个物理串口、一个进程级的硬件抽象、一个由操作系统保证唯一的资源。<br>判断句式是「<strong>这个领域本身就是唯一的</strong>」而不是「<strong>我只想让它有一个</strong>」。后者应该用依赖注入。</p>
+    </div>
+
+    <h3 class="teal">创建型的收尾：五个模式的分工</h3>
+    <p>把它们排开看，五个创建型模式回答的是同一个问题的五个不同侧面：</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">模式</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">由谁决定造什么</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">它真正的卖点</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">典型触发信号</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>抽象工厂</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">注入进来的某个具体工厂</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">产品族<strong>成套配套</strong>，混搭在类型上不可能</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">要换一整套风格/驱动/方言</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>生成器</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">调用者选的建造者</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">装配<strong>步骤固定、产物多变</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">构造函数参数太多，或同一个步骤序列要产出多种格式</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>工厂方法</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">子类</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">父类流程<strong>一次写成永不修改</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">框架里留给你 override 的那个 create 钩子</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>原型</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一个现成的实例</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">绕开昂贵或复杂的构造过程</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">构造很贵，或你不想知道构造细节</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>单件</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">没有人——它自己</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">全局唯一且延迟创建</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">外部约束强制唯一（谨慎使用）</td></tr>
+</tbody>
+</table>
+</div>
+
+    <div class="callout co-blue">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>创建型模式的判断顺序是：<strong>先问「需要几个」，再问「由谁决定」，最后才问「怎么造」</strong>。大多数选型的困难都出在跳过前两问、直接纠结实现细节。</p>
+    </div>
+  </section>
+
+  <!-- ================= 05 ================= -->
+  <section id="s5">
+    <div class="sec-head">
+      <div class="badge teal">05</div>
+      <h2>结构型（7）：不动源码，改外形<span class="en">Structural Patterns</span></h2>
+    </div>
+
+    <p>结构型模式处理的是<strong>「对象怎么拼」</strong>。它们有一个共同的前提假设：<em class="hl">有些代码你改不了，或者改了不划算</em>。可能是第三方的库、可能是已经上线稳定的核心类、可能是改了会引爆一堆子类。于是只能从外面想办法。</p>
+
+    <div class="diagram">
+      <div class="dtitle">七个结构型模式，三种「从外面想办法」的手段</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>① 加一层翻译，让不兼容的接口对上</b><br><span style="color:#475569;font-size:13px">适配器 · 外观<br>—— 前者一对一转换接口，后者一对多简化入口。<b>都是接口层面的活儿，不改功能。</b></span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>② 加一层包装，让功能可以叠加</b><br><span style="color:#475569;font-size:13px">装饰 · 代理<br>—— 都是「持有被包装对象的引用」，结构几乎一模一样。<b>差别全在意图：一个加功能，一个管访问。</b></span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #c4b5fd;border-radius:11px;background:#faf5ff"><b>③ 改变组织方式，让结构本身可伸缩</b><br><span style="color:#475569;font-size:13px">组合（树形统一）· 桥接（两个维度解耦）· 享元（共享省内存）<br><b>这三个动的是结构，不是接口。</b></span></div>
+      <div class="cap">这张图的用法：客户端的报错是「接口对不上」找第一组；是「想加行为/想拦访问」找第二组；是「结构本身撑不住」找第三组。</div>
+    </div>
+
+    <h3 class="teal">5.1 适配器<span class="en">Adapter</span></h3>
+    <div class="intent teal"><b>意图：</b>将一个类的接口<strong>转换成客户希望的另外一个接口</strong>，使原本因接口不兼容而不能一起工作的类可以一起工作。</div>
+    <div class="tags"><span>变化点：外来接口</span><span>范围：类/对象模式</span><span>关键词：事后兼容</span></div>
+
+    <p>它的画面就是电源转接头。已有的类和你要用的类都在，谁都没错，只是插头对不上。适配器不做功能改造，只做<strong>形状翻译</strong>。</p>
+
+    <div class="diagram">
+      <div class="dtitle">结构：一个会说两种话的中间人</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>客户端</b><br><span style="color:#475569;font-size:13px">只认 <code>Target.Request()</code> 这一个签名，改不了（它是我们自己的抽象）</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>Adapter</b><br><span style="color:#475569;font-size:13px">实现 Target，同时<b>抱一个 Adaptee 进来</b><br><code>Request() { adaptee.SpecificRequest(); }</code></span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>Adaptee（已有代码，一行不改）</b><br><span style="color:#475569;font-size:13px">它的方法名、参数顺序、返回类型都跟客户端期望的不一样</span></div>
+      <div class="cap">注意「一行不改」这四个字——<strong>适配器存在的唯一理由就是被适配的那一方动不了。</strong>如果两边都能改，直接统一接口就行，不需要这个模式。</div>
+    </div>
+
+    <p>它还有一个经常被忽略的用途：<strong>防腐层</strong>。当你必须依赖一个外部系统（旧系统、第三方 SDK），用它把所有丑陋的接口细节关在一个类里，其余代码只看到自己定义的干净接口。这样将来外部系统升级，只有适配器要改。</p>
+
+    <div class="pit">
+      <span class="lbl">误用信号</span>
+      <p>给每一个新接入的类都写一个适配器，即使两边接口本来就差不多。<strong>适配器是「事后兼容」的工具</strong>，如果能在设计时就统一接口，那属于事前就该做好的事。</p>
+    </div>
+
+    <h3 class="teal">5.2 桥接<span class="en">Bridge</span></h3>
+    <div class="intent teal"><b>意图：</b>将抽象部分与它的实现部分分离，使它们<strong>都可以独立地变化</strong>。</div>
+    <div class="tags"><span>变化点：两个独立维度</span><span>范围：对象模式</span><span>关键词：事前解耦</span></div>
+
+    <p>它和适配器最容易混，但方向完全相反：<strong>适配器是「事后兼容」，桥接是「事前拆分」</strong>。适配器是在两个已经存在、本来不搭的东西之间架桥；桥接是在设计之初就把一个本来会长成 <em class="hl">M×N 个类</em>的继承树，拆成 M+N 个类。</p>
+
+    <div class="diagram">
+      <div class="dtitle">为什么需要它：继承会让类数量相乘</div>
+      <div class="nbox" style="border:1.5px solid #fecdd3;border-radius:11px;background:#fffafb"><b>不拆的话：2 个维度 → 6 个类</b><br><span style="color:#475569;font-size:13px">窗口类型（Icon / Transient / Application）× 平台实现（X / PM）<br>= IconX · IconPM · TransientX · TransientPM · ApplicationX · ApplicationPM<br><b>加第 3 个平台，要多写 3 个类</b></span></div>
+      <div class="narw">↓ 拆成两条独立的继承线</div>
+      <div class="nbox" style="border:1.5px solid #bbf7d0;border-radius:11px;background:#f0fdf4"><b>拆开后：2 + 2 = 4 个类</b><br><span style="color:#475569;font-size:13px">抽象侧：Window → IconWindow / TransientWindow<br>实现侧：WindowImp → XWindowImp / PMWindowImp<br><b>加一个平台只需 1 个类，加一种窗口只需 1 个类</b></span></div>
+      <div class="narw">↓ 两侧靠一个引用相连</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>这个引用就是「桥」</b><br><span style="color:#475569;font-size:13px">Window 持有一个 WindowImp，把自己的绘制请求<b>委托下去</b>——而不是靠继承去继承平台细节</span></div>
+      <div class="cap">GoF 在 Lexi 里用桥接解决「支持多种窗口系统」，用的正是这张图的 Window / WindowImp 结构。</div>
+    </div>
+
+    <p>判断要不要桥接，有一个很干脆的测试：<strong>数一数这个问题有几个会独立变化的维度。</strong>一个维度用策略就够了；两个维度用继承会爆炸，此时才轮到桥接。</p>
+
+    <h3 class="teal">5.3 组合<span class="en">Composite</span></h3>
+    <div class="intent teal"><b>意图：</b>将对象组合成<strong>树形结构</strong>来表示「部分-整体」的层次，使用户对单个对象和组合对象的使用具有一致性。</div>
+    <div class="tags"><span>变化点：结构深度</span><span>范围：对象模式</span><span>关键词：统一对待</span></div>
+
+    <p>它解决的是一个很具体、很常见的麻烦：<strong>「一个东西」和「一堆东西」要不要区别对待？</strong>不区别对待的话，客户端就得写「如果它是容器就遍历，如果是叶子就直接处理」这种判断，而且每加一种操作就要重写一遍。</p>
+
+    <div class="diagram">
+      <div class="dtitle">结构：叶子和容器实现同一个接口，自己递归</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>Glyph（抽象基类）</b><br><span style="color:#475569;font-size:13px">Draw() · GetBounds() · Insert() · Remove()<br><b>所有节点都实现它，无论简单还是复杂</b></span></div>
+      <div class="narw">↓ 分成两种节点</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>叶子节点 Character</b><br><span style="color:#475569;font-size:13px">Draw() 真的画一个字符<br>Insert()/Remove() 是<b>空实现</b>——因为单个字符没有孩子</span></div>
+      <div class="narw">+</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>容器节点 Row / Column</b><br><span style="color:#475569;font-size:13px">Draw() 遍历孩子，<b>对每个孩子调 Draw()</b><br>Insert()/Remove() 真的维护孩子列表</span></div>
+      <div class="cap">客户端再也不用问「你是单个还是一个组」。<strong>递归把复杂度吸收进了结构本身</strong>，上层代码保持一行。</div>
+    </div>
+
+    <div class="pit">
+      <span class="lbl">这个模式有明确的设计代价，GoF 专门讨论过</span>
+      <p>把 <code>Insert</code>/<code>Remove</code> 放在公共基类上，会让叶子节点拥有<strong>无意义的方法</strong>——调用一个字符的 <code>Insert</code> 什么也不会发生，这是行为上的不一致（也常被拿来当违反里氏替换的例子）。另一条路是把它们只放在容器节点上，但那样客户端又得先判断类型。<br><strong>两种做法各有代价，GoF 明确说这是个权衡，没有免费答案。</strong>实践里常见的是「基类给空实现或抛异常」，并接受这个不完美。</p>
+    </div>
+
+    <h3 class="teal">5.4 装饰<span class="en">Decorator</span></h3>
+    <div class="intent teal"><b>意图：</b>动态地给一个对象<strong>添加一些额外的职责</strong>。就增加功能而言，装饰模式比生成子类更为灵活。</div>
+    <div class="tags"><span>变化点：功能的组合方式</span><span>范围：对象模式</span><span>关键词：层层包装</span></div>
+
+    <p>要解决的问题是<strong>组合爆炸</strong>。一个窗口要能加边框、加滚动条、加阴影——用继承的话，每一种组合都是一个类；装饰把它变成「一层一层套」，每种功能只写一个类，运行期任意叠加。</p>
+
+    <div class="diagram">
+      <div class="dtitle">结构：装饰者和被装饰者实现同一个接口，于是可以无限套</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>Glyph 接口</b><br><span style="color:#475569;font-size:13px">Draw() —— 装饰者和真实对象都实现它，客户端分不出差别</span></div>
+      <div class="narw">↓ 运行期一层层套上去</div>
+      <div class="nbox" style="border:1.5px solid #c4b5fd;border-radius:11px;background:#faf5ff"><b>Border( Scroller( TextGlyph ) )</b><br><span style="color:#475569;font-size:13px">外层 Border.Draw() 先调 <code>base.Draw()</code> 画出内容，再画自己的边框<br><b>被装饰的对象始终不知道自己被套住了</b></span></div>
+      <div class="narw">↓ 加功能 = 多套一层，不动任何已有类</div>
+      <div class="nbox" style="border:1.5px solid #bbf7d0;border-radius:11px;background:#f0fdf4"><b>透明围栏（Transparent Enclosure）</b><br><span style="color:#475569;font-size:13px">GoF 在 Lexi 里叫它 MonoGlyph：它既是装饰者，也仍然是 Glyph，<br>所以它能被放进任意一个需要 Glyph 的位置</span></div>
+      <div class="cap">本质是「包装 + 接口一致 + 转发」。正是这三件事凑在一起，才让套娃成为可能。</div>
+    </div>
+
+    <p>日常见到的极端案例是 I/O 流：<code>BufferedInputStream(DataInputStream(FileInputStream(file)))</code>。三层包装合成了一个「带缓冲的、能读基本类型的数据流」，而每一层都是独立可复用的小类。这就是装饰模式在标准库里的样子。</p>
+
+    <h3 class="teal">5.5 外观<span class="en">Facade</span></h3>
+    <div class="intent teal"><b>意图：</b>为子系统中的一组接口提供一个<strong>一致的高层接口</strong>，使子系统更加容易使用。</div>
+    <div class="tags"><span>变化点：子系统的复杂度</span><span>范围：对象模式</span><span>关键词：简化入口</span></div>
+
+    <p>它最简单，也最容易被误解成「只是包装一下」。它真正的价值是<strong>提供一条捷径，同时不剥夺强者的能力</strong>：客户端想要简单就用 <code>Compiler.Compile(code)</code> 一行搞定，想要精细控制仍然可以绕过外观直接去调那些子系统类。</p>
+
+    <div class="diagram">
+      <div class="dtitle">结构：给一栋楼开一个正门，但侧门没有锁上</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>客户端</b><br><span style="color:#475569;font-size:13px">只调 <code>Compiler.Compile()</code> 一行<br>它不知道编译涉及哪几个子系统</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>Compiler（外观）</b><br><span style="color:#475569;font-size:13px">内部按顺序协调：Scanner → Parser → ProgramNodeBuilder → CodeGenerator<br><b>它只转发和编排，不含业务逻辑</b></span></div>
+      <div class="narw">↓ 但客户端仍然可以直接访问下面的类</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>子系统类（保持原样）</b><br><span style="color:#475569;font-size:13px">Scanner · Parser · CodeGenerator ……<br>外观<b>不封装它们，只是给它们一个更方便的入口</b></span></div>
+      <div class="cap">和适配器的区别：<strong>适配器是「一对一转换接口」，外观是「一对多简化入口」</strong>。适配器让两个东西能协作，外观让用的人少走几步路。</div>
+    </div>
+
+    <p>它在工程里最常见的形态就是「门面」：SLF4J 统一各家日志实现、各种 SDK 把十几个零散调用包成三个方法、一个进程内模块对外只暴露一个 Service 类。这些都是标准的外观模式。</p>
+
+    <h3 class="teal">5.6 享元<span class="en">Flyweight</span></h3>
+    <div class="intent teal"><b>意图：</b>运用<strong>共享</strong>技术有效地支持大量细粒度对象。</div>
+    <div class="tags"><span>变化点：对象数量</span><span>范围：对象模式</span><span>关键词：共享内在状态</span></div>
+
+    <p>它是 23 个模式里目标最单一的一个：<strong>纯粹为了省内存</strong>。当你需要几十万个对象，而这些对象的大部分状态是重复的，就把重复的那部分抽出来共享。</p>
+
+    <div class="diagram">
+      <div class="dtitle">关键动作：把对象的状态切成两半</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>内在状态（Intrinsic）→ 共享</b><br><span style="color:#475569;font-size:13px">不随场景变化的部分：字符的字体、字形的点阵轮廓、棋子的颜色形状<br><b>只存一份，被所有实例共用</b></span></div>
+      <div class="narw">+</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>外在状态（Extrinsic）→ 传参</b><br><span style="color:#475569;font-size:13px">随场景变化的部分：字符在文档中的位置、棋子在棋盘上的坐标<br><b>不存进对象，调用时当参数传进去</b></span></div>
+      <div class="narw">↓ 二者靠一个工厂拼起来</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>FlyweightFactory</b><br><span style="color:#475569;font-size:13px">按内在状态做池子：<code>GetGlyph('a', font)</code> 命中就返回已有对象，<br>没命中才新建。<b>文档里几千个 'a' 可能只对应一个对象。</b></span></div>
+      <div class="cap">它需要客户端配合：调用者必须负责把外在状态传进来。<strong>这是它的使用成本，也是它常被写错的地方。</strong></div>
+    </div>
+
+    <p>它和「缓存」的区别在于目的：缓存是为了省时间（避免重算），享元是为了省空间（避免重复对象）。两者经常一起出现——<code>FlyweightFactory</code> 本身就是一种缓存。</p>
+
+    <div class="pit">
+      <span class="lbl">不要提前用</span>
+      <p>它的代价很实在：代码复杂度上升、客户端要自己管理外在状态、共享对象的不可变约束必须严格遵守（改了共享状态 = 所有使用者一起出 bug）。<strong>只有在测量确认「对象数量确实是瓶颈」之后才值得上。</strong>在没有数据支撑时，它是一个典型的过度优化。</p>
+    </div>
+
+    <h3 class="teal">5.7 代理<span class="en">Proxy</span></h3>
+    <div class="intent teal"><b>意图：</b>为其他对象提供一种<strong>代理以控制对这个对象的访问</strong>。</div>
+    <div class="tags"><span>变化点：访问的时机与权限</span><span>范围：对象模式</span><span>关键词：能不能访问</span></div>
+
+    <p>结构上和装饰几乎一样：都是「实现同一接口 + 持有一个真实对象 + 转发调用」。<strong>区别全在意图</strong>：装饰是<em class="hl">加功能</em>，代理是<em class="hl">管访问</em>——控制什么时候让你拿到、以什么权限拿到、要不要先做点别的。</p>
+
+    <div class="diagram">
+      <div class="dtitle">GoF 列出的四种代理，画面各不相同</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>远程代理 Remote</b><br><span style="color:#475569;font-size:13px">本地对象是远方对象的替身，把网络细节藏起来<br>—— 调用方像调本地方法一样调远程服务</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>虚代理 Virtual</b><br><span style="color:#475569;font-size:13px">按需创建昂贵的对象：图片没滚到可视区就先不加载<br>—— <b>延迟创建</b>，代理先答应着，真要用时才 new</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>保护代理 Protection</b><br><span style="color:#475569;font-size:13px">检查调用者有没有权限，没权限就拒绝<br>—— 权限控制塞在转发之前</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #c4b5fd;border-radius:11px;background:#faf5ff"><b>智能引用 Smart Reference</b><br><span style="color:#475569;font-size:13px">在访问前后做附加动作：引用计数、首次访问时加锁、写时复制<br>—— 现代语言里的智能指针就是这个</span></div>
+      <div class="cap">四种代理共用一个结构，差别在「转发之前多加了一步什么」。</div>
+    </div>
+
+    <h3 class="teal">结构型的收尾：三条容易走错的岔路</h3>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">容易混的一对</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">差在哪</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">一句话判据</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>适配器 vs 桥接</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一个事后兼容，一个事前拆分</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">两个东西是<strong>本来就有</strong>、只是不搭（适配器），还是<strong>设计时就该拆成两个独立变化的维度</strong>（桥接）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>装饰 vs 代理</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">代码结构几乎相同，意图完全不同</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">你是想<strong>给它加能力</strong>（装饰，可以叠很多层），还是想<strong>管住访问</strong>（代理，通常一层）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>装饰 vs 组合</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一个包装一个，一个容纳多个</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">被包装的东西是<strong>唯一一个</strong>（装饰），还是<strong>一组、且结构是树</strong>（组合）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>外观 vs 中介者</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">都简化了关系，但方向相反</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">外观是<strong>单向的、给外部人用的入口</strong>；中介者是<strong>双向的、内部同事之间的协调者</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+    <div class="callout co-teal">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>结构型模式有一个共同前提：<strong>被组合的东西你不想改或改不了</strong>。所以判断该不该用时，先问一句「我为什么不能直接改它」——如果答案是「其实可以改」，那正确做法往往是改它，而不是套一层。</p>
+    </div>
+  </section>
+
+  <!-- ================= 06 ================= -->
+  <section id="s6">
+    <div class="sec-head">
+      <div class="badge violet">06</div>
+      <h2>行为型（11）：让请求和对象脱钩<span class="en">Behavioral Patterns</span></h2>
+    </div>
+
+    <p>这一类最多（11 个），也最容易学成一团浆糊——因为它们的结构彼此很像，都是「多个类 + 一层抽象 + 互相调」。真正能把它们分开的只有一个东西：<strong>它在切断哪一根耦合</strong>。</p>
+
+    <div class="diagram">
+      <div class="dtitle">11 个行为型模式，各自切断哪一根耦合</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>切断「发送者 ↔ 接收者」</b><br><span style="color:#475569;font-size:13px">职责链（沿链传递）· 命令（变成对象）· 中介者（经过中间人）</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>切断「算法 ↔ 使用它的代码」</b><br><span style="color:#475569;font-size:13px">策略（算法可换）· 模板方法（骨架与步骤分离）· 解释器（文法与求值分离）</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #c4b5fd;border-radius:11px;background:#faf5ff"><b>切断「状态 ↔ 行为」</b><br><span style="color:#475569;font-size:13px">状态（行为随状态自动切换）· 备忘录（状态与持有者分离）</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>切断「集合内部 ↔ 遍历者」或「数据结构 ↔ 新操作」</b><br><span style="color:#475569;font-size:13px">迭代器（不暴露内部就能遍历）· 访问者（不改结构就能加操作）</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f9c2cd;border-radius:11px;background:#fff7f9"><b>切断「发布者 ↔ 订阅者」</b><br><span style="color:#475569;font-size:13px">观察者（一对多通知，发布者不知道有谁在听）</span></div>
+      <div class="cap">学这一类的正确方法：<strong>先记住这根耦合，再看模式怎么切断它。</strong>只背结构，这 11 个会长得一模一样。</div>
+    </div>
+
+    <h3 class="violet">6.1 职责链<span class="en">Chain of Responsibility</span></h3>
+    <div class="intent violet"><b>意图：</b>使多个对象都有机会处理请求，从而<strong>避免请求的发送者和接收者之间的耦合关系</strong>。将这些对象连成一条链，沿着链传递请求，直到有一个对象处理它。</div>
+    <div class="tags"><span>切断：发送者↔接收者</span><span>关键词：逐级传递</span></div>
+
+    <div class="diagram">
+      <div class="dtitle">结构：每个处理者只认识自己的下一个</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>Client</b><br><span style="color:#475569;font-size:13px">调 <code>handler.Handle(request)</code> 一次<br><b>它不知道最终是谁处理的</b></span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>Handler1 → Handler2 → Handler3</b><br><span style="color:#475569;font-size:13px">每个处理者：<b>能处理就处理并停下，不能处理就转给后继者</b><br>转发靠的是自己持有的 <code>successor</code> 引用，不是知道全链</span></div>
+      <div class="cap">收益：链的成员可以<strong>运行期重排、增删</strong>，客户端一行都不用改。这也是它被用在 UI 事件冒泡、日志分级、审批流里的原因。</div>
+    </div>
+
+    <div class="pit">
+      <span class="lbl">常见误用</span>
+      <p>忘记定义「没人处理会怎样」。请求走到链尾没人接，是静默丢弃还是抛异常？GoF 特别提醒了这一点：<strong>大多数实现里请求不一定被处理，这个语义必须由设计者明确下来。</strong></p>
+    </div>
+
+    <h3 class="violet">6.2 命令<span class="en">Command</span></h3>
+    <div class="intent violet"><b>意图：</b>将一个<strong>请求封装为一个对象</strong>，从而使你可用不同的请求对客户进行参数化；对请求排队或记录请求日志，以及支持可撤销的操作。</div>
+    <div class="tags"><span>切断：调用者↔执行者</span><span>关键词：请求变成一等公民</span></div>
+
+    <p>它的核心动作是「把一次调用变成一个东西」。一旦请求变成对象，它就能被<strong>存储、排队、序列化、重放、撤销</strong>——这些事在「一行方法调用」上是做不了的。</p>
+
+    <div class="diagram">
+      <div class="dtitle">结构：GoF 在 Lexi 里用它实现撤销/重做</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>Command 接口</b><br><span style="color:#475569;font-size:13px">Execute() · Unexecute()<br><b>撤销能力和执行能力写在同一个对象里</b></span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>CommandHistory（命令历史）</b><br><span style="color:#475569;font-size:13px">按执行顺序压入栈：<code>[Insert'A'][Insert'B'][Delete'A']</code><br>撤销 = 弹出并调 Unexecute()；重做 = 再压回去</span></div>
+      <div class="narw">↓ 谁来执行</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>Receiver 们</b><br><span style="color:#475569;font-size:13px">Document 自己知道怎么插入删除；Command 只负责下令<br><b>Command 对象里存的是「下令所需的全部信息」</b></span></div>
+      <div class="cap">它真正的价值：<strong>撤销功能不需要业务类支持</strong>。Document 一行撤销相关代码都没有，全靠 Command 自带 <code>Unexecute</code>。这就是「请求变成对象」换来的东西。</div>
+    </div>
+
+    <h3 class="violet">6.3 解释器<span class="en">Interpreter</span></h3>
+    <div class="intent violet"><b>意图：</b>给定一个语言，定义它的<strong>文法的一种表示</strong>，并定义一个解释器，该解释器使用该表示来解释语言中的句子。</div>
+    <div class="tags"><span>切断：文法↔求值</span><span>范围：类模式</span><span>关键词：规则树</span></div>
+
+    <p>它是 23 个里最少被实际使用的一个，因为它的适用条件很窄：<strong>文法本身简单、稳定，且效率要求不高</strong>。它的做法是把一条规则变成一个类——正则表达式、布尔表达式、简单查询语言都是它的主场。</p>
+
+    <div class="diagram">
+      <div class="dtitle">结构：一句表达式长成一棵树，求值就是树的遍历</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>要解析的句子</b><br><span style="color:#475569;font-size:13px"><code>(a and b) or (not c)</code></span></div>
+      <div class="narw">↓ 终结符和非终结符各自成类</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>非终结符节点</b><br><span style="color:#475569;font-size:13px">AndExpression · OrExpression · NotExpression<br>它们的 Evaluate() = <b>先求孩子的值，再组合</b></span></div>
+      <div class="narw">+</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>终结符节点</b><br><span style="color:#475569;font-size:13px">VariableExpression / Constant<br>它们的 Evaluate() 直接查上下文</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #bbf7d0;border-radius:11px;background:#f0fdf4"><b>Context（上下文）</b><br><span style="color:#475569;font-size:13px">存变量取值：a=true, b=false, c=true<br><b>求值结果由结构 + 上下文共同决定</b></span></div>
+      <div class="cap">结构上它其实是<b>组合模式 + 一个 Evaluate 操作</b>——这正是为什么两者看起来像。</div>
+    </div>
+
+    <div class="pit">
+      <span class="lbl">GoF 自己的警告</span>
+      <p>书里明确说：当文法变得复杂时，解释器模式会产生<strong>庞大的类层次</strong>，此时应该改用解析器生成器（如 yacc/lex 那类工具），而不是继续手工加类。<strong>不要用解释器模式去写一门真正的编程语言。</strong></p>
+    </div>
+
+    <h3 class="violet">6.4 迭代器<span class="en">Iterator</span></h3>
+    <div class="intent violet"><b>意图：</b>提供一种方法<strong>顺序访问一个聚合对象中的各个元素</strong>，而又不暴露该对象的内部表示。</div>
+    <div class="tags"><span>切断：遍历↔内部结构</span><span>关键词：统一的走法</span></div>
+
+    <p>它的收益有两层，第二层常被忘掉：第一层是<strong>不暴露内部结构</strong>（你不用知道它背后是数组还是链表还是树）；第二层是<strong>遍历算法本身可以换</strong>——正序、逆序、过滤、惰性求值，都不需要动集合类。</p>
+
+    <div class="diagram">
+      <div class="dtitle">结构：把「走到哪了」这个状态从集合里搬出来</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>Aggregate 接口</b><br><span style="color:#475569;font-size:13px">只有一件事：<code>CreateIterator()</code></span></div>
+      <div class="narw">↓ 造出一个遍历状态</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>Iterator 接口</b><br><span style="color:#475569;font-size:13px">First() · Next() · IsDone() · CurrentItem()<br><b>「当前走到哪」存在迭代器里，不存在集合里</b></span></div>
+      <div class="narw">↓ 于是</div>
+      <div class="nbox" style="border:1.5px solid #bbf7d0;border-radius:11px;background:#f0fdf4"><b>可以同时有多个遍历在进行</b><br><span style="color:#475569;font-size:13px">两个客户端各自拿着自己的迭代器，互不干扰——<br>如果遍历状态存在集合里，这是做不到的</span></div>
+      <div class="cap">这也是为什么现代语言把它做成了语法层的东西：<code>foreach</code> / <code>for...of</code> / generator 背后都是这个模式。</div>
+    </div>
+
+    <h3 class="violet">6.5 中介者<span class="en">Mediator</span></h3>
+    <div class="intent violet"><b>意图：</b>用一个中介对象来封装一系列的对象交互。中介者使各对象不需要<strong>显式地相互引用</strong>，从而使其耦合松散，而且可以独立地改变它们之间的交互。</div>
+    <div class="tags"><span>切断：同事↔同事</span><span>关键词：网状变星形</span></div>
+
+    <p>它解决的问题用一张图就说完了：<strong>n 个对象互相引用是 n² 条线，全接到中间人身上是 n 条线。</strong>当 n 从 3 涨到 10，这个差别就是「还能维护」和「不敢维护」的区别。</p>
+
+    <div class="diagram">
+      <div class="dtitle">结构：把网状依赖改成星形</div>
+      <div class="nbox" style="border:1.5px solid #fecdd3;border-radius:11px;background:#fffafb"><b>没有中介者时</b><br><span style="color:#475569;font-size:13px">对话框里每个控件都要知道其他控件的状态：<br>输入框要通知按钮、按钮要通知列表、列表要通知输入框……<br><b>加一个控件要改所有控件的代码</b></span></div>
+      <div class="narw">↓ 全部接到中介者上</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>有了中介者之后</b><br><span style="color:#475569;font-size:13px">每个控件只认识 DialogDirector 一个对象，<br>变化时喊一声 <code>director.WidgetChanged(this)</code>，剩下交给中介者</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>中介者持有全部协调逻辑</b><br><span style="color:#475569;font-size:13px">「输入框变空 → 禁用确定按钮」这条规则只写在一个地方<br><b>加新控件只需改中介者，不动老控件</b></span></div>
+      <div class="cap">代价同样明确：<strong>中介者会变胖</strong>。协调逻辑集中在一处，如果规则多而杂，它自己会变成一个难以维护的上帝类。</div>
+    </div>
+
+    <h3 class="violet">6.6 备忘录<span class="en">Memento</span></h3>
+    <div class="intent violet"><b>意图：</b>在不破坏封装性的前提下，捕获一个对象的内部状态，并在该对象之外保存这个状态，以便以后<strong>将该对象恢复到原先保存的状态</strong>。</div>
+    <div class="tags"><span>切断：状态↔持有者</span><span>关键词：快照</span></div>
+
+    <p>「不破坏封装」这四个字是它的全部难点。<strong>朴素做法是把对象的所有字段暴露出来存一份，但那等于把内部结构公开了</strong>——以后改字段，所有存快照的地方都得改。备忘录的做法是：快照由对象自己生成和读取，外部只拿着一个不透明的盒子。</p>
+
+    <div class="diagram">
+      <div class="dtitle">结构：三方分工，谁都不能多知道一点</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>Originator（原发器）</b><br><span style="color:#475569;font-size:13px">自己生成快照 <code>CreateMemento()</code>，自己恢复 <code>SetMemento(m)</code><br><b>只有它知道快照里到底是什么</b></span></div>
+      <div class="narw">↓ 交出一个不透明对象</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>Memento（备忘录）</b><br><span style="color:#475569;font-size:13px">对原发器完全可见，对别人<b>完全不透明</b><br>别人只能拿着它、不能读它、更不能改它</span></div>
+      <div class="narw">↓ 只是保管</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>Caretaker（负责人）</b><br><span style="color:#475569;font-size:13px">只负责存和取，不检查内容、不操作内容<br><b>它保证不破坏封装</b></span></div>
+      <div class="cap">它和命令模式经常配合：<strong>命令负责「怎么撤销」，备忘录负责「撤销到什么状态」</strong>。两者合起来才是完整的撤销系统。</div>
+    </div>
+
+    <h3 class="violet">6.7 观察者<span class="en">Observer</span></h3>
+    <div class="intent violet"><b>意图：</b>定义对象间的一种<strong>一对多的依赖关系</strong>，当一个对象的状态发生改变时，所有依赖于它的对象都得到通知并被自动更新。</div>
+    <div class="tags"><span>切断：发布者↔订阅者</span><span>关键词：广播通知</span></div>
+
+    <p>这是 23 个模式里在现代工程中<strong>出现频率最高</strong>的一个。事件监听、数据绑定、消息总线、响应式框架——底层几乎都是它。</p>
+
+    <div class="diagram">
+      <div class="dtitle">结构：发布者只管喊，不知道谁在听</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>Subject（目标）</b><br><span style="color:#475569;font-size:13px">维护一个观察者列表 + Attach() / Detach()<br>状态一变就 <code>foreach(o in observers) o.Update()</code><br><b>它不知道具体有多少人、都是谁</b></span></div>
+      <div class="narw">↓ 广播</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>Observer（观察者）</b><br><span style="color:#475569;font-size:13px">都实现 <code>Update()</code>，各自决定收到通知后干什么<br><b>新增一种反应 = 新增一个观察者，目标类一行不改</b></span></div>
+      <div class="narw">↓ GoF 在 Lexi/文档场景里的做法</div>
+      <div class="nbox" style="border:1.5px solid #bbf7d0;border-radius:11px;background:#f0fdf4"><b>一处数据，多处视图</b><br><span style="color:#475569;font-size:13px">文档数据变了，表格视图、图表视图、大纲视图各自刷新<br><b>三个视图之间互不知情</b></span></div>
+      <div class="cap">注意 push 和 pull 的取舍：推模式把细节塞进通知里，拉模式让观察者自己来取。<strong>GoF 说推模式更难复用，拉模式更灵活但要求观察者知道目标。</strong></div>
+    </div>
+
+    <h3 class="violet">6.8 状态<span class="en">State</span></h3>
+    <div class="intent violet"><b>意图：</b>允许一个对象在其<strong>内部状态改变时改变它的行为</strong>。对象看起来似乎修改了它的类。</div>
+    <div class="tags"><span>切断：状态↔行为</span><span>关键词：内部自动切换</span></div>
+
+    <p>它对付的是那种「一个 switch 判断自己处在哪个状态，然后每个分支里又是一大堆操作」的代码。做法是把每个状态做成一个类，把「在这个状态下能做什么」放进去；<strong>状态之间还能决定下一个状态是谁</strong>。</p>
+
+    <div class="diagram">
+      <div class="dtitle">结构：行为随状态自动流转</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>Context</b><br><span style="color:#475569;font-size:13px">持有一个 State 引用，把请求转发给它<br><code>Request() { state.Handle(this); }</code><br><b>它自己不写任何 if 判断状态</b></span></div>
+      <div class="narw">↓ 每个状态自己决定下一步是谁</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>具体状态类</b><br><span style="color:#475569;font-size:13px">TCPClosed → 收到主动打开 → 把自己换成 TCPListen，并返回失败<br>TCPEstablished → 收到关闭 → 换成 TCPListen<br><b>「下一状态是谁」写在这一步里，不是查表</b></span></div>
+      <div class="cap">这就是它和策略模式最关键的区别：<strong>状态是对象内部自己换的，策略是外部传进来的</strong>。状态知道彼此，策略互不知情。</div>
+    </div>
+
+    <h3 class="violet">6.9 策略<span class="en">Strategy</span></h3>
+    <div class="intent violet"><b>意图：</b>定义一系列的算法，把它们一个个封装起来，并且使它们可相互替换。本模式使得算法可独立于使用它的客户而变化。</div>
+    <div class="tags"><span>切断：算法↔使用者</span><span>关键词：可替换</span></div>
+
+    <p>它可能是所有模式里最容易理解、也最容易被滥用的一个。理解起来一句话：<strong>把那个会变的算法从类里抽出来，放到外面去，用的时候传进来。</strong></p>
+
+    <div class="diagram">
+      <div class="dtitle">结构：上下文不知道用的哪个算法</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>Context（上下文）</b><br><span style="color:#475569;font-size:13px">持有一个 Strategy 引用，需要时调 <code>strategy.Algorithm()</code><br>它只知道「有个算法可以调」，不知道是哪个<br><b>什么时候用哪个，由客户端决定</b></span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>Strategy 接口 + 若干实现</b><br><span style="color:#475569;font-size:13px">每个具体策略封装一种算法，彼此<b>完全不知道对方存在</b><br>加一种算法 = 加一个类，不改 Context 老代码</span></div>
+      <div class="cap">它是「对扩展开放、对修改关闭」最直观的样板：<strong>扩展是加类，修改是没有。</strong></div>
+    </div>
+
+    <div class="pit">
+      <span class="lbl">它的代价被低估得最严重</span>
+      <p>策略模式把算法抽离了，但也把「有哪些算法、怎么选」<strong>推给了客户端</strong>。如果选择逻辑本身复杂，这个复杂度不会消失——它会跑到调用方，变成一个更难看的 if-else。<br>另外两个实际问题：<strong>算法多的时候类数量膨胀</strong>；<strong>策略之间无法共享中间结果</strong>（因为互不知情），所以需要协作的算法不适合它。<br>还有一个前置条件：<strong>调用方必须知道不同策略的差别才能选，这本身就是一种信息泄露。</strong>GoF 提到可以用一个参数化的 Context 或把选择逻辑放进工厂/配置来缓解，但代价是把复杂度挪到别处。</p>
+    </div>
+
+    <h3 class="violet">6.10 模板方法<span class="en">Template Method</span></h3>
+    <div class="intent violet"><b>意图：</b>定义一个操作中的算法的<strong>骨架</strong>，而将一些步骤延迟到子类中。模板方法使得子类可以不改变一个算法的结构即可重定义该算法的某些特定步骤。</div>
+    <div class="tags"><span>切断：骨架↔步骤</span><span>范围：类模式</span><span>关键词：钩子</span></div>
+
+    <p>它是三个「类模式」之一，也是最古老、最普遍的设计手法——不需要任何额外的接口或类，只是一个父类里的方法调用了几个抽象的或可覆盖的方法。</p>
+
+    <div class="diagram">
+      <div class="dtitle">结构：父类写死顺序，子类填内容</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>父类的模板方法（不打算被覆盖）</b><br><span style="color:#475569;font-size:13px">读输入 → 转换 → <b>处理（抽象）</b> → 输出<br>顺序、错误处理、资源释放都写死在这里</span></div>
+      <div class="narw">↓ 中间那一步是钩子</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>子类只实现被留空的那一步</b><br><span style="color:#475569;font-size:13px">TextFileProcessor 每行转大写<br>CSVFileProcessor 解析成表再处理<br><b>流程一行都不用重写</b></span></div>
+      <div class="cap">GoF 特别强调这类「钩子操作」（hook operation）：父类给一个<b>默认空实现或默认行为</b>，子类想改才改。<br>这比强制抽象更灵活——<b>不关心某个步骤的子类可以完全无视它</b>。</div>
+    </div>
+
+    <p>它常被拿来和策略对比。区别在于变化的手段：<strong>模板方法用继承，在编译期定死步骤实现；策略用组合，运行期可换。</strong>所以策略更灵活，模板方法更简单直接——如果你的「多个变体」是明确的、有限的几个子类，模板方法往往就够了。</p>
+
+    <div class="quote">
+      <b>模板方法是最常被不知不觉用上的模式。</b><br>
+      任何一个「父类写好了流程、留几个坑给子类填」的框架，都在用这个模式。它不需要你刻意去实现，只需要你刻意去识别。
+      <span class="who">—— 这也是它值得放在最后才讲的原因</span>
+    </div>
+
+    <h3 class="violet">6.11 访问者<span class="en">Visitor</span></h3>
+    <div class="intent violet"><b>意图：</b>表示一个作用于某对象结构中的各元素的操作。它使你可以在<strong>不改变各元素的类的前提下</strong>定义作用于这些元素的新操作。</div>
+    <div class="tags"><span>切断：数据结构↔操作</span><span>关键词：加操作不改类</span></div>
+
+    <p>它解决的是一个具体的僵局：<strong>数据结构稳定，但需要加在它上面的操作一直在增多。</strong>如果每个操作都做成元素类里的一个方法，那每加一个操作就要改所有元素类——而它们可能来自第三方，改不了。</p>
+
+    <div class="diagram">
+      <div class="dtitle">结构：双重分派——先看你是谁，再看你想干什么</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>第一步：元素接受访问者</b><br><span style="color:#475569;font-size:13px">每个元素类实现一个方法：<code>Accept(v) { v.VisitXxx(this); }</code><br><b>注意它写死了自己要调哪个 Visit 重载</b></span></div>
+      <div class="narw">↓ 于是「元素类型」被确定下来</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>第二步：访问者按类型分派</b><br><span style="color:#475569;font-size:13px">Visitor 里为每种元素类型准备一个 VisitXxx 方法<br><b>「操作」这一维被确定下来</b></span></div>
+      <div class="narw">↓ 结果是</div>
+      <div class="nbox" style="border:1.5px solid #bbf7d0;border-radius:11px;background:#f0fdf4"><b>加一个新「操作」= 新增一个 Visitor 子类</b><br><span style="color:#475569;font-size:13px">拼写检查、断字处理、字数统计、导出……各是一个 Visitor<br><b>元素类（Character / Row / Column）一行都不用改</b></span></div>
+      <div class="cap">GoF 用它在 Lexi 里实现「拼写检查和断字处理」，并明确说：<b>两维扩展不能同时自由</b>——加操作容易，加元素类型则要改所有 Visitor。</div>
+    </div>
+
+    <div class="pit">
+      <span class="lbl">它是把双刃剑，用错方向会很痛</span>
+      <p>访问者模式把「可扩展的方向」从<strong>元素类型</strong>换成了<strong>操作</strong>。也就是说：<br>• 加新操作 → 很爽，加一个类就行<br>• 加新元素类型 → 很痛，所有 Visitor 都要加一个 <code>Visit新类型</code>，全部重编译<br><strong>如果你的元素类型还在不断增加，选它是选错了方向。</strong>这个取舍在 GoF 书里写得很清楚，但很多教程不提。</p>
+    </div>
+
+    <h3 class="violet">行为型的收尾：三组最容易混的</h3>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">对照组</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">差异轴</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">一句话判据</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>策略 vs 状态</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">谁来切换</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">外部传进来的（策略）还是对象内部自己流转的（状态）。<strong>策略是「选一个」，状态是「流转起来」</strong></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>策略 vs 命令</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">生命周期</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只算一次、算完就完（策略）还是有「执行 / 撤销 / 排队」的生命周期（命令）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>中介者 vs 观察者</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">要不要「接下来谁干」</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只是广播通知大家各自知道（观察者），还是要集中决定后续动作（中介者）。<strong>观察者是一对多，中介者是多对多收敛到一处</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+    <div class="callout co-violet">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>行为型模式不是按「有几个类、怎么连线」区分的，而是按<strong>「它切断了哪一根耦合」</strong>区分的。结构看起来都一样（接口 + 若干实现 + 一个持有者），但切断的耦合不同，适用场景就完全不同。</p>
+    </div>
+  </section>
+
+  <!-- ================= 07 ================= -->
+  <section id="s7">
+    <div class="sec-head">
+      <div class="badge amber">07</div>
+      <h2>最容易选错的六组对照<span class="en">Confusable Pairs</span></h2>
+    </div>
+
+    <p>23 个模式单独看都清楚，放到一起就容易选错。而选错的根源几乎永远是同一个：<strong>在看代码结构，而不是在看意图。</strong>下面六组的代码结构往往高度相似，唯一的区别是「它想干什么」。</p>
+
+    <h3 class="amber">第一组：策略 vs 状态 —— 谁在切换</h3>
+    <p>两者都是「一个上下文 + 一个可替换的实现」，代码写出来几乎一样。唯一的区别是<em class="hl">切换动作由谁发起</em>。</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">对比项</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">策略 Strategy</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">状态 State</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">封装的是</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">算法</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">状态</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">谁决定用哪个</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>客户端</strong>主动传入</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>对象内部</strong>自动流转</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">这些实现彼此认识吗</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不认识，互不知情</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">通常认识——状态会指定下一个状态</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">典型场景</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">支付方式、排序算法、压缩算法</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">订单状态流转、TCP 连接状态、工作流</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一句话</td><td colspan="2" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>策略是「选一个」，状态是「流转起来」</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3 class="amber">第二组：装饰 vs 代理 vs 适配器 —— 三种「套一层」</h3>
+    <p>这三个都是包装类持有被包装对象的引用，结构上最难区分。差别全在意图。</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">对比项</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">装饰 Decorator</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">代理 Proxy</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">适配器 Adapter</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">接口变了吗</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不变，和被装饰者一致</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不变，和真实对象一致</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">变了，转成客户端期望的接口</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">功能变了吗</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">加了新功能</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">功能不变，控制访问</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">功能不变，只改形状</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">能叠多层吗</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">可以，任意层嵌套</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">通常一层</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不叠，一对一</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">被包装方知情吗</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不知情</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">通常由代理创建/管理</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不知情</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一句话</td><td colspan="3" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>装饰是「加能力」，代理是「管访问」，适配器是「换插头」</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+    <div class="pit">
+      <span class="lbl">最容易踩的坑</span>
+      <p>装饰和代理在代码上<strong>完全无法区分</strong>——都是 <code>class X : ISame { private ISame inner; ... }</code>。所以判断时不要看代码，要看目的：如果你希望「用户可以自由决定加不加这一层」，那是装饰；如果「加这层是系统强制、用户不该察觉」，那是代理。</p>
+    </div>
+
+    <h3 class="amber">第三组：工厂方法 vs 抽象工厂 —— 一个还是一个套</h3>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">对比项</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">工厂方法</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">抽象工厂</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">造几个产品</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一种产品</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一族产品（多个方法）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">抽象层次</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一层</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">两层（工厂的抽象 + 产品的抽象）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">靠什么扩展</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">加子类（继承）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">加一个具体工厂（实现接口）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">加一种新产品时</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">加一个子类，老代码不动</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">要改接口，所有具体工厂都要实现它</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一句话</td><td colspan="2" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>工厂方法造「一个东西」，抽象工厂造「一套东西」</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3 class="amber">第四组：适配器 vs 桥接 —— 事后补还是事前拆</h3>
+    <p>这一组的关键词是<strong>时间点</strong>：两个不搭的东西是「本来就有，现在要凑一起」还是「设计时就该分成两个独立变化的维度」。</p>
+
+    <div class="diagram">
+      <div class="dtitle">同一张图，两种成因</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>适配器：事后补救</b><br><span style="color:#475569;font-size:13px">旧日志库的 <code>WriteLine(string, Level)</code> 和你要的 <code>Log(string)</code> 对不上<br><b>两边都不想动 → 加一个翻译</b></span></div>
+      <div class="narw">对比</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>桥接：事前拆分</b><br><span style="color:#475569;font-size:13px">「画什么窗口」和「用哪个平台画」是两件独立的事<br><b>设计时就不该让它们长在一棵继承树上 → 拆两条线</b></span></div>
+      <div class="cap">判断句式：<strong>「这东西本来就有、只是不兼容」→ 适配器；「这东西将来会在两个方向上各自变化」→ 桥接。</strong></div>
+    </div>
+
+    <h3 class="amber">第五组：中介者 vs 观察者 —— 要不要决定「接下来谁干」</h3>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">对比项</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">观察者 Observer</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">中介者 Mediator</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">通信方向</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一对多，单向广播</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">多对多，收敛到一处再分发</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">发布者知道谁在听吗</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不知道</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">知道，中介者持有所有同事</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">协调逻辑在哪</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">分散在各观察者里</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">集中在中介者里</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">典型场景</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">数据变了多个视图刷新、事件总线</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">UI 控件联动、聊天室、航空管制</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一句话</td><td colspan="2" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>观察者是「大家各自知道一下」，中介者是「我来安排接下来谁干」</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3 class="amber">第六组：组合 vs 装饰 —— 一个容器还是一个包装</h3>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">对比项</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">组合 Composite</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">装饰 Decorator</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">持有一个还是多个</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">多个孩子（列表）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一个被装饰者</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">整体形状</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">树</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">链（一条直线）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">目的</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">让「单个」和「一组」被统一对待</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">让功能可以逐层叠加</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">叶子节点有空方法吗</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">有（Insert/Remove 无意义）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">没有，每个装饰者都在做事</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一句话</td><td colspan="2" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>组合是「一对多、要递归」，装饰是「一对一、要叠加」</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+    <div class="callout co-amber">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>选模式时，判断顺序永远是：<strong>先问意图（我要解决什么问题），再看结构（谁持有谁）。</strong>反过来做——先看结构像哪个——必然出错，因为大约有三分之一的模式共享同一套结构。</p>
+    </div>
+  </section>
+
+  <!-- ================= 08 ================= -->
+  <section id="s8">
+    <div class="sec-head">
+      <div class="badge green">08</div>
+      <h2>完整走一遍：Lexi 文档编辑器<span class="en">Case Study</span></h2>
+    </div>
+
+    <p>GoF 书的第 2 章是一个长达 40 页的案例：设计一个所见即所得（WYSIWYG）的文档编辑器 <strong>Lexi</strong>。它的价值在于把 8 个模式放进同一个真实系统里，展示它们<b>不是孤立的花招，而是同一个设计过程中的接力</b>。</p>
+
+    <p>Lexi 面对七个设计问题，而它们正好对应用户最熟悉的那些「编辑器为什么会难做」。</p>
+
+    <div class="diagram">
+      <div class="dtitle">七个问题 → 八个模式（GoF 第 2 章的完整映射）</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>① 文档结构怎么表示</b><br><span style="color:#475569;font-size:13px">要能容纳字符、图形、表格、分栏，任意嵌套，且不区分「单个」和「一组」<br>→ <b>递归组合</b>，即<b>组合模式 Composite</b></span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>② 怎么排版（把元素排成行列）</b><br><span style="color:#475569;font-size:13px">排版算法有很多种，各有质量/速度取舍，而且会换<br>→ Compositor 类封装算法，<b>策略模式 Strategy</b></span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #c4b5fd;border-radius:11px;background:#faf5ff"><b>③ 怎么给界面加边框、滚动条、阴影</b><br><span style="color:#475569;font-size:13px">这些装饰会随界面演进变化，且组合方式很多<br>→ <b>透明围栏</b>（MonoGlyph），即<b>装饰模式 Decorator</b></span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>④ 怎么支持多种视感标准（Motif / PM）</b><br><span style="color:#475569;font-size:13px">滚动条、按钮、菜单必须成套切换，不能混搭<br>→ <b>抽象工厂 Abstract Factory</b></span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f9c2cd;border-radius:11px;background:#fff7f9"><b>⑤ 怎么支持多种窗口系统（X / PM）</b><br><span style="color:#475569;font-size:13px">这里是「实现细节」的差异，不是「部件风格」的差异<br>→ Window / WindowImp 两条独立的继承线，<b>桥接模式 Bridge</b></span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>⑥ 用户操作怎么统一处理并撤销</b><br><span style="color:#475569;font-size:13px">功能散落在各个对象里，菜单和按钮需要一致的触发方式和撤销能力<br>→ <b>命令模式 Command</b>（配 CommandHistory 做撤销/重做）</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>⑦ 拼写检查、断字这些分析怎么加</b><br><span style="color:#475569;font-size:13px">操作会不断增加，但不该每次都去改所有元素类；且分析需要遍历整个结构<br>→ <b>迭代器 Iterator</b>（遍历）+ <b>访问者 Visitor</b>（操作）</span></div>
+      <div class="cap">七个问题用了八个模式：注意第 ⑦ 个用了两个。<strong>问题和解法不是一一对应的，这也是为什么不能靠背「模式→场景」的一对一表。</strong></div>
+    </div>
+
+    <h3 class="green">这个案例最值得学的三个细节</h3>
+
+    <ol class="steps">
+      <li><strong>Glyph 这一个抽象救了整个设计。</strong>文档里的一切——单个字符、一行、一列、一张图、一个边框装饰——全部实现同一个 <code>Glyph</code> 接口。于是「查询光标位置」「重绘损坏区域」「做拼写检查」这些操作，都只需要对着一个接口写一次。<em class="hl">这是「统一对待单个和一组」带来的最大红利。</em></li>
+      <li><strong>同一处的差异，被拆给了两个不同的模式。</strong>「支持多种视感」用抽象工厂（换一套部件），「支持多种窗口系统」用桥接（换一层实现）。GoF 专门写了一节讨论「这里能不能用抽象工厂」，结论是不能——因为前者变的是<strong>产品族</strong>，后者变的是<strong>实现层</strong>。<em class="hl">这个对照本身就是最好的选型训练。</em></li>
+      <li><strong>装饰者也被做成了 Glyph。</strong>边框、滚动条这些「外观装饰」不是悬浮在文档之外的东西，而是<strong>文档结构里的一个节点</strong>。于是「重绘所有元素」的递归调用会顺路把它们一起画了，客户端完全不需要知道有装饰存在——这就是「透明围栏」这个名字的来历。</li>
+    </ol>
+
+    <div class="callout co-green">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>Lexi 案例真正的教学价值不在这八个模式本身，而在于它展示了<strong>一个设计是被「一个个具体问题」推着往前走的</strong>：先有文档结构的麻烦，才有组合；排版算法会换，才有策略；界面装饰会变，才有装饰……<em class="hl">模式是问题的产物，不是设计的起点。</em></p>
+    </div>
+  </section>
+
+  <!-- ================= 09 ================= -->
+  <section id="s9">
+    <div class="sec-head">
+      <div class="badge rose">09</div>
+      <h2>代价：模式被批评，以及语言在吃掉模式<span class="en">Criticism</span></h2>
+    </div>
+
+    <p>一本 1994 年的书，能统治软件设计三十年，同时也一直挨批。这一节讲清楚批评的内容和它的边界——因为知道「什么时候不用」，比多记三个模式有价值。</p>
+
+    <h3 class="rose">批评一：模式是「语言缺陷的报工单」</h3>
+    <p>1996 年，当时在 NASA、后来成为 Google 研究总监的 <strong>Peter Norvig</strong> 做了一个著名演讲《Design Patterns in Dynamic Languages》。他把 23 个模式拿到 Lisp 和 Dylan 里重新审视，结论是：<strong>其中 16 个要么直接消失，要么实现起来简单得多。</strong></p>
+
+    <p>他的论证角度不是「模式不好」，而是：<em class="hl">这些模式之所以存在，是因为当时的语言缺少某些能力。</em>他在演讲里引用过一句流传最广的概括——设计模式是对你的编程语言的缺陷报工单（design patterns are bug reports against your programming language）。</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">语言缺的能力</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">被它「吃掉」的模式（6+4+2+2+1+1 = 16 个）</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">为什么消失</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>类型是一等公民</strong><br/><span style="font-size:12.5px;color:var(--ink3)">6 个</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">抽象工厂 · 享元 · 工厂方法 · 状态 · 代理 · 职责链</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">类和类型本身就是运行期对象，可以直接当参数传，不需要「两条平行的类层次」</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>函数是一等公民</strong><br/><span style="font-size:12.5px;color:var(--ink3)">4 个</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">命令 · 策略 · 模板方法 · 访问者</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一个函数变量就能替掉一整个 Command / Strategy 对象；组合替掉了继承</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>宏</strong><br/><span style="font-size:12.5px;color:var(--ink3)">2 个</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">解释器 · 迭代器</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">语法抽象在语言层面解决了「解析」和「遍历」这两件事</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>方法组合</strong><br/><span style="font-size:12.5px;color:var(--ink3)">2 个</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">中介者 · 观察者</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">before/after/around 钩子直接干掉了观察者的样板代码</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>多方法</strong><br/><span style="font-size:12.5px;color:var(--ink3)">1 个</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">生成器</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">按多个参数类型分派，省掉 director / builder 那套类层次</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>模块</strong><br/><span style="font-size:12.5px;color:var(--ink3)">1 个</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">外观</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">模块导出天然就是一个简化入口</td></tr>
+<tr><td colspan="2" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>剩下 7 个变化不大</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">组合 · 装饰 · 备忘录 · 原型 · 单件 · 桥接 · 适配器——它们不属于「语言特性缺失」那一类，只是实现更简单</td></tr>
+</tbody>
+</table>
+</div>
+
+    <p>更有意思的是「被吃掉」这件事在主流语言里已经真实发生了。下面的表是 1996 年的预测，今天基本都兑现了：</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">模式</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">今天被什么取代</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">具体例子</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">迭代器</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">生成器语法 / 语言内建遍历</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Python 的 <code>yield</code>、C# 的 <code>IEnumerable</code>、JS 的 <code>function*</code></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">观察者</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">事件机制 / 响应式流</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">C# <code>event</code>、Go channel、RxJS</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">策略</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">匿名函数 / 一等函数</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Java 8 lambda、JS 箭头函数——传一个函数就行</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">命令</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">闭包 / thunk</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Rust <code>FnOnce</code>、JS 闭包</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">访问者</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">模式匹配</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Scala <code>match</code>、Java 17 switch、Rust <code>match</code></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">装饰</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">注解 / 特性 / mixin</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Python <code>@decorator</code>、Java Annotation</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">代理</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">语言原生代理 / 拦截器</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">ES6 <code>Proxy</code>、Java 动态代理</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">单件</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象声明 / 枚举</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Scala <code>object</code>、Kotlin <code>object</code></td></tr>
+</tbody>
+</table>
+</div>
+
+    <p>另一项研究走的是同一方向：Hannemann 和 Kiczales 用面向切面编程（AspectJ）实现了这 23 个模式，发现其中 <strong>17 个</strong>的代码级依赖可以被移除或大幅简化。结论类似——<strong>很多模式的复杂度，来自「用错误的机制去表达一个关系」。</strong></p>
+
+    <h3 class="rose">批评二：模式变成模板复制，丢掉了原书的「为什么」</h3>
+    <p>这个批评来自另一侧，更值得在意。GoF 明确说过书的灵感来自建筑学家 Christopher Alexander 的《建筑模式语言》——那本书里每个模式都有丰富的语境、力量和张力。但有评论指出：<strong>《设计模式》拿走了 Alexander 的「形式」，没有拿走他的「生成性思维」</strong>，于是传播开的是「照着模板套」，而不是「理解情境再判断」。</p>
+
+    <p>表现就是今天最常见的两种悲剧：<strong>面试能背出 23 个模式的定义，却在真实代码里分辨不出哪里该切一刀；或者把模式当成了「资深工程师的装饰品」，用小问题去喂大结构。</strong></p>
+
+    <h3 class="rose">批评三：作者自己也改了主意</h3>
+    <p>2009 年，Erich Gamma 在一次访谈里透露：四位作者 2005 年讨论过如果重写这本书会怎么改，结论是<strong>会重新给一些模式归类，并且补上几个当时没写的模式</strong>——扩展对象/接口（extension object / interface）、依赖注入（dependency injection）、类型对象（type object）、空对象（null object）。</p>
+
+    <p>另外，他个人<strong>想删掉单件模式</strong>，但四人没有达成一致。加上前面那句「依赖注入应该被补进来」——这两个动作放在一起看，含义很清楚：<em class="hl">「唯一实例」这件事，作者更倾向于用依赖注入来做，而不是用单件模式来做。</em></p>
+
+    <div class="diagram">
+      <div class="dtitle">那这套东西还值得学吗：把三种立场摆在一起</div>
+      <div class="nbox" style="border:1.5px solid #fbd5dd;border-radius:11px;background:#fff7f9"><b>批评方的意思</b><br><span style="color:#475569;font-size:13px">很多模式是特定语言条件下的产物。换了语言，或者语言升级了，<br>手写这些模式就成了反模式。<b>别把权宜之计当真理。</b></span></div>
+      <div class="narw">↓ 但</div>
+      <div class="nbox" style="border:1.5px solid #bbf7d0;border-radius:11px;background:#f0fdf4"><b>支持方的意思</b><br><span style="color:#475569;font-size:13px">模式首先是一套<b>共享词汇</b>。「这里需要一个访问者」比讲十行话更快，<br>而且它们确实是被反复验证过的解法。</span></div>
+      <div class="narw">↓ 合起来用</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>务实的结论</b><br><span style="color:#475569;font-size:13px">把它当<b>词汇表和问题清单</b>用，不要当<b>施工图纸</b>用。<br>学「它在防哪种变化」，别学「它的类图画成什么样」。</span></div>
+      <div class="cap">一个可操作的判据：<strong>当你发现语言或框架已经原生支持某件事时，用原生的，不要手写模式。</strong>用 <code>yield</code> 而不是手写 Iterator 类，用事件而不是手写 Observer 基类。</div>
+    </div>
+
+    <div class="callout co-rose">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>Norvig 的批评有一个很具体的实用推论：<strong>判断一个模式该不该手写，先看语言有没有更好的表达。</strong>模式的价值在于「它指出的问题」，而不在于「它的类图」。<em class="hl">当模式变成语言特性时，继续手写模式才是反模式。</em></p>
+    </div>
+  </section>
+
+  <!-- ================= 10 ================= -->
+  <section id="s10">
+    <div class="sec-head">
+      <div class="badge">10</div>
+      <h2>速查：从问题直接查模式<span class="en">Cheat Sheet</span></h2>
+    </div>
+
+    <p>最后一节把整篇教程压缩成两张表。用法是：<strong>不要从模式出发，从你手上这行代码出发。</strong></p>
+
+    <h3>第一张：你现在遇到的是哪一种麻烦</h3>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">你手上的麻烦</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">先考虑</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">为什么是它</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">某个资源全局只能有一份</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">单件（<strong>优先依赖注入</strong>）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">唯一性约束；但注入能保住可测试性</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">新增一种产品就要改一堆老代码</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">工厂方法</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把创建的决定交给新子类，老流程不动</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一批对象必须成套创建，不能混搭</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">抽象工厂</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">产品族的约束被写进类型</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">构造函数参数太多、组合太复杂</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">生成器</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">分步装配，步骤可读</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象初始化很贵，但实例之间又很像</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">原型</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">复制代替重造</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">新旧接口对不上，两边都不想改</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">适配器</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只在中间做形状翻译</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一个类被两个维度同时驱动，类数量要爆炸</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">桥接</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">拆成两条独立的继承线</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">「一个东西」和「一堆东西」要写两套代码</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">组合</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">统一接口 + 递归</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">要给对象加日志/缓存/限流，且想自由组合</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">装饰</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">运行期任意叠加，不改原类</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">客户端只想要一个简单入口</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">外观</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">高层接口，不剥夺细粒度访问</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">同类对象数量巨大，内存吃紧</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">享元</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">共享内在状态，外在状态传参</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">要控制访问：延迟加载 / 权限 / 远程调用</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">代理</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">转发之前多加一步</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">流程固定、只有少数几步会变</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">模板方法</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">骨架写死，钩子留给子类</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">同一件事有多种算法，需要能换</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">策略</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">算法独立成类，运行期替换</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一个状态变了要通知很多模块</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">观察者</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一对多广播，发布者不认识订阅者</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">请求要一层层审批 / 拦截</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">职责链</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">沿链传递，发送者只认识链头</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">要支持撤销、队列、回放</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">命令</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">请求变成对象，自带 Unexecute</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象行为随状态变化，if-else 越写越长</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">状态</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">状态自己决定下一个状态</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不同容器的遍历方式要统一</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">迭代器</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">遍历状态从集合里搬出来</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">多个对象互相关联，形成网状依赖</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">中介者</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">网状变星形，协调集中一处</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对象状态需要存档、回滚</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">备忘录</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不破坏封装的状态快照</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">数据结构稳定，但操作一直在增加</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">访问者</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">加操作 = 加一个 Visitor</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">要自定义一套简单语法并解析</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">解释器</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">文法简单且稳定时才用</td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3>第二张：用之前先检查这几条</h3>
+    <ul class="chk">
+      <li>这个变化是<strong>真的发生过</strong>，还是我猜它会发生？（猜出来的抽象会变成阅读负担）</li>
+      <li>语言或框架是不是<strong>已经原生支持</strong>了？（有 <code>yield</code> 就别手写 Iterator）</li>
+      <li>我是在<strong>看结构选模式</strong>，还是<strong>看意图选模式</strong>？（约三分之一的模式共享结构）</li>
+      <li>套上之后，下一个读代码的人<strong>需要多开几个文件</strong>才能看懂这一行业务？</li>
+      <li>它带来的间接层，<strong>明年会不会真的被用到</strong>？</li>
+      <li>如果不用它，最坏的情况是什么？<strong>能不能接受？</strong></li>
+    </ul>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">反模式信号</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">它通常意味着</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">接口只有一个实现，且未来也不会变</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">抽象是猜出来的，纯成本</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Factory 里只有一行 <code>return new X()</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">多了一层，什么都没换到</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">为了加一个字段，新建了三个文件</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">结构比问题大太多</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">模式名出现在方法名里（<code>ProcessDataByStrategy()</code>）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">模式成了装饰品，而不是解法</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">新人要读六个文件才能改一行判断</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">间接层已经超过可读性预算</td></tr>
+</tbody>
+</table>
+</div>
+  </section>
+
+  <!-- ================= 11 ================= -->
+  <section id="s11">
+    <div class="sec-head">
+      <div class="badge green">11</div>
+      <h2>结语：模式是词汇，不是建材<span class="en">Closing</span></h2>
+    </div>
+
+    <p>如果这篇教程只留下一句话，我希望是这句：</p>
+
+    <div class="quote">
+      <b>Each design pattern lets some aspect of system structure vary independently of other aspects.</b><br>
+      每一个设计模式，都是让系统结构中的<strong>某一个方面</strong>可以独立于其他方面而变化。
+      <span class="who">—— GoF《设计模式》第 1 章</span>
+    </div>
+
+    <p>这句话值得反复读。它把 23 个模式浓缩成了一个动作：<strong>找到那根「会单独变化」的轴，用一层边界把它圈起来。</strong>剩下的都是细节——圈在哪、用什么形状圈、圈完由谁负责。</p>
+
+    <h3 class="green">三个必须说清楚的提醒</h3>
+
+    <ol class="steps">
+      <li><strong>模式和设计原则的关系，是「答案」和「题目」。</strong>上一篇文章讲的 SOLID 七条是题面——它告诉你「哪里不对劲」；设计模式是参考答案——它告诉你「有人是这么处理的」。所以正确顺序是<strong>先学原则、再看模式</strong>：带着「开闭原则」去看策略模式，你会看到的是「加算法不改老代码」；不带原则去看，你看到的只是「三个类一个接口」，看完就忘。</li>
+      <li><strong>不要一次把 23 个学完。</strong>真实的工程里，八成的场景落在六个模式上：<strong>策略、观察者、工厂方法、适配器、装饰、模板方法</strong>。剩下十七个是「遇到了再回来翻」的词典条目。把它们当参考手册，不要当课程表。</li>
+      <li><strong>语言在进化，模式在退位。</strong>看到语言原生支持了某个模式，就应该用原生的，并且<strong>把这件事当成进步而不是偷懒</strong>。手写一个 Python 的 Iterator 类不是严谨，是倒退。</li>
+    </ol>
+
+    <h3 class="green">最后一句反直觉的话</h3>
+    <p>回头看第 01 节那条规矩。整篇教程里出现的每一个模式，都需要你先付出一层间接的代价。所以学完模式之后，最该长出来的能力不是「一眼认出该用哪个模式」，而是——</p>
+
+    <div class="keyline">
+      <b>能看着一段简单到「不需要任何模式」的代码，忍住不动它。</b><br>
+      <span style="font-size:15px;color:var(--ink2)">这比能在复杂代码里挑出正确的模式更难，也更有价值。因为绝大多数的「过度设计」，都不是发生在不会用模式的人手上——恰恰发生在刚学会模式、还很兴奋的人手上。</span>
+    </div>
+
+    <div class="callout co-blue">
+      <span class="lbl">本教程的资料基础</span>
+      <p>模式定义、分类、范围判定、八类重新设计原因、Lexi 案例的七个问题与八个模式的映射，综合自 Erich Gamma、Richard Helm、Ralph Johnson、John Vlissides《设计模式：可复用面向对象软件的基础》（机械工业出版社中文版，刘建中译；英文 1994 年初版）第 1 章与第 2 章。中文译名以该版目录为准——因此本文用「生成器」「单件」「组合」「职责链」等正式译名，并在正文标注了日常更常见的叫法。<br>
+      Norvig 的 16/23 结论与按语言特性分组的分类，来自其 1996 年演讲《Design Patterns in Dynamic Languages》；AspectJ 的 17/23 结论来自 Hannemann &amp; Kiczales 的研究；Erich Gamma 关于「想删掉单件、补上依赖注入等模式」的说法来自 2009 年 InformIT 访谈中对 2005 年作者讨论的回顾。「语言特性取代模式」那张对照表是对上述论证的整理。<br>
+      全部结构图、示意流程与代码片段均为本文为便于理解而重新绘制和编写，不是原书插图；文中没有引用原书的任何图表。</p>
+    </div>
+
+    <div class="card">
+      <h4>如果还想往下走</h4>
+      <ul style="margin-bottom:0">
+        <li><strong>上游：设计原则</strong>——本站的《面向对象设计原则》图解教程。设计模式是这些原则在具体场景里的落地形态，先看题面再看答案。</li>
+        <li><strong>下游：重构手法</strong>——本站的《重构》图解教程。它给你「怎么从现在的结构走到目标结构」的每一步动作，正好补上模式缺失的那一段路。</li>
+        <li><strong>原书第 2 章</strong>——如果只读一章，读 Lexi 案例那一章。它比任何二手总结都更能说明「模式是怎么被问题逼出来的」。</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <span>设计模式 · 图解教程</span><br>
+    <span>本教程为学习提炼笔记，图表为重新绘制；模式定义与案例出处见正文标注，代码示例为说明性伪代码。</span>
+  </footer>
+
+</div>
+</body>
+</html>

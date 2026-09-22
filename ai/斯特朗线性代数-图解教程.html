@@ -202,6 +202,11 @@
     .layer{flex-direction:column;align-items:flex-start;gap:8px}
     .layer .lab{min-width:0}
   }
+
+.toclist{list-style:none;margin:8px 0 0;padding:0}
+.toclist li{padding:6px 2px;font-size:14px;line-height:1.6;color:var(--ink);border-bottom:1px dashed var(--line)}
+.toclist li:last-child{border-bottom:none}
+.tocpart{font-weight:700;color:var(--blue);margin-top:14px;font-size:13px;letter-spacing:.04em}
 </style>
 </head>
 <body>
@@ -285,19 +290,21 @@
   <section id="toc">
     <div class="sec-head"><h2>目录</h2><span class="en">Contents</span><div class="line"></div></div>
     <div class="toc">
-      <a href="#ch1"><span class="no">01</span><span class="tx">向量与矩阵<small>Ax 是列的线性组合</small></span></a>
-      <a href="#ch1b"><span class="no">01·4</span><span class="tx">矩阵乘法与 A = CR<small>第 6 版的开场王牌</small></span></a>
-      <a href="#ch2"><span class="no">02</span><span class="tx">解 Ax = b<small>消元、逆矩阵、A = LU</small></span></a>
-      <a href="#ch3"><span class="no">03</span><span class="tx">四个基本子空间<small>全书的心脏</small></span></a>
-      <a href="#ch4"><span class="no">04</span><span class="tx">正交性<small>投影、最小二乘、Gram-Schmidt</small></span></a>
-      <a href="#ch5"><span class="no">05</span><span class="tx">行列式<small>有符号的体积</small></span></a>
-      <a href="#ch6"><span class="no">06</span><span class="tx">特征值与特征向量<small>对角化与微分方程</small></span></a>
-      <a href="#ch7"><span class="no">07</span><span class="tx">奇异值分解 SVD<small>压缩、PCA、降噪</small></span></a>
-      <a href="#ch8"><span class="no">08</span><span class="tx">线性变换<small>换一组好基</small></span></a>
-      <a href="#ch9"><span class="no">09·10</span><span class="tx">优化与从数据学习<small>线性代数遇上深度学习</small></span></a>
-      <a href="#appx"><span class="no">A</span><span class="tx">附录：五大分解速查<small>术语表 + 自测题</small></span></a>
-      <a href="#end"><span class="no">—</span><span class="tx">结语与阅读建议<small>怎么接着学</small></span></a>
-    </div>
+<ul class="toclist">
+<li>01 · 向量与矩阵 — Ax 是列的线性组合</li>
+<li>01·4 · 矩阵乘法与 A = CR — 第 6 版的开场王牌</li>
+<li>02 · 解 Ax = b — 消元、逆矩阵、A = LU</li>
+<li>03 · 四个基本子空间 — 全书的心脏</li>
+<li>04 · 正交性 — 投影、最小二乘、Gram-Schmidt</li>
+<li>05 · 行列式 — 有符号的体积</li>
+<li>06 · 特征值与特征向量 — 对角化与微分方程</li>
+<li>07 · 奇异值分解 SVD — 压缩、PCA、降噪</li>
+<li>08 · 线性变换 — 换一组好基</li>
+<li>09·10 · 优化与从数据学习 — 线性代数遇上深度学习</li>
+<li>A · 附录：五大分解速查 — 术语表 + 自测题</li>
+<li>结语与阅读建议 — 怎么接着学</li>
+</ul>
+</div>
   </section>
 
   <!-- ==================== CH1 ==================== -->
