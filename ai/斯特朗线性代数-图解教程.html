@@ -247,58 +247,32 @@
       从四个你能画出来的子空间出发。整本书的骨架非常清楚，一共三层：
     </p>
 
-    <div class="diagram">
-      <div class="stack">
-        <div class="layer" style="border-color:#a8b8f5;background:var(--blue-bg)">
-          <div class="lab" style="color:var(--blue)">第 1 层 · 语言</div>
-          <div class="chips">
-            <span class="chip b">1 向量与矩阵</span>
-            <span class="chip b">2 解 Ax=b</span>
-            <span class="chip b">3 四个基本子空间</span>
-          </div>
-        </div>
-        <div class="layer" style="border-color:#9adccf;background:var(--teal-bg)">
-          <div class="lab" style="color:var(--teal)">第 2 层 · 结构</div>
-          <div class="chips">
-            <span class="chip t">4 正交性</span>
-            <span class="chip t">5 行列式</span>
-            <span class="chip t">6 特征值与特征向量</span>
-          </div>
-        </div>
-        <div class="layer" style="border-color:#c9bcf7;background:var(--violet-bg)">
-          <div class="lab" style="color:var(--violet)">第 3 层 · 应用</div>
-          <div class="chips">
-            <span class="chip v">7 奇异值分解 SVD</span>
-            <span class="chip v">8 线性变换</span>
-            <span class="chip v">9 优化</span>
-            <span class="chip v">10 从数据学习</span>
-          </div>
-        </div>
-      </div>
-      <div class="cap">第 1–3 章是「内功」，第 4–6 章是经典理论，第 7–10 章是第 6 版重笔墨的现代应用（机器学习）</div>
-    </div>
+    <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><div style="margin-top:4px">第 1 层 · 语言</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><div style="margin-top:4px">第 2 层 · 结构</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><div style="margin-top:4px">第 3 层 · 应用</div></div>
+<div class="cap">第 1–3 章是「内功」，第 4–6 章是经典理论，第 7–10 章是第 6 版重笔墨的现代应用（机器学习）</div>
+</div>
 
     <p>
       有一条主线贯穿全部十章，Strang 反复强调：<strong>每一个核心思想，最终都表达成一个矩阵分解</strong>。
       不是一堆定理，而是把 <i>A</i> 拆开。这条主线长这样：
     </p>
 
-    <div class="diagram">
-      <div class="flow">
-        <div class="box blue">A<i>x</i><small>列的组合</small></div>
-        <div class="arw">→</div>
-        <div class="box blue">A = CR<small>独立列 × 行阶梯形</small></div>
-        <div class="arw">→</div>
-        <div class="box teal">A = LU<small>消元</small></div>
-        <div class="arw">→</div>
-        <div class="box teal">A = QR<small>正交化</small></div>
-        <div class="arw">→</div>
-        <div class="box amber">S = QΛQᵀ<small>对称·特征值</small></div>
-        <div class="arw">→</div>
-        <div class="box violet">A = UΣVᵀ<small>任意矩阵·SVD</small></div>
-      </div>
-      <div class="cap">五大分解：从「哪些列是独立的」一路升级到「任何矩阵都能旋转—拉伸—旋转」</div>
-    </div>
+    <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">Ax列的组合</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">A = CR独立列 × 行阶梯形</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">A = LU消元</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">A = QR正交化</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">S = QΛQᵀ对称·特征值</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">A = UΣVᵀ任意矩阵·SVD</b></div>
+<div class="cap">五大分解：从「哪些列是独立的」一路升级到「任何矩阵都能旋转—拉伸—旋转」</div>
+</div>
 
     <div class="callout co-blue">
       <span class="h">读这本书的正确姿势</span>
@@ -399,19 +373,17 @@
       <li><strong>矩阵乘向量</strong>：<i>A</i> 乘 <i>x</i> 有两种算法（行点积 / 列组合），第二种才是理解后续一切的关键。</li>
     </ul>
 
-    <div class="diagram">
-      <div class="lbl">向量的三种"加法"，取决于你把它当什么</div>
-      <div class="flow">
-        <div class="box blue">向量 = 箭头<small>可加、可缩放</small></div>
-        <div class="arw">+</div>
-        <div class="box teal">向量 = 空间中的点<small>n 个坐标</small></div>
-        <div class="arw">+</div>
-        <div class="box amber">向量 = 一次配方<small>线性组合的权重</small></div>
-        <div class="arw">→</div>
-        <div class="box violet">张成空间 span<small>所有能配出来的结果</small></div>
-      </div>
-      <div class="cap">"张成"(span) 是本书出现频率最高的动词：几个列能张成一条线、一个平面，或整个空间</div>
-    </div>
+    <div class="diagram" style="text-align:center">
+<div class="lbl">向量的三种"加法"，取决于你把它当什么</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">向量 = 箭头可加、可缩放</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">+</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">向量 = 空间中的点n 个坐标</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">+</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">向量 = 一次配方线性组合的权重</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">张成空间 span所有能配出来的结果</b></div>
+<div class="cap">"张成"(span) 是本书出现频率最高的动词：几个列能张成一条线、一个平面，或整个空间</div>
+</div>
   </section>
 
   <!-- ==================== CH1.4 ==================== -->
@@ -490,16 +462,14 @@
       </table>
     </div>
 
-    <div class="diagram">
-      <div class="lbl">第 4 种：矩阵 = 若干个"秩 1 矩阵"之和</div>
-      <div class="flow" style="align-items:center">
-        <div class="box dark">A = σ₁<i>u</i>₁<i>v</i>₁ᵀ + σ₂<i>u</i>₂<i>v</i>₂ᵀ + … + σ<sub>r</sub><i>u</i><sub>r</sub><i>v</i><sub>r</sub>ᵀ<small>每一项都是「一列 × 一行」</small></div>
-      </div>
-      <div class="cap">
-        秩 1 矩阵是所有矩阵的「原子」：一个秩 <i>r</i> 的矩阵，恰好是 <i>r</i> 个秩 1 矩阵之和<br>
+    <div class="diagram" style="text-align:center">
+<div class="lbl">第 4 种：矩阵 = 若干个"秩 1 矩阵"之和</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #94a3b8;border-radius:11px;background:#f1f5f9;font-size:14px;text-align:left"><b style="color:#1e293b">A = σ₁u₁v₁ᵀ + σ₂u₂v₂ᵀ + … + σrurvrᵀ每一项都是「一列 × 一行」</b></div>
+<div class="cap">
+        秩 1 矩阵是所有矩阵的「原子」：一个秩 <i>r</i> 的矩阵，恰好是 <i>r</i> 个秩 1 矩阵之和<br/>
         σ 排好序之后，只留前 <i>k</i> 项 = 最佳低秩近似 —— 这就是 SVD 压缩的原理（第 7 章）
       </div>
-    </div>
+</div>
 
     <div class="stats">
       <div class="stat">
@@ -546,19 +516,17 @@
       用一个主元把下面的元素消成 0、换行、给某一行乘倍数。
     </p>
 
-    <div class="diagram">
-      <div class="lbl">消元的三步（增广矩阵 [A | b] 一起动）</div>
-      <div class="flow">
-        <div class="box blue">① 选主元<small>第 k 列第 k 行不为 0</small></div>
-        <div class="arw">→</div>
-        <div class="box teal">② 向下消元<small>第 i 行 − ℓ<sub>ik</sub> × 第 k 行</small></div>
-        <div class="arw">→</div>
-        <div class="box amber">③ 回代<small>从最后一个主元往前解</small></div>
-        <div class="arw">→</div>
-        <div class="box violet">得到 U 和 L<small> multiplier ℓ<sub>ik</sub> 直接落进 L</small></div>
-      </div>
-      <div class="cap">消元的副产品才是宝藏：每一步的乘数 ℓ 原封不动填进下三角矩阵 L</div>
-    </div>
+    <div class="diagram" style="text-align:center">
+<div class="lbl">消元的三步（增广矩阵 [A | b] 一起动）</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">① 选主元第 k 列第 k 行不为 0</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">② 向下消元第 i 行 − ℓik× 第 k 行</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">③ 回代从最后一个主元往前解</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">得到 U 和 Lmultiplier ℓik直接落进 L</b></div>
+<div class="cap">消元的副产品才是宝藏：每一步的乘数 ℓ 原封不动填进下三角矩阵 L</div>
+</div>
 
     <div class="diagram">
       <div class="lbl">A = LU：消元 = 分解</div>
@@ -727,17 +695,15 @@
       <li><b>左零空间</b>的基：消元过程中记录的行操作，或者对 <i>A</i>ᵀ 重复一遍上面的流程。</li>
     </ol>
 
-    <div class="diagram">
-      <div class="lbl">Ax = b 的完整解 = 一个特解 + 零空间里的任意向量</div>
-      <div class="flow">
-        <div class="box teal">x<sub>particular</sub><small>任取自由变量 = 0 解出来</small></div>
-        <div class="arw">+</div>
-        <div class="box rose">x<sub>nullspace</sub><small>c₁s₁ + … + c<sub>n−r</sub>s<sub>n−r</sub></small></div>
-        <div class="arw">=</div>
-        <div class="box blue">x = x<sub>p</sub> + x<sub>n</sub><small>A(x<sub>p</sub>+x<sub>n</sub>) = b + 0 = b</small></div>
-      </div>
-      <div class="cap">几何上：解集是零空间平移到特解处的一个「仿射子空间」—— 一条线、一个平面……</div>
-    </div>
+    <div class="diagram" style="text-align:center">
+<div class="lbl">Ax = b 的完整解 = 一个特解 + 零空间里的任意向量</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">xparticular任取自由变量 = 0 解出来</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">+</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">xnullspacec₁s₁ + … + cn−rsn−r</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">=</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">x = xp+ xnA(xp+xn) = b + 0 = b</b></div>
+<div class="cap">几何上：解集是零空间平移到特解处的一个「仿射子空间」—— 一条线、一个平面……</div>
+</div>
 
     <p>
       顺带把三个词钉死，它们在第 4 章和第 7 章会被反复使用：
@@ -819,19 +785,17 @@
       把「一条直线」换成「<i>A</i> 的列空间」，同样的推理给出线性代数里出镜率最高的一个方程。
     </p>
 
-    <div class="diagram">
-      <div class="lbl">从「垂直」到正规方程（Normal Equations）</div>
-      <div class="flow">
-        <div class="box blue">Aᵀ(b − A<i>x̂</i>) = 0<small>误差垂直于 A 的每一列</small></div>
-        <div class="arw">⟹</div>
-        <div class="box teal">AᵀA<i>x̂</i> = Aᵀb<small>n×n 对称，可解</small></div>
-        <div class="arw">⟹</div>
-        <div class="box amber"><i>x̂</i> = (AᵀA)⁻¹Aᵀb<small>使 ‖Ax−b‖² 最小</small></div>
-        <div class="arw">⟹</div>
-        <div class="box violet">p = A<i>x̂</i> = P<i>b</i><small>P = A(AᵀA)⁻¹Aᵀ 是投影矩阵</small></div>
-      </div>
-      <div class="cap">投影矩阵 P 满足 P² = P（投影两次 = 投影一次），Pᵀ = P（对称）</div>
-    </div>
+    <div class="diagram" style="text-align:center">
+<div class="lbl">从「垂直」到正规方程（Normal Equations）</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">Aᵀ(b − Ax̂) = 0误差垂直于 A 的每一列</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">⟹</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">AᵀAx̂= Aᵀbn×n 对称，可解</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">⟹</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">x̂= (AᵀA)⁻¹Aᵀb使 ‖Ax−b‖² 最小</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">⟹</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">p = Ax̂= PbP = A(AᵀA)⁻¹Aᵀ 是投影矩阵</b></div>
+<div class="cap">投影矩阵 P 满足 P² = P（投影两次 = 投影一次），Pᵀ = P（对称）</div>
+</div>
 
     <div class="callout co-teal">
       <span class="h">AᵀA 的一个坑（书里专门提醒）</span>
@@ -848,28 +812,14 @@
       Gram-Schmidt 就是把任意一组独立列变成 <i>Q</i> 的算法，写出来就是 <b><i>A</i> = <i>QR</i></b>。
     </p>
 
-    <div class="diagram">
-      <div class="lbl">Gram-Schmidt 的每一步：减掉「在已有方向上的投影」</div>
-      <div class="stack">
-        <div class="layer" style="border-color:#a8b8f5;background:var(--blue-bg)">
-          <div class="lab" style="color:var(--blue)">第 1 步</div>
-          <div class="chips"><span class="chip b">q₁ = a₁ / ‖a₁‖</span><span class="chip">第一个方向直接归一化</span></div>
-        </div>
-        <div class="layer" style="border-color:#9adccf;background:var(--teal-bg)">
-          <div class="lab" style="color:var(--teal)">第 2 步</div>
-          <div class="chips"><span class="chip t">B = a₂ − (q₁ᵀa₂) q₁</span><span class="chip">减掉 a₂ 在 q₁ 上的分量</span><span class="chip t">q₂ = B / ‖B‖</span></div>
-        </div>
-        <div class="layer" style="border-color:#f0d09a;background:var(--amber-bg)">
-          <div class="lab" style="color:var(--amber)">第 3 步</div>
-          <div class="chips"><span class="chip">C = a₃ − (q₁ᵀa₃)q₁ − (q₂ᵀa₃)q₂</span><span class="chip">减掉两个方向上的分量</span><span class="chip">q₃ = C / ‖C‖</span></div>
-        </div>
-        <div class="layer" style="border-color:#c9bcf7;background:var(--violet-bg)">
-          <div class="lab" style="color:var(--violet)">结果</div>
-          <div class="chips"><span class="chip v">A = QR</span><span class="chip">Q 列正交（QᵀQ = I）</span><span class="chip">R 上三角（记录减掉了多少）</span></div>
-        </div>
-      </div>
-      <div class="cap">注意 R 是上三角：q₁ 只由 a₁ 决定，q₂ 只用到 a₁、a₂ —— 这种"只用前面的"结构就是三角</div>
-    </div>
+    <div class="diagram" style="text-align:center">
+<div class="lbl">Gram-Schmidt 的每一步：减掉「在已有方向上的投影」</div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><div style="margin-top:4px">第 1 步</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><div style="margin-top:4px">第 2 步</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><div style="margin-top:4px">第 3 步</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><div style="margin-top:4px">结果</div></div>
+<div class="cap">注意 R 是上三角：q₁ 只由 a₁ 决定，q₂ 只用到 a₁、a₂ —— 这种"只用前面的"结构就是三角</div>
+</div>
 
     <div class="callout co-amber">
       <span class="h">正交矩阵 Q 为什么是「数值稳定性的天花板」</span>
@@ -952,19 +902,17 @@
       </table>
     </div>
 
-    <div class="diagram">
-      <div class="lbl">怎么真正算 det（不是背公式，而是用性质）</div>
-      <div class="flow">
-        <div class="box blue">消元成 U<small>只做「行减倍数」和换行</small></div>
-        <div class="arw">→</div>
-        <div class="box teal">det A = ±(主元之积)<small>换过奇数次行就带负号</small></div>
-        <div class="arw">→</div>
-        <div class="box violet">代数余子式<small>只适合小矩阵 / 含符号的推导</small></div>
-        <div class="arw">→</div>
-        <div class="box amber">A⁻¹ = Cᵀ / det A<small>伴随矩阵法，好看不好算</small></div>
-      </div>
-      <div class="cap">克拉默法则 x<sub>j</sub> = det(B<sub>j</sub>)/det(A)：Strang 直言它「漂亮但不实用」—— n+1 个行列式太贵了</div>
-    </div>
+    <div class="diagram" style="text-align:center">
+<div class="lbl">怎么真正算 det（不是背公式，而是用性质）</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">消元成 U只做「行减倍数」和换行</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">det A = ±(主元之积)换过奇数次行就带负号</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">代数余子式只适合小矩阵 / 含符号的推导</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">A⁻¹ = Cᵀ / det A伴随矩阵法，好看不好算</b></div>
+<div class="cap">克拉默法则 x<sub>j</sub> = det(B<sub>j</sub>)/det(A)：Strang 直言它「漂亮但不实用」—— n+1 个行列式太贵了</div>
+</div>
 
     <div class="callout co-rose">
       <span class="h">常见误区</span>
@@ -1033,19 +981,17 @@
       <div class="cap">n×n 矩阵最多有 n 个线性无关的特征向量；够不够 n 个，决定了它能不能对角化</div>
     </div>
 
-    <div class="diagram">
-      <div class="lbl">对角化：把 A 搬到"它自己的坐标系"里</div>
-      <div class="flow">
-        <div class="box blue">AS = SΛ<small>S 的列是 n 个特征向量</small></div>
-        <div class="arw">⟹</div>
-        <div class="box teal">A = SΛS⁻¹<small>Λ = diag(λ₁…λ<sub>n</sub>)</small></div>
-        <div class="arw">⟹</div>
-        <div class="box amber">A<sup>k</sup> = SΛ<sup>k</sup>S⁻¹<small>只把对角线取 k 次方</small></div>
-        <div class="arw">⟹</div>
-        <div class="box violet">k→∞ 时看 |λ|&lt;1<small>决定迭代收敛还是发散</small></div>
-      </div>
-      <div class="cap">这就是"幂法"和 PageRank 的原理：反复乘 A，最后只剩下 |λ| 最大的那个特征方向</div>
-    </div>
+    <div class="diagram" style="text-align:center">
+<div class="lbl">对角化：把 A 搬到"它自己的坐标系"里</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">AS = SΛS 的列是 n 个特征向量</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">⟹</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">A = SΛS⁻¹Λ = diag(λ₁…λn)</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">⟹</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">Ak= SΛkS⁻¹只把对角线取 k 次方</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">⟹</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">k→∞ 时看 |λ|&lt;1决定迭代收敛还是发散</b></div>
+<div class="cap">这就是"幂法"和 PageRank 的原理：反复乘 A，最后只剩下 |λ| 最大的那个特征方向</div>
+</div>
 
     <h4 class="sub">两个必须分清的特殊类型</h4>
 
@@ -1219,21 +1165,19 @@
       <div class="cap">现实中奇异值掉得极快：图像、用户评分矩阵、词频矩阵都是这样，这就是压缩和降噪能成立的根本原因</div>
     </div>
 
-    <div class="diagram">
-      <div class="lbl">PCA：把 SVD 用在「中心化后的数据矩阵」上</div>
-      <div class="flow">
-        <div class="box blue">数据矩阵 X<small>每行一个样本，每列一个特征</small></div>
-        <div class="arw">→</div>
-        <div class="box teal">减去均值<small>把点云中心搬到原点</small></div>
-        <div class="arw">→</div>
-        <div class="box amber">X = UΣVᵀ<small>做 SVD</small></div>
-        <div class="arw">→</div>
-        <div class="box violet">主成分 = V 的前 k 列<small>方差 = σ<sub>i</sub>²/(m−1)</small></div>
-        <div class="arw">→</div>
-        <div class="box green">降维：X·V<sub>k</sub><small>投影到前 k 个主成分</small></div>
-      </div>
-      <div class="cap">工程上永远用 SVD 做 PCA，而不是去求协方差矩阵 XᵀX 的特征值 —— 后者会把条件数平方，数值上更糟</div>
-    </div>
+    <div class="diagram" style="text-align:center">
+<div class="lbl">PCA：把 SVD 用在「中心化后的数据矩阵」上</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">数据矩阵 X每行一个样本，每列一个特征</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">减去均值把点云中心搬到原点</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">X = UΣVᵀ做 SVD</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">主成分 = V 的前 k 列方差 = σi²/(m−1)</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #9bd3a4;border-radius:11px;background:#f2fbf4;font-size:14px;text-align:left"><b style="color:#1e293b">降维：X·Vk投影到前 k 个主成分</b></div>
+<div class="cap">工程上永远用 SVD 做 PCA，而不是去求协方差矩阵 XᵀX 的特征值 —— 后者会把条件数平方，数值上更糟</div>
+</div>
 
     <div class="callout co-teal">
       <span class="h">伪逆 A⁺：最小二乘的终极形态</span>
@@ -1277,21 +1221,19 @@
       </table>
     </div>
 
-    <div class="diagram">
-      <div class="lbl">换基的完整流程（相似变换 B = M⁻¹AM）</div>
-      <div class="flow">
-        <div class="box blue">输入向量 v<small>在旧基下的坐标</small></div>
-        <div class="arw">→</div>
-        <div class="box teal">乘 M⁻¹<small>换成新基坐标</small></div>
-        <div class="arw">→</div>
-        <div class="box amber">乘 A<small>在新基下做变换</small></div>
-        <div class="arw">→</div>
-        <div class="box violet">乘 M<small>换回旧基</small></div>
-        <div class="arw">=</div>
-        <div class="box green">B = M⁻¹AM<small>B 与 A 相似：同特征值</small></div>
-      </div>
-      <div class="cap">相似矩阵共享特征值、行列式、秩 —— 变的只是"看起来乱不乱"</div>
-    </div>
+    <div class="diagram" style="text-align:center">
+<div class="lbl">换基的完整流程（相似变换 B = M⁻¹AM）</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">输入向量 v在旧基下的坐标</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">乘 M⁻¹换成新基坐标</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">乘 A在新基下做变换</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">乘 M换回旧基</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">=</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #9bd3a4;border-radius:11px;background:#f2fbf4;font-size:14px;text-align:left"><b style="color:#1e293b">B = M⁻¹AMB 与 A 相似：同特征值</b></div>
+<div class="cap">相似矩阵共享特征值、行列式、秩 —— 变的只是"看起来乱不乱"</div>
+</div>
 
     <div class="callout co-blue">
       <span class="h">8.3 节「寻找好基」是这一章的题眼</span>
@@ -1325,24 +1267,13 @@
       也就是二阶偏导组成的对称矩阵）。正定、半正定、鞍点这些概念，全靠第 6 章。
     </p>
 
-    <div class="diagram">
-      <div class="lbl">多变量最小化的判据（全是前面章节的组合）</div>
-      <div class="stack">
-        <div class="layer" style="border-color:#a8b8f5;background:var(--blue-bg)">
-          <div class="lab" style="color:var(--blue)">一阶</div>
-          <div class="chips"><span class="chip b">∇F = 0</span><span class="chip">n 个方程，n 个未知数 —— 又是一个线性/非线性方程组</span></div>
-        </div>
-        <div class="layer" style="border-color:#9adccf;background:var(--teal-bg)">
-          <div class="lab" style="color:var(--teal)">二阶</div>
-          <div class="chips"><span class="chip t">H 正定 → 极小</span><span class="chip t">H 负定 → 极大</span><span class="chip">H 有正有负 → 鞍点</span></div>
-        </div>
-        <div class="layer" style="border-color:#f0d09a;background:var(--amber-bg)">
-          <div class="lab" style="color:var(--amber)">迭代</div>
-          <div class="chips"><span class="chip">x<sub>k+1</sub> = x<sub>k</sub> − s·∇F</span><span class="chip">步长 s 太大发散、太小学不动</span></div>
-        </div>
-      </div>
-      <div class="cap">深度学习里最常见的坑不是局部极小，而是<b>鞍点</b> —— 高维空间里鞍点远比极小点多</div>
-    </div>
+    <div class="diagram" style="text-align:center">
+<div class="lbl">多变量最小化的判据（全是前面章节的组合）</div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><div style="margin-top:4px">一阶</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><div style="margin-top:4px">二阶</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><div style="margin-top:4px">迭代</div></div>
+<div class="cap">深度学习里最常见的坑不是局部极小，而是<b>鞍点</b> —— 高维空间里鞍点远比极小点多</div>
+</div>
 
     <h4 class="sub">神经网络：把矩阵叠起来</h4>
 
@@ -1352,37 +1283,33 @@
       一个 <i>L</i> 层的网络就是把这事重复 <i>L</i> 次：
     </p>
 
-    <div class="diagram">
-      <div class="lbl">深度网络 = 线性（矩阵）× 非线性（ReLU）交替</div>
-      <div class="flow">
-        <div class="box blue">输入 v₀<small>一张图 / 一句话</small></div>
-        <div class="arw">→</div>
-        <div class="box teal">A₁v₀ + b₁<small>矩阵乘法（线性）</small></div>
-        <div class="arw">→</div>
-        <div class="box amber">ReLU<small>逐元素非线性，造出折点</small></div>
-        <div class="arw">→</div>
-        <div class="box teal">A₂v₁ + b₂</div>
-        <div class="arw">→</div>
-        <div class="box amber">ReLU</div>
-        <div class="arw">→</div>
-        <div class="box violet">输出<small>分类 / 回归</small></div>
-      </div>
-      <div class="cap">每个 ReLU 都在输入空间切一刀：n 个折点把空间分成许多线性区域 → 整体是<b>分段线性函数</b></div>
-    </div>
+    <div class="diagram" style="text-align:center">
+<div class="lbl">深度网络 = 线性（矩阵）× 非线性（ReLU）交替</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">输入 v₀一张图 / 一句话</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">A₁v₀ + b₁矩阵乘法（线性）</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">ReLU逐元素非线性，造出折点</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">A₂v₁ + b₂</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">ReLU</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">输出分类 / 回归</b></div>
+<div class="cap">每个 ReLU 都在输入空间切一刀：n 个折点把空间分成许多线性区域 → 整体是<b>分段线性函数</b></div>
+</div>
 
-    <div class="diagram">
-      <div class="lbl">训练：反向传播就是链式法则 + 矩阵转置</div>
-      <div class="flow">
-        <div class="box blue">前向：算出预测 ŷ<small>缓存每层的中间值</small></div>
-        <div class="arw">→</div>
-        <div class="box rose">损失 L(ŷ, y)<small>预测与真值的差距</small></div>
-        <div class="arw">→</div>
-        <div class="box amber">反向：∂L/∂A<sub>ℓ</sub><small>从最后一层往前乘，复用缓存</small></div>
-        <div class="arw">→</div>
-        <div class="box green">A<sub>ℓ</sub> ← A<sub>ℓ</sub> − s·∂L/∂A<sub>ℓ</sub><small>梯度下降一步</small></div>
-      </div>
-      <div class="cap">反向传播的成本和前向同阶 —— 这就是为什么"深"网络也能训练。SGD 则是每步只用一小批样本估梯度</div>
-    </div>
+    <div class="diagram" style="text-align:center">
+<div class="lbl">训练：反向传播就是链式法则 + 矩阵转置</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">前向：算出预测 ŷ缓存每层的中间值</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">损失 L(ŷ, y)预测与真值的差距</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">反向：∂L/∂Aℓ从最后一层往前乘，复用缓存</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #9bd3a4;border-radius:11px;background:#f2fbf4;font-size:14px;text-align:left"><b style="color:#1e293b">Aℓ← Aℓ− s·∂L/∂Aℓ梯度下降一步</b></div>
+<div class="cap">反向传播的成本和前向同阶 —— 这就是为什么"深"网络也能训练。SGD 则是每步只用一小批样本估梯度</div>
+</div>
 
     <div class="stats">
       <div class="stat">
@@ -1509,24 +1436,13 @@
       Strang 花了五十年把课越讲越薄，核心就是这三样。
     </p>
 
-    <div class="diagram">
-      <div class="lbl">如果想继续往下走</div>
-      <div class="stack">
-        <div class="layer" style="border-color:#a8b8f5;background:var(--blue-bg)">
-          <div class="lab" style="color:var(--blue)">看视频</div>
-          <div class="chips"><span class="chip b">MIT 18.06（Strang 本人，入门）</span><span class="chip">MIT 18.065（矩阵方法与机器学习，进阶）</span></div>
-        </div>
-        <div class="layer" style="border-color:#9adccf;background:var(--teal-bg)">
-          <div class="lab" style="color:var(--teal)">动手算</div>
-          <div class="chips"><span class="chip t">numpy.linalg.svd / qr / lstsq</span><span class="chip">拿自己的照片做一遍 rank-k 压缩</span></div>
-        </div>
-        <div class="layer" style="border-color:#c9bcf7;background:var(--violet-bg)">
-          <div class="lab" style="color:var(--violet)">接着读</div>
-          <div class="chips"><span class="chip v">《Linear Algebra and Learning from Data》</span><span class="chip">同一作者，把第 9–10 章展开成一本书</span></div>
-        </div>
-      </div>
-      <div class="cap">书里的习题不要跳过 —— 尤其是每章末尾的 Review Problems，那是 Strang 精心挑的"概念检查点"</div>
-    </div>
+    <div class="diagram" style="text-align:center">
+<div class="lbl">如果想继续往下走</div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><div style="margin-top:4px">看视频</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><div style="margin-top:4px">动手算</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><div style="margin-top:4px">接着读</div></div>
+<div class="cap">书里的习题不要跳过 —— 尤其是每章末尾的 Review Problems，那是 Strang 精心挑的"概念检查点"</div>
+</div>
 
     <div class="callout co-amber">
       <span class="h">最后一句</span>

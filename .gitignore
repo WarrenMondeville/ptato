@@ -1,3 +1,6 @@
 /.workbuddy
 /_cyclone
 *.txt
+*.py
+*.js
+

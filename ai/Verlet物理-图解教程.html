@@ -976,18 +976,16 @@ b −= delta · diff · (wb / (wa + wb))</div>
   <h2><span class="num">13</span>完整实现：120 行的迷你引擎</h2>
   <p class="lead">把前面所有零件拼起来。这段代码可以直接粘进浏览器的 console 跑 —— 粒子、Verlet 积分、距离约束松弛、地面碰撞、布料构建、主循环，全在里面。</p>
 
-  <div class="diagram">
-    <div class="flow">
-      <div class="box blue"><b>① 积分</b><span>位置 Verlet + 重力</span></div>
-      <div class="arw">→</div>
-      <div class="box violet"><b>② 松弛</b><span>× N 次：距离 / 碰撞</span></div>
-      <div class="arw">→</div>
-      <div class="box teal"><b>③ 边界</b><span>地面 + 墙 + 摩擦</span></div>
-      <div class="arw">→</div>
-      <div class="box amber"><b>④ 渲染</b><span>用位置画线/网格</span></div>
-    </div>
-    <div class="cap">图 10 · 一帧的完整流程。第 ②③ 步在 substep 里重复若干次（第 11 节）</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">① 积分</b><br><span style="color:#475569;font-size:13px">位置 Verlet + 重力</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">② 松弛</b><br><span style="color:#475569;font-size:13px">× N 次：距离 / 碰撞</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">③ 边界</b><br><span style="color:#475569;font-size:13px">地面 + 墙 + 摩擦</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">④ 渲染</b><br><span style="color:#475569;font-size:13px">用位置画线/网格</span></div>
+<div class="cap">图 10 · 一帧的完整流程。第 ②③ 步在 substep 里重复若干次（第 11 节）</div>
+</div>
 
   <pre><span class="cm">// ── 数据结构：一个粒子只存 4 个数 + 1 个逆质量 ──────────────────</span>
 <span class="k">const</span> P = (x, y, w = <span class="n">1</span>) =&gt; ({ x, y, px: x, py: y, w });

@@ -216,18 +216,16 @@ footer{text-align:center;color:var(--ink3);font-size:13px;padding:30px 20px 0;li
 
   <p>先破一个常见的幻想：游戏物理引擎<strong>不是</strong>科学仿真。科学仿真追求"与真实世界一致到小数点后几位"，游戏物理追求的是<strong>在 16.6 毫秒内算完、看起来可信、绝不许炸</strong>。Millington 在开篇就明确点出这一点 —— 引擎里大量参数（阻尼系数、迭代次数、穿透容差）都是"手感调出来的"，不是物理常数。</p>
 
-  <div class="diagram">
-    <div class="flow">
-      <div class="box blue"><b>输入</b><span>力 / 力矩 / 碰撞</span></div>
-      <div class="arw">→</div>
-      <div class="box dark" style="min-width:200px"><b>物理引擎</b><span>积分 → 检测 → 求解</span></div>
-      <div class="arw">→</div>
-      <div class="box teal"><b>输出</b><span>位置 + 朝向</span></div>
-      <div class="arw">→</div>
-      <div class="box violet"><b>渲染</b><span>画出来</span></div>
-    </div>
-    <div class="cap">图 1 · 物理引擎在游戏中的位置：它是一个纯数据的黑盒，与渲染完全解耦</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">输入</b><br><span style="color:#475569;font-size:13px">力 / 力矩 / 碰撞</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #94a3b8;border-radius:11px;background:#f1f5f9;font-size:14px;text-align:left"><b style="color:#1e293b">物理引擎</b><br><span style="color:#475569;font-size:13px">积分 → 检测 → 求解</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">输出</b><br><span style="color:#475569;font-size:13px">位置 + 朝向</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">渲染</b><br><span style="color:#475569;font-size:13px">画出来</span></div>
+<div class="cap">图 1 · 物理引擎在游戏中的位置：它是一个纯数据的黑盒，与渲染完全解耦</div>
+</div>
 
   <h3>为什么需要它？</h3>
   <p>没有物理引擎的日子里，游戏里所有运动都是<strong>手写关键帧动画</strong>或<strong>硬编码脚本</strong>：箱子被打飞就播一段动画，石头落地就播一段动画。这在"只有一种情况会发生"时很好用，但一旦玩家能自由交互，组合数就爆炸了 —— 你不可能为"箱子以 37° 角撞到斜坡再弹到木桶上"预先做一段动画。</p>
@@ -272,15 +270,13 @@ footer{text-align:center;color:var(--ink3);font-size:13px;padding:30px 20px 0;li
   <p class="lead">在动手之前，Millington 先摊开了一张选择表。引擎的设计其实就三个维度的取舍：<strong>模拟什么对象</strong>、<strong>怎么解决碰撞</strong>、<strong>碰撞用冲量还是用力</strong>。</p>
 
   <h3>维度一：对象类型</h3>
-  <div class="diagram">
-    <div class="stack">
-      <div class="layer g"><span class="taglbl">粒子</span><div><b>Particle</b> —— 只有位置，没有体积和朝向。最便宜，适合烟、火、火花、水花。</div></div>
-      <div class="layer t"><span class="taglbl">质体</span><div><b>Mass-Aggregate</b> —— 一堆粒子用弹簧/杆连起来。布料、绳索、软体、可破碎物体。</div></div>
-      <div class="layer blue"><span class="taglbl">刚体</span><div><b>Rigid Body</b> —— 有体积、有朝向、会旋转。箱子、车轮、飞船。游戏里的主力。</div></div>
-      <div class="layer d"><span class="taglbl">关节</span><div><b>Joint / Ragdoll</b> —— 刚体 + 约束。布娃娃、门铰链、链条。</div></div>
-    </div>
-    <div class="cap">图 2 · 四种对象类型，越往下越贵、也越真实。本书的路线是逐个往上加</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">粒子</span><div style="margin-top:4px"><b>Particle</b> —— 只有位置，没有体积和朝向。最便宜，适合烟、火、火花、水花。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">质体</span><div style="margin-top:4px"><b>Mass-Aggregate</b> —— 一堆粒子用弹簧/杆连起来。布料、绳索、软体、可破碎物体。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">刚体</span><div style="margin-top:4px"><b>Rigid Body</b> —— 有体积、有朝向、会旋转。箱子、车轮、飞船。游戏里的主力。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">关节</span><div style="margin-top:4px"><b>Joint / Ragdoll</b> —— 刚体 + 约束。布娃娃、门铰链、链条。</div></div>
+<div class="cap">图 2 · 四种对象类型，越往下越贵、也越真实。本书的路线是逐个往上加</div>
+</div>
 
   <h3>维度二：碰撞处理方案</h3>
   <p>这是本书最核心的分水岭。物体压在一起（穿透）了怎么办？</p>
@@ -315,24 +311,20 @@ footer{text-align:center;color:var(--ink3);font-size:13px;padding:30px 20px 0;li
   </div>
   <p style="margin-top:14px">在 Cyclone 里两者泾渭分明：<strong>力</strong>通过 <code>addForce()</code> 进入累加器，活一帧；<strong>冲量</strong>由接触求解器直接施加，绕过整个积分流程。</p>
 
-  <div class="diagram">
-    <div class="flow">
-      <div class="box blue"><b>持续力</b><span>重力 / 弹簧 / 风</span></div>
-      <div class="arw">→</div>
-      <div class="box dark"><b>forceAccum</b><span>力累加器</span></div>
-      <div class="arw">→</div>
-      <div class="box teal"><b>integrate()</b><span>a = F/m → v += a·Δt</span></div>
-    </div>
-    <div class="arw dn">↓</div>
-    <div class="flow">
-      <div class="box amber"><b>瞬时冲量</b><span>碰撞</span></div>
-      <div class="arw">→</div>
-      <div class="box rose"><b>ContactResolver</b><span>直接改 velocity</span></div>
-      <div class="arw">→</div>
-      <div class="box dark" style="opacity:.55"><b>跳过积分</b><span>不进累加器</span></div>
-    </div>
-    <div class="cap">图 3 · 两条完全不同的路径：力走积分器，冲量直接改速度</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">持续力</b><br><span style="color:#475569;font-size:13px">重力 / 弹簧 / 风</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #94a3b8;border-radius:11px;background:#f1f5f9;font-size:14px;text-align:left"><b style="color:#1e293b">forceAccum</b><br><span style="color:#475569;font-size:13px">力累加器</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">integrate()</b><br><span style="color:#475569;font-size:13px">a = F/m → v += a·Δt</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">瞬时冲量</b><br><span style="color:#475569;font-size:13px">碰撞</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">ContactResolver</b><br><span style="color:#475569;font-size:13px">直接改 velocity</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #94a3b8;border-radius:11px;background:#f1f5f9;font-size:14px;text-align:left;opacity:.55"><b style="color:#1e293b">跳过积分</b><br><span style="color:#475569;font-size:13px">不进累加器</span></div>
+<div class="cap">图 3 · 两条完全不同的路径：力走积分器，冲量直接改速度</div>
+</div>
 </section>
 
 <!-- ============ 2 ============ -->
@@ -375,20 +367,18 @@ footer{text-align:center;color:var(--ink3);font-size:13px;padding:30px 20px 0;li
     <p>先用<strong>旧速度</strong>更新位置，再用<strong>新加速度</strong>更新速度。这比"先更新速度再更新位置"的显式欧拉稳定得多 —— 显式欧拉会让弹簧和轨道运动<strong>能量发散</strong>（越摆越高，最后飞出去）。半隐式欧拉虽然也不守恒能量，但它是辛的，长期行为不会跑偏。<strong>这一行代码的顺序，决定了你的引擎会不会炸。</strong></p>
   </div>
 
-  <div class="diagram">
-    <div class="flow">
-      <div class="box blue"><b>forceAccum</b><span>本帧所有力</span></div>
-      <div class="arw">→</div>
-      <div class="box dark"><b>× inverseMass</b><span>1/m</span></div>
-      <div class="arw">→</div>
-      <div class="box teal"><b>a</b><span>加速度</span></div>
-      <div class="arw">→</div>
-      <div class="box amber"><b>v += a·Δt</b><span>速度</span></div>
-      <div class="arw">→</div>
-      <div class="box rose"><b>p += v·Δt</b><span>位置</span></div>
-    </div>
-    <div class="cap">图 4 · 力的流动路径：力只活一帧，位置是它的最终沉淀</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">forceAccum</b><br><span style="color:#475569;font-size:13px">本帧所有力</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #94a3b8;border-radius:11px;background:#f1f5f9;font-size:14px;text-align:left"><b style="color:#1e293b">× inverseMass</b><br><span style="color:#475569;font-size:13px">1/m</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">a</b><br><span style="color:#475569;font-size:13px">加速度</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">v += a·Δt</b><br><span style="color:#475569;font-size:13px">速度</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">p += v·Δt</b><br><span style="color:#475569;font-size:13px">位置</span></div>
+<div class="cap">图 4 · 力的流动路径：力只活一帧，位置是它的最终沉淀</div>
+</div>
 
   <h3>为什么存"质量的倒数"？</h3>
   <p>Cyclone 里 <code>Particle</code> 和 <code>RigidBody</code> 都存 <code>inverseMass</code> 而不是 <code>mass</code>。源码注释给了两个理由：</p>
@@ -422,16 +412,14 @@ a = F · (1/m)   <span class="c">// 引擎里真正写的样子</span>
   </div>
 
   <h3>一帧的完整顺序</h3>
-  <div class="diagram">
-    <div class="stack">
-      <div class="layer d"><span class="taglbl">STEP 1</span><div><b>清空 / 施加力</b> —— 注册表遍历所有力发生器，各自往目标粒子的 <code>forceAccum</code> 里加力</div></div>
-      <div class="layer blue"><span class="taglbl">STEP 2</span><div><b>积分</b> —— 每个粒子调用 <code>integrate(Δt)</code>：更新位置、速度、阻尼，清空累加器</div></div>
-      <div class="layer t"><span class="taglbl">STEP 3</span><div><b>生成接触</b> —— 遍历所有接触生成器（缆绳、杆、地面…），把违规的约束写进接触数组</div></div>
-      <div class="layer a"><span class="taglbl">STEP 4</span><div><b>求解接触</b> —— <code>ContactResolver</code> 迭代 N 轮，逐个用冲量解决</div></div>
-      <div class="layer v"><span class="taglbl">STEP 5</span><div><b>渲染</b> —— 用最新位置画出来</div></div>
-    </div>
-    <div class="cap">图 5 · <code>ParticleWorld::runPhysics()</code> 一帧主循环（对应 pworld.cpp:77-94）</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">STEP 1</span><div style="margin-top:4px"><b>清空 / 施加力</b> —— 注册表遍历所有力发生器，各自往目标粒子的 <code>forceAccum</code> 里加力</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">STEP 2</span><div style="margin-top:4px"><b>积分</b> —— 每个粒子调用 <code>integrate(Δt)</code>：更新位置、速度、阻尼，清空累加器</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">STEP 3</span><div style="margin-top:4px"><b>生成接触</b> —— 遍历所有接触生成器（缆绳、杆、地面…），把违规的约束写进接触数组</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">STEP 4</span><div style="margin-top:4px"><b>求解接触</b> —— <code>ContactResolver</code> 迭代 N 轮，逐个用冲量解决</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">STEP 5</span><div style="margin-top:4px"><b>渲染</b> —— 用最新位置画出来</div></div>
+<div class="cap">图 5 · <code>ParticleWorld::runPhysics()</code> 一帧主循环（对应 pworld.cpp:77-94）</div>
+</div>
 
   <p>值得注意的是 <strong>STEP 3 和 STEP 4 的顺序</strong>：先让所有物体自由运动一步，<em>然后</em>再检查有没有穿模、有没有把绳子拉断，最后统一修。这种<strong>"先预测，后修正"</strong>的思路贯穿全书 —— 包括后面的刚体碰撞也是这个套路。</p>
 
@@ -508,15 +496,13 @@ a = F · (1/m)   <span class="c">// 引擎里真正写的样子</span>
   <h3>示例二：焰火</h3>
   <p>焰火是粒子引擎的经典展示：一个"母体"升空，到达顶点后炸成几十个小火花，每个火花各自受重力、各自带阻尼、各自淡出。</p>
 
-  <div class="diagram">
-    <div class="stack">
-      <div class="layer v"><span class="taglbl">规则 1</span><div><b>焰火由若干"载荷"（payload）组成</b> —— 每个载荷有自己的类型、颜色、寿命</div></div>
-      <div class="layer a"><span class="taglbl">规则 2</span><div><b>载荷可以被"引爆"</b> —— 到期后在原地生成 N 个子粒子</div></div>
-      <div class="layer r"><span class="taglbl">规则 3</span><div><b>子粒子继承母体的速度</b> + 一个随机方向的速度增量（球面均匀采样）</div></div>
-      <div class="layer t"><span class="taglbl">规则 4</span><div><b>子粒子受重力 + 阻尼</b>，寿命结束后从场景移除</div></div>
-    </div>
-    <div class="cap">图 7 · 焰火规则集（对应原书 4.2.2 节）</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">规则 1</span><div style="margin-top:4px"><b>焰火由若干"载荷"（payload）组成</b> —— 每个载荷有自己的类型、颜色、寿命</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">规则 2</span><div style="margin-top:4px"><b>载荷可以被"引爆"</b> —— 到期后在原地生成 N 个子粒子</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">规则 3</span><div style="margin-top:4px"><b>子粒子继承母体的速度</b> + 一个随机方向的速度增量（球面均匀采样）</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">规则 4</span><div style="margin-top:4px"><b>子粒子受重力 + 阻尼</b>，寿命结束后从场景移除</div></div>
+<div class="cap">图 7 · 焰火规则集（对应原书 4.2.2 节）</div>
+</div>
 
   <p>这里有个值得学习的工程细节：<strong>粒子池</strong>。焰火每秒生成成百上千个粒子，如果每次 <code>new</code>/<code>delete</code>，内存分配开销会直接吃掉帧预算。Cyclone 的做法是预分配一个定长数组，用一个"活跃计数"标记前 N 个是活的 —— 销毁粒子 = 把最后一个活粒子拷过来覆盖它，计数减一。</p>
 
@@ -541,24 +527,18 @@ particles[i] = particles[--numParticles];</div>
   </div>
   <p>这个原理让物理引擎的代码彻底<strong>模块化</strong>：加一个新力 = 写一个 <code>updateForce()</code> 函数 + 注册一下。这也正是 Cyclone 里"数据与逻辑分离"的体现 —— 力是<em>数据</em>（注册表里的一条记录），力的计算是<em>逻辑</em>（一个可复用的类）。</p>
 
-  <div class="diagram">
-    <div class="grid3">
-      <div class="box blue"><b>Gravity</b><span>F = m·g</span></div>
-      <div class="box teal"><b>Drag</b><span>F = −(k₁‖v‖+k₂‖v‖²)·v̂</span></div>
-      <div class="box amber"><b>Spring</b><span>F = −k·Δl·d̂</span></div>
-    </div>
-    <div class="arw dn">↓</div>
-    <div class="flow">
-      <div class="box dark" style="min-width:240px"><b>ForceRegistry</b><span>{(重力, 粒子A), (阻力, 粒子A), (弹簧, 粒子B)…}</span></div>
-    </div>
-    <div class="arw dn">↓</div>
-    <div class="flow">
-      <div class="box violet"><b>updateForces(Δt)</b><span>遍历注册表 → 各生成器 addForce()</span></div>
-      <div class="arw">→</div>
-      <div class="box rose"><b>forceAccum</b><span>每个粒子的合力</span></div>
-    </div>
-    <div class="cap">图 8 · 力注册表：把"谁受什么力"变成一张可增删的表</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">Gravity</b><br><span style="color:#475569;font-size:13px">F = m·g</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">Drag</b><br><span style="color:#475569;font-size:13px">F = −(k₁‖v‖+k₂‖v‖²)·v̂</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">Spring</b><br><span style="color:#475569;font-size:13px">F = −k·Δl·d̂</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #94a3b8;border-radius:11px;background:#f1f5f9;font-size:14px;text-align:left"><b style="color:#1e293b">ForceRegistry</b><br><span style="color:#475569;font-size:13px">{(重力, 粒子A), (阻力, 粒子A), (弹簧, 粒子B)…}</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">updateForces(Δt)</b><br><span style="color:#475569;font-size:13px">遍历注册表 → 各生成器 addForce()</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">forceAccum</b><br><span style="color:#475569;font-size:13px">每个粒子的合力</span></div>
+<div class="cap">图 8 · 力注册表：把"谁受什么力"变成一张可增删的表</div>
+</div>
 
   <h3>力发生器全家桶</h3>
   <div class="tblwrap">
@@ -628,14 +608,12 @@ F = m·a
 
   <p>方向 <code>d̂</code> 的符号是这里最容易写错的地方。记住一条：<strong>弹簧总是试图把两端拉回静止长度</strong> —— 拉长了就往内拉，压短了就往外推。蹦极绳则是"只在拉长时往内拉"。</p>
 
-  <div class="diagram">
-    <div class="grid3">
-      <div class="box teal"><b>弹簧 Spring</b><br><span class="small">拉伸 → 向内拉 ✓<br>压缩 → 向外推 ✓<br>像：减震器、果冻</span></div>
-      <div class="box amber"><b>蹦极 Bungee</b><br><span class="small">拉伸 → 向内拉 ✓<br>压缩 → 无作用力 ✗<br>像：绳子、橡皮筋</span></div>
-      <div class="box rose"><b>杆 Rod</b><br><span class="small">拉伸 → 约束修正<br>压缩 → 约束修正<br>像：自行车架（见下章）</span></div>
-    </div>
-    <div class="cap">图 10 · 三种"连接"的行为差异，用错就会得到奇怪的结果</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">弹簧 Spring</b><br><span style="color:#475569;font-size:13px">拉伸 → 向内拉 ✓压缩 → 向外推 ✓像：减震器、果冻</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">蹦极 Bungee</b><br><span style="color:#475569;font-size:13px">拉伸 → 向内拉 ✓压缩 → 无作用力 ✗像：绳子、橡皮筋</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">杆 Rod</b><br><span style="color:#475569;font-size:13px">拉伸 → 约束修正压缩 → 约束修正像：自行车架（见下章）</span></div>
+<div class="cap">图 10 · 三种"连接"的行为差异，用错就会得到奇怪的结果</div>
+</div>
 
   <h3>用弹簧搭出软体</h3>
   <p>把一堆粒子用弹簧连成网格，就得到了<strong>可变形的软体</strong>。这是"质体物理引擎"（Mass-Aggregate）的基础，下一章的布料、破碎都建立在此之上。</p>
@@ -655,18 +633,16 @@ F = m·a
   <p>想做一根刚性杆（长度永远不变）。用弹簧近似？那你得把 k 调到无穷大 —— 结果就是上一章的爆炸。就算不炸，杆也会被"拉长一点点再弹回来"，玩家能看出来。</p>
   <p>Millington 给出的解法非常聪明：<strong>不施加任何力。每帧检查一次几何约束，超了就生成一个"接触"，让通用求解器用冲量瞬间把它拉回来。</strong></p>
 
-  <div class="diagram">
-    <div class="flow">
-      <div class="box blue"><b>每帧检查</b><span>L = ‖p₁ − p₀‖</span></div>
-      <div class="arw">→</div>
-      <div class="box dark"><b>违规？</b><span>Cable: L &gt; maxLength<br>Rod: L ≠ length</span></div>
-      <div class="arw">→</div>
-      <div class="box amber"><b>生成接触</b><span>n, penetration, restitution</span></div>
-      <div class="arw">→</div>
-      <div class="box rose"><b>冲量求解</b><span>瞬间修正速度 + 位置</span></div>
-    </div>
-    <div class="cap">图 11 · 硬约束不是"力"，是"每帧一次的几何检查 + 冲量修正"</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">每帧检查</b><br><span style="color:#475569;font-size:13px">L = ‖p₁ − p₀‖</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #94a3b8;border-radius:11px;background:#f1f5f9;font-size:14px;text-align:left"><b style="color:#1e293b">违规？</b><br><span style="color:#475569;font-size:13px">Cable: L &gt; maxLengthRod: L ≠ length</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">生成接触</b><br><span style="color:#475569;font-size:13px">n, penetration, restitution</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">冲量求解</b><br><span style="color:#475569;font-size:13px">瞬间修正速度 + 位置</span></div>
+<div class="cap">图 11 · 硬约束不是"力"，是"每帧一次的几何检查 + 冲量修正"</div>
+</div>
 
   <h3>两种约束的行为</h3>
   <div class="tblwrap">
@@ -686,19 +662,11 @@ F = m·a
     <p>缆绳、杆、碰撞、关节 —— 它们<strong>共用同一套接触求解器</strong>。物理引擎里没有"缆绳专用代码"，只有一个通用的"两个东西违反了某个沿法线的约束，请用冲量修正"机制。这是本书最重要的架构思想之一：<strong>把约束统一表达成接触</strong>。</p>
   </div>
 
-  <div class="diagram">
-    <div class="grid2">
-      <div class="box teal" style="text-align:left;padding:14px 16px">
-        <b>Cable 缆绳</b><br>
-        <span class="small">L &lt; maxLength → 返回 0 个接触<br>L ≥ maxLength → n = normalize(p₁−p₀)，penetration = L − maxLength</span>
-      </div>
-      <div class="box rose" style="text-align:left;padding:14px 16px">
-        <b>Rod 杆</b><br>
-        <span class="small">L &gt; length → n = normalize(p₁−p₀)，d = L − length<br>L &lt; length → n 取反，d = length − L</span>
-      </div>
-    </div>
-    <div class="cap">图 12 · 接触生成的判定逻辑（对应 plinks.cpp:24-84）</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left;text-align:left;padding:14px 16px"><b style="color:#1e293b">Cable 缆绳</b><br><span style="color:#475569;font-size:13px">L &lt; maxLength → 返回 0 个接触L ≥ maxLength → n = normalize(p₁−p₀)，penetration = L − maxLength</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left;text-align:left;padding:14px 16px"><b style="color:#1e293b">Rod 杆</b><br><span style="color:#475569;font-size:13px">L &gt; length → n = normalize(p₁−p₀)，d = L − lengthL &lt; length → n 取反，d = length − L</span></div>
+<div class="cap">图 12 · 接触生成的判定逻辑（对应 plinks.cpp:24-84）</div>
+</div>
 </section>
 
 <!-- ============ 8 ============ -->
@@ -707,14 +675,12 @@ F = m·a
   <p class="lead">把大量粒子用弹簧和硬约束连起来，就得到了"质体物理引擎"（Mass-Aggregate）。它能做出刚体做不到的效果：布料飘动、绳索摆动、物体碎裂。</p>
 
   <h3>质体引擎的三件套</h3>
-  <div class="diagram">
-    <div class="stack">
-      <div class="layer blue"><span class="taglbl">粒子</span><div><b>Particle[]</b> —— 一个预分配的定长数组，质体世界里所有的"肉"</div></div>
-      <div class="layer t"><span class="taglbl">连接</span><div><b>Cable / Rod / Spring</b> —— 记录哪些粒子之间有约束，每帧生成接触</div></div>
-      <div class="layer a"><span class="taglbl">求解</span><div><b>ParticleWorld + ContactResolver</b> —— 把所有约束当接触一起迭代求解</div></div>
-    </div>
-    <div class="cap">图 13 · 质体引擎 = 粒子池 + 约束表 + 通用求解器</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">粒子</span><div style="margin-top:4px"><b>Particle[]</b> —— 一个预分配的定长数组，质体世界里所有的"肉"</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">连接</span><div style="margin-top:4px"><b>Cable / Rod / Spring</b> —— 记录哪些粒子之间有约束，每帧生成接触</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">求解</span><div style="margin-top:4px"><b>ParticleWorld + ContactResolver</b> —— 把所有约束当接触一起迭代求解</div></div>
+<div class="cap">图 13 · 质体引擎 = 粒子池 + 约束表 + 通用求解器</div>
+</div>
 
   <h3>示例：一座吊桥</h3>
   <p>原书里的经典 demo。桥面是一串粒子，相邻粒子用 <strong>Rod</strong> 连接（保持间距），两端用 <strong>Cable Constraint</strong> 锚定在固定点上（可以摆动但不会掉下去）。</p>
@@ -788,15 +754,13 @@ F = m·a
   <h3>四元数：只需要记住四件事</h3>
   <p>你不需要理解四元数的代数结构，只要记住它在引擎里的四个用法：</p>
 
-  <div class="diagram">
-    <div class="stack">
-      <div class="layer v"><span class="taglbl">①</span><div><b>表示朝向</b>：<code>q = (r, i, j, k)</code>，<strong>必须保持单位长度</strong>才是合法旋转 → 定期 <code>normalise()</code></div></div>
-      <div class="layer blue"><span class="taglbl">②</span><div><b>角速度更新朝向</b>：<code>q̇ = ½ · ω ⊗ q</code>。Cyclone 里写成 <code>addScaledVector(ω, Δt)</code></div></div>
-      <div class="layer t"><span class="taglbl">③</span><div><b>旋转一个向量</b>：把局部坐标的向量转到世界坐标（机翼方向、锚点位置都靠它）</div></div>
-      <div class="layer a"><span class="taglbl">④</span><div><b>转成矩阵</b>：渲染和惯性张量变换都需要矩阵，四元数能一键转出 3×3 旋转矩阵</div></div>
-    </div>
-    <div class="cap">图 15 · 四元数在引擎里的四个职责</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">①</span><div style="margin-top:4px"><b>表示朝向</b>：<code>q = (r, i, j, k)</code>，<strong>必须保持单位长度</strong>才是合法旋转 → 定期 <code>normalise()</code></div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">②</span><div style="margin-top:4px"><b>角速度更新朝向</b>：<code>q̇ = ½ · ω ⊗ q</code>。Cyclone 里写成 <code>addScaledVector(ω, Δt)</code></div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">③</span><div style="margin-top:4px"><b>旋转一个向量</b>：把局部坐标的向量转到世界坐标（机翼方向、锚点位置都靠它）</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">④</span><div style="margin-top:4px"><b>转成矩阵</b>：渲染和惯性张量变换都需要矩阵，四元数能一键转出 3×3 旋转矩阵</div></div>
+<div class="cap">图 15 · 四元数在引擎里的四个职责</div>
+</div>
 
   <div class="formula">角速度 → 四元数     q̇ = ½ · ω ⊗ q          <span class="c">// core.h:592</span>
 归一化               q ← q / ‖q‖              <span class="c">// ‖q‖ 太小则重置为 (1,0,0,0)</span>
@@ -833,16 +797,14 @@ F = m·a
   <p>和质量一样，Cyclone 存的是<strong>逆</strong>张量 <code>I⁻¹</code>。好处同样是两条：省一次矩阵求逆、能表达"无限惯量"（零矩阵 = 不可旋转）。</p>
   <p>但有个新问题：<strong>物体会转，转过之后惯量就变了</strong>。一根棍子横着和竖着，绕同一个世界轴的转动惯量完全不同。解决办法是每帧做一次变换：</p>
 
-  <div class="diagram">
-    <div class="flow">
-      <div class="box blue"><b>I⁻¹_body</b><span>局部系，建模时算好</span></div>
-      <div class="arw">→</div>
-      <div class="box dark"><b>R · I⁻¹ · Rᵀ</b><span>R 来自四元数</span></div>
-      <div class="arw">→</div>
-      <div class="box teal"><b>I⁻¹_world</b><span>世界系，直接用</span></div>
-    </div>
-    <div class="cap">图 16 · 逆惯性张量每帧的世界坐标变换</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">I⁻¹_body</b><br><span style="color:#475569;font-size:13px">局部系，建模时算好</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #94a3b8;border-radius:11px;background:#f1f5f9;font-size:14px;text-align:left"><b style="color:#1e293b">R · I⁻¹ · Rᵀ</b><br><span style="color:#475569;font-size:13px">R 来自四元数</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">I⁻¹_world</b><br><span style="color:#475569;font-size:13px">世界系，直接用</span></div>
+<div class="cap">图 16 · 逆惯性张量每帧的世界坐标变换</div>
+</div>
 
   <div class="callout co-violet">
     <span class="hd">这里有个漂亮的数学结论</span>
@@ -860,19 +822,11 @@ F = m·a
 α = I⁻¹_world · τ
 ω ← ω + α·Δt</div>
 
-  <div class="diagram">
-    <div class="grid2">
-      <div class="box blue" style="text-align:left;padding:14px 16px">
-        <b>推质心 → r = 0</b><br>
-        <span class="small">叉乘为 0，τ = 0<br>→ 只有平动，箱子滑走<br><br>同理：如果 <b>r 与 F 平行</b>（沿着质心方向推/拉），叉乘也是 0</span>
-      </div>
-      <div class="box rose" style="text-align:left;padding:14px 16px">
-        <b>推边缘 → r ⊥ F</b><br>
-        <span class="small">叉乘最大，τ 最大<br>→ 平动 + 旋转，箱子翻倒<br><br>r 越远、F 越大、夹角越接近 90°，力矩越大</span>
-      </div>
-    </div>
-    <div class="cap">图 17 · 同样的力，作用点不同，结果天差地别</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left;text-align:left;padding:14px 16px"><b style="color:#1e293b">推质心 → r = 0</b><br><span style="color:#475569;font-size:13px">叉乘为 0，τ = 0→ 只有平动，箱子滑走同理：如果r 与 F 平行（沿着质心方向推/拉），叉乘也是 0</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left;text-align:left;padding:14px 16px"><b style="color:#1e293b">推边缘 → r ⊥ F</b><br><span style="color:#475569;font-size:13px">叉乘最大，τ 最大→ 平动 + 旋转，箱子翻倒r 越远、F 越大、夹角越接近 90°，力矩越大</span></div>
+<div class="cap">图 17 · 同样的力，作用点不同，结果天差地别</div>
+</div>
 
   <h3>两个 API 的区别</h3>
   <p>Cyclone 提供了两个施加力的函数，差别只在坐标系：</p>
@@ -887,24 +841,20 @@ F = m·a
   </div>
   <p>实际开发中 <code>addForceAtBodyPoint</code> 更好用 —— 机翼、螺旋桨、车轮的位置是"焊在物体上的"，用局部坐标描述，物体转了它们自动跟着转。</p>
 
-  <div class="diagram">
-    <div class="flow">
-      <div class="box blue"><b>施加力 F 于点 P</b></div>
-      <div class="arw">→</div>
-      <div class="box dark"><b>平动分量</b><span>forceAccum += F</span></div>
-      <div class="arw">→</div>
-      <div class="box teal"><b>a = F·(1/m)</b><span>→ 速度变化</span></div>
-    </div>
-    <div class="arw dn">↓ 同时</div>
-    <div class="flow">
-      <div class="box amber"><b>力臂 r = P − 质心</b></div>
-      <div class="arw">→</div>
-      <div class="box dark"><b>转动分量</b><span>torqueAccum += r × F</span></div>
-      <div class="arw">→</div>
-      <div class="box rose"><b>α = I⁻¹·τ</b><span>→ 角速度变化</span></div>
-    </div>
-    <div class="cap">图 18 · 一个力被拆成两条独立的线：平动和转动</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">施加力 F 于点 P</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #94a3b8;border-radius:11px;background:#f1f5f9;font-size:14px;text-align:left"><b style="color:#1e293b">平动分量</b><br><span style="color:#475569;font-size:13px">forceAccum += F</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">a = F·(1/m)</b><br><span style="color:#475569;font-size:13px">→ 速度变化</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓ 同时</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">力臂 r = P − 质心</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #94a3b8;border-radius:11px;background:#f1f5f9;font-size:14px;text-align:left"><b style="color:#1e293b">转动分量</b><br><span style="color:#475569;font-size:13px">torqueAccum += r × F</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">α = I⁻¹·τ</b><br><span style="color:#475569;font-size:13px">→ 角速度变化</span></div>
+<div class="cap">图 18 · 一个力被拆成两条独立的线：平动和转动</div>
+</div>
 
   <div class="callout co-teal">
     <span class="hd">工程价值</span>
@@ -914,15 +864,13 @@ F = m·a
   <h3>飞行模拟：Aero 翼面</h3>
   <p>原书用一整节讲飞行模拟，因为它是"力矩 + 局部坐标"最漂亮的展示。核心是一个<strong>四步坐标变换</strong>：</p>
 
-  <div class="diagram">
-    <div class="stack">
-      <div class="layer blue"><span class="taglbl">①</span><div><b>合成气流</b>：<code>v_rel = 物体速度 + 风速</code>（世界系）</div></div>
-      <div class="layer t"><span class="taglbl">②</span><div><b>转到机体坐标</b>：<code>v_loc = Rᵀ · v_rel</code> —— 机翼的物理常数是焊在机体上的</div></div>
-      <div class="layer a"><span class="taglbl">③</span><div><b>气动张量映射</b>：<code>f_loc = T · v_loc</code> —— 一个 3×3 矩阵把"翼型+面积+空气密度"全烘焙进去</div></div>
-      <div class="layer r"><span class="taglbl">④</span><div><b>转回世界并施加</b>：<code>f = R · f_loc</code>，然后 <code>addForceAtBodyPoint(f, 机翼位置)</code></div></div>
-    </div>
-    <div class="cap">图 19 · Aero 翼面四步：世界 → 机体 → 张量 → 世界</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">①</span><div style="margin-top:4px"><b>合成气流</b>：<code>v_rel = 物体速度 + 风速</code>（世界系）</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">②</span><div style="margin-top:4px"><b>转到机体坐标</b>：<code>v_loc = Rᵀ · v_rel</code> —— 机翼的物理常数是焊在机体上的</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">③</span><div style="margin-top:4px"><b>气动张量映射</b>：<code>f_loc = T · v_loc</code> —— 一个 3×3 矩阵把"翼型+面积+空气密度"全烘焙进去</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">④</span><div style="margin-top:4px"><b>转回世界并施加</b>：<code>f = R · f_loc</code>，然后 <code>addForceAtBodyPoint(f, 机翼位置)</code></div></div>
+<div class="cap">图 19 · Aero 翼面四步：世界 → 机体 → 张量 → 世界</div>
+</div>
 
   <div class="callout co-amber">
     <span class="hd">副翼是怎么让飞机滚转的</span>
@@ -935,18 +883,16 @@ F = m·a
   <h2><span class="num">11</span>刚体引擎主循环</h2>
   <p class="lead">把上一章的东西组装起来，得到刚体的每一帧。这张流程图值得存下来 —— 它是整个引擎的骨架。</p>
 
-  <div class="diagram">
-    <div class="stack">
-      <div class="layer d"><span class="taglbl">STEP 1</span><div><b>清空累加器</b> —— <code>forceAccum = 0</code>，<code>torqueAccum = 0</code></div></div>
-      <div class="layer blue"><span class="taglbl">STEP 2</span><div><b>施加力</b> —— 遍历 ForceRegistry，各力发生器 <code>addForce</code> / <code>addForceAtPoint</code></div></div>
-      <div class="layer t"><span class="taglbl">STEP 3</span><div><b>积分</b> —— <code>integrate(Δt)</code>：算 a 与 α，更新 v/ω，加阻尼，更新 p/q</div></div>
-      <div class="layer a"><span class="taglbl">STEP 4</span><div><b>更新派生数据</b> —— 归一化四元数 → 算变换矩阵 R → 算 <code>I⁻¹_world = R·I⁻¹·Rᵀ</code></div></div>
-      <div class="layer v"><span class="taglbl">STEP 5</span><div><b>碰撞检测</b> —— 粗检筛出候选对 → 细检生成 Contact 数组</div></div>
-      <div class="layer r"><span class="taglbl">STEP 6</span><div><b>接触求解</b> —— 先解穿透（位置），再迭代解速度（冲量）</div></div>
-      <div class="layer g"><span class="taglbl">STEP 7</span><div><b>渲染</b> —— 用 <code>transformMatrix</code> 画出物体</div></div>
-    </div>
-    <div class="cap">图 20 · 刚体世界的一帧（对应 flightsim.cpp 的 update()）</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">STEP 1</span><div style="margin-top:4px"><b>清空累加器</b> —— <code>forceAccum = 0</code>，<code>torqueAccum = 0</code></div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">STEP 2</span><div style="margin-top:4px"><b>施加力</b> —— 遍历 ForceRegistry，各力发生器 <code>addForce</code> / <code>addForceAtPoint</code></div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">STEP 3</span><div style="margin-top:4px"><b>积分</b> —— <code>integrate(Δt)</code>：算 a 与 α，更新 v/ω，加阻尼，更新 p/q</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">STEP 4</span><div style="margin-top:4px"><b>更新派生数据</b> —— 归一化四元数 → 算变换矩阵 R → 算 <code>I⁻¹_world = R·I⁻¹·Rᵀ</code></div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">STEP 5</span><div style="margin-top:4px"><b>碰撞检测</b> —— 粗检筛出候选对 → 细检生成 Contact 数组</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">STEP 6</span><div style="margin-top:4px"><b>接触求解</b> —— 先解穿透（位置），再迭代解速度（冲量）</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">STEP 7</span><div style="margin-top:4px"><b>渲染</b> —— 用 <code>transformMatrix</code> 画出物体</div></div>
+<div class="cap">图 20 · 刚体世界的一帧（对应 flightsim.cpp 的 update()）</div>
+</div>
 
   <p>把粒子的主循环（图 5）和这张图对比，会发现：<strong>刚体只是把"速度/位置"各拆成了线性和角量两份，其余流程完全一致</strong>。这正是本书循序渐进的好处 —— 学会粒子，刚体只多了三个新概念：四元数、惯性张量、力矩。</p>
 
@@ -973,18 +919,16 @@ motion = 0.5^Δt · motion + (1 − 0.5^Δt) · currentMotion     <span class="c
 motion &lt; sleepEpsilon (0.3)   → 进入休眠，跳过积分
 motion &gt; 10 × sleepEpsilon    → 钳制到上限（防止刚被撞飞的物体数值爆炸）</div>
 
-  <div class="diagram">
-    <div class="flow">
-      <div class="box teal"><b>静止</b><span>motion &lt; ε</span></div>
-      <div class="arw">→</div>
-      <div class="box dark"><b>休眠</b><span>isAwake = false</span></div>
-      <div class="arw">→</div>
-      <div class="box blue"><b>被碰撞唤醒</b><span>matchAwakeState()</span></div>
-      <div class="arw">→</div>
-      <div class="box rose"><b>唤醒</b><span>motion = 2ε</span></div>
-    </div>
-    <div class="cap">图 21 · 休眠状态机。唤醒时把 motion 抬到 2ε，避免刚醒就又睡</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">静止</b><br><span style="color:#475569;font-size:13px">motion &lt; ε</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #94a3b8;border-radius:11px;background:#f1f5f9;font-size:14px;text-align:left"><b style="color:#1e293b">休眠</b><br><span style="color:#475569;font-size:13px">isAwake = false</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">被碰撞唤醒</b><br><span style="color:#475569;font-size:13px">matchAwakeState()</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">唤醒</b><br><span style="color:#475569;font-size:13px">motion = 2ε</span></div>
+<div class="cap">图 21 · 休眠状态机。唤醒时把 motion 抬到 2ε，避免刚醒就又睡</div>
+</div>
 
   <div class="callout co-blue">
     <span class="hd">休眠会传染</span>
@@ -1003,14 +947,12 @@ motion &gt; 10 × sleepEpsilon    → 钳制到上限（防止刚被撞飞的物
   </div>
 
   <h3>分两层：粗检筛人，细检定责</h3>
-  <div class="diagram">
-    <div class="stack">
-      <div class="layer blue"><span class="taglbl">粗检</span><div><b>Broad Phase</b> —— 用一个便宜的包围体（球/AABB）快速排除绝大多数不可能相交的对。<br><span class="small">要求：<strong>绝不漏报</strong>（可以有假阳性，交给细检处理）</span></div></div>
-      <div class="arw dn" style="margin:2px auto">↓ 候选对（通常只剩百分之几）</div>
-      <div class="layer r"><span class="taglbl">细检</span><div><b>Narrow Phase</b> —— 对候选对做精确检测，算出<strong>接触法线、穿透深度、接触点</strong>这三件套</div></div>
-    </div>
-    <div class="cap">图 22 · 碰撞检测的两层漏斗</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">粗检</span><div style="margin-top:4px"><b>Broad Phase</b> —— 用一个便宜的包围体（球/AABB）快速排除绝大多数不可能相交的对。<br/><span class="small">要求：<strong>绝不漏报</strong>（可以有假阳性，交给细检处理）</span></div></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓ 候选对（通常只剩百分之几）</div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">细检</span><div style="margin-top:4px"><b>Narrow Phase</b> —— 对候选对做精确检测，算出<strong>接触法线、穿透深度、接触点</strong>这三件套</div></div>
+<div class="cap">图 22 · 碰撞检测的两层漏斗</div>
+</div>
 
   <div class="stats">
     <div class="stat"><div class="v">1000 → ~50</div><div class="k">粗检的筛选效果<br><span class="small">（量级示意）</span></div></div>
@@ -1089,17 +1031,15 @@ motion &gt; 10 × sleepEpsilon    → 钳制到上限（防止刚被撞飞的物
   <h2><span class="num">13</span>生成碰撞：7 种图元对</h2>
   <p class="lead">细检的产物是一个 <code>Contact</code>（接触）。不管什么形状相交，最终都归结为三样东西：<strong>法线 n、穿透深度 d、接触点 P</strong>。这一章看各种图元对怎么算出这三样。</p>
 
-  <div class="diagram">
-    <div class="flow">
-      <div class="box blue"><b>球-球</b></div>
-      <div class="box teal"><b>球-平面</b></div>
-      <div class="box amber"><b>盒-平面</b></div>
-      <div class="box violet"><b>盒-球</b></div>
-      <div class="box rose"><b>盒-盒</b></div>
-      <div class="box green"><b>盒-点</b></div>
-    </div>
-    <div class="cap">图 24 · Cyclone 的 CollisionDetector 分发：按图元类型分派到对应的检测函数</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">球-球</b></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">球-平面</b></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">盒-平面</b></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">盒-球</b></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">盒-盒</b></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #9bd3a4;border-radius:11px;background:#f2fbf4;font-size:14px;text-align:left"><b style="color:#1e293b">盒-点</b></div>
+<div class="cap">图 24 · Cyclone 的 CollisionDetector 分发：按图元类型分派到对应的检测函数</div>
+</div>
 
   <h3>最简单的两个</h3>
   <div class="formula">球-球：
@@ -1118,14 +1058,12 @@ motion &gt; 10 × sleepEpsilon    → 钳制到上限（防止刚被撞飞的物
   <h3>盒-盒：SAT 之后的三种接触类型</h3>
   <p>测完 15 根轴、选定"最优轴"之后，还要判断这到底是哪种接触 —— 因为接触点的算法完全不同：</p>
 
-  <div class="diagram">
-    <div class="stack">
-      <div class="layer v"><span class="taglbl">best 0-2</span><div><b>点-面</b>：盒 B 的一个顶点插进盒 A 的一个面里 → <code>fillPointFaceBoxBox(A, B, ...)</code></div></div>
-      <div class="layer a"><span class="taglbl">best 3-5</span><div><b>点-面</b>（反过来）：盒 A 的顶点插进盒 B → 把两个盒<strong>参数对调</strong>复用同一个函数</div></div>
-      <div class="layer r"><span class="taglbl">best 6-14</span><div><b>边-边</b>：两根棱交叉 → 求两条线段的最近点对，取中点</div></div>
-    </div>
-    <div class="cap">图 25 · 最优轴的编号直接决定了接触类型 —— 这是个非常省代码的設計</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">best 0-2</span><div style="margin-top:4px"><b>点-面</b>：盒 B 的一个顶点插进盒 A 的一个面里 → <code>fillPointFaceBoxBox(A, B, ...)</code></div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">best 3-5</span><div style="margin-top:4px"><b>点-面</b>（反过来）：盒 A 的顶点插进盒 B → 把两个盒<strong>参数对调</strong>复用同一个函数</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">best 6-14</span><div style="margin-top:4px"><b>边-边</b>：两根棱交叉 → 求两条线段的最近点对，取中点</div></div>
+<div class="cap">图 25 · 最优轴的编号直接决定了接触类型 —— 这是个非常省代码的設計</div>
+</div>
 
   <div class="diagram">
     <svg viewBox="0 0 640 170" style="width:100%;height:auto">
@@ -1197,19 +1135,11 @@ v_sep &gt; 0  → 正在分离，<b style="color:#15803d">不用管</b>（它们
 v_sep &lt; 0  → 正在靠近，<b style="color:#be123c">需要冲量</b>
 v_sep = 0  → 相对静止（比如静止堆叠），也不用管</div>
 
-  <div class="diagram">
-    <div class="grid2">
-      <div class="box rose" style="text-align:left;padding:14px 16px">
-        <b>迎面撞上</b><br>
-        <span class="small">相对速度与法线反向<br>→ v_sep 是大负数<br>→ 需要<strong>大冲量</strong>，弹得猛</span>
-      </div>
-      <div class="box teal" style="text-align:left;padding:14px 16px">
-        <b>擦身而过</b><br>
-        <span class="small">相对速度几乎垂直于法线<br>→ v_sep 接近 0<br>→ 几乎不需要法向冲量（但摩擦在起作用）</span>
-      </div>
-    </div>
-    <div class="cap">图 27 · 分离速度决定了需要多大的冲量</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left;text-align:left;padding:14px 16px"><b style="color:#1e293b">迎面撞上</b><br><span style="color:#475569;font-size:13px">相对速度与法线反向→ v_sep 是大负数→ 需要大冲量，弹得猛</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left;text-align:left;padding:14px 16px"><b style="color:#1e293b">擦身而过</b><br><span style="color:#475569;font-size:13px">相对速度几乎垂直于法线→ v_sep 接近 0→ 几乎不需要法向冲量（但摩擦在起作用）</span></div>
+<div class="cap">图 27 · 分离速度决定了需要多大的冲量</div>
+</div>
 
   <h3>第二步：算需要多大的冲量</h3>
   <p>我们希望碰撞后的分离速度变成 <code>−e · v_sep</code>（<code>e</code> 是弹性系数）。于是速度改变量是：</p>
@@ -1269,20 +1199,18 @@ v_sep = 0  → 相对静止（比如静止堆叠），也不用管</div>
 
   <p>每一轮的策略是<strong>贪心</strong>：扫描所有接触，挑出<strong>最需要解决</strong>的那个（速度误差最大的 / 穿透最深的），解决它，然后把这次改动同步到所有共享刚体的其他接触上，再进入下一轮。</p>
 
-  <div class="diagram">
-    <div class="flow">
-      <div class="box blue"><b>扫描全部接触</b></div>
-      <div class="arw">→</div>
-      <div class="box rose"><b>挑最严重的</b></div>
-      <div class="arw">→</div>
-      <div class="box amber"><b>施加冲量</b></div>
-      <div class="arw">→</div>
-      <div class="box teal"><b>同步其他接触</b></div>
-      <div class="arw">→</div>
-      <div class="box dark"><b>下一轮</b></div>
-    </div>
-    <div class="cap">图 29 · 贪心迭代循环。<code>ε</code> 以下就提前退出，不浪费预算</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">扫描全部接触</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">挑最严重的</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">施加冲量</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">同步其他接触</b></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #94a3b8;border-radius:11px;background:#f1f5f9;font-size:14px;text-align:left"><b style="color:#1e293b">下一轮</b></div>
+<div class="cap">图 29 · 贪心迭代循环。<code>ε</code> 以下就提前退出，不浪费预算</div>
+</div>
 
   <div class="stats">
     <div class="stat"><div class="v">×2</div><div class="k">粒子世界的默认迭代数<br><span class="small">接触数 × 2</span></div></div>
@@ -1381,16 +1309,14 @@ v_sep = 0  → 相对静止（比如静止堆叠），也不用管</div>
     <p>这是所有优化里性价比最高的。<strong>物理永远以固定 Δt（如 1/60 秒）推进</strong>，不管渲染帧率是多少；多余的渲染帧用插值平滑。理由：所有调出来的参数（阻尼、迭代、容差）都只在固定 Δt 下成立，一旦 Δt 变化，整个系统的行为就变了 —— 而且是不可预测的变。</p>
   </div>
 
-  <div class="diagram">
-    <div class="stack">
-      <div class="layer d"><span class="taglbl">优化</span><div><b>休眠机制</b> —— 静止物体跳过积分与求解。收益最大，实现最简</div></div>
-      <div class="layer blue"><span class="taglbl">优化</span><div><b>接触缓存（warm starting）</b> —— 记住上一帧的冲量，作为这一帧的初值，收敛快数倍</div></div>
-      <div class="layer t"><span class="taglbl">优化</span><div><b>空间划分</b> —— BVH / 网格，让粗检从 O(N²) 降到接近 O(N log N)</div></div>
-      <div class="layer a"><span class="taglbl">优化</span><div><b>质量比限制</b> —— 避免 1kg 撞 10000kg 这种病态配置，迭代难以收敛</div></div>
-      <div class="layer r"><span class="taglbl">优化</span><div><b>接触数上限</b> —— 单帧接触数封顶（Cyclone 用 256），超了就丢弃次要接触，保证帧时间可控</div></div>
-    </div>
-    <div class="cap">图 31 · 五种稳定性/性能手段，按性价比排序</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">优化</span><div style="margin-top:4px"><b>休眠机制</b> —— 静止物体跳过积分与求解。收益最大，实现最简</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">优化</span><div style="margin-top:4px"><b>接触缓存（warm starting）</b> —— 记住上一帧的冲量，作为这一帧的初值，收敛快数倍</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">优化</span><div style="margin-top:4px"><b>空间划分</b> —— BVH / 网格，让粗检从 O(N²) 降到接近 O(N log N)</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">优化</span><div style="margin-top:4px"><b>质量比限制</b> —— 避免 1kg 撞 10000kg 这种病态配置，迭代难以收敛</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">优化</span><div style="margin-top:4px"><b>接触数上限</b> —— 单帧接触数封顶（Cyclone 用 256），超了就丢弃次要接触，保证帧时间可控</div></div>
+<div class="cap">图 31 · 五种稳定性/性能手段，按性价比排序</div>
+</div>
 
   <h3>关于"允许一点点穿透"</h3>
   <p>新手总想让穿透为 0。但这是<strong>做不到的，也不该追求</strong>：位置修正本身是"硬拽"物体，拽多了会引入能量，反而制造抖动。正确做法是留一个<strong>允许穿透容差（slop）</strong> —— 比如 0.01~0.05 个世界单位，在这个范围内不修正。玩家完全看不出来，系统却稳定得多。</p>
@@ -1406,22 +1332,20 @@ v_sep = 0  → 相对静止（比如静止堆叠），也不用管</div>
   <h2><span class="num">17</span>整合：完整的一帧</h2>
   <p class="lead">把所有部件拼起来。这张图是整本书的收束 —— 如果你只记一张图，记这张。</p>
 
-  <div class="diagram">
-    <div class="stack">
-      <div class="layer d"><span class="taglbl">1</span><div><b>startFrame()</b> —— 清空所有刚体的力/力矩累加器</div></div>
-      <div class="layer blue"><span class="taglbl">2</span><div><b>施加力</b> —— ForceRegistry 遍历：重力、弹簧、翼面、浮力…（持续力每帧重加）</div></div>
-      <div class="layer t"><span class="taglbl">3</span><div><b>积分</b> —— 更新 v/ω（加速度 + 阻尼），更新 p/q（位置与朝向）</div></div>
-      <div class="layer a"><span class="taglbl">4</span><div><b>派生数据</b> —— 四元数归一化 → 变换矩阵 R → <code>I⁻¹_world = R·I⁻¹·Rᵀ</code></div></div>
-      <div class="layer v"><span class="taglbl">5</span><div><b>粗检</b> —— 包围球 / BVH 筛出候选对</div></div>
-      <div class="layer r"><span class="taglbl">6</span><div><b>细检</b> —— SAT 等算法生成 Contact[]：法线、穿透、接触点</div></div>
-      <div class="layer g"><span class="taglbl">7</span><div><b>接触准备</b> —— 建接触坐标系、算接触点速度、算目标速度变化量</div></div>
-      <div class="layer d"><span class="taglbl">8</span><div><b>解穿透</b> —— 迭代 <code>positionIterations</code> 轮，按惯量分配位移</div></div>
-      <div class="layer blue"><span class="taglbl">9</span><div><b>解速度</b> —— 迭代 <code>velocityIterations</code> 轮，逐个施加冲量 + 摩擦</div></div>
-      <div class="layer t"><span class="taglbl">10</span><div><b>休眠判定</b> —— 更新 motion，低于阈值就睡；接触传播唤醒</div></div>
-      <div class="layer a"><span class="taglbl">11</span><div><b>渲染</b> —— 取 <code>transformMatrix</code> 交给图形层</div></div>
-    </div>
-    <div class="cap">图 32 · 一个完整物理帧的 11 步</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">1</span><div style="margin-top:4px"><b>startFrame()</b> —— 清空所有刚体的力/力矩累加器</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">2</span><div style="margin-top:4px"><b>施加力</b> —— ForceRegistry 遍历：重力、弹簧、翼面、浮力…（持续力每帧重加）</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">3</span><div style="margin-top:4px"><b>积分</b> —— 更新 v/ω（加速度 + 阻尼），更新 p/q（位置与朝向）</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">4</span><div style="margin-top:4px"><b>派生数据</b> —— 四元数归一化 → 变换矩阵 R → <code>I⁻¹_world = R·I⁻¹·Rᵀ</code></div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">5</span><div style="margin-top:4px"><b>粗检</b> —— 包围球 / BVH 筛出候选对</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">6</span><div style="margin-top:4px"><b>细检</b> —— SAT 等算法生成 Contact[]：法线、穿透、接触点</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">7</span><div style="margin-top:4px"><b>接触准备</b> —— 建接触坐标系、算接触点速度、算目标速度变化量</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">8</span><div style="margin-top:4px"><b>解穿透</b> —— 迭代 <code>positionIterations</code> 轮，按惯量分配位移</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">9</span><div style="margin-top:4px"><b>解速度</b> —— 迭代 <code>velocityIterations</code> 轮，逐个施加冲量 + 摩擦</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">10</span><div style="margin-top:4px"><b>休眠判定</b> —— 更新 motion，低于阈值就睡；接触传播唤醒</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">11</span><div style="margin-top:4px"><b>渲染</b> —— 取 <code>transformMatrix</code> 交给图形层</div></div>
+<div class="cap">图 32 · 一个完整物理帧的 11 步</div>
+</div>
 
   <h3>注意第 8 步在第 9 步<strong>之前</strong></h3>
   <p>这个顺序是刻意的：<strong>先把物体分开，再算速度</strong>。如果反过来，你会在物体还嵌在一起时算冲量，接触点位置是错的，法线方向也不可靠。Cyclone 的 <code>resolveContacts()</code> 明确按 <code>prepareContacts → adjustPositions → adjustVelocities</code> 的顺序执行。</p>
@@ -1570,18 +1494,16 @@ v_sep = 0  → 相对静止（比如静止堆叠），也不用管</div>
   <h2><span class="num">C</span>动手清单：12 步造一个自己的引擎</h2>
   <p class="lead">照着做，每一步都能跑起来看到东西。建议用任何你熟悉的语言（Python/JS/C# 都行），2D 起步。</p>
 
-  <div class="diagram">
-    <div class="stack">
-      <div class="layer blue"><span class="taglbl">1-3</span><div><b>粒子与世界</b> —— 实现 <code>Particle</code>（position/velocity/inverseMass）+ <code>integrate()</code> + 一个 World 循环。让一个点自由落体，画出来</div></div>
-      <div class="layer t"><span class="taglbl">4-5</span><div><b>力与注册表</b> —— 实现重力、阻力两个力发生器 + ForceRegistry。加上阻尼，看粒子慢慢停下</div></div>
-      <div class="layer a"><span class="taglbl">6-7</span><div><b>地面接触</b> —— 实现球-地面检测 + 单接触冲量求解。粒子会弹起来了（试试不同 restitution）</div></div>
-      <div class="layer v"><span class="taglbl">8-9</span><div><b>硬约束</b> —— 实现 Rod 和 Cable，做一条绳子 / 一座吊桥。<strong>这一步会让你真正理解"约束 = 接触"</strong></div></div>
-      <div class="layer r"><span class="taglbl">10</span><div><b>布料</b> —— 用粒子网格 + Rod 搭一块布，四角固定，看它飘</div></div>
-      <div class="layer g"><span class="taglbl">11</span><div><b>刚体</b> —— 加朝向（2D 用一个角度 θ）、角速度、力矩。实现 <code>addForceAtPoint</code>，推箱子看它翻</div></div>
-      <div class="layer d"><span class="taglbl">12</span><div><b>盒-盒碰撞与迭代</b> —— 实现 SAT + 多接触迭代求解 + 摩擦。堆三个箱子，看它们稳不稳</div></div>
-    </div>
-    <div class="cap">图 33 · 12 步路线图。第 7 步和第 12 步是两个坎，跨过去就通了</div>
-  </div>
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">1-3</span><div style="margin-top:4px"><b>粒子与世界</b> —— 实现 <code>Particle</code>（position/velocity/inverseMass）+ <code>integrate()</code> + 一个 World 循环。让一个点自由落体，画出来</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">4-5</span><div style="margin-top:4px"><b>力与注册表</b> —— 实现重力、阻力两个力发生器 + ForceRegistry。加上阻尼，看粒子慢慢停下</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">6-7</span><div style="margin-top:4px"><b>地面接触</b> —— 实现球-地面检测 + 单接触冲量求解。粒子会弹起来了（试试不同 restitution）</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">8-9</span><div style="margin-top:4px"><b>硬约束</b> —— 实现 Rod 和 Cable，做一条绳子 / 一座吊桥。<strong>这一步会让你真正理解"约束 = 接触"</strong></div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">10</span><div style="margin-top:4px"><b>布料</b> —— 用粒子网格 + Rod 搭一块布，四角固定，看它飘</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">11</span><div style="margin-top:4px"><b>刚体</b> —— 加朝向（2D 用一个角度 θ）、角速度、力矩。实现 <code>addForceAtPoint</code>，推箱子看它翻</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">12</span><div style="margin-top:4px"><b>盒-盒碰撞与迭代</b> —— 实现 SAT + 多接触迭代求解 + 摩擦。堆三个箱子，看它们稳不稳</div></div>
+<div class="cap">图 33 · 12 步路线图。第 7 步和第 12 步是两个坎，跨过去就通了</div>
+</div>
 
   <h3>每一步的验证标准</h3>
   <div class="tblwrap">
