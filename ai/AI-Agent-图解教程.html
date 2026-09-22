@@ -258,16 +258,16 @@
 
   <h3>Agent 的行为是怎么"改变"的：三条时间尺度</h3>
   <p>很多人以为"Agent 学习"就是训练模型。书里把它拆成三条并行路径，理解这三条，你就知道该把改进放在哪里：</p>
-  <div class="tblwrap">
-    <table>
-      <thead><tr><th>路径</th><th>载体</th><th>特性</th><th>代价</th></tr></thead>
-      <tbody>
-        <tr><td><b>任务内适应</b><br><small>上下文</small></td><td>当前的示例、状态、检索结果</td><td class="y">即时、成本低</td><td>任务结束就没了</td></tr>
-        <tr><td><b>外部产物更新</b><br><small>可审计、可回滚</small></td><td>知识文档 / Prompt / Skill / 程序 / Harness</td><td class="y">跨任务持久</td><td>执行时还得靠检索或工具调用</td></tr>
-        <tr><td><b>模型参数更新</b><br><small>能力内化</small></td><td>模型权重（SFT / 偏好训练 / RL）</td><td class="y">泛化能力强、推理开销低</td><td class="n">训练与回归成本高</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">路径</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">载体</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">特性</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">代价</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>任务内适应</b><br/><small>上下文</small></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">当前的示例、状态、检索结果</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">即时、成本低</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">任务结束就没了</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>外部产物更新</b><br/><small>可审计、可回滚</small></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">知识文档 / Prompt / Skill / 程序 / Harness</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">跨任务持久</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">执行时还得靠检索或工具调用</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>模型参数更新</b><br/><small>能力内化</small></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">模型权重（SFT / 偏好训练 / RL）</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">泛化能力强、推理开销低</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">训练与回归成本高</td></tr>
+</tbody>
+</table>
+</div>
   <p class="lbl-mini">一句话记忆：<b>上下文负责临场应对，外部产物负责可控积累，参数负责内化"说不清楚"的能力。</b></p>
 </section>
 
@@ -288,16 +288,16 @@
 </div>
 
   <p>书里用"多币种收入汇总"这个例子讲得特别清楚——模型只用了 3 轮、4 次工具调用就完成了任务：</p>
-  <div class="tblwrap">
-    <table>
-      <thead><tr><th style="width:70px">轮次</th><th>模型在做什么</th><th>轨迹里新增了什么</th></tr></thead>
-      <tbody>
-        <tr><td>第 1 轮</td><td>收到"Q1 2.5M 美元、Q2 2.1M 欧元、Q3 1.8M 英镑、Q4 3.8 亿日元，算总收入和均值"</td><td>思考 + 3 个并行的汇率转换调用 + 3 条工具结果</td></tr>
-        <tr><td>第 2 轮</td><td>汇率拿到了，调用代码解释器做汇总</td><td>思考 + 代码执行调用 + 结果</td></tr>
-        <tr><td>第 3 轮</td><td>所有计算完成，给出最终答案</td><td>最终回答（没有工具调用 → 循环结束）</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left;width:70px">轮次</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">模型在做什么</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">轨迹里新增了什么</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 1 轮</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">收到"Q1 2.5M 美元、Q2 2.1M 欧元、Q3 1.8M 英镑、Q4 3.8 亿日元，算总收入和均值"</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">思考 + 3 个并行的汇率转换调用 + 3 条工具结果</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 2 轮</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">汇率拿到了，调用代码解释器做汇总</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">思考 + 代码执行调用 + 结果</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 3 轮</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">所有计算完成，给出最终答案</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">最终回答（没有工具调用 → 循环结束）</td></tr>
+</tbody>
+</table>
+</div>
   <p>注意一个工程细节：<b>两个工具能不能并行，取决于参数之间有没有数据依赖。</b>汇率转换之间互不依赖 → 并行；汇总必须等汇率拿到 → 只能串行、多走一轮。</p>
 
   <h3>关键事实：上下文 = 静态前缀 + 轨迹</h3>
@@ -313,17 +313,17 @@
 
   <h3>用消融实验验证：每个组件都不可或缺吗？</h3>
   <p>书里做了一组很漂亮的对照实验——逐一"摘掉"某个上下文组件，看 Agent 会怎样（相当于医生逐一排除病因）：</p>
-  <div class="tblwrap">
-    <table>
-      <thead><tr><th>去掉什么</th><th>结果</th><th>说明</th></tr></thead>
-      <tbody>
-        <tr><td>工具定义</td><td class="n">无法调用工具</td><td>但模型<b>照样会给出一份格式工整、语气笃定的答案</b>，数据来自参数记忆，和真实观测长得一模一样</td></tr>
-        <tr><td>工具执行结果</td><td class="n">盲目循环</td><td>缺失闭环反馈，反复重试直到耗尽迭代预算</td></tr>
-        <tr><td>思考过程</td><td>决策不连贯</td><td>它记录"为什么这么做"；若能从工具结果重建，丢掉代价不大</td></tr>
-        <tr><td>历史记录</td><td>重复操作</td><td>会重复犯同样的错</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">去掉什么</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">结果</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">说明</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">工具定义</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">无法调用工具</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">但模型<b>照样会给出一份格式工整、语气笃定的答案</b>，数据来自参数记忆，和真实观测长得一模一样</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">工具执行结果</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">盲目循环</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">缺失闭环反馈，反复重试直到耗尽迭代预算</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">思考过程</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">决策不连贯</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">它记录"为什么这么做"；若能从工具结果重建，丢掉代价不大</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">历史记录</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">重复操作</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">会重复犯同样的错</td></tr>
+</tbody>
+</table>
+</div>
   <div class="callout co-rose">
     <span class="lbl">这条最该记住</span>
     <p>上下文残缺时，典型失败不是报错退出，而是<b>一个看上去毫无破绽的答案</b>。<b>"给出了回答"不等于"完成了任务"。</b>这也是为什么第 7 章要花整整一章讲评估。</p>
@@ -385,17 +385,17 @@
   </ol>
 
   <h3>工作流 vs 自主 Agent：先简单，后复杂</h3>
-  <div class="tblwrap">
-    <table>
-      <thead><tr><th></th><th>工作流 Workflow</th><th>自主 Agent</th></tr></thead>
-      <tbody>
-        <tr><td>执行路径</td><td>代码写死的固定节点</td><td>Agent 根据环境反馈实时决定</td></tr>
-        <tr><td>优势</td><td class="y">严格流程控制、攻击面被限制在单节点内</td><td class="y">能处理无法预先分解的开放问题</td></tr>
-        <tr><td>局限</td><td>遇到预设之外的例外就卡住</td><td>成本高、复合错误风险大</td></tr>
-        <tr><td>典型例子</td><td>订机票四步：核实身份→搜航班→付款→确认</td><td>SWE-bench 修 bug、Computer Use、迭代研究</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left"></th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">工作流 Workflow</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">自主 Agent</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">执行路径</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">代码写死的固定节点</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Agent 根据环境反馈实时决定</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">优势</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">严格流程控制、攻击面被限制在单节点内</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">能处理无法预先分解的开放问题</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">局限</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">遇到预设之外的例外就卡住</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">成本高、复合错误风险大</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">典型例子</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">订机票四步：核实身份→搜航班→付款→确认</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">SWE-bench 修 bug、Computer Use、迭代研究</td></tr>
+</tbody>
+</table>
+</div>
   <p>书里给出的决策顺序非常实用：<b>先优化提示词 → 再考虑工作流 → 最后才引入自主 Agent。</b>反过来做的典型反面例子是：一上来就设计一条六七步的多 Agent 流水线，每个部件单看都有道理，组合起来又低效又不可靠，因为<b>执行拓扑是固定的，遇到例外只会继续加节点</b>。</p>
   <div class="callout co-blue">
     <span class="lbl">Manus 的取舍</span>
@@ -459,33 +459,33 @@
   </ol>
 
   <h4>顺带认识两个容易搞混的概念</h4>
-  <div class="tblwrap">
-    <table>
-      <thead><tr><th></th><th>KV Cache</th><th>Prompt Cache</th></tr></thead>
-      <tbody>
-        <tr><td>层级</td><td>模型内部机制</td><td>推理引擎 / API 服务商的优化</td></tr>
-        <tr><td>作用范围</td><td>一次推理过程中</td><td>多次 API 请求之间</td></tr>
-        <tr><td>类比</td><td>读过的内容写成笔记，不用每遍重读</td><td>多个客户问同样问题，复用上一份草稿</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left"></th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">KV Cache</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">Prompt Cache</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">层级</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">模型内部机制</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">推理引擎 / API 服务商的优化</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">作用范围</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一次推理过程中</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">多次 API 请求之间</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">类比</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">读过的内容写成笔记，不用每遍重读</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">多个客户问同样问题，复用上一份草稿</td></tr>
+</tbody>
+</table>
+</div>
   <div class="callout co-amber">
     <span class="lbl">缓存读取比首次计算便宜得多</span>
     <p>书里给出一个量级：Anthropic、DeepSeek、GPT-5 等的缓存读取成本约为首次计算的<b>十分之一</b>。当这个差距足够大时，<b>缓存一致性会反过来主导架构选择</b>——Claude Code 就把系统提示词按缓存边界切成两半：边界之前跨用户跨会话全局缓存，边界之后才放用户/会话特定信息。<b>缓存经济性不是事后优化，而是前置约束。</b></p>
   </div>
 
   <h4>五种常见但有害的上下文管理方式</h4>
-  <div class="tblwrap">
-    <table>
-      <thead><tr><th>错误模式</th><th>问题</th><th>正确做法</th></tr></thead>
-      <tbody>
-        <tr><td>动态系统提示词</td><td>破坏前缀一致性</td><td>时间信息作为消息追加到末尾，或用工具获取</td></tr>
-        <tr><td><b>工具定义动态排序</b></td><td>工具定义每个数百 token，换顺序让缓存从首个变动处全部失效</td><td>保持固定顺序——实验表明对模型选工具能力几乎没影响，性能收益却很显著</td></tr>
-        <tr><td><b>滑动窗口砍历史</b></td><td>既破坏前缀，又丢失关键工具结果——窗口 10 条时早先读到的内容已滑出，Agent 会陷入循环反复调同样的工具</td><td>用压缩而非截断（见 4.4）</td></tr>
-        <tr><td>文本化拼接消息</td><td>最具破坏性：模型要额外推断角色边界，导致重复执行、忽略工具结果、该调工具时却生成文本</td><td>用标准 API 结构</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">错误模式</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">问题</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">正确做法</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">动态系统提示词</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">破坏前缀一致性</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">时间信息作为消息追加到末尾，或用工具获取</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>工具定义动态排序</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">工具定义每个数百 token，换顺序让缓存从首个变动处全部失效</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">保持固定顺序——实验表明对模型选工具能力几乎没影响，性能收益却很显著</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>滑动窗口砍历史</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">既破坏前缀，又丢失关键工具结果——窗口 10 条时早先读到的内容已滑出，Agent 会陷入循环反复调同样的工具</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">用压缩而非截断（见 4.4）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">文本化拼接消息</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">最具破坏性：模型要额外推断角色边界，导致重复执行、忽略工具结果、该调工具时却生成文本</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">用标准 API 结构</td></tr>
+</tbody>
+</table>
+</div>
 
   <h3>4.2 提示工程：五个层次，从"人格"到"业务规则"</h3>
   <p>书里给了一条极其实用的检验标准：<b>如果一个聪明的新员工读完你的系统提示词还不知道该怎么做，Agent 也一样不知道。</b></p>
@@ -575,17 +575,17 @@
   <p>第 2 章的视野是"一次会话"。当它扩展到跨会话、跨用户，就有了两条线：<b>用户记忆</b>（记住一个人）和<b>知识库</b>（记住一个领域）。两者共用同一套检索底层技术。</p>
 
   <h3>5.1 用户记忆的四种存储格式</h3>
-  <div class="tblwrap">
-    <table>
-      <thead><tr><th>格式</th><th>长什么样</th><th>类比</th></tr></thead>
-      <tbody>
-        <tr><td>Simple Notes</td><td>每条是最小、不可再分的原子事实</td><td>便利贴，一张一件事</td></tr>
-        <tr><td>Enhanced Notes</td><td>每条是一段包含完整上下文的叙事</td><td>日记本上的一整段</td></tr>
-        <tr><td>JSON Cards</td><td>类别 → 子类别 → 键值对的三层嵌套</td><td>档案柜：抽屉 → 文件夹 → 卡片</td></tr>
-        <tr><td><b>Advanced JSON Cards</b></td><td>JSON Cards + 来源背景 + 主体 + 关系 + 时间戳</td><td>卡片上还注明"这是谁的事、我和他什么关系、为什么记这条"</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">格式</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">长什么样</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">类比</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Simple Notes</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">每条是最小、不可再分的原子事实</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">便利贴，一张一件事</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Enhanced Notes</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">每条是一段包含完整上下文的叙事</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">日记本上的一整段</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">JSON Cards</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">类别 → 子类别 → 键值对的三层嵌套</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">档案柜：抽屉 → 文件夹 → 卡片</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Advanced JSON Cards</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">JSON Cards + 来源背景 + 主体 + 关系 + 时间戳</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">卡片上还注明"这是谁的事、我和他什么关系、为什么记这条"</td></tr>
+</tbody>
+</table>
+</div>
   <p>书里还提到一种进阶形态 <b>User as Code</b>：把用户状态建成带类型的可执行对象，规则写成普通函数——这样"汇总、冲突发现、约束执行"就变成确定性计算，而不是每次让 LLM"读一遍再心算"。在医疗、金融这类不容出错的场景，这点很关键。</p>
   <p>记忆本身也有认知科学上的分层：<b>情景记忆</b>（上周三和同事吃了顿意餐）、<b>语义记忆</b>（意大利首都是罗马）、<b>程序记忆</b>（会骑自行车），而<b>工作记忆</b>对应 Agent 的上下文窗口。</p>
 
@@ -606,17 +606,17 @@
 </div>
 
   <h4>为什么要"两路都跑"</h4>
-  <div class="tblwrap">
-    <table>
-      <thead><tr><th></th><th>稠密嵌入 Dense</th><th>稀疏嵌入 Sparse / BM25</th></tr></thead>
-      <tbody>
-        <tr><td>原理</td><td>把文本映射成每个维度都有值的向量，语义近则向量近</td><td>极高维向量，绝大多数维度为 0，只有出现的词对应维度非零</td></tr>
-        <tr><td>优势</td><td class="y">能理解"意思"，换个说法也找得到</td><td class="y">精确匹配关键词、型号、专有名词很准</td></tr>
-        <tr><td>弱点</td><td>对罕见专有名词、编号容易失手</td><td>不懂同义词；词频要饱和、长文要归一化</td></tr>
-        <tr><td>类比</td><td>给每个词在地图上标个坐标</td><td>一张超长的勾选表，只勾中出现的词</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left"></th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">稠密嵌入 Dense</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">稀疏嵌入 Sparse / BM25</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">原理</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把文本映射成每个维度都有值的向量，语义近则向量近</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">极高维向量，绝大多数维度为 0，只有出现的词对应维度非零</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">优势</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">能理解"意思"，换个说法也找得到</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">精确匹配关键词、型号、专有名词很准</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">弱点</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对罕见专有名词、编号容易失手</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不懂同义词；词频要饱和、长文要归一化</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">类比</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">给每个词在地图上标个坐标</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一张超长的勾选表，只勾中出现的词</td></tr>
+</tbody>
+</table>
+</div>
   <p>两路结果怎么合并？书里介绍了 <b>RRF（倒数排名融合）</b>——<b>不看原始得分，只看名次</b>：<code>得分 = Σ 1/(k + rank)</code>，k 常取 60。这个"不看分数看名次"的思路很重要，因为稠密和稀疏的分数根本不在一个量纲上。</p>
   <p>之后再上<b>神经重排序</b>：用跨编码器（Cross-Encoder，把查询和文档拼在一起逐词比对，慢但准）对融合后的前 N 个候选精排。书里用的比喻很形象——<b>双编码器像猎头按简历关键字快速筛，跨编码器像面试官和人选面对面深谈</b>。</p>
 
@@ -670,17 +670,17 @@
 
   <h3>6.3 工具描述的艺术（本章最值得反复咀嚼的一节）</h3>
   <p>大多数人写工具描述只写"这个工具能干什么"，而真正决定成败的是"<b>什么时候该用</b>"和"<b>什么时候不该用</b>"。</p>
-  <div class="tblwrap">
-    <table>
-      <thead><tr><th>要点</th><th>❌ 差</th><th>✓ 好</th></tr></thead>
-      <tbody>
-        <tr><td>写"何时用"而非"能做什么"</td><td>"搜索相关内容"</td><td>"当需要获取实时信息或查找未知事实时使用"</td></tr>
-        <tr><td><b>边界比能力更重要</b></td><td>只说能按文件名匹配</td><td>明确说明"<b>不能</b>搜索文件内容"——大多数调用失败不是模型不知道工具能做什么，而是不知道它不能做什么</td></tr>
-        <tr><td>用具体例子代替抽象规范</td><td>"timestamp：RFC3339 格式"</td><td>"RFC3339 格式，例如 2024-03-15T14:30:00Z"</td></tr>
-        <tr><td>描述返回值 + 标注执行代价</td><td>只写参数</td><td>"返回 JSON 数组，含 title/url/snippet"；"此工具需下载完整网页，可能 5–10 秒，只要元信息请用 get_page_metadata"</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">要点</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">❌ 差</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">✓ 好</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">写"何时用"而非"能做什么"</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">"搜索相关内容"</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">"当需要获取实时信息或查找未知事实时使用"</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>边界比能力更重要</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只说能按文件名匹配</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">明确说明"<b>不能</b>搜索文件内容"——大多数调用失败不是模型不知道工具能做什么，而是不知道它不能做什么</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">用具体例子代替抽象规范</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">"timestamp：RFC3339 格式"</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">"RFC3339 格式，例如 2024-03-15T14:30:00Z"</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">描述返回值 + 标注执行代价</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只写参数</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">"返回 JSON 数组，含 title/url/snippet"；"此工具需下载完整网页，可能 5–10 秒，只要元信息请用 get_page_metadata"</td></tr>
+</tbody>
+</table>
+</div>
   <p>为什么例子这么关键？<b>模型在专注处理一个问题时能理解这些术语，但在执行复杂任务时——要同时处理多个工具、从历史轨迹里提取信息、权衡多个决策——只能分出一小部分注意力去确认参数格式。</b>具体例子让它可以照搬，省掉一次推理。</p>
   <div class="stats">
     <div class="stat"><div class="v g">72% → 90%</div><div class="k">给每个工具附上 1–5 个真实调用示例后，工具调用准确率在一些基准上的典型提升（书中注明具体数值因任务而异）</div></div>
@@ -804,16 +804,16 @@
 <div class="cap">和 Go 里 <code>for { select { ... } }</code> 从 channel 读消息是同一个结构：一个长期运行、可被中断、可被抢占的循环</div>
 </div>
 
-  <div class="tblwrap">
-    <table>
-      <thead><tr><th>策略</th><th>适用事件</th><th>做法</th></tr></thead>
-      <tbody>
-        <tr><td><b>取消式</b></td><td>用户中断、系统告警、支付失败</td><td>停止当前操作 → 清空队列 → 紧急事件一起追加到轨迹末尾 → 立即重新调用 LLM</td></tr>
-        <tr><td><b>队列式</b></td><td>工具结果、用户补充、定时器</td><td>入队不打断，等当前操作完成，工具返回时一次性批量追加</td></tr>
-        <tr><td><b>并行式</b></td><td>"今天天气怎么样？"这类独立轻量查询</td><td>另起一个推理会话立即回答，结果标记"[与主任务并行]"追加回主轨迹</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">策略</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">适用事件</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">做法</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>取消式</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">用户中断、系统告警、支付失败</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">停止当前操作 → 清空队列 → 紧急事件一起追加到轨迹末尾 → 立即重新调用 LLM</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>队列式</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">工具结果、用户补充、定时器</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">入队不打断，等当前操作完成，工具返回时一次性批量追加</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>并行式</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">"今天天气怎么样？"这类独立轻量查询</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">另起一个推理会话立即回答，结果标记"[与主任务并行]"追加回主轨迹</td></tr>
+</tbody>
+</table>
+</div>
   <p>紧急度判定建议用<b>轻量级分类 LLM 作为事件路由器</b>，而不是硬编码规则。另一条硬约束：<b>取消点必须是能安全收尾的位置；未完成的工具结果用显式占位符表示，不能伪造成功。</b></p>
 
   <div class="callout co-amber">
@@ -878,17 +878,17 @@
     <p>单次成功率做到 90%，<b>连续 5 次不出错的概率也只有约 59%</b>。如果这是一个每天跑 5 笔的退款流程，平均差不多<b>每两天就会出一次错</b>。这就是为什么"我试了一次，通了"完全不能说明系统可用。</p>
   </div>
   <p>书里还有一个更极端的例子（p = 0.6，k = 5）：Pass@5 ≈ 99%，看起来很美好；<b>Pass^5 ≈ 7.8%</b>——一个"十次能成六次"的 Agent，给它五次机会几乎必然能成一次，但要它连着五次都别出错，概率不到 8%。</p>
-  <div class="tblwrap">
-    <table>
-      <thead><tr><th>指标</th><th>含义</th><th>适用场景</th></tr></thead>
-      <tbody>
-        <tr><td>Pass@k</td><td>k 次中至少一次通过 = 能力上限</td><td>科研发现、漏洞挖掘、开放式创作（人类可以从 k 条候选里挑最好的）</td></tr>
-        <tr><td>Best@k</td><td>k 次中取最好的一次得分（连续分数时）</td><td>同上</td></tr>
-        <tr><td><b>Pass^k</b></td><td>连续 k 次每次都必须通过，且不触发安全/合规/幻觉等一票否决项</td><td><b>支付、退款、权限变更、生产部署</b></td></tr>
-        <tr><td>Pass@1</td><td>单次平均成功率</td><td>日常最常用的口径</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">指标</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">含义</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">适用场景</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Pass@k</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">k 次中至少一次通过 = 能力上限</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">科研发现、漏洞挖掘、开放式创作（人类可以从 k 条候选里挑最好的）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Best@k</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">k 次中取最好的一次得分（连续分数时）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">同上</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Pass^k</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">连续 k 次每次都必须通过，且不触发安全/合规/幻觉等一票否决项</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>支付、退款、权限变更、生产部署</b></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Pass@1</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">单次平均成功率</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">日常最常用的口径</td></tr>
+</tbody>
+</table>
+</div>
   <div class="callout co-amber">
     <span class="lbl">报告口径必须写清</span>
     <p>k 次尝试是"同一任务的 k 次独立采样"，还是"生产流水线上连续 k 个任务"？<b>对于会产生副作用的操作，不能简单地"重试直到成功"</b>，而应在沙盒或可回滚环境中采样，并把每一次失败都记入可靠性指标。</p>
@@ -965,17 +965,17 @@
 <div class="cap">代价从"极高"到"高"，样本效率从"极低"到"高"——顺序反过来就是浪费</div>
 </div>
 
-  <div class="tblwrap">
-    <table>
-      <thead><tr><th>阶段</th><th>用什么数据</th><th>学到什么</th><th>典型代价</th></tr></thead>
-      <tbody>
-        <tr><td>预训练</td><td>海量原始互联网文本</td><td>语言规律、世界知识、基本推理</td><td>数百万～数千万美元</td></tr>
-        <tr><td>Mid-training</td><td>目标语料 + 通用保留数据</td><td>补齐领域知识、语言和基础能力</td><td>中到高</td></tr>
-        <tr><td>SFT</td><td>几千～几万条示范对</td><td>指令遵循、输出格式、风格、流程协议</td><td class="y">低（几小时～几天）</td></tr>
-        <tr><td>RL</td><td>任务、环境 + 奖励信号</td><td>可迁移的决策策略、探索出的新解法</td><td class="n">高（常是 SFT 的几十～上百倍）</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">阶段</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">用什么数据</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">学到什么</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">典型代价</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">预训练</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">海量原始互联网文本</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">语言规律、世界知识、基本推理</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">数百万～数千万美元</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Mid-training</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">目标语料 + 通用保留数据</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">补齐领域知识、语言和基础能力</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">中到高</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">SFT</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">几千～几万条示范对</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">指令遵循、输出格式、风格、流程协议</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">低（几小时～几天）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">RL</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">任务、环境 + 奖励信号</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">可迁移的决策策略、探索出的新解法</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">高（常是 SFT 的几十～上百倍）</td></tr>
+</tbody>
+</table>
+</div>
 
   <div class="callout co-blue">
     <span class="lbl">一个很生动的细节</span>
@@ -1047,17 +1047,17 @@
 </div>
 
   <h3>10.5 该用哪个？一张决策树</h3>
-  <div class="tblwrap">
-    <table>
-      <thead><tr><th>观察到的现象</th><th>主要缺口</th><th>优先方法</th></tr></thead>
-      <tbody>
-        <tr><td>领域概念/语言不会，合理采样下 pass@k 仍接近 0</td><td>知识与能力不在基模的有效支持中</td><td><b>Mid-training</b>；动态事实用 RAG</td></tr>
-        <tr><td>偶尔能做对，但格式、工具 schema、语气或固定流程不稳定</td><td>行为协议没有固化</td><td><b>SFT 或约束解码</b></td></tr>
-        <tr><td>已有非零成功率和可靠奖励，但好策略概率低、长程决策不足</td><td>概率质量分配与策略优化</td><td><b>RL</b></td></tr>
-        <tr><td>只有少量稳定示范，无可交互环境</td><td>可模仿数据有、在线反馈无</td><td>SFT / RFT / 离线偏好优化</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">观察到的现象</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">主要缺口</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">优先方法</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">领域概念/语言不会，合理采样下 pass@k 仍接近 0</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">知识与能力不在基模的有效支持中</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Mid-training</b>；动态事实用 RAG</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">偶尔能做对，但格式、工具 schema、语气或固定流程不稳定</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">行为协议没有固化</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>SFT 或约束解码</b></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">已有非零成功率和可靠奖励，但好策略概率低、长程决策不足</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">概率质量分配与策略优化</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>RL</b></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只有少量稳定示范，无可交互环境</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">可模仿数据有、在线反馈无</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">SFT / RFT / 离线偏好优化</td></tr>
+</tbody>
+</table>
+</div>
   <div class="callout co-rose">
     <span class="lbl">本章最值钱的一句话</span>
     <p><b>RL 擅长把已有但概率较低的成功行为推高，不擅长从全零奖励中凭空创造模型从未学过的知识和能力。</b><br>所以：pass@1 低但 pass@k 随 k 明显上升 → 正确策略已在分布里，只是概率太小，RL/蒸馏都有东西可放大；<b>实测 pass@k 仍接近 0 → 先补 Mid-training 或 SFT</b>。</p>
@@ -1096,20 +1096,20 @@
 </div>
 
   <p>书里还给了一张可直接抄作检查表的"客服 Agent 七个可评分维度"：</p>
-  <div class="tblwrap">
-    <table>
-      <thead><tr><th>维度</th><th>验证问题</th><th>层次</th></tr></thead>
-      <tbody>
-        <tr><td>任务结果</td><td>用户的核心诉求是否得到解决</td><td>结果层</td></tr>
-        <tr><td>规则遵从</td><td>是否违反政策、权限或必要流程</td><td>过程层</td></tr>
-        <tr><td>隐私边界</td><td>是否泄露不应提供的信息</td><td>过程层</td></tr>
-        <tr><td><b>承诺—行动一致性</b></td><td>声称完成的操作是否真实发生</td><td>过程层</td></tr>
-        <tr><td>表达质量</td><td>是否自然、简洁，避免重复与模板化</td><td>质量层</td></tr>
-        <tr><td>合规变通</td><td>原方案不可行时，是否找到允许的替代路径</td><td>质量层</td></tr>
-        <tr><td>事实可靠性</td><td>陈述是否有知识或工具结果支持</td><td>横跨两层</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">维度</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">验证问题</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">层次</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">任务结果</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">用户的核心诉求是否得到解决</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">结果层</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">规则遵从</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">是否违反政策、权限或必要流程</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">过程层</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">隐私边界</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">是否泄露不应提供的信息</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">过程层</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>承诺—行动一致性</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">声称完成的操作是否真实发生</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">过程层</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">表达质量</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">是否自然、简洁，避免重复与模板化</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">质量层</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">合规变通</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">原方案不可行时，是否找到允许的替代路径</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">质量层</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">事实可靠性</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">陈述是否有知识或工具结果支持</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">横跨两层</td></tr>
+</tbody>
+</table>
+</div>
 
   <div class="callout co-amber">
     <span class="lbl">验证器输出的四项必备内容（分水岭）</span>
@@ -1130,16 +1130,16 @@
 <div class="cap">左端更新最快、最可追溯；右端最慢、最贵、最难回滚，但一旦学会，推理零额外开销</div>
 </div>
 
-  <div class="tblwrap">
-    <table>
-      <thead><tr><th>升级</th><th>触发条件</th></tr></thead>
-      <tbody>
-        <tr><td>知识 → <b>指令</b></td><td>多条相似轨迹反复暴露<b>同一种策略错误</b>，而且错误能够用语言清楚描述</td></tr>
-        <tr><td>指令 → <b>程序</b></td><td>经验描述的是<b>稳定、重复且可验证</b>的操作——每次都让模型重新阅读文档和推理并不经济</td></tr>
-        <tr><td>程序 → <b>参数</b></td><td>只有当目标能力<b>不能被外部符号较完整地表达</b>时才走这条路：医疗影像理解、自然的语音韵律、消除文本的模板化"AI 味"、长程规划</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">升级</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">触发条件</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">知识 → <b>指令</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">多条相似轨迹反复暴露<b>同一种策略错误</b>，而且错误能够用语言清楚描述</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">指令 → <b>程序</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">经验描述的是<b>稳定、重复且可验证</b>的操作——每次都让模型重新阅读文档和推理并不经济</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">程序 → <b>参数</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只有当目标能力<b>不能被外部符号较完整地表达</b>时才走这条路：医疗影像理解、自然的语音韵律、消除文本的模板化"AI 味"、长程规划</td></tr>
+</tbody>
+</table>
+</div>
   <div class="callout co-blue">
     <span class="lbl">两个必要的澄清</span>
     <p>1. <b>这不是单向阶梯，而是四种互补载体。</b>同一能力可以拆到多个载体：医疗影像 Agent 依靠参数识别病灶，用知识库提供最新指南，再用代码计算风险指标。<br>
@@ -1210,19 +1210,19 @@
 
   <h3>12.3 六种失败模式</h3>
   <p>书里先给了一段理论背景：分布式容错把故障分为<b>崩溃故障</b>（部件停止工作）与<b>拜占庭故障</b>（部件继续工作，但给出错误信息）。<b>Agent 的故障天生是拜占庭式的——它很少径直停止运行，而是继续给出看似可信的错误结论，且错误不会主动声明自己是错误。</b></p>
-  <div class="tblwrap">
-    <table>
-      <thead><tr><th>#</th><th>失败模式</th><th>成因</th><th>对策</th></tr></thead>
-      <tbody>
-        <tr><td>一</td><td><b>共享文件系统的并发冲突</b></td><td>简单冲突（后写覆盖先写）／<b>语义冲突</b>（文件层面看不出冲突，但操作逻辑上相互矛盾）</td><td>乐观锁（读时记版本、写时校验）；跨文件语义冲突需更高层的语义校验；并发改代码库用工作副本隔离（Git worktree）</td></tr>
-        <tr><td>二</td><td><b>错误的级联放大</b></td><td>进程间传字节是逐位保真的，<b>但 Agent 间传语义——每转述一次都是有损的重新编码</b>（传话游戏）</td><td>交叉验证：让某个 Agent 以独立视角重新审视，<b>不看前序 Agent 的思考过程，只看原始证据与最终结论是否一致</b></td></tr>
-        <tr><td>三</td><td><b>同质趋同 / 共因失效</b></td><td>同一模型、相似上下文生成的多个审核意见，<b>不能自动视为相互独立的证据</b></td><td>主动引入模型、上下文、数据来源的差异；用命名空间、配额和速率限制防同时冲击共享资源</td></tr>
-        <tr><td>四</td><td><b>互相扯皮</b></td><td>目标互斥时从趋同走向对抗。<b>更强的执行能力并不等于更好的协调能力</b></td><td>运行时预先定义目标优先级、资源所有权和权限边界；无法按可验证规则解决时暂停并交人工裁决</td></tr>
-        <tr><td>五</td><td><b>循环失控</b></td><td>与"过早终止"相反：循环停不下来。失控的 Agent 有时会生成<b>数千个子 Agent</b></td><td>对自主性强的 Agent 使用独立的 API key；配合移交次数上限、预算、终止级联</td></tr>
-        <tr><td>六</td><td><b>理解债与认知投降</b></td><td><b>这种模式不是 Agent 的失败，而是人的失败。</b>Agent 交付越快，人对系统的理解越落后</td><td>记住 Karpathy 的话：<b>"你可以外包你的思考，但不能外包你的理解。"</b></td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">#</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">失败模式</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">成因</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">对策</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>共享文件系统的并发冲突</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">简单冲突（后写覆盖先写）／<b>语义冲突</b>（文件层面看不出冲突，但操作逻辑上相互矛盾）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">乐观锁（读时记版本、写时校验）；跨文件语义冲突需更高层的语义校验；并发改代码库用工作副本隔离（Git worktree）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">二</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>错误的级联放大</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">进程间传字节是逐位保真的，<b>但 Agent 间传语义——每转述一次都是有损的重新编码</b>（传话游戏）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">交叉验证：让某个 Agent 以独立视角重新审视，<b>不看前序 Agent 的思考过程，只看原始证据与最终结论是否一致</b></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">三</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>同质趋同 / 共因失效</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">同一模型、相似上下文生成的多个审核意见，<b>不能自动视为相互独立的证据</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">主动引入模型、上下文、数据来源的差异；用命名空间、配额和速率限制防同时冲击共享资源</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">四</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>互相扯皮</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">目标互斥时从趋同走向对抗。<b>更强的执行能力并不等于更好的协调能力</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">运行时预先定义目标优先级、资源所有权和权限边界；无法按可验证规则解决时暂停并交人工裁决</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">五</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>循环失控</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">与"过早终止"相反：循环停不下来。失控的 Agent 有时会生成<b>数千个子 Agent</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对自主性强的 Agent 使用独立的 API key；配合移交次数上限、预算、终止级联</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">六</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>理解债与认知投降</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>这种模式不是 Agent 的失败，而是人的失败。</b>Agent 交付越快，人对系统的理解越落后</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">记住 Karpathy 的话：<b>"你可以外包你的思考，但不能外包你的理解。"</b></td></tr>
+</tbody>
+</table>
+</div>
   <div class="stats">
     <div class="stat"><div class="v r">15.6%</div><div class="k">2025 年《Why Do Multi-Agent LLM Systems Fail?》在 7 个主流多 Agent 框架、约 150 条轨迹上归纳出 <b>14 种失败模式</b>；即使采用简单修复措施，效果也十分有限（ChatDev 框架仅提升 15.6%）</div></div>
     <div class="stat"><div class="v a">18 / 30</div><div class="k">Anthropic 实验中，30 个同时上线的 Agent 有 <b>18 个创建了同名 Git 分支</b>——同质趋同的生动写照</div></div>
@@ -1311,15 +1311,15 @@
   </div>
 
   <h3>这对不同的人意味着什么</h3>
-  <div class="tblwrap">
-    <table>
-      <thead><tr><th>你站在哪一端</th><th>建议</th></tr></thead>
-      <tbody>
-        <tr><td>造模型</td><td>护城河就是把这条飞轮转起来——<b>让真实场景的反馈尽快回流到训练里</b></td></tr>
-        <tr><td>在模型之上造应用</td><td>Harness 是你短期最锋利的技术杠杆，但要清醒：<b>模型每内化一层约束，就会顺手抹平一批只靠 Harness 建立的优势</b>。真正长久的护城河往往在技术之外——独占的数据、稳固的渠道、用户的信任、网络效应，以及必须由人与 Agent 协作的物理世界场景</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">你站在哪一端</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">建议</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">造模型</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">护城河就是把这条飞轮转起来——<b>让真实场景的反馈尽快回流到训练里</b></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">在模型之上造应用</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Harness 是你短期最锋利的技术杠杆，但要清醒：<b>模型每内化一层约束，就会顺手抹平一批只靠 Harness 建立的优势</b>。真正长久的护城河往往在技术之外——独占的数据、稳固的渠道、用户的信任、网络效应，以及必须由人与 Agent 协作的物理世界场景</td></tr>
+</tbody>
+</table>
+</div>
   <p class="qa">书最后的落点很平静：<b>不必焦虑手里的框架会不会过时。模型每几个月迭代一次，具体的 API、产品和榜单都会翻篇，但"看到什么、能做什么、如何验证做得对不对"这三个问题不会过时。</b></p>
 </section>
 
@@ -1328,44 +1328,44 @@
   <div class="sec-head"><div class="badge">附</div><h2>速查表 + 动手清单</h2></div>
 
   <h3>A. 术语速查（按主题）</h3>
-  <div class="tblwrap">
-    <table>
-      <thead><tr><th>术语</th><th>一句话解释</th><th>类比</th></tr></thead>
-      <tbody>
-        <tr><td>上下文（Context）</td><td>Agent 每次调用模型时实际"看到"的全部信息</td><td>办公桌桌面</td></tr>
-        <tr><td>静态前缀 + 轨迹</td><td>系统提示词+工具定义（不变）+ 消息历史（只增不改）</td><td>固定手册 vs 不断堆积的文件</td></tr>
-        <tr><td>KV Cache</td><td>缓存已算过的 Key/Value 向量，新 token 直接复用</td><td>读过就写下结论，不用每遍重读</td></tr>
-        <tr><td>Prompt Cache</td><td>跨 API 请求缓存相同前缀的计算</td><td>复用上一份草稿</td></tr>
-        <tr><td>Chat Template</td><td>把结构化消息翻译成模型能读的线性 token 流</td><td>信封格式</td></tr>
-        <tr><td>上下文腐化 / 溢出 / 焦虑</td><td>找不到关键信息 / 真的装不下 / 怕不够用而提前收尾</td><td>图书馆塞满无关书 / 桌面堆不下 / 快收卷时草草写完</td></tr>
-        <tr><td>提示注入</td><td>攻击者通过外部内容把伪装成指令的文本混入上下文</td><td>快递包裹里塞了张假的工作指令单</td></tr>
-        <tr><td>Skill + 渐进式披露</td><td>能力做成可按需加载的知识包，先给目录再给正文</td><td>先看总目录 → 取手册 → 查附录</td></tr>
-        <tr><td>Agent 状态栏</td><td>在上下文末尾注入的结构化元信息（进度、计数、时间）</td><td>手机顶部的时间/电量/信号栏</td></tr>
-        <tr><td>Chunking</td><td>把长文档切成适合独立检索的片段</td><td>把长篇拆成卡片</td></tr>
-        <tr><td>稠密 / 稀疏嵌入</td><td>语义向量 / 关键词向量</td><td>地图坐标 / 超长的勾选表</td></tr>
-        <tr><td>RRF 倒数排名融合</td><td>抛开得分只看名次：Σ 1/(k + rank)</td><td>不看分数看名次</td></tr>
-        <tr><td>双编码器 / 跨编码器</td><td>独立编码快速筛 / 拼在一起逐词比对，慢但准</td><td>猎头筛简历 / 面试官深谈</td></tr>
-        <tr><td>ACI</td><td>Agent-Computer Interface：从 Agent 视角设计接口</td><td>给 Agent 用的界面重语义</td></tr>
-        <tr><td>防呆 Poka-yoke</td><td>用设计让错误无法发生</td><td>SIM 卡缺角、微波炉门没关好不加热</td></tr>
-        <tr><td>参数保真性</td><td>工具不得在模型不知情时修改输入或输出</td><td>传话游戏里有人偷偷改了一个字</td></tr>
-        <tr><td>MCP</td><td>统一模型与外部工具/数据源通信的开放标准</td><td>电器插头的国标</td></tr>
-        <tr><td>元能力</td><td>一种"能创造其他能力"的能力</td><td>给你造鱼竿的能力</td></tr>
-        <tr><td>生成式 UI / A2UI</td><td>Agent 动态生成表单、图表、网页来替代纯文本对话</td><td>与其发十条消息，不如甩给你一张表</td></tr>
-        <tr><td>Pass@k / Pass^k</td><td>至少成功一次 / 连续 k 次都成功</td><td>抽 k 次奖中一次 / 连续 k 次考试都满分</td></tr>
-        <tr><td>LLM-as-a-Judge</td><td>用模型按 Rubric 给另一个模型的输出打分</td><td>请阅卷老师批改开放式作文</td></tr>
-        <tr><td>古德哈特定律</td><td>当一个度量变成优化目标，它就不再是好的度量</td><td>按"填坑数量"发奖金，大家就开始挖坑</td></tr>
-        <tr><td>消融实验</td><td>逐一去掉组件，看系统是否还正常</td><td>医生逐一排除病因</td></tr>
-        <tr><td>RLVR</td><td>可验证奖励：用测试/断言/状态差异直接判断结果</td><td>客观题由标准答案说了算</td></tr>
-        <tr><td>On-policy / Off-policy</td><td>用当前策略生成的数据 / 用别处来的数据</td><td>现炒现卖 / 吃昨天剩的</td></tr>
-        <tr><td>蒸馏</td><td>让学生的预测分布贴近教师的分布</td><td>抄学霸的解题思路，而不是只抄答案</td></tr>
-        <tr><td>睡眠学习</td><td>空闲期批量读取新经历、合并重复、解决冲突、跑回归</td><td>人睡着后大脑整理白天的记忆</td></tr>
-        <tr><td>可信根</td><td>批准自身更新的验证器/门槛/日志，业务 Agent 不能改</td><td>裁判和规则手册不能由参赛队改写</td></tr>
-        <tr><td>拜占庭故障</td><td>部件继续工作但给出错误信息，且不主动承认</td><td>员工还在上班但一直报错数据</td></tr>
-        <tr><td>乐观锁</td><td>读时记版本，写时校验，不一致就重读重做</td><td>"文档已更新，请刷新"</td></tr>
-        <tr><td>A2A / Agent Card</td><td>跨组织 Agent 互操作协议 / Agent 的能力名片</td><td>网络协议 / 名片</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">术语</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">一句话解释</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">类比</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">上下文（Context）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Agent 每次调用模型时实际"看到"的全部信息</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">办公桌桌面</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">静态前缀 + 轨迹</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">系统提示词+工具定义（不变）+ 消息历史（只增不改）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">固定手册 vs 不断堆积的文件</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">KV Cache</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">缓存已算过的 Key/Value 向量，新 token 直接复用</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">读过就写下结论，不用每遍重读</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Prompt Cache</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">跨 API 请求缓存相同前缀的计算</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">复用上一份草稿</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Chat Template</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把结构化消息翻译成模型能读的线性 token 流</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">信封格式</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">上下文腐化 / 溢出 / 焦虑</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">找不到关键信息 / 真的装不下 / 怕不够用而提前收尾</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">图书馆塞满无关书 / 桌面堆不下 / 快收卷时草草写完</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">提示注入</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">攻击者通过外部内容把伪装成指令的文本混入上下文</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">快递包裹里塞了张假的工作指令单</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Skill + 渐进式披露</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">能力做成可按需加载的知识包，先给目录再给正文</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">先看总目录 → 取手册 → 查附录</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Agent 状态栏</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">在上下文末尾注入的结构化元信息（进度、计数、时间）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">手机顶部的时间/电量/信号栏</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Chunking</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把长文档切成适合独立检索的片段</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把长篇拆成卡片</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">稠密 / 稀疏嵌入</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">语义向量 / 关键词向量</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">地图坐标 / 超长的勾选表</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">RRF 倒数排名融合</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">抛开得分只看名次：Σ 1/(k + rank)</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不看分数看名次</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">双编码器 / 跨编码器</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">独立编码快速筛 / 拼在一起逐词比对，慢但准</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">猎头筛简历 / 面试官深谈</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">ACI</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Agent-Computer Interface：从 Agent 视角设计接口</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">给 Agent 用的界面重语义</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">防呆 Poka-yoke</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">用设计让错误无法发生</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">SIM 卡缺角、微波炉门没关好不加热</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">参数保真性</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">工具不得在模型不知情时修改输入或输出</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">传话游戏里有人偷偷改了一个字</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">MCP</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">统一模型与外部工具/数据源通信的开放标准</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">电器插头的国标</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">元能力</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一种"能创造其他能力"的能力</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">给你造鱼竿的能力</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">生成式 UI / A2UI</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Agent 动态生成表单、图表、网页来替代纯文本对话</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">与其发十条消息，不如甩给你一张表</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Pass@k / Pass^k</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">至少成功一次 / 连续 k 次都成功</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">抽 k 次奖中一次 / 连续 k 次考试都满分</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">LLM-as-a-Judge</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">用模型按 Rubric 给另一个模型的输出打分</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">请阅卷老师批改开放式作文</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">古德哈特定律</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">当一个度量变成优化目标，它就不再是好的度量</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">按"填坑数量"发奖金，大家就开始挖坑</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">消融实验</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">逐一去掉组件，看系统是否还正常</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">医生逐一排除病因</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">RLVR</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">可验证奖励：用测试/断言/状态差异直接判断结果</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">客观题由标准答案说了算</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">On-policy / Off-policy</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">用当前策略生成的数据 / 用别处来的数据</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">现炒现卖 / 吃昨天剩的</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">蒸馏</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">让学生的预测分布贴近教师的分布</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">抄学霸的解题思路，而不是只抄答案</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">睡眠学习</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">空闲期批量读取新经历、合并重复、解决冲突、跑回归</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">人睡着后大脑整理白天的记忆</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">可信根</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">批准自身更新的验证器/门槛/日志，业务 Agent 不能改</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">裁判和规则手册不能由参赛队改写</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">拜占庭故障</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">部件继续工作但给出错误信息，且不主动承认</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">员工还在上班但一直报错数据</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">乐观锁</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">读时记版本，写时校验，不一致就重读重做</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">"文档已更新，请刷新"</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">A2A / Agent Card</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">跨组织 Agent 互操作协议 / Agent 的能力名片</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">网络协议 / 名片</td></tr>
+</tbody>
+</table>
+</div>
 
   <h3>B. 动手清单：从今天就能做起的 15 件事</h3>
   <ol class="num">

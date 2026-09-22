@@ -450,17 +450,17 @@
 
     <h4 class="sub">矩阵乘法的四种看法（第 4 种最有杀伤力）</h4>
 
-    <div class="tblwrap">
-      <table>
-        <thead><tr><th>看法</th><th>写法</th><th>什么时候最好用</th></tr></thead>
-        <tbody>
-          <tr><td>① 行 × 列（点积）</td><td class="k">(AB)ᵢⱼ = 第 i 行 · 第 j 列</td><td>手算单个元素</td></tr>
-          <tr><td>② 列视角</td><td class="k">AB 的列 = A × (B 的列)</td><td>理解列空间</td></tr>
-          <tr><td>③ 行视角</td><td class="k">AB 的行 = (A 的行) × B</td><td>理解行空间、做消元</td></tr>
-          <tr><td>④ 列 × 行（外积和）</td><td class="k">AB = Σ (A的第k列)(B的第k行)</td><td><b>SVD、低秩近似、PCA 全靠它</b></td></tr>
-        </tbody>
-      </table>
-    </div>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">看法</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">写法</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">什么时候最好用</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">① 行 × 列（点积）</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">(AB)ᵢⱼ = 第 i 行 · 第 j 列</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">手算单个元素</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">② 列视角</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">AB 的列 = A × (B 的列)</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">理解列空间</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">③ 行视角</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">AB 的行 = (A 的行) × B</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">理解行空间、做消元</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">④ 列 × 行（外积和）</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">AB = Σ (A的第k列)(B的第k行)</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>SVD、低秩近似、PCA 全靠它</b></td></tr>
+</tbody>
+</table>
+</div>
 
     <div class="diagram" style="text-align:center">
 <div class="lbl">第 4 种：矩阵 = 若干个"秩 1 矩阵"之和</div>
@@ -566,17 +566,17 @@
       一旦拿到 <i>L</i> 和 <i>U</i>，右侧 <i>b</i> 换多少次都是便宜的。工程上「矩阵不变、右端项变」是最常见的场景。
     </p>
 
-    <div class="tblwrap">
-      <table>
-        <thead><tr><th>情况</th><th>几何含义</th><th>解的个数</th></tr></thead>
-        <tbody>
-          <tr><td class="k">r = m = n</td><td>列张成整个空间，且列之间独立</td><td>唯一解，<i>x</i> = <i>A</i>⁻¹<i>b</i></td></tr>
-          <tr><td class="k">r = m &lt; n</td><td>矮胖：列张成整个 Rᵐ，但有自由变量</td><td>无穷多解（一个特解 + 零空间）</td></tr>
-          <tr><td class="k">r = n &lt; m</td><td>高瘦：列独立，但张不满 Rᵐ</td><td>0 或 1 个解（看 <i>b</i> 在不在列空间）</td></tr>
-          <tr><td class="k">r &lt; m 且 r &lt; n</td><td>既张不满，又有自由变量</td><td>0 个 或 无穷多个</td></tr>
-        </tbody>
-      </table>
-    </div>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">情况</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">几何含义</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">解的个数</th></tr></thead>
+<tbody>
+<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">r = m = n</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">列张成整个空间，且列之间独立</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">唯一解，<i>x</i> = <i>A</i>⁻¹<i>b</i></td></tr>
+<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">r = m &lt; n</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">矮胖：列张成整个 Rᵐ，但有自由变量</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">无穷多解（一个特解 + 零空间）</td></tr>
+<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">r = n &lt; m</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">高瘦：列独立，但张不满 Rᵐ</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">0 或 1 个解（看 <i>b</i> 在不在列空间）</td></tr>
+<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">r &lt; m 且 r &lt; n</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">既张不满，又有自由变量</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">0 个 或 无穷多个</td></tr>
+</tbody>
+</table>
+</div>
 
     <div class="callout co-rose">
       <span class="h">关于逆矩阵，Strang 的态度</span>
@@ -709,16 +709,16 @@
       顺带把三个词钉死，它们在第 4 章和第 7 章会被反复使用：
     </p>
 
-    <div class="tblwrap">
-      <table>
-        <thead><tr><th>术语</th><th>定义</th><th>怎么判断</th></tr></thead>
-        <tbody>
-          <tr><td>线性无关</td><td>只有全 0 系数才能让组合为 0</td><td><i>A<i>x</i></i>=0 只有零解 ⇔ 列无关</td></tr>
-          <tr><td>张成 span</td><td>这些向量的所有线性组合</td><td>张成整个 Rᵐ ⇔ 行有 <i>m</i> 个主元</td></tr>
-          <tr><td>基 basis</td><td>既独立、又张成这个空间的一组向量</td><td>该空间里任何一组基，向量个数都一样 = 维数</td></tr>
-        </tbody>
-      </table>
-    </div>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">术语</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">定义</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">怎么判断</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">线性无关</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只有全 0 系数才能让组合为 0</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><i>A<i>x</i></i>=0 只有零解 ⇔ 列无关</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">张成 span</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">这些向量的所有线性组合</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">张成整个 Rᵐ ⇔ 行有 <i>m</i> 个主元</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">基 basis</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">既独立、又张成这个空间的一组向量</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">该空间里任何一组基，向量个数都一样 = 维数</td></tr>
+</tbody>
+</table>
+</div>
   </section>
 
   <!-- ==================== CH4 ==================== -->
@@ -884,23 +884,23 @@
       <div class="cap">三维就是平行六面体的体积；n 维同理。行列式为 0 ⟺ 列线性相关 ⟺ 体积被压扁 ⟺ 矩阵不可逆</div>
     </div>
 
-    <div class="tblwrap">
-      <table>
-        <thead><tr><th>#</th><th>性质</th><th>直觉</th></tr></thead>
-        <tbody>
-          <tr><td class="k">1</td><td>det I = 1</td><td>单位立方体体积为 1，定了标尺</td></tr>
-          <tr><td class="k">2</td><td>交换两行，det 变号</td><td>朝向翻转</td></tr>
-          <tr><td class="k">3</td><td>对单行线性（可拆分、可提倍数）</td><td>体积对一条边可加、可缩放</td></tr>
-          <tr><td class="k">4</td><td>两行相等 ⟹ det = 0</td><td>由 2 推出：换了自己又变号，只能是 0</td></tr>
-          <tr><td class="k">5</td><td>行减去另一行的倍数，det 不变</td><td><b>这就是为什么消元能用它</b></td></tr>
-          <tr><td class="k">6</td><td>有一行全 0 ⟹ det = 0</td><td>体积塌了</td></tr>
-          <tr><td class="k">7</td><td>三角矩阵 det = 主对角线之积</td><td>消元的终点，也是算法的核心</td></tr>
-          <tr><td class="k">8</td><td>det A = 0 ⟺ A 奇异</td><td>与可逆性等价</td></tr>
-          <tr><td class="k">9</td><td>det(AB) = det A · det B</td><td>体积放大倍数相乘</td></tr>
-          <tr><td class="k">10</td><td>det Aᵀ = det A</td><td>行和列完全对称</td></tr>
-        </tbody>
-      </table>
-    </div>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">#</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">性质</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">直觉</th></tr></thead>
+<tbody>
+<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">1</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">det I = 1</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">单位立方体体积为 1，定了标尺</td></tr>
+<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">2</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">交换两行，det 变号</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">朝向翻转</td></tr>
+<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">3</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对单行线性（可拆分、可提倍数）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">体积对一条边可加、可缩放</td></tr>
+<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">4</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">两行相等 ⟹ det = 0</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">由 2 推出：换了自己又变号，只能是 0</td></tr>
+<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">5</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">行减去另一行的倍数，det 不变</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>这就是为什么消元能用它</b></td></tr>
+<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">6</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">有一行全 0 ⟹ det = 0</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">体积塌了</td></tr>
+<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">7</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">三角矩阵 det = 主对角线之积</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">消元的终点，也是算法的核心</td></tr>
+<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">8</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">det A = 0 ⟺ A 奇异</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">与可逆性等价</td></tr>
+<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">9</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">det(AB) = det A · det B</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">体积放大倍数相乘</td></tr>
+<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">10</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">det Aᵀ = det A</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">行和列完全对称</td></tr>
+</tbody>
+</table>
+</div>
 
     <div class="diagram" style="text-align:center">
 <div class="lbl">怎么真正算 det（不是背公式，而是用性质）</div>
@@ -995,18 +995,18 @@
 
     <h4 class="sub">两个必须分清的特殊类型</h4>
 
-    <div class="tblwrap">
-      <table>
-        <thead><tr><th></th><th>对称矩阵 S = Sᵀ</th><th>正定矩阵（对称的特例）</th></tr></thead>
-        <tbody>
-          <tr><td>特征值</td><td><b>全是实数</b></td><td>全是<b>正数</b> λ &gt; 0</td></tr>
-          <tr><td>特征向量</td><td><b>可以选成互相正交的</b></td><td>同上，且构成一组正交基</td></tr>
-          <tr><td>分解</td><td class="k">S = QΛQᵀ（谱定理）</td><td class="k">S = QΛQᵀ，还可做 A = LᵀL / RᵀR</td></tr>
-          <tr><td>等价判据</td><td>—</td><td>所有主元 &gt; 0 ⇔ 所有 λ &gt; 0 ⇔ <i>x</i>ᵀ<i>Sx</i> &gt; 0 ⇔ 顺序主子式 &gt; 0</td></tr>
-          <tr><td>几何</td><td>沿正交轴拉伸（可能反向）</td><td>沿正交轴拉伸，方向不变、不翻转，<i>x</i>ᵀ<i>Sx</i>=1 是一个<b>椭球</b></td></tr>
-        </tbody>
-      </table>
-    </div>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left"></th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">对称矩阵 S = Sᵀ</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">正定矩阵（对称的特例）</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">特征值</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>全是实数</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">全是<b>正数</b> λ &gt; 0</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">特征向量</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>可以选成互相正交的</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">同上，且构成一组正交基</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">分解</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">S = QΛQᵀ（谱定理）</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">S = QΛQᵀ，还可做 A = LᵀL / RᵀR</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">等价判据</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">—</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">所有主元 &gt; 0 ⇔ 所有 λ &gt; 0 ⇔ <i>x</i>ᵀ<i>Sx</i> &gt; 0 ⇔ 顺序主子式 &gt; 0</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">几何</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">沿正交轴拉伸（可能反向）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">沿正交轴拉伸，方向不变、不翻转，<i>x</i>ᵀ<i>Sx</i>=1 是一个<b>椭球</b></td></tr>
+</tbody>
+</table>
+</div>
 
     <div class="callout co-violet">
       <span class="h">谱定理是这本书最美的结论之一</span>
@@ -1099,17 +1099,17 @@
       SVD 与四个基本子空间的对应关系，要背下来 —— 它把第 3 章那张图配上了「最好的基」：
     </p>
 
-    <div class="tblwrap">
-      <table>
-        <thead><tr><th>子空间</th><th>维数</th><th>最佳正交基来自</th></tr></thead>
-        <tbody>
-          <tr><td>行空间 <i>C</i>(<i>A</i>ᵀ)</td><td class="k">r</td><td><i>V</i> 的前 <i>r</i> 列：v₁…v<sub>r</sub></td></tr>
-          <tr><td>零空间 <i>N</i>(<i>A</i>)</td><td class="k">n − r</td><td><i>V</i> 的后 <i>n</i>−<i>r</i> 列</td></tr>
-          <tr><td>列空间 <i>C</i>(<i>A</i>)</td><td class="k">r</td><td><i>U</i> 的前 <i>r</i> 列：u₁…u<sub>r</sub></td></tr>
-          <tr><td>左零空间 <i>N</i>(<i>A</i>ᵀ)</td><td class="k">m − r</td><td><i>U</i> 的后 <i>m</i>−<i>r</i> 列</td></tr>
-        </tbody>
-      </table>
-    </div>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">子空间</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">维数</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">最佳正交基来自</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">行空间 <i>C</i>(<i>A</i>ᵀ)</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">r</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><i>V</i> 的前 <i>r</i> 列：v₁…v<sub>r</sub></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">零空间 <i>N</i>(<i>A</i>)</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">n − r</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><i>V</i> 的后 <i>n</i>−<i>r</i> 列</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">列空间 <i>C</i>(<i>A</i>)</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">r</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><i>U</i> 的前 <i>r</i> 列：u₁…u<sub>r</sub></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">左零空间 <i>N</i>(<i>A</i>ᵀ)</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">m − r</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><i>U</i> 的后 <i>m</i>−<i>r</i> 列</td></tr>
+</tbody>
+</table>
+</div>
 
     <h4 class="sub">低秩近似：为什么 SVD 能压缩</h4>
 
@@ -1209,17 +1209,17 @@
       一旦承认它们是线性的，前面所有关于子空间和分解的工具就都能搬过去用。
     </p>
 
-    <div class="tblwrap">
-      <table>
-        <thead><tr><th>变换 T</th><th>输入空间</th><th>选定基后的矩阵</th><th>"好基"是什么</th></tr></thead>
-        <tbody>
-          <tr><td>求导 d/d<i>x</i></td><td>多项式 1, <i>x</i>, <i>x</i>²…</td><td class="k">次对角线填 1,2,3…</td><td>傅里叶基（让它对角）</td></tr>
-          <tr><td>二阶差分</td><td>离散信号</td><td class="k">三对角 [-1 2 -1]</td><td>正弦/余弦向量（特征向量）</td></tr>
-          <tr><td>循环卷积</td><td>周期序列</td><td class="k">循环矩阵</td><td>傅里叶基 → FFT 把它对角化</td></tr>
-          <tr><td>平面旋转</td><td>R²</td><td class="k">[cos −sin; sin cos]</td><td>复特征值 e<sup>iθ</sup></td></tr>
-        </tbody>
-      </table>
-    </div>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">变换 T</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">输入空间</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">选定基后的矩阵</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">"好基"是什么</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">求导 d/d<i>x</i></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">多项式 1, <i>x</i>, <i>x</i>²…</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">次对角线填 1,2,3…</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">傅里叶基（让它对角）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">二阶差分</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">离散信号</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">三对角 [-1 2 -1]</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">正弦/余弦向量（特征向量）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">循环卷积</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">周期序列</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">循环矩阵</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">傅里叶基 → FFT 把它对角化</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">平面旋转</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">R²</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">[cos −sin; sin cos]</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">复特征值 e<sup>iθ</sup></td></tr>
+</tbody>
+</table>
+</div>
 
     <div class="diagram" style="text-align:center">
 <div class="lbl">换基的完整流程（相似变换 B = M⁻¹AM）</div>
@@ -1363,39 +1363,39 @@
     <div class="sec-head"><h2>附录：五分钟速查</h2><span class="en">Cheat Sheet</span><div class="line"></div></div>
 
     <h4 class="sub">五大分解（全书的主干，一张表看完）</h4>
-    <div class="tblwrap">
-      <table>
-        <thead><tr><th>分解</th><th>适用</th><th>它回答的问题</th><th>章节</th></tr></thead>
-        <tbody>
-          <tr><td class="k">A = CR</td><td>任何矩阵</td><td>哪些列是独立的？列秩 = 行秩</td><td>1.4</td></tr>
-          <tr><td class="k">A = LU</td><td>消元（方阵为主）</td><td>怎么解 Ax=b？一次分解反复用</td><td>2.3</td></tr>
-          <tr><td class="k">A = QR</td><td>列独立</td><td>怎么得到正交基？最小二乘最稳</td><td>4.4</td></tr>
-          <tr><td class="k">S = QΛQᵀ</td><td>对称矩阵</td><td>主轴在哪？正定吗？</td><td>6.3</td></tr>
-          <tr><td class="k">A = UΣVᵀ</td><td><b>任何</b>矩阵</td><td>最佳低秩近似？最佳正交基？</td><td>7.1</td></tr>
-        </tbody>
-      </table>
-    </div>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">分解</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">适用</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">它回答的问题</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">章节</th></tr></thead>
+<tbody>
+<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">A = CR</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">任何矩阵</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">哪些列是独立的？列秩 = 行秩</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">1.4</td></tr>
+<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">A = LU</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">消元（方阵为主）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">怎么解 Ax=b？一次分解反复用</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">2.3</td></tr>
+<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">A = QR</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">列独立</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">怎么得到正交基？最小二乘最稳</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">4.4</td></tr>
+<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">S = QΛQᵀ</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对称矩阵</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">主轴在哪？正定吗？</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">6.3</td></tr>
+<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">A = UΣVᵀ</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>任何</b>矩阵</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">最佳低秩近似？最佳正交基？</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">7.1</td></tr>
+</tbody>
+</table>
+</div>
 
     <h4 class="sub">中英术语对照</h4>
-    <div class="tblwrap">
-      <table>
-        <thead><tr><th>中文</th><th>英文</th><th>一句话</th></tr></thead>
-        <tbody>
-          <tr><td>列空间</td><td class="k">column space C(A)</td><td>A 各列的所有组合，dim = r</td></tr>
-          <tr><td>零空间</td><td class="k">nullspace N(A)</td><td>Ax=0 的全部解，dim = n−r</td></tr>
-          <tr><td>行空间</td><td class="k">row space C(Aᵀ)</td><td>消元不改变它，dim = r</td></tr>
-          <tr><td>左零空间</td><td class="k">left nullspace N(Aᵀ)</td><td>最小二乘的误差住在里面，dim = m−r</td></tr>
-          <tr><td>秩</td><td class="k">rank r</td><td>主元个数 = 独立列数 = 独立行数</td></tr>
-          <tr><td>线性无关</td><td class="k">independence</td><td>Ax=0 只有零解</td></tr>
-          <tr><td>标准正交</td><td class="k">orthonormal</td><td>QᵀQ = I，长度角度都不变</td></tr>
-          <tr><td>投影矩阵</td><td class="k">projection P</td><td>P² = P，Pᵀ = P</td></tr>
-          <tr><td>正规方程</td><td class="k">normal equations</td><td>AᵀAx̂ = Aᵀb</td></tr>
-          <tr><td>伪逆</td><td class="k">pseudoinverse A⁺</td><td>VΣ⁺Uᵀ，最小范数最小二乘解</td></tr>
-          <tr><td>条件数</td><td class="k">condition number</td><td>σ₁/σᵣ，衡量矩阵有多病态</td></tr>
-          <tr><td>低秩近似</td><td class="k">low-rank approximation</td><td>截断 SVD，Eckart–Young 保证最优</td></tr>
-        </tbody>
-      </table>
-    </div>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">中文</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">英文</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">一句话</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">列空间</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">column space C(A)</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">A 各列的所有组合，dim = r</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">零空间</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">nullspace N(A)</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Ax=0 的全部解，dim = n−r</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">行空间</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">row space C(Aᵀ)</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">消元不改变它，dim = r</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">左零空间</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">left nullspace N(Aᵀ)</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">最小二乘的误差住在里面，dim = m−r</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">秩</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">rank r</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">主元个数 = 独立列数 = 独立行数</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">线性无关</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">independence</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Ax=0 只有零解</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">标准正交</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">orthonormal</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">QᵀQ = I，长度角度都不变</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">投影矩阵</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">projection P</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">P² = P，Pᵀ = P</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">正规方程</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">normal equations</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">AᵀAx̂ = Aᵀb</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">伪逆</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">pseudoinverse A⁺</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">VΣ⁺Uᵀ，最小范数最小二乘解</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">条件数</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">condition number</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">σ₁/σᵣ，衡量矩阵有多病态</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">低秩近似</td><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">low-rank approximation</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">截断 SVD，Eckart–Young 保证最优</td></tr>
+</tbody>
+</table>
+</div>
 
     <h4 class="sub">自测：给自己的六个问题</h4>
 

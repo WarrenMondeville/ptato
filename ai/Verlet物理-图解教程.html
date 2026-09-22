@@ -577,18 +577,18 @@ b −= delta · diff · (wb / (wa + wb))</div>
   <h2><span class="num">06</span>固定点、不等式与自碰撞</h2>
   <p class="lead">距离约束是"等于"，游戏里还有大量"小于等于"和"不许进"的需求。在 Verlet 框架里它们都是同一种操作：<strong>只在条件被违反时才投影</strong>。</p>
 
-  <div class="tblwrap">
-    <table>
-      <thead><tr><th>约束类型</th><th>数学形式</th><th>触发条件</th><th>典型用途</th></tr></thead>
-      <tbody>
-        <tr><td><strong>等式 · 距离</strong></td><td>|b − a| = d</td><td>恒成立，总是投影</td><td>绳子、布料结构线、骨骼</td></tr>
-        <tr><td><strong>不等式 · 最小距离</strong></td><td>|b − a| ≥ d</td><td>只在 dist &lt; d 时</td><td>自碰撞、防止膝盖穿模、体积保持</td></tr>
-        <tr><td><strong>不等式 · 最大距离</strong></td><td>|b − a| ≤ d</td><td>只在 dist &gt; d 时</td><td>限位绳、关节活动范围</td></tr>
-        <tr><td><strong>单侧 · 平面</strong></td><td>(p − q)·n ≥ 0</td><td>只在点越过平面</td><td>地面、墙、碰撞体表面</td></tr>
-        <tr><td><strong>钉住（pin）</strong></td><td>p = 目标点</td><td>总是</td><td>固定端、被玩家抓住的部位</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">约束类型</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">数学形式</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">触发条件</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">典型用途</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>等式 · 距离</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">|b − a| = d</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">恒成立，总是投影</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">绳子、布料结构线、骨骼</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>不等式 · 最小距离</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">|b − a| ≥ d</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只在 dist &lt; d 时</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">自碰撞、防止膝盖穿模、体积保持</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>不等式 · 最大距离</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">|b − a| ≤ d</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只在 dist &gt; d 时</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">限位绳、关节活动范围</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>单侧 · 平面</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">(p − q)·n ≥ 0</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只在点越过平面</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">地面、墙、碰撞体表面</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>钉住（pin）</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">p = 目标点</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">总是</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">固定端、被玩家抓住的部位</td></tr>
+</tbody>
+</table>
+</div>
 
   <p>投影代码只有一行判断的差别：</p>
   <pre><span class="k">function</span> solveMinDist(a, b, minD) {        <span class="cm">// 不等式：只在太近时才推开</span>
@@ -726,16 +726,16 @@ b −= delta · diff · (wb / (wa + wb))</div>
     <div class="cap">图 7 · 布料的两类核心约束（第三类 bend = 隔一个节点的连线，画在下方代码里）</div>
   </div>
 
-  <div class="tblwrap">
-    <table>
-      <thead><tr><th>约束</th><th>连接谁</th><th>静止长度</th><th>作用</th><th>缺失后果</th></tr></thead>
-      <tbody>
-        <tr><td><strong>stretch</strong> 结构</td><td>上下左右相邻</td><td>spacing</td><td>维持布面尺寸，承担张力</td><td>布被拉长、像橡皮膜</td></tr>
-        <tr><td><strong>shear</strong> 剪切</td><td>两条对角线</td><td>spacing·√2</td><td>抵抗面内错切</td><td>网格变成菱形，布"漏风"</td></tr>
-        <tr><td><strong>bend</strong> 弯曲</td><td>隔一个节点</td><td>spacing·2</td><td>抵抗折叠，决定挺括度</td><td>布料软塌、褶皱过碎</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">约束</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">连接谁</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">静止长度</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">作用</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">缺失后果</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>stretch</strong> 结构</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">上下左右相邻</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">spacing</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">维持布面尺寸，承担张力</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">布被拉长、像橡皮膜</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>shear</strong> 剪切</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">两条对角线</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">spacing·√2</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">抵抗面内错切</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">网格变成菱形，布"漏风"</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>bend</strong> 弯曲</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">隔一个节点</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">spacing·2</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">抵抗折叠，决定挺括度</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">布料软塌、褶皱过碎</td></tr>
+</tbody>
+</table>
+</div>
 
   <pre><span class="k">for</span> (<span class="k">let</span> r = <span class="n">0</span>; r &lt; rows; r++) <span class="k">for</span> (<span class="k">let</span> c = <span class="n">0</span>; c &lt; cols; c++) {
   <span class="k">const</span> p = at(r, c);
@@ -945,18 +945,18 @@ b −= delta · diff · (wb / (wa + wb))</div>
 
   <p>其中 <code>C = |b − a| − rest</code> 是约束违反量，<code>∇C</code> 是梯度（对距离约束就是单位方向向量）。对比一下：</p>
 
-  <div class="tblwrap">
-    <table>
-      <thead><tr><th></th><th>经典 PBD</th><th>XPBD</th></tr></thead>
-      <tbody>
-        <tr><td>刚度表示</td><td>k ∈ [0,1] 的修正比例</td><td>柔度 α（单位 m/N），物理可解释</td></tr>
-        <tr><td>依赖迭代次数</td><td><strong>是</strong> —— 迭代翻倍，材料变硬</td><td>否 —— 迭代只影响收敛精度</td></tr>
-        <tr><td>依赖时间步</td><td><strong>是</strong> —— 30 FPS 布料会变软</td><td>否 —— α̃ = α/Δt² 已归一化</td></tr>
-        <tr><td>额外内存</td><td>无</td><td>每条约束一个 λ（每步清零）</td></tr>
-        <tr><td>α = 0 时</td><td>—</td><td>退化为完全刚性，等价于经典 PBD 的 k=1</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left"></th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">经典 PBD</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">XPBD</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">刚度表示</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">k ∈ [0,1] 的修正比例</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">柔度 α（单位 m/N），物理可解释</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">依赖迭代次数</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>是</strong> —— 迭代翻倍，材料变硬</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">否 —— 迭代只影响收敛精度</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">依赖时间步</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>是</strong> —— 30 FPS 布料会变软</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">否 —— α̃ = α/Δt² 已归一化</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">额外内存</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">无</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">每条约束一个 λ（每步清零）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">α = 0 时</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">—</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">退化为完全刚性，等价于经典 PBD 的 k=1</td></tr>
+</tbody>
+</table>
+</div>
 
   <div class="callout co-violet">
     <span class="hd">要不要上 XPBD</span>
@@ -1063,21 +1063,21 @@ b −= delta · diff · (wb / (wa + wb))</div>
   <h2><span class="num">A</span>调参表与踩坑清单</h2>
   <p class="lead">这些数字不是物理常数，是<strong>手感起点</strong>。单位按"1 米 = 100 像素、重力 ≈ 1400 px/s²"的尺度给。</p>
 
-  <div class="tblwrap">
-    <table>
-      <thead><tr><th>参数</th><th>典型值</th><th>调大的效果</th><th>调小的效果</th></tr></thead>
-      <tbody>
-        <tr><td><strong>damping</strong> 阻尼</td><td>0.99 ~ 0.999</td><td>更黏、更快静止（&gt;1 会自激振荡！）</td><td>更飘、晃个不停</td></tr>
-        <tr><td><strong>iterations</strong> 迭代</td><td>3 ~ 15</td><td>更硬、更接近不可拉伸，更费 CPU</td><td>橡皮筋感、误差沿链累积</td></tr>
-        <tr><td><strong>substeps</strong></td><td>4 ~ 8</td><td>更稳、穿透更浅（同预算下优于加迭代）</td><td>大步长误差、抖动</td></tr>
-        <tr><td><strong>dt</strong></td><td>1/60 固定</td><td>更快但更糙</td><td>更准但更费（配合 substep 用）</td></tr>
-        <tr><td><strong>gravity</strong></td><td>900 ~ 2000 px/s²</td><td>更快下落，需要更多迭代才不拉伸</td><td>飘、像在水下</td></tr>
-        <tr><td><strong>restitution</strong> e</td><td>0 ~ 0.5</td><td>更弹（&gt;1 会增能，会炸）</td><td>0 = 泥巴，静止接触最稳</td></tr>
-        <tr><td><strong>friction</strong> μ</td><td>0.1 ~ 0.4</td><td>更黏（布搭在球上不滑）</td><td>打滑、堆叠站不住</td></tr>
-        <tr><td><strong>spacing</strong> 网格间距</td><td>15 ~ 25 px</td><td>更省但更粗糙</td><td>更细腻但 O(n²) 开销上升</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">参数</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">典型值</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">调大的效果</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">调小的效果</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>damping</strong> 阻尼</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">0.99 ~ 0.999</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">更黏、更快静止（&gt;1 会自激振荡！）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">更飘、晃个不停</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>iterations</strong> 迭代</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">3 ~ 15</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">更硬、更接近不可拉伸，更费 CPU</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">橡皮筋感、误差沿链累积</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>substeps</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">4 ~ 8</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">更稳、穿透更浅（同预算下优于加迭代）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">大步长误差、抖动</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>dt</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">1/60 固定</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">更快但更糙</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">更准但更费（配合 substep 用）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>gravity</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">900 ~ 2000 px/s²</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">更快下落，需要更多迭代才不拉伸</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">飘、像在水下</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>restitution</strong> e</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">0 ~ 0.5</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">更弹（&gt;1 会增能，会炸）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">0 = 泥巴，静止接触最稳</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>friction</strong> μ</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">0.1 ~ 0.4</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">更黏（布搭在球上不滑）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">打滑、堆叠站不住</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>spacing</strong> 网格间距</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">15 ~ 25 px</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">更省但更粗糙</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">更细腻但 O(n²) 开销上升</td></tr>
+</tbody>
+</table>
+</div>
 
   <h3>七个一定会踩的坑</h3>
   <ol>
@@ -1099,25 +1099,25 @@ b −= delta · diff · (wb / (wa + wb))</div>
 <!-- ============ B ============ -->
 <section id="app-b">
   <h2><span class="num">B</span>术语速查</h2>
-  <div class="tblwrap">
-    <table>
-      <thead><tr><th>术语</th><th>含义</th></tr></thead>
-      <tbody>
-        <tr><td><strong>位置 Verlet</strong></td><td>x' = 2x − x* + a·Δt²。只存位置，速度隐含在位置差里</td></tr>
-        <tr><td><strong>隐式速度</strong></td><td>v ≡ (x − x*)/Δt。改位置即改速度，二者不可能失步</td></tr>
-        <tr><td><strong>辛积分器</strong></td><td>保持相空间体积的积分器；能量有界振荡而非单调漂移</td></tr>
-        <tr><td><strong>约束投影</strong></td><td>把违反约束的位置直接挪回满足约束的位置</td></tr>
-        <tr><td><strong>松弛 / relaxation</strong></td><td>反复扫描所有约束直到整体收敛（Gauss-Seidel 风格）</td></tr>
-        <tr><td><strong>逆质量 w</strong></td><td>w = 1/m；w = 0 表示固定不动。修正量按 w 比例分摊</td></tr>
-        <tr><td><strong>刚性 / stiffness</strong></td><td>约束"有多不可违反"。PBD 里由迭代次数决定，XPBD 里由柔度 α 决定</td></tr>
-        <tr><td><strong>柔度 α</strong></td><td>α = 1/k，XPBD 的参数，单位 m/N，与帧率和迭代次数解耦</td></tr>
-        <tr><td><strong>substep</strong></td><td>把一帧切成若干小步，每步做少量迭代；同预算下比堆迭代更稳</td></tr>
-        <tr><td><strong>TCV</strong></td><td>Time-Corrected Verlet，变步长时按 Δt 比例缩放位移项的补丁</td></tr>
-        <tr><td><strong>投影式碰撞</strong></td><td>把穿透点沿最短路径推出表面，等价于恢复系数 0 的碰撞响应</td></tr>
-        <tr><td><strong>capped cylinder</strong></td><td>带端帽的圆柱。Hitman 用它近似每根连杆去做三角形碰撞</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">术语</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">含义</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>位置 Verlet</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">x' = 2x − x* + a·Δt²。只存位置，速度隐含在位置差里</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>隐式速度</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">v ≡ (x − x*)/Δt。改位置即改速度，二者不可能失步</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>辛积分器</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">保持相空间体积的积分器；能量有界振荡而非单调漂移</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>约束投影</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把违反约束的位置直接挪回满足约束的位置</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>松弛 / relaxation</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">反复扫描所有约束直到整体收敛（Gauss-Seidel 风格）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>逆质量 w</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">w = 1/m；w = 0 表示固定不动。修正量按 w 比例分摊</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>刚性 / stiffness</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">约束"有多不可违反"。PBD 里由迭代次数决定，XPBD 里由柔度 α 决定</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>柔度 α</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">α = 1/k，XPBD 的参数，单位 m/N，与帧率和迭代次数解耦</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>substep</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把一帧切成若干小步，每步做少量迭代；同预算下比堆迭代更稳</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>TCV</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Time-Corrected Verlet，变步长时按 Δt 比例缩放位移项的补丁</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>投影式碰撞</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把穿透点沿最短路径推出表面，等价于恢复系数 0 的碰撞响应</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>capped cylinder</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">带端帽的圆柱。Hitman 用它近似每根连杆去做三角形碰撞</td></tr>
+</tbody>
+</table>
+</div>
 </section>
 
 <!-- ============ C ============ -->
