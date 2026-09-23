@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GAS 技能系统 · 图解教程</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%236d28d9'/><circle cx='16' cy='16' r='4' fill='%23fff'/><circle cx='16' cy='16' r='9' fill='none' stroke='%23fff' stroke-width='2'/></svg>">
+<style>
+:root{
+  --bg:#f6f8fb; --card:#fff; --ink:#1e293b; --ink2:#475569; --ink3:#94a3b8;
+  --line:#e2e8f0; --line2:#cbd5e1;
+  --blue:#3b5bdb; --amber:#b45309; --teal:#0d9488; --violet:#6d28d9; --rose:#be123c; --green:#15803d;
+  --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px -12px rgba(15,23,42,.14);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",sans-serif;
+  font-size:16px; line-height:1.85; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:920px;margin:0 auto;padding:0 20px 80px}
+a{color:var(--blue);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ---------- hero ---------- */
+.hero{
+  background:linear-gradient(160deg,#fff 0%,#f6f4ff 55%,#eef2ff 100%);
+  border:1px solid var(--line); border-radius:20px; padding:44px 38px; margin:28px 0 26px;
+  box-shadow:var(--shadow); position:relative; overflow:hidden;
+}
+.hero::after{
+  content:""; position:absolute; right:-70px; top:-70px; width:260px; height:260px; border-radius:50%;
+  background:radial-gradient(circle,rgba(109,40,217,.12),transparent 70%);
+}
+.kicker{font-size:13px;letter-spacing:.16em;color:var(--violet);font-weight:700;margin-bottom:14px}
+.hero h1{font-size:33px;line-height:1.3;margin:0 0 12px;letter-spacing:-.01em}
+.hero .sub{font-size:16.5px;color:var(--ink2);margin:0 0 22px;max-width:680px}
+.hero .meta{display:flex;flex-wrap:wrap;gap:10px}
+.chip{
+  background:#fff;border:1px solid var(--line2);border-radius:999px;
+  padding:5px 14px;font-size:12.5px;color:var(--ink2);
+}
+.chip b{color:var(--ink);font-weight:600}
+
+/* ---------- 目录 ---------- */
+.toc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-bottom:30px;box-shadow:var(--shadow)}
+.toc h2{font-size:15px;margin:0 0 16px;color:var(--ink3);font-weight:700;letter-spacing:.08em}
+
+/* ---------- 章节 ---------- */
+section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:34px 38px;margin-bottom:26px;box-shadow:var(--shadow)}
+section>h2{font-size:24px;margin:0 0 6px;letter-spacing:-.01em;scroll-margin-top:20px}
+section>h2 .num{color:var(--line2);font-weight:800;margin-right:10px;font-size:20px}
+.lead{color:var(--ink2);font-size:15.5px;margin:0 0 22px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+h3{font-size:18px;margin:32px 0 10px;color:var(--ink)}
+h3:first-of-type{margin-top:8px}
+h4{font-size:15px;margin:22px 0 8px;color:var(--ink2)}
+p{margin:0 0 14px}
+ul,ol{margin:0 0 16px;padding-left:22px}
+li{margin-bottom:7px}
+strong{font-weight:650;color:var(--ink)}
+code{
+  font-family:"SFMono-Regular",Menlo,Consolas,monospace;font-size:13px;
+  background:#f1f5f9;border:1px solid var(--line);border-radius:5px;padding:1px 5px;color:#0f172a;
+  overflow-wrap:anywhere;word-break:break-word;
+}
+.small{font-size:13.5px;color:var(--ink3)}
+
+/* ---------- 图 ---------- */
+.diagram{background:linear-gradient(180deg,#fdfefe,#f8fafc);border:1px solid var(--line);border-radius:14px;padding:22px 18px;margin:22px 0}
+.cap{font-size:12.5px;color:var(--ink3);text-align:center;margin-top:12px;line-height:1.6}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;justify-content:center;gap:8px}
+.box{background:#fff;border:1.5px solid var(--line2);border-radius:11px;padding:10px 14px;font-size:13.5px;text-align:center;line-height:1.5}
+.box b{display:block;font-size:13.5px;font-weight:700;color:var(--ink)}
+.box span{font-size:11.5px;color:var(--ink3)}
+.box.blue{border-color:#a8b8f5;background:#f3f6ff}
+.box.teal{border-color:#8fd3cb;background:#f0fbf9}
+.box.amber{border-color:#f0c48a;background:#fffaf0}
+.box.rose{border-color:#f2aab8;background:#fff5f7}
+.box.violet{border-color:#c4b0f5;background:#f8f5ff}
+.box.green{border-color:#9bd3a4;background:#f2fbf4}
+.box.dark{border-color:#94a3b8;background:#f1f5f9}
+.arw{align-self:center;color:#94a3b8;font-size:17px;font-weight:700}
+.arw.dn{display:block;text-align:center;margin:6px auto;color:#94a3b8;font-size:16px}
+.stack{display:grid;gap:7px}
+.layer{display:flex;gap:12px;align-items:center;border:1.5px solid var(--line2);border-radius:11px;padding:11px 15px;background:#fff;font-size:13.5px}
+.layer .taglbl{
+  flex:0 0 auto;font-size:11px;font-weight:700;color:#fff;background:var(--blue);
+  border-radius:6px;padding:2px 8px;letter-spacing:.03em;
+}
+.layer.t .taglbl{background:var(--teal)}
+.layer.a .taglbl{background:var(--amber)}
+.layer.v .taglbl{background:var(--violet)}
+.layer.r .taglbl{background:var(--rose)}
+.layer.g .taglbl{background:var(--green)}
+.layer.d .taglbl{background:#64748b}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:680px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+svg{max-width:100%;height:auto}
+
+/* ---------- 高亮框 ---------- */
+.callout{border-radius:12px;padding:16px 18px;margin:20px 0;font-size:14.5px;border:1px solid;line-height:1.75}
+.callout .hd{font-weight:700;font-size:13px;letter-spacing:.05em;margin-bottom:6px;display:block}
+.callout p:last-child{margin-bottom:0}
+.co-blue{background:#f3f6ff;border-color:#c7d2fe;color:#1e3a8a}
+.co-blue .hd{color:var(--blue)}
+.co-teal{background:#f0fbf9;border-color:#99e6d9;color:#134e4a}
+.co-teal .hd{color:var(--teal)}
+.co-amber{background:#fffaf0;border-color:#fcd9a5;color:#78350f}
+.co-amber .hd{color:var(--amber)}
+.co-rose{background:#fff5f7;border-color:#f8c2cd;color:#831843}
+.co-rose .hd{color:var(--rose)}
+.co-violet{background:#f8f5ff;border-color:#ddd0fb;color:#4c1d95}
+.co-violet .hd{color:var(--violet)}
+
+/* ---------- 数据卡 ---------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0}
+.stat{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:14px 16px;text-align:center}
+.stat .v{font-size:23px;font-weight:750;color:var(--blue);line-height:1.2;letter-spacing:-.02em}
+.stat .k{font-size:12px;color:var(--ink3);margin-top:4px;line-height:1.4}
+
+/* ---------- 表格 ---------- */
+.tblwrap{overflow-x:auto;margin:20px 0;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13.5px;background:#fff}
+th{background:#f8fafc;text-align:left;padding:10px 13px;font-weight:700;color:var(--ink2);border-bottom:1px solid var(--line);white-space:nowrap;font-size:13px}
+td{padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#fcfdff}
+
+/* ---------- 公式 ---------- */
+.formula{
+  background:#f8fafc;border:1px solid var(--line);border-left:3px solid var(--blue);
+  border-radius:0 10px 10px 0;padding:12px 16px;margin:16px 0;
+  font-family:"SFMono-Regular",Menlo,Consolas,monospace;font-size:13.5px;line-height:2;color:#0f172a;
+  overflow-x:auto;white-space:pre;
+}
+.formula .c{color:var(--ink3)}
+
+/* ---------- 代码 ---------- */
+pre{
+  background:#0f172a;color:#e2e8f0;border-radius:12px;padding:16px 18px;overflow-x:auto;
+  font-family:"SFMono-Regular",Menlo,Consolas,monospace;font-size:12.8px;line-height:1.75;margin:18px 0;
+}
+pre .k{color:#93c5fd}
+pre .t{color:#86efac}
+pre .cm{color:#94a3b8}
+pre .n{color:#fcd34d}
+
+/* ---------- 其他 ---------- */
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0}
+.tag{font-size:11.5px;background:#f1f5f9;border:1px solid var(--line);border-radius:6px;padding:2px 9px;color:var(--ink2)}
+.q{border-left:3px solid var(--line2);padding:2px 0 2px 16px;color:var(--ink2);font-size:14.5px;margin:16px 0}
+footer{text-align:center;color:var(--ink3);font-size:13px;padding:30px 20px 0;line-height:1.9}
+.divider{height:1px;background:var(--line);margin:34px 0}
+
+.toclist{list-style:none;margin:8px 0 0;padding:0}
+.toclist li{padding:6px 2px;font-size:14px;line-height:1.6;color:var(--ink);border-bottom:1px dashed var(--line)}
+.toclist li:last-child{border-bottom:none}
+.tocpart{font-weight:700;color:var(--blue);margin-top:14px;font-size:13px;letter-spacing:.04em}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hero">
+  <div class="kicker">图 解 教 程 · 实 战 专 题</div>
+  <h1>GAS 技能系统：把「技能」从代码里拆出来</h1>
+  <p class="sub">Unreal 的 Gameplay Ability System 常被说成「难」，但难的从来不是它的想法，而是它的名字太长、类名太像。这一篇把 ASC、Attribute、Ability、Effect、Tag、Cue 六块积木逐个拆开，讲清数值是怎么被算出来的、状态是怎么被标签管住的、联机是怎么先斩后奏的，最后给一张「什么时候别用它」的判别表和一份 Unity 侧的移植清单。</p>
+  <div class="meta">
+    <span class="chip">定位 <b>工程实战专题</b></span>
+    <span class="chip">框架 <b>UE5 Gameplay Ability System</b></span>
+    <span class="chip">案例 <b>Fortnite / Paragon / Lyra</b></span>
+    <span class="chip">迁移 <b>附 Unity C# 对照</b></span>
+    <span class="chip">阅读时长 <b>约 55 分钟</b></span>
+  </div>
+</div>
+
+<div class="toc">
+<h2>目 录</h2>
+<ul class="toclist">
+<li class="tocpart">开篇</li>
+<li>0 · 技能系统为什么会烂掉</li>
+<li class="tocpart">第一部分 · 六块积木</li>
+<li>1 · ASC：一个人的技能中枢</li>
+<li>2 · AttributeSet：数值不是一个 float</li>
+<li>3 · GameplayTag：把 if 换成一个标签</li>
+<li>4 · GameplayAbility：技能是有生命周期的对象</li>
+<li>5 · GameplayEffect：改数值的唯一合法途径</li>
+<li>6 · GameplayCue：让表现和逻辑离婚</li>
+<li class="tocpart">第二部分 · 数值是怎么算出来的</li>
+<li>7 · 聚合公式：加、乘、除的顺序</li>
+<li>8 · 堆叠：三个火球算几层</li>
+<li>9 · 消耗与冷却：不要写计时器</li>
+<li>10 · Meta Attribute 与 Execution：护甲减伤放哪</li>
+<li>11 · 标签状态机：死亡、眩晕、吟唱</li>
+<li class="tocpart">第三部分 · 联机</li>
+<li>12 · 复制模式：Full / Mixed / Minimal</li>
+<li>13 · 预测：客户端先斩后奏</li>
+<li>14 · 预测不了的三件事</li>
+<li>15 · 完整走一遍：一个火球术的 14 步</li>
+<li class="tocpart">第四部分 · 工程判断</li>
+<li>16 · 什么时候不该用 GAS</li>
+<li>17 · 12 个几乎人人都会踩的坑</li>
+<li>18 · Unity 视角：把这套思想搬回 C#</li>
+<li>19 · 调试：看不见的系统永远调不好</li>
+<li class="tocpart">附录</li>
+<li>A · 术语速查表</li>
+<li>B · 从零搭建的 10 步清单</li>
+<li>C · 常见误区与反直觉点</li>
+<li>D · 思考题</li>
+</ul>
+</div>
+
+<!-- ============ 0 ============ -->
+<section id="ch0">
+  <h2><span class="num">00</span>技能系统为什么会烂掉</h2>
+  <p class="lead">一句话：<strong>技能系统的复杂度不是线性增长的，是乘法增长的</strong>。五个技能 × 五种状态 = 不是 25 行代码，而是 25 种「这个组合是否被允许」的判断。</p>
+
+  <p>先描述一个几乎所有动作游戏项目都会经历的过程。</p>
+
+  <p>第一天，你写了一个 <code>Fireball</code> 类：检查蓝量够不够 → 扣蓝 → 播放动画 → 生成一个火球 → 命中后扣血。很清楚，两百行。</p>
+
+  <p>第二周，策划说要加冷却。你加了一个 <code>float CooldownTimer</code>。</p>
+
+  <p>第三周，要加一个「燃烧」Debuff，每秒扣血，持续 5 秒。你加了一个 <code>List&lt;Buff&gt;</code> 和一段 Tick 里的遍历。</p>
+
+  <p>第四周，策划问：角色被眩晕的时候能放技能吗？吟唱中被打断会怎样？两个加攻击力的 Buff 是叠加还是取最大？火球术在冷却时按钮要不要变灰？</p>
+
+  <p>到这里，你会发现每一个新问题都不是「新增一个功能」，而是「修改所有已存在的功能」。<strong>这就是技能系统烂掉的真正原因：不是代码写得差，而是信息散落在了错误的地方。</strong></p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">症状一</span><div style="margin-top:4px"><b>状态散落</b><br/>「是否能放技能」这件事，被写进了技能类自己、角色类、UI 类三份代码里，且三份的判断条件会逐渐不一致。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">症状二</span><div style="margin-top:4px"><b>数值有多个真相源</b><br/>攻击力可能同时被装备、Buff、天赋、光环修改，每一处都在直接写 <code>AttackPower</code> 这个 float，谁最后写谁说了算。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">症状三</span><div style="margin-top:4px"><b>表现与逻辑缠死</b><br/>技能代码里直接 <code>SpawnEmitter</code>，于是单机跑得好好的，一上联机满屏特效重复播放两次。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">症状四</span><div style="margin-top:4px"><b>改一个数值要碰代码</b><br/>策划想调一个伤害系数，得改 C++、编译、重启编辑器。于是数值迭代速度被编译速度锁死。</div></div>
+<div class="cap">图 0-1 · 技能系统的四种典型腐烂路径</div>
+</div>
+
+  <h3>GAS 给出的答案：把所有东西拆成数据和规则</h3>
+
+  <p>GAS 是 Epic 用《Paragon》（MOBA）和《Fortnite》（战术竞技）的实际需求磨出来的一套框架。它没有发明什么新算法，它做的是一件更朴素的事：<strong>把「技能」这个概念拆成六个各司其职的部件，并且规定它们之间只能按固定的方式通信。</strong></p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #94a3b8;border-radius:11px;background:#f1f5f9;font-size:14px;text-align:left"><b style="color:#1e293b">AttributeSet</b><br><span style="color:#475569;font-size:13px">数值：血量、蓝量、攻击力</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">GameplayEffect</b><br><span style="color:#475569;font-size:13px">改数值的唯一途径</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">GameplayAbility</b><br><span style="color:#475569;font-size:13px">技能：什么时候能放、放完怎么收尾</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">GameplayTag</b><br><span style="color:#475569;font-size:13px">标签：状态与资格</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">GameplayCue</b><br><span style="color:#475569;font-size:13px">表现：特效、音效</span></div>
+<div class="cap">图 0-2 · 五块积木围绕 ASC 的依赖顺序：ASC 居中调度，其余五块各管一件事</div>
+</div>
+
+  <p>拆完之后，上面四个症状分别被这样解决：</p>
+
+  <ul>
+    <li><strong>状态散落</strong> → 状态统一用 Tag 表示，挂在角色身上。技能、UI、AI 都问同一句话。</li>
+    <li><strong>多个真相源</strong> → 数值只能被 GameplayEffect 修改，且修改是「累加到基础值上」而不是「覆盖」。</li>
+    <li><strong>表现缠死</strong> → 特效只能由 GameplayCue 触发，而 Cue 天然知道自己是该在客户端跑还是服务端跑。</li>
+    <li><strong>改数值要碰代码</strong> → GameplayEffect 是纯数据资产，策划自己在编辑器里改。</li>
+  </ul>
+
+  <div class="callout co-violet">
+    <span class="hd">最该记住的一条</span>
+    <p>GAS 的全部设计都可以归纳为一句话：<strong>能写成数据的，就不要写成代码；能靠标签判断的，就不要写 if。</strong>当你发现自己想在技能里写 <code>if (bIsStunned)</code> 的时候，正确做法通常是给角色挂一个 <code>State.Stunned</code> 标签，然后让技能的「禁用标签」栏位去处理它。</p>
+  </div>
+
+  <h3>关于「GAS 很难」这件事</h3>
+
+  <p>GAS 的口碑是两极的：一边是「我三天就跑起来了」，一边是「我看了两周 Lyra 还是不懂」。造成差异的通常不是能力，而是<strong>入手顺序</strong>。</p>
+
+  <p>如果你从 Lyra 源码开始读，你会同时撞上 Game Feature、Experience、Equipment、Input Mapping 四套额外系统，它们和 GAS 本身毫无关系，但混在一起看起来就像 GAS 的一部分。</p>
+
+  <p>正确的顺序是本文的顺序：先只理解六块积木各自的职责，再理解数值怎么算，最后才碰网络。等你能用 GAS 在单机里做出一个完整的火球术，Lyra 里的那些封装你会一眼看懂它在解决什么问题。</p>
+
+  <div class="stats">
+    <div class="stat"><div class="v">6</div><div class="k">核心类：ASC / Attribute / Ability / Effect / Tag / Cue</div></div>
+    <div class="stat"><div class="v">3</div><div class="k">Effect 时长策略：Instant / Duration / Infinite</div></div>
+    <div class="stat"><div class="v">4</div><div class="k">Ability 网络执行策略</div></div>
+    <div class="stat"><div class="v">1</div><div class="k">每个 GAS 角色有且只有一个 ASC</div></div>
+  </div>
+</section>
+
+<!-- ============ 1 ============ -->
+<section id="ch1">
+  <h2><span class="num">01</span>ASC：一个人的技能中枢</h2>
+  <p class="lead">一句话：<strong>AbilitySystemComponent（ASC）是挂在角色身上的那个「技能背包」</strong>，它持有该角色全部的技能、生效中的效果、属性集和标签。任何 GAS 角色有且只有一个。</p>
+
+  <p>ASC 本身不做任何游戏逻辑。它的角色是一个<strong>容器 + 路由器</strong>：别人想改这个角色的数值，得经过它；别人想查这个角色能不能放某个技能，得问它；网络要复制什么，由它决定。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">持有</span><div style="margin-top:4px"><b>ActivatableAbilities</b><br/>这个角色「会」的技能列表。注意是会，不代表现在能放。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">持有</span><div style="margin-top:4px"><b>ActiveGameplayEffects</b><br/>当前正在生效的效果：Buff、Debuff、护盾、冷却。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">持有</span><div style="margin-top:4px"><b>AttributeSets</b><br/>数值集：血量、蓝量、攻击力。可以有多个不同的 Set。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">持有</span><div style="margin-top:4px"><b>GameplayTags</b><br/>当前状态标签：State.Dead、State.Stunned、Cooldown.Fireball。</div></div>
+<div class="cap">图 1-1 · ASC 手里握着四样东西，整个角色的「当前状态」就是这四样的并集</div>
+</div>
+
+  <h3>OwnerActor 和 AvatarActor：两个容易混的概念</h3>
+
+  <p>ASC 会区分两个角色：</p>
+
+  <ul>
+    <li><strong>OwnerActor</strong>：真正<strong>持有</strong> ASC 的那个 Actor。</li>
+    <li><strong>AvatarActor</strong>：ASC 的<strong>物理化身</strong>，也就是你在世界里看到的那个角色。</li>
+  </ul>
+
+  <p>大多数情况下两者是同一个对象（比如一个 AI 杂兵，ASC 就挂在它自己身上）。但玩家的英雄往往不是：<strong>ASC 挂在 PlayerState 上，Avatar 是那个 Character。</strong></p>
+
+  <p>为什么要这么绕？因为<strong>角色会死、会重生，而 PlayerState 不会</strong>。如果 ASC 挂在 Character 上，角色一重生，身上的 Buff、冷却、属性全部清零重生——这在 MOBA 里是不可接受的（你不会希望英雄复活后身上的红 buff 没了）。放到 PlayerState 上，Pawn 可以随便销毁重建，ASC 里的数据一直活着。</p>
+
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">方案</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">适用</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">代价</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>ASC 在 PlayerState</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">MOBA 英雄、会重生的玩家角色</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">PlayerState 的 <code>NetUpdateFrequency</code> 默认很低，属性与标签同步到客户端会有肉眼可见的延迟，必须手动调高并开启 <code>Adaptive Network Update Frequency</code>。Fortnite 就是这么做的。</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>ASC 在 Character / Pawn</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">AI 杂兵、一次性生成的怪物、纯单机</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">简单直接，但角色销毁后 GAS 数据一起没；死亡重生时状态全丢。</td></tr>
+</tbody>
+</table>
+</div>
+
+  <h3>三个复制模式：决定「谁需要知道什么」</h3>
+
+  <p>这是 ASC 上最重要的一个设置，它直接决定联机时的带宽和玩家看到的正确性。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">Full</span><div style="margin-top:4px"><b>一切都复制给所有人</b><br/>每个 GameplayEffect 都会同步到每个客户端。单机用这个。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">Mixed</span><div style="margin-top:4px"><b>效果只给本人，标签和特效给所有人</b><br/>玩家控制的角色用这个。你不需要知道敌人身上有几个 Buff 的具体数值，但你需要看到他头顶冒火（GameplayCue）和他是不是无敌（Tag）。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">Minimal</span><div style="margin-top:4px"><b>效果完全不复制</b><br/>AI 控制的角色用这个。AI 的状态由服务器权威，客户端只需要看到标签和特效。</div></div>
+<div class="cap">图 1-2 · 三种复制模式，本质是「把多少真相告诉别人」</div>
+</div>
+
+  <div class="callout co-amber">
+    <span class="hd">一个必踩的坑</span>
+    <p><code>Mixed</code> 模式要求 OwnerActor 的 <code>Owner</code> 是 Controller。PlayerState 的 Owner 默认就是 Controller，但 Character 不是——所以如果你把 ASC 放在 Character 上又想用 Mixed，必须自己调 <code>SetOwner()</code>。从 UE 4.24 起 <code>PossessedBy()</code> 会自动设置 Pawn 的 Owner，这个问题缓解了不少。</p>
+  </div>
+
+  <h3>初始化的时机</h3>
+
+  <p>ASC 必须在 <strong>C++ 里创建</strong>并 <code>SetIsReplicated(true)</code>——这一步没有蓝图等价物。然后，<strong>服务器和客户端都要</strong>调用一次 <code>InitAbilityActorInfo(OwnerActor, AvatarActor)</code>：</p>
+
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">ASC 位置</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">服务器在哪初始化</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">客户端在哪初始化</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">在 PlayerState 上</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Pawn 的 <code>PossessedBy()</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Pawn 的 <code>OnRep_PlayerState()</code>（确保客户端的 PlayerState 已经存在）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">在 Pawn 上</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Pawn 的 <code>PossessedBy()</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">PlayerController 的 <code>AcknowledgePossession()</code></td></tr>
+</tbody>
+</table>
+</div>
+
+  <p>如果你忘了在客户端初始化，会得到一条很有名的报错：</p>
+
+  <pre><span class="cm">// LogAbilitySystem: Warning:</span>
+Can't activate LocalOnly or LocalPredicted ability %s when not local!</pre>
+
+  <p>这条报错几乎每年都会在 GAS 新手群里出现一次。它的意思不是「你的技能写错了」，而是「客户端这边的 ASC 还不知道自己是谁」。</p>
+
+  <div class="callout co-blue">
+    <span class="hd">命名约定</span>
+    <p>社区通行的资产前缀：<code>GA_</code> = GameplayAbility，<code>GE_</code> = GameplayEffect，<code>GC_</code> = GameplayCue，<code>AS_</code> = AttributeSet。看起来是小事，但当项目里有 300 个技能时，前缀是唯一能让你在内容浏览器里活着的东西。</p>
+  </div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section id="ch2">
+  <h2><span class="num">02</span>AttributeSet：数值不是一个 float</h2>
+  <p class="lead">一句话：<strong>Attribute 有两个值：BaseValue（永久值）和 CurrentValue（当前值）</strong>。CurrentValue 是 BaseValue 加上所有临时修改后算出来的结果，而不是被直接改出来的。</p>
+
+  <p>这是 GAS 里最核心、也最容易被忽略的一个设计。平时我们写 <code>Health -= 30</code>，是直接改一个数字。GAS 里你永远不直接改数字，你<strong>施加一个效果</strong>，由框架去聚合出最终值。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #94a3b8;border-radius:11px;background:#f1f5f9;font-size:14px;text-align:left"><b style="color:#1e293b">BaseValue = 600</b><br><span style="color:#475569;font-size:13px">移速的永久值</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">+50 加速 Buff</b><br><span style="color:#475569;font-size:13px">Duration 效果</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">CurrentValue = 650</b><br><span style="color:#475569;font-size:13px">实际生效的移速</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">Buff 到期</b><br><span style="color:#475569;font-size:13px">自动回落到 600</span></div>
+<div class="cap">图 2-1 · Buff 从来没「减去」过 50，它只是失效了，CurrentValue 被重新聚合一遍</div>
+</div>
+
+  <p>这个设计带来一个巨大的好处：<strong>多个系统可以同时修改同一个属性，而且互相不知道对方的存在。</strong></p>
+
+  <p>一个伤害数字可以被护甲减免、被 Buff 翻倍、被免疫标签完全挡下——而这三套系统之间没有一行代码互相引用。它们只是各自往同一个聚合器里丢了一个修改器。</p>
+
+  <div class="callout co-teal">
+    <span class="hd">最该记住的一条</span>
+    <p>为什么不用一个 <code>float</code> 自己写？因为你在复刻的不是「一个数字」，而是数字周围那条管道：谁改过它、改了多少、什么时候失效、要不要同步给客户端、客户端能不能先斩后奏。前两个 Buff 你写得出来，第五个你会开始写 GAS 的劣化版。</p>
+  </div>
+
+  <h3>三类时长策略分别改哪个值</h3>
+
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">Effect 时长</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">改的是</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">典型用途</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">注意</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Instant</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">BaseValue（永久）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">伤害、治疗、扣蓝</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不会给角色添加任何 Tag，哪怕一帧也不会</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Duration</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">CurrentValue（临时）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">限时 Buff / Debuff、冷却</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">到期自动移除，也可以设 Period 做周期触发</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Infinite</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">CurrentValue（临时）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">被动光环、装备加成、护盾</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不会自然过期，必须手动移除，否则永久泄漏</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Periodic</b>（附属性）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">BaseValue</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">中毒每秒扣血、持续治疗</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Duration/Infinite 上开启 Period 后，每次触发按 Instant 处理，用于 DOT</td></tr>
+</tbody>
+</table>
+</div>
+
+  <h3>两个必须知道的回调</h3>
+
+  <p>AttributeSet 上有两个钩子，几乎所有项目的血量逻辑都写在这两个里面。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">Pre</span><div style="margin-top:4px"><b>PreAttributeChange()</b><br/>在 CurrentValue 被改变<strong>之前</strong>调用。用途：夹取范围。比如移速不允许低于 150 也不允许高于 1000。<br/><span class="small">注意：这里的夹取不会永久修改 ASC 上的修改器，任何重新计算 CurrentValue 的地方（Execution、MMC）都要自己再夹一次。</span></div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">Post</span><div style="margin-top:4px"><b>PostGameplayEffectExecute()</b><br/>只在 <strong>Instant</strong> 效果改完 BaseValue <strong>之后</strong>调用。用途：伤害的二次分配。<br/><span class="small">经典写法：先把伤害打到护盾上，溢出部分再打到血量；同时在这里飘伤害数字、放受击动画、结算击杀奖励。</span></div></div>
+<div class="cap">图 2-2 · 一前一后两个钩子，分别管「值合不合法」和「值变了之后要发生什么」</div>
+</div>
+
+  <pre><span class="cm">// PreAttributeChange：夹取，不改 modifier 本身</span>
+<span class="k">if</span> (Attribute == GetMoveSpeedAttribute())
+{
+    NewValue = FMath::Clamp(NewValue, <span class="n">150.f</span>, <span class="n">1000.f</span>);
+}
+
+<span class="cm">// PostGameplayEffectExecute：护盾优先，溢出再打血</span>
+<span class="k">float</span> Damage = Data.EvaluatedData.Magnitude;
+<span class="k">float</span> Absorbed = FMath::Min(Shield.GetCurrentValue(), Damage);
+SetShield(Shield.GetCurrentValue() - Absorbed);
+SetHealth(Health.GetCurrentValue() - (Damage - Absorbed));</pre>
+
+  <div class="callout co-rose">
+    <span class="hd">两个高频误区</span>
+    <p><strong>一、不要把 BaseValue 当成最大值。</strong>「血量上限」应该是一个独立的 <code>MaxHealth</code> 属性，而不是 Health 的 BaseValue。否则一个 +20 上限的 Buff 会让你陷入「加血上限时当前血量要不要跟着涨」的泥潭。</p>
+    <p><strong>二、不要在同一个 ASC 上挂两个同类型的 AttributeSet。</strong>GAS 查找时只会找到第一个实例，第二条永远读不到，而且不报错。</p>
+  </div>
+
+  <h3>什么不该放进 AttributeSet</h3>
+
+  <p>武器弹药是一个经典反例。直觉上「子弹数」是个属性，应该放进 AttributeSet。但 Fortnite 和 GASShooter 的做法都是：<strong>它就是一个普通 float，挂在物品上。</strong></p>
+
+  <p>理由是：AttributeSet 的生命周期是跟着 ASC 走的，而武器会被捡起、丢弃、切换。每次换枪都要新建 / 移除一个 AttributeSet，代价高、容易崩（客户端先移除、服务器随后复制属性变化过来，客户端找不到 Set 直接崩）。</p>
+
+  <div class="callout co-blue">
+    <span class="hd">判断标准</span>
+    <p>问一句：<strong>这个值会被 Buff 修改吗？</strong>会被改 → 放进 AttributeSet；不会被改 → 用一个普通变量。攻击力会被 Buff 改，弹药不会。</p>
+  </div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section id="ch3">
+  <h2><span class="num">03</span>GameplayTag：把 if 换成一个标签</h2>
+  <p class="lead">一句话：<strong>GameplayTag 是 GAS 的通用语</strong>。它是形如 <code>State.Stunned</code>、<code>Ability.Fire.Fireball</code> 的层级字符串，用来表达「现在是什么状态」和「允许不允许」。</p>
+
+  <p>GAS 里的大部分逻辑是<strong>标签匹配</strong>而不是<strong>条件分支</strong>。这一点很难在第一次读代码时体会出来，但它决定了你的项目后期能不能扛住复杂度。</p>
+
+  <p>举个例子。「被眩晕时不能放技能」，朴素写法是在每个技能里加一句判断：已经有了 40 个技能，你就得改 40 处，还得保证以后每个新技能都记得加。标签写法是：眩晕时角色的 ASC 上多了一个 <code>State.Stunned</code>，所有「动作类技能」的 <strong>Activation Blocked Tags</strong> 里填 <code>State.Stunned</code>。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">State.Stunned</b><br><span style="color:#475569;font-size:13px">被挂在角色身上</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #94a3b8;border-radius:11px;background:#f1f5f9;font-size:14px;text-align:left"><b style="color:#1e293b">GA_Fireball</b><br><span style="color:#475569;font-size:13px">Blocked: State.Stunned</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #94a3b8;border-radius:11px;background:#f1f5f9;font-size:14px;text-align:left"><b style="color:#1e293b">GA_Dash</b><br><span style="color:#475569;font-size:13px">Blocked: State.Stunned</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #9bd3a4;border-radius:11px;background:#f2fbf4;font-size:14px;text-align:left"><b style="color:#1e293b">UI 按钮</b><br><span style="color:#475569;font-size:13px">问同一个 Tag，变灰</span></div>
+<div class="cap">图 3-1 · 一处写状态，多处消费状态。这就是标签相对 if 的全部优势</div>
+</div>
+
+  <h3>标签的层级是真实生效的</h3>
+
+  <p>标签不是普通字符串，它有父子关系。查询 <code>State.Dead</code> 时，拥有 <code>State.Dead.ByDamage</code> 的角色会匹配成功。这意味着你可以先粗后细：一开始只用 <code>State.Stunned</code>，后来需要区分「被击晕」和「被冻结」，就扩展成 <code>State.Stunned.Knockdown</code> 和 <code>State.Stunned.Frozen</code>，<strong>所有老的查询代码一行都不用改</strong>。</p>
+
+  <h3>Ability 侧：八个标签容器</h3>
+
+  <p>这是初学者最容易看晕的一张表，但它的逻辑其实很整齐——分成三组：我是谁、我要什么、我影响谁。</p>
+
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">容器</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">作用</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Ability Tags</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">我这个技能的身份标签。别人靠它来封锁我、取消我</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Activation Required Tags</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">拥有者必须有全部这些标签，我才能激活</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Activation Blocked Tags</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">拥有者只要有任意一个这些标签，我就不能激活</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Activation Owned Tags</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">我在执行期间，临时给拥有者挂上这些标签（吟唱、施法中）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Cancel Abilities With Tag</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">我启动时，取消掉所有带这些标签的正在执行的技能</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Block Abilities With Tag</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">我在执行期间，禁止所有带这些标签的技能激活</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Source Required / Blocked</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对「来源」的要求（仅在被事件触发时有效）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Target Required / Blocked</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对「目标」的要求（仅在被事件触发时有效）</td></tr>
+</tbody>
+</table>
+</div>
+
+  <p>用这三个就能搭出绝大多数交互：</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">互斥</span><div style="margin-top:4px"><b>喝药时不能冲刺</b><br/>GA_Potion 的 <b>Block Abilities With Tag</b> = <code>Ability.Movement</code>。喝药期间所有移动类技能被锁。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">打断</span><div style="margin-top:4px"><b>翻滚打断吟唱</b><br/>GA_Roll 的 <b>Cancel Abilities With Tag</b> = <code>Ability.Channel</code>。翻滚一启动，正在吟唱的技能被取消。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">独占</span><div style="margin-top:4px"><b>同时只能吟唱一个</b><br/>GA_Fireball 的 <b>Activation Owned Tags</b> = <code>State.Channeling</code>，同时 <b>Blocked</b> = <code>State.Channeling</code>。自己把自己锁住。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">死亡</span><div style="margin-top:4px"><b>死了不能动，但复活技能例外</b><br/>给所有动作技能填 <b>Blocked</b> = <code>State.Dead</code>，复活类技能不填。</div></div>
+<div class="cap">图 3-2 · 四种最常见的标签交互模式</div>
+</div>
+
+  <h3>Effect 侧：标签还能控制「效果是否生效」</h3>
+
+  <p>除了资产标签（纯注释用）和授予标签（Granted Tags，效果期间挂给目标），还有两个特别有用的：</p>
+
+  <ul>
+    <li><strong>Application Tag Requirements</strong>：目标不满足这些标签，效果根本不会被应用。比如「对已死亡目标不施加中毒」。</li>
+    <li><strong>Ongoing Tag Requirements</strong>：效果应用后，标签不满足时<strong>临时失效</strong>（移除修改与标签，但效果对象还在），满足后自动恢复。比如「隐身时被光照到失效」——不用移除再重新加。</li>
+    <li><strong>Remove Gameplay Effects with Tags</strong>：我生效时，把目标身上带这些标签的效果全部移除。这是「净化术」「解控」的实现方式。</li>
+    <li><strong>Immunity</strong>：带某些标签的来源对我施加的一切效果免疫。「免疫所有来自 Boss 的 Debuff」一行配置搞定。</li>
+  </ul>
+
+  <div class="callout co-amber">
+    <span class="hd">Loose Tag 的陷阱</span>
+    <p>除了由效果授予的标签，还有一种 <strong>LooseGameplayTag</strong>：直接用 <code>AddLooseGameplayTag()</code> 手动挂上去的。它<strong>不参与网络复制</strong>，服务器和客户端要各自维护。社区通常用它在拥有者客户端上立刻标记 <code>State.Dead</code>（让本地 UI 零延迟响应），但你必须记得在重生时手动清掉，否则角色会永远「死着」。</p>
+  </div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section id="ch4">
+  <h2><span class="num">04</span>GameplayAbility：技能是有生命周期的对象</h2>
+  <p class="lead">一句话：<strong>Ability 管的是「能不能放、放完怎么收尾」，而不是「放的时候做什么」。</strong>真正的行为逻辑应当尽量下沉到 Effect 和 Task 里。</p>
+
+  <p>一个 GameplayAbility（GA）的生命周期是一条明确的三段式流水线。理解这条流水线，就理解了 GAS 一半的报错来源。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #94a3b8;border-radius:11px;background:#f1f5f9;font-size:14px;text-align:left"><b style="color:#1e293b">CanActivateAbility</b><br><span style="color:#475569;font-size:13px">检查：标签 / 冷却 / 消耗</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">CommitAbility</b><br><span style="color:#475569;font-size:13px">扣消耗、上冷却</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">ActivateAbility</b><br><span style="color:#475569;font-size:13px">真正干活</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">EndAbility</b><br><span style="color:#475569;font-size:13px">收尾：清理、解除占用</span></div>
+<div class="cap">图 4-1 · 四步流程。第二步是「最后的失败机会」，第四步是最容易被忘的一步</div>
+</div>
+
+  <p>这里有个很关键的细节：<strong><code>CommitAbility</code> 必须由你自己调用，而且通常写在 <code>ActivateAbility</code> 的开头。</strong>框架不会自动帮你扣蓝。如果你忘了调用，技能就变成了「免费无限放」。</p>
+
+  <p>反过来，如果你在 Commit 之前就 return 了（比如发现目标不合法），消耗和冷却不会被扣——这是<strong>特性</strong>，不是 bug：<strong>Commit 是最后一道闸门，过了这道闸门才真正付费。</strong></p>
+
+  <div class="callout co-rose">
+    <span class="hd">最经典的一个坑</span>
+    <p>官方文档里专门举了这个例子：一个「喝血瓶」的技能没有正确调用 <code>EndAbility()</code>，结果角色永远处于「正在喝药」的状态——于是他再也不能喝第二瓶、不能冲刺、不能爬梯子，<strong>因为技能系统认为他还在忙着喝这瓶药</strong>。</p>
+    <p>记住：<strong>不 End，就永远占着位置。</strong>所有提前 return 的分支都要走 <code>EndAbility()</code>，包括失败分支。</p>
+  </div>
+
+  <h3>异步怎么办：AbilityTask</h3>
+
+  <p>技能经常需要「等一下」：等动画播完、等玩家点地面、等某个事件发生。你不能在 <code>ActivateAbility</code> 里写死循环，所以 GAS 提供了 <strong>AbilityTask</strong>——本质上是和技能生命周期绑定的协程。</p>
+
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">Task</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">用途</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>PlayMontageAndWait</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">播放动画蒙太奇并等待结束 / 等待某个 AnimNotify</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>WaitGameplayEvent</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">等待一个带标签的事件（比如 AnimNotify 发出的「命中帧到了」）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>WaitTargetData</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">生成一个选取器让玩家选目标（选地面、选范围、选敌人）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>WaitInputPress / Release</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">等待蓄力型技能的按键抬起</td></tr>
+</tbody>
+</table>
+</div>
+
+  <p>于是一个近战攻击技能的骨架就长这样：</p>
+
+  <pre><span class="cm">// 1. 播放挥砍动画，等它播完</span>
+PlayMontageAndWait(SwingMontage)
+  <span class="cm">→ OnCompleted</span>
+<span class="cm">// 2. 等动画的「命中帧」事件（由 AnimNotify 发送）</span>
+WaitGameplayEvent(Event.HitFrame)
+  <span class="cm">→ 收到后：做一次球形检测，对命中的每个目标 ApplyGameplayEffectToTarget(GE_Damage)</span>
+<span class="cm">// 3. 收尾</span>
+EndAbility()</pre>
+
+  <div class="callout co-teal">
+    <span class="hd">为什么用事件而不是直接在 Notify 里写伤害</span>
+    <p>因为 AnimNotify 跑在动画线程/表现层，它不知道网络权威、不知道目标是谁、也不知道技能有没有被中断。让 Notify 只发一个「命中帧到了」的事件，由技能来决定做什么——这样被打断时，事件自然没人接收，伤害也就不会误触发。</p>
+  </div>
+
+  <h3>三组策略：实例化、网络执行、复制</h3>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">实例化</span><div style="margin-top:4px"><b>Instancing Policy</b><br/><code>InstancedPerActor</code>：每个角色一个实例，反复激活共用（默认推荐，能用成员变量和 Task）。<br/><code>InstancedPerExecution</code>：每次激活新建，最灵活但 GC 压力大。<br/><code>NonInstanced</code>：共用类默认对象，不能用 Task，纯函数式技能（如跳跃）用过，UE 5.5 起已废弃。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">网络</span><div style="margin-top:4px"><b>Net Execution Policy</b><br/><code>LocalPredicted</code>：客户端先跑，服务器兜底纠正（玩家技能默认）。<br/><code>LocalOnly</code>：只有本地跑，不发服务器。<br/><code>ServerInitiated</code>：服务器先跑，再通知客户端。<br/><code>ServerOnly</code>：只在服务器跑（被动技能常用）。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">复制</span><div style="margin-top:4px"><b>Replication Policy</b><br/>决定技能实例本身的状态与事件要不要同步给所有人。不需要就关掉，省带宽。</div></div>
+<div class="cap">图 4-2 · Ability 的三组策略，决定了它在内存和网络上的样子</div>
+</div>
+
+  <h3>技能等级</h3>
+
+  <p>技能有等级概念（火球术 Lv3）。升级有两条路，区别很重要：</p>
+
+  <ul>
+    <li><strong>解除授予再重新授予</strong>：会<strong>打断</strong>正在执行的该技能。</li>
+    <li><strong>直接改 Spec 的 Level 并标记脏</strong>：不打断正在执行的技能。</li>
+  </ul>
+
+  <p>配合 <code>Scalable Float</code> 类型的修改器（从数据表按等级读值），策划可以在表里填「Lv1 = 30 伤害，Lv5 = 90 伤害」，代码一行不动。</p>
+</section>
+
+<!-- ============ 5 ============ -->
+<section id="ch5">
+  <h2><span class="num">05</span>GameplayEffect：改数值的唯一合法途径</h2>
+  <p class="lead">一句话：<strong>GameplayEffect（GE）是纯数据</strong>。它描述「对哪个属性做什么运算、持续多久、期间挂什么标签」，里面不应该有逻辑。</p>
+
+  <p>把 GE 理解成一张<strong>单据</strong>：谁开了单、改什么、改多少、什么时候失效。ASC 是会计，它拿着单据去算账。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">时长</span><div style="margin-top:4px"><b>Duration Policy</b><br/>Instant / Duration / Infinite。选错不会报错，只会让你的游戏「闹鬼」—— 用 Instant 做 Buff 结果加成永远不掉，用 Duration 做伤害结果血自己回来了。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">改什么</span><div style="margin-top:4px"><b>Modifiers</b><br/>对属性做 Add / Multiply / Divide / Override。数值来源有四种：常量表（Scalable Float）、基于另一个属性（Attribute Based）、自定义计算类（MMC）、运行时传入（SetByCaller）。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">复杂计算</span><div style="margin-top:4px"><b>Executions</b><br/>用 <code>GameplayEffectExecutionCalculation</code> 写自定义公式，可以捕获任意多个属性。护甲减伤、暴击、属性克制都放这里。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">副作用</span><div style="margin-top:4px"><b>Granted Tags / Cues / Granted Abilities</b><br/>期间挂标签、触发表现、甚至临时授予一个新技能。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">周期</span><div style="margin-top:4px"><b>Period</b><br/>每 X 秒执行一次 Modifier 与 Execution，用于 DOT 与 HoT。</div></div>
+<div class="cap">图 5-1 · 一个 GE 的完整构成</div>
+</div>
+
+  <div class="callout co-rose">
+    <span class="hd">选错时长策略，是 GAS 新手的第一大坑</span>
+    <p>它不会产生任何编译错误、任何运行警告。它只会让你的游戏出现「说不清哪里不对」的手感问题：</p>
+    <p>· 用 Instant 做加速 Buff → 加速永远不消失，角色越跑越快。<br>· 用 Duration 做伤害 → 5 秒后血量自动涨回来，玩家看到血条诡异地弹回去。<br>· 用 Infinite 做 Debuff 却忘了移除 → 内存和状态永久泄漏。</p>
+  </div>
+
+  <h3>四种 Modifier 运算</h3>
+
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">运算</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">含义</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">典型用途</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Add</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">加上去（负值即减法）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">+20 攻击力、-15 移速</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Multiply</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">乘上去</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">攻击力 ×1.3、移速 ×0.5</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Divide</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">除下去</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">受到伤害 ÷2（护甲）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Override</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">直接覆盖</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">无视其他加成，把移速锁死为 200</td></tr>
+</tbody>
+</table>
+</div>
+
+  <p>官方文档有一句必须记住的提醒：<strong>百分比变化一定要用 Multiply，不要用 Add。</strong>因为聚合顺序是「先加后乘」，用 Multiply 才能保证「+20 攻击」和「+30% 攻击」叠加时算出的是 <code>(Base + 20) × 1.3</code>，而不是两者互相稀释。</p>
+
+  <h3>数值从哪来：四种 Magnitude</h3>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">Scalable Float</b><br><span style="color:#475569;font-size:13px">从数据表按技能等级读一个常量，可再乘系数。策划改数值的主力入口</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">Attribute Based</b><br><span style="color:#475569;font-size:13px">取来源或目标身上某个属性的值。可以做「伤害 = 攻击力 × 1.5」，也可以选择在创建时快照还是应用时读取</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">Custom Calculation (MMC)</b><br><span style="color:#475569;font-size:13px">写一个 ModifierMagnitudeCalculation 类，任意计算。能捕获多个属性</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">SetByCaller</b><br><span style="color:#475569;font-size:13px">运行时由技能通过标签塞进来的值。适合「蓄力 2 秒伤害翻倍」这类动态数值</span></div>
+<div class="cap">图 5-2 · Modifier 数值的四种来源</div>
+</div>
+
+  <div class="callout co-amber">
+    <span class="hd">SetByCaller 的运行时炸弹</span>
+    <p><code>SetByCaller</code> 本质是一个 <code>TMap&lt;FGameplayTag, float&gt;</code>：<strong>如果对应的标签不存在，它会在运行时报错并返回 0</strong>。对 Add 来说只是「没加上」，对 <strong>Divide</strong> 来说就是除以 0。用 Divide + SetByCaller 的组合一定要给默认值兜底。</p>
+  </div>
+
+  <h3>GE 之间也能互相作用</h3>
+
+  <p>除了标签，GE 还有一层直接的效果交互：</p>
+
+  <ul>
+    <li><strong>堆叠（Stacking）</strong>：三个火球叠在身上是算一层还是三层？见第 8 节。</li>
+    <li><strong>移除（Remove Gameplay Effects with Tags）</strong>：净化术的实现。</li>
+    <li><strong>免疫（Immunity）</strong>：按来源标签或按效果查询整体屏蔽。</li>
+  </ul>
+
+  <p>这一层意味着「驱散」「免疫」「霸体」这类高阶机制不需要写新代码，只是配置。</p>
+</section>
+
+<!-- ============ 6 ============ -->
+<section id="ch6">
+  <h2><span class="num">06</span>GameplayCue：让表现和逻辑离婚</h2>
+  <p class="lead">一句话：<strong>GameplayCue（GC）是 GAS 的表现层出口</strong>。命中特效、音效、屏幕抖动全部由它触发，而它天生知道「自己是该在客户端跑还是服务端跑」。</p>
+
+  <p>没有 Cue 的时候，你会怎么做？在技能代码里 <code>SpawnEmitterAtLocation</code>。单机没问题。一上联机，你会看到：特效在服务器上也播了一次（浪费但看不见），在客户端播了一次，而在预测失败需要回滚时——<strong>特效已经放出去了，收不回来</strong>。</p>
+
+  <p>Cue 解决的是这个：<strong>表现是表现，逻辑是逻辑，两者由标签连接。</strong></p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">逻辑</b><br><span style="color:#475569;font-size:13px">技能 / 效果</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">触发</b><br><span style="color:#475569;font-size:13px">GameplayCue.XXX 标签</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">表现</b><br><span style="color:#475569;font-size:13px">GC 处理器：粒子 / 音效 / 抖屏</span></div>
+<div class="cap">图 6-1 · 逻辑侧只喊一句「我触发了某某 Cue」，谁去播、怎么播由表现侧决定</div>
+</div>
+
+  <h3>硬规则：Cue 标签必须以 GameplayCue. 开头</h3>
+
+  <p>这是引擎层面的强制约定：<strong>标签不以 <code>GameplayCue.</code> 开头，Cue 系统会直接忽略它</strong>，不报错、不警告，就是没反应。这条规则坑过非常多的人。</p>
+
+  <p>而且标签的层级会参与匹配：一个处理 <code>GameplayCue.Weapon.Impact</code> 的处理器，会自动接管 <code>GameplayCue.Weapon.Impact.Metal</code> 和 <code>...Wood</code>，除非存在更具体的处理器。这让你可以用「泛化处理 + 特化处理」组织特效。</p>
+
+  <h3>四个回调</h3>
+
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">回调</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">触发时机</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">例子</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>OnExecute</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一次性（Instant 效果触发）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">命中火花、受击音效</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>OnActive</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">效果开始生效</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">点燃身上的火焰</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>WhileActive</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">持续期间每帧</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">跟随角色的光环</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>OnRemove</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">效果结束或被移除</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">火焰熄灭、护盾破碎</td></tr>
+</tbody>
+</table>
+</div>
+
+  <p>Cue 分两种实现：<strong>Static</strong>（一次性、无状态，性能最好，命中火花用这个）和 <strong>Actor</strong>（生成一个 Actor 持续存在，火焰、护盾用这个）。</p>
+
+  <div class="callout co-violet">
+    <span class="hd">一个重要的架构收益</span>
+    <p>Cue <strong>不在专用服务器上运行</strong>。这意味着你可以在 Cue 里随便写粒子、音效、UI 飘字，完全不用担心浪费服务器 CPU——因为服务器上它根本不会被调用。这一条让「表现层代码会不会拖慢服务器」这个问题从根上消失了。</p>
+  </div>
+
+  <p>另外，Cue 是可以被批量和合并的（Batching），引擎会把同帧内的多个 Cue 合并成一次网络消息。在百人同屏的场景下这个功能很关键。</p>
+</section>
+
+<!-- ============ 7 ============ -->
+<section id="ch7">
+  <h2><span class="num">07</span>聚合公式：加、乘、除的顺序</h2>
+  <p class="lead">一句话：<strong>CurrentValue = ((BaseValue + 所有加法) × 所有乘法) ÷ 所有除法)</strong>。顺序是固定的，而乘法那一层有一个会让所有人算错的陷阱。</p>
+
+  <p>官方文档直接给出了聚合器里的那行公式：</p>
+
+  <div class="formula">((InlineBaseValue + Additive) * Multiplicitive) / Division</div>
+
+  <p>看一个具体例子。基础攻击力 100，装备 +10，Buff +30%：</p>
+
+  <div class="formula">CurrentValue = (100 + 10) * 1.3 = 143
+<span class="c">// 而不是 100 + 10 + 30 = 140，也不是 100 * 1.3 + 10 = 140</span></div>
+
+  <p>这个顺序不是随意定的：<strong>先加后乘，保证百分比加成不会被固定值加成稀释</strong>。你 +10 攻击力之后，那个 +30% 依然是对「加成后的总值」生效。</p>
+
+  <div class="callout co-rose">
+    <span class="hd">陷阱：多个乘法不是连乘</span>
+    <p>这是 GAS 里最反直觉的一处实现。所有 Multiply 修改器会<strong>先合并，再一起乘上去</strong>，而不是逐个相乘。原因是乘法的 Bias（中性值）是 1：</p>
+  </div>
+
+  <div class="formula">Multiplicitive = 1 + (m1 - 1) + (m2 - 1) + ...
+
+<span class="c">// 一个 0.5 的减速：</span>  1 + (0.5 - 1)      = 0.5    ✅
+<span class="c">// 两个 0.5 的减速：</span>  1 + (0.5-1)+(0.5-1) = 0      ❌ 直接归零
+<span class="c">// 一个 1.1 和一个 0.5：</span> 1 + (0.1)+(-0.5)  = 0.6    ✅
+<span class="c">// 两个 ×5 的加成：</span>    1 + (5-1) + (5-1)  = 9      ❌ 你以为是 25</div>
+
+  <p>《Paragon》当年为此定了一条硬性设计约束，你照抄就行：</p>
+
+  <div class="formula"><span class="c">// 允许的乘法修改器组合</span>
+(最多一个值 &lt; 1)  且  (任意多个 [1, 2) 之间的值)
+       或
+(恰好一个值 &gt;= 2)</div>
+
+  <p>如果你的项目真的需要「两个 ×5 叠成 ×25」，那不是配置能解决的——你得改动引擎里 <code>FAggregatorModChannel::EvaluateWithBase()</code>，把合并函数从 <code>SumMods</code> 换成自定义的 <code>MultiplyMods</code>。<strong>这是一个需要写进项目技术文档的引擎改动</strong>，因为升级引擎版本时会冲突。</p>
+
+  <h3>还有一个更高级的开关</h3>
+
+  <p>如果连「先加后乘」这个顺序你都想改（比如想让减速只取最狠的那个，而不是叠乘），GAS 在 <code>OnAttributeAggregatorCreated()</code> 里提供了自定义评估元数据。</p>
+
+  <p>《Paragon》的移速就是这么做的：<code>MostNegativeMod_AllPositiveMods</code>——所有正向加成都生效，负向减速<strong>只取最狠的那一个</strong>。这样两个 -30% 的减速不会叠成 -51%，而是 -30%。不符合条件的修改器仍然存在，只是暂时不计入结果，等最狠的那个过期后下一个会自动顶上。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">默认</span><div style="margin-top:4px"><b>全部叠加</b><br/>两个 -30% 减速 → 1 + (-0.3) + (-0.3) = 0.4，最终只剩 40% 移速</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">改元数据</span><div style="margin-top:4px"><b>只取最狠</b><br/>两个 -30% 减速 → 只生效一个，最终 70% 移速。更符合玩家直觉</div></div>
+<div class="cap">图 7-1 · 减速叠加的两种策略，动作游戏通常更想要右边</div>
+</div>
+</section>
+
+<!-- ============ 8 ============ -->
+<section id="ch8">
+  <h2><span class="num">08</span>堆叠：三个火球算几层</h2>
+  <p class="lead">一句话：<strong>Stacking 只对 Duration 和 Infinite 效果有效</strong>，它决定「同一个效果再次施加时，是新建一个，还是给已有的那个加一层」。</p>
+
+  <p>默认行为是：每次施加都是一个全新的、互不相干的实例。三个火球打在身上，就是三条独立的燃烧 Debuff，各自计时、各自到期。</p>
+
+  <p>开了堆叠之后，第二次施加不会新建，而是把已有的那条 Spec 的层数 +1，并按策略决定是否刷新时长。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">Aggregate by Source</b><br><span style="color:#475569;font-size:13px">按来源分堆。玩家 A 的火球在目标身上最多堆 3 层，玩家 B 的火球另起一堆也能堆 3 层。PVE 里鼓励多打</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">Aggregate by Target</b><br><span style="color:#475569;font-size:13px">目标身上只有一堆，所有来源共享层数上限。PVP 里防止一个目标被全队叠爆</span></div>
+<div class="cap">图 8-1 · 两种堆叠范围，选错会导致「三个人的 Debuff 互相顶掉」或者「一个人刷满了全队的额度」</div>
+</div>
+
+  <h3>四个必须配的参数</h3>
+
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">参数</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">决定什么</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">配错的后果</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Stack Limit Count</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">最多几层</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不设就是无限层，伤害指数爆炸</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Stack Duration Refresh Policy</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">加层时是否重置剩余时长</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不刷新 → 玩家感觉「刚叠满就到期了」；刷新 → 永续 Debuff</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Stack Period Policy</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">加层时是否重置周期计时</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">影响 DOT 的跳伤节奏</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Stack Expiration Policy</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">到期时是掉一层还是整堆清空</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">影响手感的「断崖感」</td></tr>
+</tbody>
+</table>
+</div>
+
+  <div class="callout co-amber">
+    <span class="hd">Period 与 Duration 的配合</span>
+    <p>这是周期效果最容易算错的地方。周期触发的时刻是<strong>相对于效果生效时刻</strong>的：Duration = 3 秒、Period = 1 秒，触发在 <strong>t = 1、2、3</strong>，共三次，<strong>不是 t = 0、1、2</strong>。</p>
+    <p>很多人以为「3 秒内每秒扣一次」应该只有 2 次，或者反过来以为 t=0 会立刻跳一次伤害——都不是。另外 <strong>Period 不要设得大于 Duration</strong>，否则最后一次周期可能永远等不到。</p>
+  </div>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #94a3b8;border-radius:11px;background:#f1f5f9;font-size:14px;text-align:left"><b style="color:#1e293b">t=0</b><br><span style="color:#475569;font-size:13px">施加燃烧，Duration=3, Period=1</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">t=1</b><br><span style="color:#475569;font-size:13px">第 1 次跳伤</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">t=2</b><br><span style="color:#475569;font-size:13px">第 2 次跳伤</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">t=3</b><br><span style="color:#475569;font-size:13px">第 3 次跳伤（最后一次）</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">移除</b><br><span style="color:#475569;font-size:13px">效果到期</span></div>
+<div class="cap">图 8-2 · 周期效果的触发是相对生效时刻的，t=0 不触发</div>
+</div>
+
+  <p>层数变化是可以监听的：<code>AsyncTaskEffectStackChanged</code> 让你在层数变化时更新 UI。官方示例项目就用它显示「被动护甲层数：每 4 秒 +1，最多 4 层，受伤掉 1 层」。</p>
+</section>
+
+<!-- ============ 9 ============ -->
+<section id="ch9">
+  <h2><span class="num">09</span>消耗与冷却：不要写计时器</h2>
+  <p class="lead">一句话：<strong>在 GAS 里，消耗和冷却都是 GameplayEffect</strong>。技能只是「指向」它们，判断与扣除由框架完成。</p>
+
+  <p>新手的本能是在技能里写：检查蓝够不够 → 减蓝 → 起一个 <code>SetTimer</code>。GAS 明确反对这两件事。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">朴素写法</b><br><span style="color:#475569;font-size:13px">技能内 if 判断 + 手动扣蓝 + SetTimer。UI 要另写一份同样的判断，且两边会逐渐不一致</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #9bd3a4;border-radius:11px;background:#f2fbf4;font-size:14px;text-align:left"><b style="color:#1e293b">GAS 写法</b><br><span style="color:#475569;font-size:13px">技能指向一个 Cost GE（Instant）和一个 Cooldown GE（Duration + 授予 Cooldown.* 标签）。判断只有一份</span></div>
+<div class="cap">图 9-1 · 把「消耗与冷却」从代码搬进数据，UI 与技能自然共享同一个真相</div>
+</div>
+
+  <p>运作方式非常优雅：</p>
+
+  <ul>
+    <li><strong>Cost GE</strong>：通常是一个 Instant 效果，减去 30 点蓝。</li>
+    <li><strong>Cooldown GE</strong>：一个 Duration 效果，时长 5 秒，期间给角色授予 <code>Cooldown.Fireball</code> 标签。</li>
+    <li>技能的 <strong>Activation Blocked Tags</strong> 填上 <code>Cooldown.Fireball</code>。<strong>冷却期间技能自然不能放</strong>——冷却的本质就是一个标签。</li>
+  </ul>
+
+  <div class="callout co-teal">
+    <span class="hd">这个设计的三个连带好处</span>
+    <p><strong>一、UI 不用另写判断。</strong>按钮变灰只需要问「这个角色身上有没有 Cooldown.Fireball」，和技能激活检查问的是同一句话，永远不会不一致。</p>
+    <p><strong>二、Buff 可以改冷却。</strong>「减少所有冷却时间 30%」不再需要改每一个技能，它是一个新的 GE，去修改那个 Cooldown GE 的时长。</p>
+    <p><strong>三、冷却可以被驱散和查看。</strong>它就在 ActiveGameplayEffects 列表里，调试器里能直接看到剩余时间。</p>
+  </div>
+
+  <h3>Commit 的三个粒度</h3>
+
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">函数</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">做了什么</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>CheckCost()</code> / <code>CheckCooldown()</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只问，不改。无副作用，UI 用它</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>CommitAbility()</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">同时提交消耗与冷却。<strong>最后的失败机会</strong></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>CommitAbilityCost()</code> / <code>CommitAbilityCooldown()</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只提交其中一项。用于「技能被打断时不退冷却，但退蓝」这类设计</td></tr>
+</tbody>
+</table>
+</div>
+
+  <div class="callout co-blue">
+    <span class="hd">记住这条因果链</span>
+    <p>冷却不是计时器，是<strong>一个效果授予的标签</strong>；标签不是变量，是<strong>可被任何系统查询的状态</strong>；状态不是技能私有的，是<strong>挂在角色身上的公共事实</strong>。GAS 的每一层抽象都在做同一件事：把私有知识变成公共事实。</p>
+  </div>
+</section>
+
+<!-- ============ 10 ============ -->
+<section id="ch10">
+  <h2><span class="num">10</span>Meta Attribute 与 Execution：护甲减伤放哪</h2>
+  <p class="lead">一句话：<strong>伤害先算进一个不参与复制的中间属性（Meta Attribute），再在 PostGameplayEffectExecute 里转成真正的扣血。</strong>这一步是所有复杂伤害公式的安放之处。</p>
+
+  <p>为什么不直接让 GE 去减 Health？因为「伤害」和「扣血」不是一回事。中间要过的关卡包括：护甲减免、护盾吸收、属性克制、暴击、免疫、最低伤害保底、溢出转治疗……如果直接改 Health，这些东西要么无处安放，要么全都塞进技能的 <code>ActivateAbility</code> 里。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">GE_Damage</b><br><span style="color:#475569;font-size:13px">Instant 效果</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">Damage（Meta）</b><br><span style="color:#475569;font-size:13px">不复制的中间量</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">Execution</b><br><span style="color:#475569;font-size:13px">护甲减伤公式在这里</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">Shield → Health</b><br><span style="color:#475569;font-size:13px">PostExecute 里二次分配</span></div>
+<div class="cap">图 10-1 · 伤害的四段旅程，每一段都是一个可独立修改的插槽</div>
+</div>
+
+  <h3>Meta Attribute 是什么</h3>
+
+  <p>它是一个<strong>只存在于服务端、从不复制到客户端</strong>的临时属性。典型的名字就叫 <code>Damage</code>。它的生命周期极短：被 GE 写入 → 被 <code>PostGameplayEffectExecute</code> 读走 → 归零。</p>
+
+  <p>之所以要它，是因为伤害公式的<strong>输入</strong>（攻击力、护甲、暴击率）和<strong>输出</strong>（实际扣多少血）需要分开处理，而 GE 的 Modifier 只能做「一个属性改另一个属性」这种简单映射。</p>
+
+  <h3>Execution：自定义公式的位置</h3>
+
+  <p><code>UGameplayEffectExecutionCalculation</code> 可以捕获任意多个属性，然后输出最终值。护甲减伤就写在这里：</p>
+
+  <div class="formula"><span class="c">// 一个典型的减伤公式（示意）</span>
+mig    = AttackPower * SkillCoef      <span class="c">// 技能系数</span>
+reduc  = Armor / (Armor + K)          <span class="c">// 递减式护甲收益</span>
+final  = mig * (1 - reduc) * CritMul</div>
+
+  <p>把它写在 Execution 而不是技能里，有三个理由：</p>
+
+  <ul>
+    <li><strong>可被所有来源复用</strong>：普攻、火球、陷阱、反弹伤害走同一条公式，改一次全改。</li>
+    <li><strong>可被策划配置</strong>：公式里的 <code>K</code> 可以做成从数据表读的常量。</li>
+    <li><strong>与网络正确配合</strong>：Execution 在权威端执行，结果通过属性复制同步，天然一致。</li>
+  </ul>
+
+  <div class="callout co-amber">
+    <span class="hd">性能要点</span>
+    <p>自定义计算类里的<strong>属性捕获定义（CaptureDefs）必须在构造函数里静态初始化</strong>，不要在每次计算时创建——GAS 内部会缓存这些定义，重复创建会让本该很便宜的计算变成分配热点。另外，公式极其复杂时，考虑用曲线表（Curve Table）替代实时计算。</p>
+  </div>
+
+  <h3>二次分配：护盾、吸血、反伤</h3>
+
+  <p><code>PostGameplayEffectExecute()</code> 是做这些事的地方：</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">护盾</span><div style="margin-top:4px"><b>先扣盾，溢出再扣血</b><br/>读走 Damage，先减 Shield，剩下的减 Health，然后把 Damage 归零。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">吸血</span><div style="margin-top:4px"><b>按伤害回血</b><br/>同一个函数里根据最终伤害给攻击者加血。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">反伤</span><div style="margin-top:4px"><b>给来源施加一个新 GE</b><br/>拿到 <code>Data.EffectSpec</code> 里的来源，反向施加一个荆棘伤害。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">表现</span><div style="margin-top:4px"><b>飘数字、受击动画</b><br/>伤害数字与击杀奖励（经验 / 金币）也在这里结算。</div></div>
+<div class="cap">图 10-2 · PostGameplayEffectExecute 里常做的四件事</div>
+</div>
+
+  <p>这里还有一个网络上的小福利：<strong>此时属性已经改完但还没复制回客户端</strong>，你在这里做夹取（比如把血量夹到不小于 0）不会产生两次网络更新——客户端只会收到夹取后的那一次结果。</p>
+</section>
+
+<!-- ============ 11 ============ -->
+<section id="ch11">
+  <h2><span class="num">11</span>标签状态机：死亡、眩晕、吟唱</h2>
+  <p class="lead">一句话：<strong>角色的「状态」应该是一组标签，而不是一个枚举变量。</strong>枚举只能表示一种状态，标签可以表示「同时又晕又中毒又在吟唱」。</p>
+
+  <p>这是 GAS 思路里最值得单独拿出来讲的一点，因为它能直接改善绝大多数项目的架构。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">枚举写法</b><br><span style="color:#475569;font-size:13px">ECharacterState::Stunned。角色同时中毒怎么办？加第二个枚举？加 bool？状态一多就变成八爪鱼</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #9bd3a4;border-radius:11px;background:#f2fbf4;font-size:14px;text-align:left"><b style="color:#1e293b">标签写法</b><br><span style="color:#475569;font-size:13px">ASC 上同时挂着 State.Stunned、State.Poisoned、State.Channeling。每个系统只关心自己那一个标签</span></div>
+<div class="cap">图 11-1 · 状态从「一个互斥的枚举」变成「一组可叠加的事实」</div>
+</div>
+
+  <h3>一套可以直接照抄的标签层级</h3>
+
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">标签</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">封锁什么</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">为什么</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>State.Dead</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">几乎所有动作技能（复活类除外）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">死人不能动，但「死亡后仍可触发的被动」用 <code>Ability.Behavior.SurvivesDeath</code> 标记豁免</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>State.Stunned</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">所有动作类技能</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">眩晕＝失去行动能力，不需要每个技能自己判断</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>State.Channeling</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">其他动作类技能</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">吟唱中不能起手新动作</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>State.Silenced</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>Ability.Magic</code> 类</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">沉默只封法术，不封普攻和位移</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>State.Rooted</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>Ability.Movement</code> 类（位移）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">定身不封施法，只封位移</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>Cooldown.XXX</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对应那个技能</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">冷却本质上就是状态</td></tr>
+</tbody>
+</table>
+</div>
+
+  <p>注意「沉默」和「定身」这两条：它们封锁的<strong>粒度不同</strong>。用枚举你很难表达「封法术但不封位移」，用标签只要给技能打上分类标签（<code>Ability.Magic</code> / <code>Ability.Movement</code>）就行。</p>
+
+  <div class="callout co-violet">
+    <span class="hd">三条实践建议</span>
+    <p><strong>一、给技能打分类标签，别只打身份标签。</strong><code>Ability.Fireball</code> 是身份，<code>Ability.Magic</code> / <code>Ability.Damage</code> 是分类。封锁几乎总是按分类做。</p>
+    <p><strong>二、状态标签统一由 GE 授予，不要手动挂。</strong>这样「解除眩晕」只要移除那个 GE，标签自动消失，不用记得清理。</p>
+    <p><strong>三、确需手动时用 Loose Tag，但一定配对清理。</strong>Loose Tag 不复制、不会自动消失，忘了清会导致角色「永远晕着」。</p>
+  </div>
+
+  <h3>标签不只是给技能用的</h3>
+
+  <p>一旦状态变成标签，所有系统都能消费它：</p>
+
+  <ul>
+    <li><strong>动画</strong>：AnimBP 里用 Gameplay Tag Property Map 把标签绑到布尔值上，<code>State.Aiming → bIsAiming</code>，无需每帧轮询。</li>
+    <li><strong>UI</strong>：按钮变灰、Buff 图标显示，问的是同一个标签。</li>
+    <li><strong>AI</strong>：行为树的条件节点直接查标签，不用去问角色类。</li>
+    <li><strong>输入</strong>：Lyra 把 Enhanced Input 的 Action 通过 <code>InputTag.*</code> 映射到技能，按键绑定与技能彻底解耦。</li>
+  </ul>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #94a3b8;border-radius:11px;background:#f1f5f9;font-size:14px;text-align:left"><b style="color:#1e293b">状态</b><br><span style="color:#475569;font-size:13px">ASC 上的标签</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">技能</b><br><span style="color:#475569;font-size:13px">能不能放</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">动画</b><br><span style="color:#475569;font-size:13px">播哪个</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">UI</b><br><span style="color:#475569;font-size:13px">显示什么</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">AI</b><br><span style="color:#475569;font-size:13px">做什么决策</span></div>
+<div class="cap">图 11-2 · 一份状态，四个消费方，零耦合</div>
+</div>
+</section>
+
+<!-- ============ 12 ============ -->
+<section id="ch12">
+  <h2><span class="num">12</span>复制模式：Full / Mixed / Minimal</h2>
+  <p class="lead">一句话：<strong>复制模式回答的是「别人需要知道多少真相」</strong>。玩家角色用 Mixed（效果只给本人），AI 用 Minimal（效果完全不给），单机用 Full。</p>
+
+  <p>这一节是把前面所有概念放到网络环境里重新审视一遍。核心矛盾很简单：<strong>效果（GameplayEffect）是数据量最大、但对别人最没用的东西。</strong>你不需要知道敌人身上挂着 7 个 Buff 的具体数值和剩余时间，你只需要看到他冒火（Cue）和他是不是被控（Tag）。</p>
+
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">模式</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">GameplayEffect</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">Tag</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">Cue</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">用在哪</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Full</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">复制给所有人</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">复制给所有人</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">所有人</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">单机游戏</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Mixed</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只复制给拥有者</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">复制给所有人</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">所有人</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">多人游戏中玩家控制的角色</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Minimal</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">完全不复制</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">复制给所有人</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">所有人</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">多人游戏中 AI 控制的角色</td></tr>
+</tbody>
+</table>
+</div>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">玩家 A</span><div style="margin-top:4px">ASC（Mixed）在 PlayerState 上<br/>自己能看见：全部效果、全部标签、全部特效<br/>别人能看见：他的标签 + 他的特效</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">AI 怪物</span><div style="margin-top:4px">ASC（Minimal）在自己身上<br/>服务器持有完整真相<br/>所有客户端只看见：标签 + 特效</div></div>
+<div class="cap">图 12-1 · 一个典型多人对局的复制结构</div>
+</div>
+
+  <div class="callout co-amber">
+    <span class="hd">把 ASC 放 PlayerState 时的必做项</span>
+    <p>PlayerState 的 <code>NetUpdateFrequency</code> 默认非常低，会导致属性和标签的改变在客户端上有明显延迟——表现是「血条明明掉了，UI 过半秒才动」。放 ASC 上去之后必须调高这个值，并开启 <strong>Adaptive Network Update Frequency</strong>（自适应更新频率）。Fortnite 用的就是这套。</p>
+  </div>
+
+  <h3>Batching：把三次 RPC 压成一次</h3>
+
+  <p>一次技能激活在传统流程里需要 2~3 次客户端到服务器的 RPC（激活请求、目标数据、结束通知）。GAS 提供了 <strong>Ability Batching</strong> 把它们合并，在高频技能（比如自动开火的枪）上收益明显。</p>
+
+  <p>这是个优化项，不是必做项。但如果你在做射击或 MOBA，值得在项目早期就确认它开着。</p>
+</section>
+
+<!-- ============ 13 ============ -->
+<section id="ch13">
+  <h2><span class="num">13</span>预测：客户端先斩后奏</h2>
+  <p class="lead">一句话：<strong>客户端不等服务器批准就先把动画、特效、属性变化在本地跑一遍，用一个 Prediction Key 记账；服务器回来确认就保留，否决就回滚。</strong></p>
+
+  <p>这是 GAS 里最「值钱」的一块，也是它相对自研框架最大的优势。没有预测，玩家按下技能要等一个 RTT（比如 80ms）才看到角色动手，手感像踩棉花。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #94a3b8;border-radius:11px;background:#f1f5f9;font-size:14px;text-align:left"><b style="color:#1e293b">按下按键</b><br><span style="color:#475569;font-size:13px">客户端 TryActivateAbility</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">生成 Key</b><br><span style="color:#475569;font-size:13px">FPredictionKey</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">本地先跑</b><br><span style="color:#475569;font-size:13px">动画、属性、Cue 全部立即生效</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">服务器裁决</b><br><span style="color:#475569;font-size:13px">校验标签 / 冷却 / 资源</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #9bd3a4;border-radius:11px;background:#f2fbf4;font-size:14px;text-align:left"><b style="color:#1e293b">通过</b><br><span style="color:#475569;font-size:13px">本地预测转为真实，只补差值</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">否决</b><br><span style="color:#475569;font-size:13px">按 Key 撤销这一批所有副作用</span></div>
+<div class="cap">图 13-1 · 一次带预测的技能激活</div>
+</div>
+
+  <h3>Prediction Key 与预测窗口</h3>
+
+  <p><code>FPredictionKey</code> 里有两个 int16（当前 Key 和它所依赖的 Base Key）和一个「是否过期」的脏标记。它像餐厅的取餐号：客户端拿着号先坐下，服务器按号上菜，客户端按号对账。</p>
+
+  <p><strong>预测窗口（<code>FScopedPredictionWindow</code>）是一个 RAII 作用域</strong>：构造时生成一个新 Key，析构时把它标记为失效。含义是——<strong>在这个作用域内产生的所有预测性副作用，共享同一个 Key，作为一个整体被裁决。</strong></p>
+
+  <pre>FScopedPredictionWindow Prediction(ASC, <span class="k">true</span>);   <span class="cm">// 开一个新 Key</span>
+ASC-&gt;TryActivateAbility(Handle);          <span class="cm">// 窗口内的 GE / Task / Cue 全挂到这个 Key 上</span>
+<span class="cm">// 出作用域，Key 失效，后续操作不再属于本次预测</span></pre>
+
+  <p>为什么要「成批」？因为一个复杂技能包含多个子效果（瞬发伤害 + 持续治疗 + 上状态），它们必须作为一个整体被接受或拒绝。如果各自独立预测，会出现「伤害保留了但状态没上」的半吊子结果。</p>
+
+  <h3>什么能回滚，什么不能</h3>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #9bd3a4;border-radius:11px;background:#f2fbf4;font-size:14px;text-align:left"><b style="color:#1e293b">可回滚</b><br><span style="color:#475569;font-size:13px">由 GE 造成的属性变化（扣的蓝加回来）、被预测添加的 GE（移除掉）、预测授予的标签</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">不可回滚</b><br><span style="color:#475569;font-size:13px">已经播出去的动画、已经放出的特效、已经响了的音效。这些是副作用，发生了就发生了</span></div>
+<div class="cap">图 13-2 · 设计技能时必须分清这两类</div>
+</div>
+
+  <div class="callout co-violet">
+    <span class="hd">设计准则</span>
+    <p>把所有<strong>会影响游戏结果</strong>的东西放进 GE（可回滚），把所有<strong>只是好看好听</strong>的东西放进 Cue（不可回滚但代价低）。判断标准：<strong>如果这个效果被撤销会让玩家困惑，它就应该放在可回滚的一侧。</strong>蓝量被回滚玩家不会察觉，但「技能明明放了却没伤害」玩家立刻会觉得游戏坏了。</p>
+  </div>
+
+  <h3>常见的预测失败来源</h3>
+
+  <ul>
+    <li>资源不足（客户端以为有蓝，服务器说没有）</li>
+    <li>被控制（客户端还没收到眩晕标签）</li>
+    <li>仍在冷却（客户端对冷却的预测有天然延迟，见下节）</li>
+    <li>目标不合法（客户端命中了，服务器判定没命中）</li>
+  </ul>
+</section>
+
+<!-- ============ 14 ============ -->
+<section id="ch14">
+  <h2><span class="num">14</span>预测不了的三件事</h2>
+  <p class="lead">一句话：<strong>冷却、周期效果、效果的移除，这三件 GAS 预测不了。</strong>知道边界比知道能力更重要，因为踩到边界的表现是「说不清哪里不对」。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">其一</span><div style="margin-top:4px"><b>冷却无法被正确预测</b><br/>冷却依赖服务器的时间戳对账，高延迟玩家在低冷却技能上会<strong>射速低于</strong>低延迟玩家。这是官方文档列出的已知问题，不是你的配置错。<br/><span class="small">应对：对射速敏感的技能，把「能不能开下一发」的判断做成客户端本地的容错，或接受这个差异。</span></div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">其二</span><div style="margin-top:4px"><b>周期效果（Periodic）不能被预测</b><br/>DOT 的每一跳都只能在服务器上算。所以中毒的跳伤在客户端上会「慢半拍」出现，别把它做成需要即时反馈的机制。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">其三</span><div style="margin-top:4px"><b>效果的移除无法被预测</b><br/>客户端不能预测「把某个 GE 移除」。变通做法是<strong>预测性地施加一个反向效果</strong>来抵消它，但这并非总是等价，仍是官方文档列出的待解决问题。</div></div>
+<div class="cap">图 14-1 · 预测能力的三条边界</div>
+</div>
+
+  <div class="callout co-amber">
+    <span class="hd">还有一条隐藏边界</span>
+    <p><strong>百分比变化（Multiply）的预测有问题。</strong>官方文档在讲 Modifier 时两次提示：百分比修改在预测环境下的对账不可靠。所以凡是「+20% 攻击力」这类效果，最好设计成只在服务端权威结算，或者接受偶尔一次的视觉跳变。</p>
+  </div>
+
+  <h3>自己动手做局部预测</h3>
+
+  <p>有些值不适合进 GAS，但仍需要本地即时反馈。官方示例项目给了一个很实用的技巧：<strong>武器弹药数用普通 float 存储，并在自动开火期间通过 <code>PreReplication()</code> 关掉它的复制</strong>（判断条件是角色是否拥有 <code>IsFiring</code> 标签）。</p>
+
+  <p>这样本地弹药数立刻减少，服务器的权威值不会在开火中途把本地值覆盖回去，等停火后再由服务器对齐。文档原话是：<strong>你在这里本质上是在做自己的本地预测。</strong></p>
+
+  <p>这个模式可以直接推广到任何「高频变化、不参与 Buff 计算、允许短暂不一致」的数值上。</p>
+</section>
+
+<!-- ============ 15 ============ -->
+<section id="ch15">
+  <h2><span class="num">15</span>完整走一遍：一个火球术的 14 步</h2>
+  <p class="lead">一句话：<strong>把前面所有概念串成一条时间线</strong>。从按下按键到伤害数字弹出，中间经过的每一个部件都在这里。</p>
+
+  <p>场景：玩家按下鼠标左键，向 20 米外的敌人扔一个火球，敌人有 15 点护甲、身上有一个护盾。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">01</span><div style="margin-top:4px"><b>输入映射</b><br/>Enhanced Input 的 <code>IA_Fire</code> 触发，通过 <code>InputTag.Ability.Fire</code> 找到对应技能</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">02</span><div style="margin-top:4px"><b>ASC.TryActivateAbility</b><br/>客户端发起激活请求，生成一个 Prediction Key</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">03</span><div style="margin-top:4px"><b>CanActivateAbility</b><br/>检查：拥有者没有 <code>State.Stunned</code>？没有 <code>Cooldown.Fireball</code>？蓝量够吗？</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">04</span><div style="margin-top:4px"><b>CommitAbility</b><br/>施加 Cost GE（Instant，蓝 -30）与 Cooldown GE（Duration 5 秒，授予 <code>Cooldown.Fireball</code>）</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">05</span><div style="margin-top:4px"><b>PlayMontageAndWait</b><br/>播放施法蒙太奇，本地立即可见（预测生效）</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">06</span><div style="margin-top:4px"><b>WaitGameplayEvent</b><br/>等待动画的「出手帧」AnimNotify 发来 <code>Event.CastRelease</code></div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">07</span><div style="margin-top:4px"><b>生成火球</b><br/>在手上生成一个投射物 Actor（预测性生成，带 Prediction Key）</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">08</span><div style="margin-top:4px"><b>飞行与命中</b><br/>火球命中敌人，做一次碰撞检测，拿到目标的 ASC</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">09</span><div style="margin-top:4px"><b>ApplyGameplayEffectToTarget</b><br/>对目标施加 <code>GE_FireballDamage</code>（Instant）</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">10</span><div style="margin-top:4px"><b>Execution 计算</b><br/>捕获攻击力与目标护甲，按公式算出最终伤害，写入 Meta Attribute <code>Damage</code></div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">11</span><div style="margin-top:4px"><b>PostGameplayEffectExecute</b><br/>先扣护盾、溢出再扣血；把 <code>Damage</code> 归零</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">12</span><div style="margin-top:4px"><b>施加燃烧 Debuff</b><br/>再施加一个 <code>GE_Burning</code>（Duration 4 秒、Period 1 秒、授予 <code>State.Burning</code>、可堆 3 层）</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">13</span><div style="margin-top:4px"><b>GameplayCue</b><br/>触发 <code>GameplayCue.Fire.Impact</code>：命中火花 + 音效；燃烧期间 <code>WhileActive</code> 播放身上火焰</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">14</span><div style="margin-top:4px"><b>EndAbility</b><br/>技能结束，解除对 <code>Ability.Magic</code> 类技能的封锁</div></div>
+<div class="cap">图 15-1 · 一个火球术的完整生命线</div>
+</div>
+
+  <h3>把这条线记成一张责任表</h3>
+
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">环节</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">谁负责</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">如果是你自己写，它大概在哪</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">能不能放</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Ability 的标签 + Cost/Cooldown GE</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">散落在技能类、角色类、UI 类的 if</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">扣多少蓝</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Cost GE（数据资产）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">技能里的硬编码常量</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">打多少伤害</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Execution + Meta Attribute</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">技能里的一行公式</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">护盾和护甲</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Execution 与 PostExecute</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">同一行公式里越加越长的表达式</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">持续伤害</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Duration GE + Period</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一个自己维护的 List + Tick 遍历</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">特效音效</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">GameplayCue</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">直接写在技能里，联机时出问题</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">联机一致性</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Prediction Key + 复制模式</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">完全没有，或者写了一半</td></tr>
+</tbody>
+</table>
+</div>
+
+  <div class="callout co-teal">
+    <span class="hd">这张表就是 GAS 的全部价值</span>
+    <p>它没有做任何你做不到的事。它只是<strong>给每一件事规定了一个唯一的位置</strong>。当项目里有 200 个技能时，「这件事该写在哪」有一个确定答案，比任何具体的实现细节都重要。</p>
+  </div>
+</section>
+
+<!-- ============ 16 ============ -->
+<section id="ch16">
+  <h2><span class="num">16</span>什么时候不该用 GAS</h2>
+  <p class="lead">一句话：<strong>如果你的游戏没有「多个系统同时修改同一个数值」和「多人联机」这两条需求，GAS 的前置成本收不回来。</strong></p>
+
+  <p>这一点必须讲清楚，因为 GAS 的社区讨论里「该不该上」的争议远大于「怎么用」。</p>
+
+  <p>引入 GAS 的<strong>固定成本</strong>是实打实的：C++ 侧必须写 ASC 与 AttributeSet（没有蓝图等价物）、全队要理解六块积木、调试链路比直接写代码长一层。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #9bd3a4;border-radius:11px;background:#f2fbf4;font-size:14px;text-align:left"><b style="color:#1e293b">该用</b><br><span style="color:#475569;font-size:13px">MOBA、MMO、ARPG、射击；技能数量 &gt; 30；有 Buff / Debuff 堆叠；有联机；装备与技能深度联动</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">不该用</b><br><span style="color:#475569;font-size:13px">休闲小游戏、两周的原型验证、纯单机且技能少于 10 个、团队没有 C++ 能力</span></div>
+<div class="cap">图 16-1 · 选型的第一个分水岭</div>
+</div>
+
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">维度</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">DataAsset 自管</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">GAS</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">自建组件</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">实现复杂度</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">低</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">高</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">中</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">属性叠加的正确性</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">手动保证，容易错</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">内建聚合器</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">取决于实现</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">依赖追踪（改 A 要重算 B）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">无，需手动排序</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">自动（Attribute Based）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">可自定义</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">网络复制</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">自己处理</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">官方支持，含客户端预测</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">自己处理</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">技能集成</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">无</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">原生</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">需自己桥接</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">性能开销</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">低（但重算频繁）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">中（聚合器有开销）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">可优化到低</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">学习成本</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">低</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">很高</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">中</td></tr>
+</tbody>
+</table>
+</div>
+
+  <div class="callout co-blue">
+    <span class="hd">一条被反复验证的经验</span>
+    <p>社区里有一个很典型的迁移案例：一个中型 ARPG 项目初期用 DataAsset 方案快速上线，装备系统跑得很好；后来加入「套装效果」「传奇装备触发技能」这类需求，<strong>手动维护依赖排序变得极其痛苦，一个属性 Bug 要排查半天</strong>。最终团队花了两个月迁移到 GAS，后期技能与装备联动的开发效率提升了约三倍。</p>
+    <p>结论是：<strong>技术选型要基于产品的路线图，而不是当前的舒适区。</strong>如果你确定半年内不会加套装、不会加 Buff 联动、不做联机——那就别上 GAS，把属性重算封装成一个独立模块，预留依赖排序接口即可。</p>
+  </div>
+
+  <h3>折中方案：只借鉴一半</h3>
+
+  <p>完全不上 GAS，也可以只抄它最有价值的两个想法：</p>
+
+  <ul>
+    <li><strong>基础值 / 当前值分离 + 修改器聚合</strong>：这一层的收益最大、成本最低，几乎任何项目都值得做。</li>
+    <li><strong>用标签表达状态</strong>：把 <code>bIsStunned</code> 换成标签容器，立刻能省掉大半的条件分支。</li>
+  </ul>
+
+  <p>至于预测、堆叠、Execution 这些，等真的需要了再补。详见第 18 节的 Unity 对照。</p>
+</section>
+
+<!-- ============ 17 ============ -->
+<section id="ch17">
+  <h2><span class="num">17</span>12 个几乎人人都会踩的坑</h2>
+  <p class="lead">一句话：<strong>这些坑都不会报错</strong>。它们只是让你的游戏在某个时刻开始「说不清哪里不对」，然后耗掉你两天。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">1</span><div style="margin-top:4px"><b>忘了调用 EndAbility</b><br/>技能永远占用着位置，角色再也不能做它被封锁的任何事。官方文档用「喝药喝到天荒地老」举的就是这个例子。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">2</span><div style="margin-top:4px"><b>忘了调用 CommitAbility</b><br/>技能变成免费无限放。反过来，所有提前 return 的分支也都要 End。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">3</span><div style="margin-top:4px"><b>选错 Duration Policy</b><br/>Instant 做 Buff 永不消失，Duration 做伤害血量自己弹回来。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">4</span><div style="margin-top:4px"><b>以为两个 Multiply 是连乘</b><br/>两个 ×5 得到的是 9 而不是 25。乘法是先合并再相乘。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">5</span><div style="margin-top:4px"><b>客户端没初始化 ASC</b><br/>报错是「Can't activate LocalOnly or LocalPredicted ability」，但真正的原因是缺了 <code>InitAbilityActorInfo</code>。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">6</span><div style="margin-top:4px"><b>把 BaseValue 当成血量上限</b><br/>上限应该是独立的 <code>MaxHealth</code> 属性。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">7</span><div style="margin-top:4px"><b>同一个 ASC 上挂了两个同类 AttributeSet</b><br/>第二个永远读不到，且不报错。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">8</span><div style="margin-top:4px"><b>Period 大于 Duration</b><br/>最后一次周期永远等不到，玩家觉得「少跳了一次」。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">9</span><div style="margin-top:4px"><b>SetByCaller 的标签不存在</b><br/>运行时报错并返回 0。用在 Divide 上就是除以零。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">10</span><div style="margin-top:4px"><b>Cue 标签没以 GameplayCue. 开头</b><br/>系统静默忽略，特效永远不出现。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">11</span><div style="margin-top:4px"><b>Loose Tag 忘了清理</b><br/>角色永久处于某个状态，且不参与网络复制，服务器和客户端表现不一致。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">12</span><div style="margin-top:4px"><b>遍历技能列表没加锁</b><br/>遍历 <code>ActivatableAbilities.Items</code> 前必须加 <code>ABILITYLIST_SCOPE_LOCK()</code>，而且<strong>不要在锁的作用域内移除技能</strong>。</div></div>
+<div class="cap">图 17-1 · 十二条血泪清单，建议贴在项目 wiki 首页</div>
+</div>
+
+  <div class="callout co-rose">
+    <span class="hd">还有一条跨系统的</span>
+    <p><strong>不要在 <code>PreAttributeChange</code> 里触发游戏事件。</strong>它的职责只有夹取值。要响应属性变化，用 <code>ASC::GetGameplayAttributeValueChangeDelegate()</code> 注册回调。在夹取函数里放逻辑，会导致「夹取被触发两次时事件也触发两次」这类极难定位的问题。</p>
+  </div>
+
+  <h3>关于调试困难这件事</h3>
+
+  <p>GAS 被抱怨最多的一点是「调试复杂，多层 Effect 嵌套」。这有一半是真的，另一半是因为没用对工具——见第 19 节。</p>
+</section>
+
+<!-- ============ 18 ============ -->
+<section id="ch18">
+  <h2><span class="num">18</span>Unity 视角：把这套思想搬回 C#</h2>
+  <p class="lead">一句话：<strong>GAS 真正值钱的不是那六个类，而是三条原则——数值只由修改器聚合、状态只用标签表达、表现只由事件触发。</strong>这三条在 Unity 里完全可以实现。</p>
+
+  <p>如果你是 Unity / C# 开发者，可能会觉得这一整篇讲的都是别人家的框架。但其实它对你同样有用，因为<strong>这些问题是引擎无关的</strong>：技能系统变烂的四种症状，在 Unity 项目里一模一样。</p>
+
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">GAS 概念</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">Unity / C# 对应</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">实现建议</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>AbilitySystemComponent</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">挂在角色 GameObject 上的一个 <code>AbilitySystem</code> MonoBehaviour</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">持有技能列表、生效效果列表、属性集、标签容器。所有跨系统的读写都经过它</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>AttributeSet</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">ScriptableObject 定义属性集 + 运行时的 Base / Current 双值字典</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">关键是「双值 + 修改器列表 + 脏标记重算」，不是「一个 float」</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>GameplayEffect</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">纯数据 ScriptableObject</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">描述：目标属性、运算、时长、周期、授予的标签。逻辑量为零</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>GameplayAbility</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">数据用 ScriptableObject，运行时实例用一个普通 C# 对象</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">生命周期方法照抄：<code>CanActivate / Commit / Activate / End</code>。配合 UniTask 做异步等待</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>GameplayTag</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">层级字符串 + 运行时容器（或用静态常量表 + 位掩码）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">父子匹配是关键：查询 <code>State.Dead</code> 要能命中 <code>State.Dead.ByDamage</code></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>GameplayCue</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一个表现层事件总线</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">逻辑侧只发事件，表现侧订阅。联机时订阅方天然只在客户端存在</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>ExecutionCalculation</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">策略类或委托</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把伤害公式从技能里抽出来，做成可替换的策略对象</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>客户端预测</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>没有内建支持，需要自己写</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">这是唯一真正缺失的一块。单机项目直接跳过</td></tr>
+</tbody>
+</table>
+</div>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">第一层</span><div style="margin-top:4px"><b>先做数值聚合（收益最大）</b><br/>把 <code>FinalValue = (Base + ΣAdd) × ΠMul</code> 做成一个 <code>Attribute</code> 类，所有对数值的修改都经过它。这一步通常两三天能写完，立刻解决「Buff 互相覆盖」和「不知道谁改了我的攻击力」。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">第二层</span><div style="margin-top:4px"><b>再做标签状态</b><br/>一个 <code>TagContainer</code> + 八个语义（Required / Blocked / Granted / Cancel）。把 <code>if (bIsStunned)</code> 全部替换成标签查询。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">第三层</span><div style="margin-top:4px"><b>再做技能生命周期</b><br/>把技能拆成「数据（SO）+ 实例（运行时）」，强制 CanActivate / Commit / Activate / End 四段式，并在 End 里做统一清理。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">第四层</span><div style="margin-top:4px"><b>最后才是表现解耦与联机</b><br/>表现走事件总线；联机预测如果没有强需求就别做，用「服务器权威 + 客户端插值」通常够用。</div></div>
+<div class="cap">图 18-1 · 四层移植路线，按收益排序，逐层叠加</div>
+</div>
+
+  <div class="callout co-violet">
+    <span class="hd">最容易被忽视的移植点</span>
+    <p>不是类结构，是<strong>「效果只能由效果修改」这条纪律</strong>。在 Unity 里你随时可以直接写 <code>player.Health -= 30</code>，没人拦你。而一旦开了这个口子，三层之后你又会回到「不知道血是谁扣的」。建议在项目里加一条硬性约定（甚至写个 Analyzer 或 Review 检查项）：<strong>属性的 setter 只对效果系统开放。</strong></p>
+  </div>
+
+  <p>另外，许多团队在 Unity 侧会把技能做成「时间轴 + 帧事件」的形式（类似 Timeline 或自定义轨道），这和 GAS 并不冲突：时间轴负责「什么时候发生什么」，GAS 的三层负责「发生了之后怎么结算」。两者是正交的。</p>
+</section>
+
+<!-- ============ 19 ============ -->
+<section id="ch19">
+  <h2><span class="num">19</span>调试：看不见的系统永远调不好</h2>
+  <p class="lead">一句话：<strong>GAS 的调试成本，几乎全部来自「状态看不见」。</strong>把状态可视化之后，它的调试难度会回落到和普通代码差不多的水平。</p>
+
+  <h3>三个必用工具</h3>
+
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">工具</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">怎么用</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">能看到什么</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>showdebug abilitysystem</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">游戏内控制台命令</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">当前角色身上的全部属性（Base / Current 分开显示）、生效中的效果列表、剩余时间、层数</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Gameplay Debugger</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">默认按单引号键唤出</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">同上，但是以可交互面板的形式，还能切换观察目标</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Print String / 日志</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">在关键节点打点</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">效果的剩余时间与堆叠层数——这两个是最常算错的量</td></tr>
+</tbody>
+</table>
+</div>
+
+  <div class="callout co-teal">
+    <span class="hd">最有效的一个调试习惯</span>
+    <p>遇到「效果没生效」时，不要先去读技能蓝图。按这个顺序排查，通常两分钟内能定位：</p>
+    <p><strong>1.</strong> 效果到底有没有被施加（看 ActiveGameplayEffects 里有没有它）<br>
+       <strong>2.</strong> 施加了但被挡了（看 Application Tag Requirements / Immunity）<br>
+       <strong>3.</strong> 生效了但时长策略选错（Instant 做 Buff 时会看到「属性变了但没持续」）<br>
+       <strong>4.</strong> 数值不对（看聚合器的 Modifier 列表，检查 Multiply 有没有被合并）<br>
+       <strong>5.</strong> 表现没出来（看 Cue 的标签前缀）</p>
+  </div>
+
+  <h3>联机排查的起点</h3>
+
+  <p>联机问题 90% 是「一边有、另一边没有」。最快的定位手段是<strong>在 AttributeSet 的 <code>OnRep_</code> 回调里打断点</strong>——如果断点不触发，说明数据根本没到客户端，问题在复制模式或初始化时机；如果触发了但值不对，问题在聚合或夹取。</p>
+
+  <p>还有一条必须记住的配置：<strong>属性的 <code>OnRep</code> 里要用 <code>GAMEPLAYATTRIBUTE_REPNOTIFY</code> 宏，并且复制条件设为 <code>REPNOTIFY_Always</code>。</strong>默认情况下，如果本地值（预测值）和服务器发来的值相同，OnRep 不会触发——而这恰恰是预测成功的情况，你需要它触发来完成确认。<code>REPNOTIFY_Always</code> 就是为这件事存在的。</p>
+
+  <div class="callout co-amber">
+    <span class="hd">多人测试的时机</span>
+    <p>很多人把联机测试留到项目后期，这是 GAS 项目最大的风险之一。<strong>建议在项目初期就搭一个两客户端的测试环境</strong>，哪怕只是两个窗口。GAS 的复制行为需要在真实网络下跑通，单机 PIE 里「看起来对」的东西，联机后经常完全不是那么回事。</p>
+    <p>另外，用 PIE 多客户端测试时要关掉 <strong>Run Under One Process</strong>，否则非第一个客户端的世界不会正确更新（尤其是派生属性相关的逻辑）。</p>
+  </div>
+</section>
+
+<!-- ============ A ============ -->
+<section id="chA">
+  <h2><span class="num">A</span>术语速查表</h2>
+  <p class="lead">按「遇到问题时该查谁」排列，而不是按字母。</p>
+
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">术语</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">一句话解释</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">初学者类比</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>ASC</b><br/>AbilitySystemComponent</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">角色的技能中枢，持有技能、效果、属性、标签</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一个人的档案袋：会什么、身上有什么、状态如何，全在里面</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>OwnerActor / AvatarActor</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">持有 ASC 的 Actor / ASC 的物理化身</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">档案袋放在人事部（PlayerState），人站在场上（Character）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Attribute</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一个数值，含永久值与当前值</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">工资条上的「底薪」和「本月实发」</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>AttributeSet</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一组属性的集合</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一张工资条</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>BaseValue</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">永久值，只有 Instant 效果能改</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">底薪，加工资是改底薪</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>CurrentValue</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">当前值，由基础值聚合所有临时修改得出</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">实发工资 = 底薪 + 补贴 - 扣款</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>GameplayAbility (GA)</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一个技能，管资格与收尾</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一份「申请表」：谁有资格申请、申请后要走完流程</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>GameplayEffect (GE)</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一张修改数值的单据，纯数据</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">财务凭证：改哪个科目、改多少、有效期多久</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Modifier</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">GE 里的一条运算（加 / 乘 / 除 / 覆盖）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">凭证里的一行分录</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Execution</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">GE 里的自定义计算类，可捕获多个属性</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">需要跨科目查账才能算出来的那一栏</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>MMC</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">自定义修改器数值计算类</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">「这一行的数字由某个公式算出」</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>SetByCaller</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">运行时才填进来的数值</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">凭证上留空的金额栏，交单时再填</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>GameplayTag</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">层级标签，表达状态与资格</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">贴在档案袋上的彩色便签，谁都能看</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>GameplayCue (GC)</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">表现层触发器</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">广播：「3 号窗口请取餐」——谁去取、怎么取由前台决定</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>AbilityTask</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">技能内的异步等待节点</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">流程里的「等待某某完成」</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Meta Attribute</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不复制的中间计算量</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">草稿纸上的中间结果，不写进正式账本</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Stacking</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">同类效果叠加成层而非新建</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">集章卡：同一家店的章盖在同一张卡上</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Prediction Key</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一次预测的记账编号</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">餐厅取餐号：先坐下，凭号对账</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Prediction Window</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">预测的作用域，同窗口共用一个 Key</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一次点单算一单，菜要一起上或者一起退</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Loose Tag</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">手动挂上、不参与复制的标签</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">自己给自己贴的便签，别人看不见</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- ============ B ============ -->
+<section id="chB">
+  <h2><span class="num">B</span>从零搭建的 10 步清单</h2>
+  <p class="lead">顺序很重要：<strong>属性必须早于效果，效果必须早于技能</strong>。因为效果要引用属性，技能要引用效果。顺序反了就要反复回头改。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">01</span><div style="margin-top:4px"><b>启用插件</b><br/>Edit → Plugins → 搜索 Gameplay Abilities，启用并重启编辑器。没启用时所有相关工具都会报错</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">02</span><div style="margin-top:4px"><b>注册标签</b><br/>Project Settings → GameplayTags 里先把 <code>State.*</code>、<code>Ability.*</code>、<code>Cooldown.*</code>、<code>GameplayCue.*</code> 几棵树建好。标签必须先存在，技能才能引用</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">03</span><div style="margin-top:4px"><b>写 AttributeSet（C++）</b><br/>Health / MaxHealth / Mana / MaxMana / AttackPower / Armor，每个都用 <code>ATTRIBUTE_ACCESSORS</code> 宏生成访问器</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">04</span><div style="margin-top:4px"><b>写 ASC（C++）</b><br/>在 OwnerActor 的构造函数里创建，<code>SetIsReplicated(true)</code>，选好复制模式</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">05</span><div style="margin-top:4px"><b>两端初始化</b><br/>服务器 <code>PossessedBy()</code>、客户端 <code>OnRep_PlayerState()</code> 各调一次 <code>InitAbilityActorInfo</code></div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">06</span><div style="margin-top:4px"><b>做三个基础 GE</b><br/>GE_Damage（Instant）、GE_Cost（Instant）、GE_Cooldown（Duration + 授予标签）</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">07</span><div style="margin-top:4px"><b>做第一个技能 GA_Fireball</b><br/>填上 Cost GE、Cooldown GE、Blocked Tags，ActivateAbility 里只做「播放动画 → 等事件 → 施加 GE → End」</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">08</span><div style="margin-top:4px"><b>授予技能</b><br/>用 <code>GiveAbility()</code> 把它挂到角色身上；用 InputTag 把输入绑上去</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">09</span><div style="margin-top:4px"><b>加 Cue</b><br/>建一个 <code>GC_FireImpact</code>，标签必须以 <code>GameplayCue.</code> 开头，挂到 GE 上</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">10</span><div style="margin-top:4px"><b>开调试器验证</b><br/><code>showdebug abilitysystem</code>，确认：属性 Base / Current 分开显示、效果在列表里、冷却标签出现过又消失</div></div>
+<div class="cap">图 B-1 · 十步跑通第一个技能，之后再扩展就容易了</div>
+</div>
+
+  <div class="callout co-blue">
+    <span class="hd">第 7 步的验收标准</span>
+    <p>第一个技能做完后，你应该能在调试器里看到：<strong>按下按键 → 蓝量减少 → 冷却标签出现 → 5 秒后标签消失 → 期间再按无效</strong>。这四件事全对，说明整条链路是通的。此时再去做伤害、Buff、联机，每一步都是局部修改。</p>
+  </div>
+</section>
+
+<!-- ============ C ============ -->
+<section id="chC">
+  <h2><span class="num">C</span>常见误区与反直觉点</h2>
+  <p class="lead">按「反直觉程度」排序。第一条最反直觉，也最容易毁掉一整个数值体系。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">反直觉 1</span><div style="margin-top:4px"><b>两个 ×5 的 Buff 叠出来是 ×9</b><br/>因为乘法修改器是先合并再相乘，中性值是 1 而不是 0。要真连乘得改引擎源码。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">反直觉 2</span><div style="margin-top:4px"><b>Instant 效果不会给目标挂任何标签，哪怕一帧也不会</b><br/>所以「命中即眩晕」不能靠 Instant GE 的 Granted Tags 实现，要单独施加一个 Duration GE。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">反直觉 3</span><div style="margin-top:4px"><b>冷却不是计时器，是一个效果授予的标签</b><br/>理解了这点，「减冷却」「驱散冷却」「查看剩余冷却」全都是同一件事的不同侧面。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">反直觉 4</span><div style="margin-top:4px"><b>周期效果的第一跳不在第 0 秒</b><br/>Duration 3 秒、Period 1 秒，跳在 t=1、2、3。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">反直觉 5</span><div style="margin-top:4px"><b>在 PreAttributeChange 里夹取，不会改掉修改器</b><br/>任何重新计算当前值的地方（Execution、MMC）都要再夹一次，否则会出现「夹了但没完全夹」。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">反直觉 6</span><div style="margin-top:4px"><b>预测成功时也要触发 OnRep</b><br/>因为本地预测值和服务器值相同，默认的 OnRep 不会触发。必须设 <code>REPNOTIFY_Always</code>。</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">反直觉 7</span><div style="margin-top:4px"><b>武器弹药不该放进 AttributeSet</b><br/>「看起来是个数值」和「应该是个属性」是两回事。判断标准是：它会被 Buff 修改吗？</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#64748b;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">反直觉 8</span><div style="margin-top:4px"><b>GAS 最难的从来不是 GAS 本身</b><br/>大部分人的困难来自 Lyra 里同时存在的 Game Feature、Experience、Equipment 等额外系统。先学裸 GAS，再读 Lyra。</div></div>
+<div class="cap">图 C-1 · 八条反直觉点</div>
+</div>
+</section>
+
+<!-- ============ D ============ -->
+<section id="chD">
+  <h2><span class="num">D</span>思考题</h2>
+  <p class="lead">能回答这六个问题，说明这套思路你已经真正内化了。建议先自己想，再回去翻对应章节。</p>
+
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">问题</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">涉及章节</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">1. 一个「+20 攻击力」和一个「+30% 攻击力」的 Buff 同时生效，基础攻击力 100，结果是多少？如果反过来先加 30% 再加 20 呢？</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 7 节</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">2. 你要做「中毒 5 秒，每秒扣 10 血」，Duration 和 Period 分别填多少？实际会跳几次伤害？</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 5、8 节</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">3. 三个玩家同时对同一个 Boss 上「燃烧」，你希望 Boss 最多只能叠 3 层（而不是 9 层），该选哪种堆叠类型？</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 8 节</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">4. 「沉默」只封法术不封位移，「定身」只封位移不封施法。用标签怎么设计？需要给技能加什么标签？</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 11 节</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">5. 一个技能预测失败了，哪些东西能被回滚，哪些不能？据此你会把「扣蓝」和「播放施法音效」分别放在哪一侧？</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 13 节</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">6. 你的项目有 12 个技能、纯单机、三个月上线。你会上 GAS 吗？如果不上，你会照搬它的哪两层？</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 16、18 节</td></tr>
+</tbody>
+</table>
+</div>
+
+  <div class="divider"></div>
+
+  <div class="callout co-violet">
+    <span class="hd">如果只带走一句话</span>
+    <p><strong>把「能不能」做成标签，把「改多少」做成数据，把「怎么做」留给技能。</strong>这三件事分开的那一天，你的技能系统就开始可控了——无论你用的是 GAS、Unity，还是自己撸的框架。</p>
+  </div>
+</section>
+
+<footer>
+  <p>本教程为公开资料的梳理与重新组织，主要参考 Epic 官方文档（Gameplay Ability System、Lyra 中的 Abilities）、社区广泛使用的 GASDocumentation（tranek）、Unreal Directive 的 GAS 参考，以及若干工程实践经验总结。文中所有图示均为重新绘制，示例代码为示意性伪代码。</p>
+  <p>数据与术语以 UE5 为准；不同引擎版本在个别 API 与策略命名上会有差异（例如 <code>NonInstanced</code> 策略自 5.5 起已废弃），落地前请以你所用版本的官方文档为准。</p>
+  <p class="small">ptato.github.io · 图解教程系列</p>
+</footer>
+
+</div>
+</body>
+</html>

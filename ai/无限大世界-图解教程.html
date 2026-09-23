@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>游戏中的无限大世界是怎么实现的 · 图解教程</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230d9488'/><path d='M5 22 L13 11 L19 17 L27 8' stroke='%23fff' stroke-width='2.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<style>
+:root{
+  --bg:#f6f8fb; --card:#fff; --ink:#1e293b; --ink2:#475569; --ink3:#94a3b8;
+  --line:#e2e8f0; --line2:#cbd5e1;
+  --blue:#3b5bdb; --amber:#b45309; --teal:#0d9488; --violet:#6d28d9; --rose:#be123c; --green:#15803d;
+  --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px -12px rgba(15,23,42,.14);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",sans-serif;
+  font-size:16px; line-height:1.85; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:920px;margin:0 auto;padding:0 20px 80px}
+a{color:var(--blue);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ---------- hero ---------- */
+.hero{
+  background:linear-gradient(160deg,#fff 0%,#effcfb 55%,#e6f7f5 100%);
+  border:1px solid var(--line); border-radius:20px; padding:44px 38px; margin:28px 0 26px;
+  box-shadow:var(--shadow); position:relative; overflow:hidden;
+}
+.hero::after{
+  content:""; position:absolute; right:-70px; top:-70px; width:260px; height:260px; border-radius:50%;
+  background:radial-gradient(circle,rgba(13,148,136,.12),transparent 70%);
+}
+.kicker{font-size:13px;letter-spacing:.16em;color:var(--teal);font-weight:700;margin-bottom:14px}
+.hero h1{font-size:33px;line-height:1.3;margin:0 0 12px;letter-spacing:-.01em}
+.hero .sub{font-size:16.5px;color:var(--ink2);margin:0 0 22px;max-width:680px}
+.hero .meta{display:flex;flex-wrap:wrap;gap:10px}
+.chip{
+  background:#fff;border:1px solid var(--line2);border-radius:999px;
+  padding:5px 14px;font-size:12.5px;color:var(--ink2);
+}
+.chip b{color:var(--ink);font-weight:600}
+
+/* ---------- 目录 ---------- */
+.toc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-bottom:30px;box-shadow:var(--shadow)}
+.toc h2{font-size:15px;margin:0 0 16px;color:var(--ink3);font-weight:700;letter-spacing:.08em}
+.toclist{list-style:none;margin:8px 0 0;padding:0}
+.toclist li{padding:6px 2px;font-size:14px;line-height:1.6;color:var(--ink);border-bottom:1px dashed var(--line)}
+.toclist li:last-child{border-bottom:none}
+.tocpart{font-weight:700;color:var(--teal);margin-top:14px;font-size:13px;letter-spacing:.04em}
+
+/* ---------- 章节 ---------- */
+section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:34px 38px;margin-bottom:26px;box-shadow:var(--shadow)}
+section>h2{font-size:24px;margin:0 0 6px;letter-spacing:-.01em;scroll-margin-top:20px}
+section>h2 .num{color:var(--line2);font-weight:800;margin-right:10px;font-size:20px}
+.lead{color:var(--ink2);font-size:15.5px;margin:0 0 22px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+h3{font-size:18px;margin:32px 0 10px;color:var(--ink)}
+h3:first-of-type{margin-top:8px}
+h4{font-size:15px;margin:22px 0 8px;color:var(--ink2)}
+p{margin:0 0 14px}
+ul,ol{margin:0 0 16px;padding-left:22px}
+li{margin-bottom:7px}
+strong{font-weight:650;color:var(--ink)}
+code{
+  font-family:"SFMono-Regular",Menlo,Consolas,monospace;font-size:13px;
+  background:#f1f5f9;border:1px solid var(--line);border-radius:5px;padding:1px 5px;color:#0f172a;
+  overflow-wrap:anywhere;word-break:break-word;
+}
+.small{font-size:13.5px;color:var(--ink3)}
+
+/* ---------- 图 ---------- */
+.diagram{background:linear-gradient(180deg,#fdfefe,#f8fafc);border:1px solid var(--line);border-radius:14px;padding:22px 18px;margin:22px 0}
+.cap{font-size:12.5px;color:var(--ink3);text-align:center;margin-top:12px;line-height:1.6}
+svg{max-width:100%;height:auto}
+
+/* ---------- 高亮框 ---------- */
+.callout{border-radius:12px;padding:16px 18px;margin:20px 0;font-size:14.5px;border:1px solid;line-height:1.75}
+.callout .hd{font-weight:700;font-size:13px;letter-spacing:.05em;margin-bottom:6px;display:block}
+.callout p:last-child{margin-bottom:0}
+.co-blue{background:#f3f6ff;border-color:#c7d2fe;color:#1e3a8a}
+.co-blue .hd{color:var(--blue)}
+.co-teal{background:#f0fbf9;border-color:#99e6d9;color:#134e4a}
+.co-teal .hd{color:var(--teal)}
+.co-amber{background:#fffaf0;border-color:#fcd9a5;color:#78350f}
+.co-amber .hd{color:var(--amber)}
+.co-rose{background:#fff5f7;border-color:#f8c2cd;color:#831843}
+.co-rose .hd{color:var(--rose)}
+.co-violet{background:#f8f5ff;border-color:#ddd0fb;color:#4c1d95}
+.co-violet .hd{color:var(--violet)}
+
+/* ---------- 数据卡 ---------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0}
+.stat{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:14px 16px;text-align:center}
+.stat .v{font-size:23px;font-weight:750;color:var(--teal);line-height:1.2;letter-spacing:-.02em}
+.stat .k{font-size:12px;color:var(--ink3);margin-top:4px;line-height:1.4}
+
+/* ---------- 表格 ---------- */
+.tblwrap{overflow-x:auto;margin:20px 0;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13.5px;background:#fff}
+th{background:#f8fafc;text-align:left;padding:10px 13px;font-weight:700;color:var(--ink2);border-bottom:1px solid var(--line);white-space:nowrap;font-size:13px}
+td{padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#fcfdff}
+
+/* ---------- 公式 ---------- */
+.formula{
+  background:#f8fafc;border:1px solid var(--line);border-left:3px solid var(--teal);
+  border-radius:0 10px 10px 0;padding:12px 16px;margin:16px 0;
+  font-family:"SFMono-Regular",Menlo,Consolas,monospace;font-size:13.5px;line-height:2;color:#0f172a;
+  overflow-x:auto;white-space:pre;
+}
+.formula .c{color:var(--ink3)}
+
+/* ---------- 代码 ---------- */
+pre{
+  background:#0f172a;color:#e2e8f0;border-radius:12px;padding:16px 18px;overflow-x:auto;
+  font-family:"SFMono-Regular",Menlo,Consolas,monospace;font-size:12.8px;line-height:1.75;margin:18px 0;
+}
+pre .k{color:#93c5fd}
+pre .t{color:#86efac}
+pre .cm{color:#94a3b8}
+pre .n{color:#fcd34d}
+
+/* ---------- 其他 ---------- */
+.q{border-left:3px solid var(--line2);padding:2px 0 2px 16px;color:var(--ink2);font-size:14.5px;margin:16px 0}
+footer{text-align:center;color:var(--ink3);font-size:13px;padding:30px 20px 0;line-height:1.9}
+.divider{height:1px;background:var(--line);margin:34px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hero">
+  <div class="kicker">图 解 教 程 · 开 放 世 界 技 术</div>
+  <h1>游戏里的「无限大世界」，到底是怎么造出来的</h1>
+  <p class="sub">塞尔达、荒野大镖客、艾尔登法环、原神、盗贼之海 —— 五个完全不同的答案，背后是同一道题：在有限的内存、带宽和浮点精度里，假装整个世界一直都在。从流送、地形、剔除，到化学引擎、FFT 真海、确定性跨服迁移，这篇把它们拆开讲清楚。</p>
+  <div class="meta">
+    <span class="chip">主题 <b>开放世界 / 大地图</b></span>
+    <span class="chip">覆盖 <b>流送 · 地形 · 剔除 · 精度 · PCG · 海洋</b></span>
+    <span class="chip">案例 <b>5 款 3A 级作品</b></span>
+    <span class="chip">来源 <b>GDC / SIGGRAPH / 官方文档</b></span>
+    <span class="chip">阅读时长 <b>约 55 分钟</b></span>
+  </div>
+</div>
+
+<div class="toc">
+<h2>目 录</h2>
+<ul class="toclist">
+<li class="tocpart">开篇</li>
+<li>0 · 一个反直觉的真相：大世界不是「把地图做大」</li>
+<li class="tocpart">第一部分 · 底层蓝图（所有大世界共用的零件）</li>
+<li>1 · 世界分区与流送：永远只把身边那一圈装进内存</li>
+<li>2 · 地形：脚下要细、地平线要远</li>
+<li>3 · 剔除与 HLOD：瓶颈是 draw call 不是三角形</li>
+<li>4 · 浮点精度的诅咒：21 km 与坐标重定位</li>
+<li>5 · 虚拟纹理与 IO：PS5 的 SSD 到底改变了什么</li>
+<li>6 · 程序化生成：Houdini、PCG 与「无菌感」</li>
+<li>7 · 海洋、天空与「空的恐惧」</li>
+<li class="tocpart">第二部分 · 五款游戏的答卷</li>
+<li>8 · 塞尔达 旷野之息：聪明的谎言 + 九宫格 + 化学引擎</li>
+<li>9 · 荒野大镖客2：把硬盘当内存 + 会呼吸的大气</li>
+<li>10 · 艾尔登法环：水平大地图 + 垂直地下世界</li>
+<li>11 · 原神：Unity 深度改造 + 多端统一的卡通 PBR</li>
+<li>12 · 盗贼之海：FFT 真海 + 确定性跨服迁移</li>
+<li class="tocpart">第三部分 · 横向对照与动手</li>
+<li>13 · 五款游戏技术对照表</li>
+<li>14 · 给你的选型清单与动手建议</li>
+<li>15 · 常见误区汇总</li>
+<li class="tocpart">附录</li>
+<li>A · 术语速查表</li>
+<li>B · 思考题</li>
+</ul>
+</div>
+
+<!-- ============ 0 ============ -->
+<section id="ch0">
+  <h2><span class="num">00</span>一个反直觉的真相：大世界不是「把地图做大」</h2>
+  <p class="lead">所有大世界技术，本质上都是同一个问题的不同答案：如何在有限的内存、带宽、浮点精度里，假装整个世界都在。</p>
+
+  <p>先泼一盆冷水。我们直觉里「无限大世界」的画面是：一个巨无霸的地图文件，游戏一启动就全部载入，玩家走到哪都是真的。但现实是——不管是 Switch 上的海拉鲁，还是 PS5 上的交界地，内存里永远只装着玩家<strong>周围那一小圈</strong>。所谓「无缝」，不是「全都存在」，而是「你还没看的地方，刚好在你看之前被偷偷换上去了」。</p>
+
+  <p>所以这篇文章不按「这是哪个游戏」讲技术，而是先讲清楚<strong>所有大世界共用的底层零件</strong>（流送、地形、剔除、精度、程序化），再去看五款游戏各自怎么组合这些零件交出答卷。你会发现：塞尔达和虚幻引擎 5，其实在解同一道题，只是解法一个像艺术家、一个像工业化流水线。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#0d9488;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">共同目标</span><div style="margin-top:4px">有限内存 + 有限带宽 + 有限精度 → 假装整个世界一直都在</div></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">艺术家派</span><div style="margin-top:4px">塞尔达：手工雕出小地图（约 80 km²）+ 高内容密度 + 聪明的谎言换自由度</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#6d28d9;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">工业化派</span><div style="margin-top:4px">UE5 / Unity：World Partition + HLOD + Nanite + LWC 流水线，几十平方公里也能跑</div></div>
+<div class="cap">图 0 · 一枚硬币的两面：内容密度战胜预算，自动化战胜人力</div>
+</div>
+
+  <div class="callout co-teal">
+    <span class="hd">这一篇你该记住的一条</span>
+    <p>「无限大世界」是演出，不是容量。它的全部工程，都围绕三个词：加载、卸载、以及让这两件事发生在玩家视线之外。</p>
+  </div>
+</section>
+
+<!-- ============ 1 ============ -->
+<section id="ch1">
+  <h2><span class="num">01</span>世界分区与流送：永远只把身边那一圈装进内存</h2>
+  <p class="lead">这是大世界的地基。把整张地图切成格子，按玩家位置动态加载、卸载，内存里永远只有九宫格那一点东西。</p>
+
+  <h3>它解决什么问题</h3>
+  <p>一个 80 km² 的世界里，可能有上万个可交互物体：敌人、草、树、宝箱、呀哈哈、武器、NPC。全部常驻内存？Switch 的 4GB 统一内存当场爆炸。而且只按距离砍也不行——因为很多机关是联动的（树倒了 → 桥出现），你不能把有关系的对象拆散到不同内存块里。</p>
+
+  <h3>怎么做：以塞尔达的「九宫格」为例</h3>
+  <p>《旷野之息》把世界切成带字母 + 数字的方格（A-1、B-3、H-5…），每个叫一个 <strong>Map unit</strong>。玩家站在 H-5 时，系统加载周围 3×3 = 9 个 Dynamic unit（G-4 到 I-6）。这不是比喻，是逆向工程实锤的加载策略。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">玩家在 H-5</b><br><span style="color:#475569;font-size:13px">以脚下为原点的 3×3 范围</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">加载 9 个 Dynamic unit</b><br><span style="color:#475569;font-size:13px">G-4 H-4 I-4 / G-5 H-5 I-5 / G-6 H-6 I-6</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">Inner 再过 TraverseDist</b><br><span style="color:#475569;font-size:13px">够近才显示 + 跑 AI，够远进 Sleep</span></div>
+<div class="cap">图 1 · BotW 的九宫格加载：内存级只装 9 格，渲染级再按描画距离筛一遍</div>
+</div>
+
+  <p>关键在有两个互相独立的半径，这是最容易搞混的地方：</p>
+  <ul>
+    <li><strong>加载半径（九宫格 / Loading Range）</strong>：决定这块内容进不进内存；</li>
+    <li><strong>显示半径（TraverseDist / 剔除距离）</strong>：决定它画不画、跑不跑 AI。</li>
+  </ul>
+  <p>也就是说「加载 ≠ 显示」。一个物体可以躺在内存里睡觉，也可以明明在内存里却被判「太远，别画」。理论上只要美术给它配够大的 TraverseDist，你在海拉鲁的这头能看见那头的东西。</p>
+
+  <h3>通用引擎的同一件事：World Partition 与 Addressables</h3>
+  <p>Unity / 虚幻把这套思路做成了自动化工具。UE5 的 <strong>World Partition</strong>：整个世界存在一个持久关卡里，自动按网格切成 cell（默认 128 m 一格），按玩家到流送源的距离自动加载卸载。每个 Actor 存成独立文件（OFPA），彻底解决多人协作时的版本冲突。Unity 侧则是把世界切成 additive scene，用 <strong>Addressables</strong> 按引用计数异步加载、自动释放。</p>
+
+  <div class="stats">
+    <div class="stat"><div class="v">128 m</div><div class="k">UE5 默认 cell 边长</div></div>
+    <div class="stat"><div class="v">9 格</div><div class="k">BotW 同时驻留的 Dynamic unit</div></div>
+    <div class="stat"><div class="v">255</div><div class="k">一个生成组的上限 Actor 数</div></div>
+    <div class="stat"><div class="v">3×3</div><div class="k">流送的最小视野窗口</div></div>
+  </div>
+
+  <div class="callout co-amber">
+    <span class="hd">一个会咬人的坑（Unity）</span>
+    <p><code>LoadSceneAsync</code> 的进度跑到 0.9 会「卡住」，这不是死机，是「加载完成、等待你激活」。只有把 <code>allowSceneActivation = true</code> 才跳到 1.0。正确用法恰恰是趁这 0.1 做转场动画、清理旧场景，再一次性激活——把加载藏进演出里。</p>
+  </div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section id="ch2">
+  <h2><span class="num">02</span>地形：脚下要细、地平线要远</h2>
+  <p class="lead">地形是大世界里唯一永远在视野里、永远不能卸载的东西。它的核心矛盾是：脚下要够细，地平线要够远——两者的三角形数量差好几个数量级。</p>
+
+  <h3>第一步：高度图切成块</h3>
+  <p>地形底层是一张二维「高度表」（Heightmap）。一张 4096×4096 的 16-bit 高度图不压缩约 32 MB，永远不一次性全载，而是切成 64~128 m 见方的小块（Chunk）。</p>
+
+  <h3>第二步：几何 LOD，三种流派</h3>
+  <p>远处地形用低精度模型，靠近才换高精度。问题是不同精度的相邻块之间会出现裂缝（T-junction）。三种主流解法：</p>
+
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">流派</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">结构</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">接缝处理</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">特点</th></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>Chunked LOD</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">四叉树 + 预生成块</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">插入 stitching 补丁几何</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">经典，但要额外补丁</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>CDLOD</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">四叉树 + 全场景统一 LOD 函数</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不需要 stitching，用顶点 morph</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">连续缩放、无 pop</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>GeoClipmap</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">以相机为中心的同心环</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">靠 skirt（裙边）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一个 draw call 一环，适合无限地形</td></tr>
+</table>
+</div>
+
+  <p><strong>CDLOD</strong>（Strugar, 2010）是现在最常被引用的方案：它按「观察者到地面的真实三维距离」决定 LOD，在每层最后 15~30% 的 morph 区让顶点连续变过去，所以既不用补丁，也不会有「啪」地弹一下的跳变。GeoClipmap 则像一个以你为中心的靶子，中心最清晰、越往外越粗，内存恒定，特别适合盗贼之海那种「望不到边」的海面。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">近</span><div style="margin-top:4px">全细节地形，每格只几米，贴脚下的质感</div></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓ 越远精度越低（morph 连续过渡，无裂缝）</div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#0d9488;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">中</span><div style="margin-top:4px">四叉树降一档，几十米一格</div></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#6d28d9;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">远</span><div style="margin-top:4px">地平线：一两百米一格，够看出山脉轮廓就行</div></div>
+<div class="cap">图 2 · 地形 LOD 的本质：同一座山，近处是一粒粒沙，远处是一个色块</div>
+</div>
+
+  <div class="callout co-blue">
+    <span class="hd">生活类比</span>
+    <p>拼接地砖。你可以（a）每块砖独立成形但留缝；（b）边缘磨成斜面让两块自然过渡（morph）；（c）四周加一圈踢脚线把缝挡住（skirt）。三者都能住人，只是成本不同、穿帮的位置不同。</p>
+  </div>
+</section>
+
+
+<!-- ============ 3 ============ -->
+<section id="ch3">
+  <h2><span class="num">03</span>剔除与 HLOD：瓶颈是 draw call 不是三角形</h2>
+  <p class="lead">视锥剔除只解决了「画面外的不画」。但开放世界里，你面前隔着一座山——山后那一万个物体在视锥里，却根本看不见。而且真正的瓶颈往往不是三角形数，是提交次数。</p>
+
+  <h3>三级剔除</h3>
+  <ul>
+    <li><strong>视锥剔除（Frustum Culling）</strong>：不在相机视野锥里的直接不画；</li>
+    <li><strong>遮挡剔除（Occlusion Culling）</strong>：被山、楼挡住的也不画。常用 HZB（层级深度图）——一张金字塔状的深度图，判断「这个包围盒是不是被完全挡住」只需采样几个像素，极快；</li>
+    <li><strong>GPU Driven Rendering</strong>：把剔除、LOD 选择、绘制调用全搬到 GPU 批量裁决，CPU 不再一个个问 GPU。</li>
+  </ul>
+
+  <h3>HLOD 与 Imposter：把一堆物体变成一个</h3>
+  <p>单个物体的 LOD 解决了「每个东西自己变粗」，但解决不了「东西太多、draw call 太多」。远处一片 5000 棵树的森林 = 5000 次 draw call，哪怕每棵只有 12 个三角形。这时用 <strong>HLOD（层级 LOD）</strong>：把一组相邻静态物体合并成一个低模代理。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">近</span><div style="margin-top:4px">Full Detail：所有 Actor 各自渲染，有碰撞</div></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#0d9488;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">中</span><div style="margin-top:4px">HLOD 层 0：合并网格 + 简化材质，无碰撞</div></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#6d28d9;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">远</span><div style="margin-top:4px">HLOD 层 1+：激进减面 + 图集贴图</div></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#b45309;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">极远</span><div style="margin-top:4px">Imposter 公告板：一张带透明通道的贴图贴在四边形上</div></div>
+<div class="cap">图 3 · HLOD 是把 O(n) 个物体变成 O(1) 个批次——代价是远处再也不能单独隐藏某一棵树</div>
+</div>
+
+  <h3>Nanite 的双 Pass 遮挡</h3>
+  <p>UE5 的 Nanite（虚拟化几何）把网格切成固定 128 三角形的 Cluster，用 BVH + 双 Pass 遮挡 + 软光栅化。它先用<strong>上一帧</strong>的 HZB 剔除（假设上一帧可见的这帧大概率还可见），光栅化后再构建本帧 HZB；再用本帧 HZB 把刚才被「误杀」的物体补回来。为什么两遍？因为单靠上一帧会把相机转角瞬间刚露出来的模型漏掉。</p>
+
+  <div class="stats">
+    <div class="stat"><div class="v">128</div><div class="k">Nanite 一个 Cluster 的三角形数</div></div>
+    <div class="stat"><div class="v">64 bit</div><div class="k">Visibility Buffer 位宽</div></div>
+    <div class="stat"><div class="v">1600 万</div><div class="k">场景 Nanite 实例硬上限</div></div>
+    <div class="stat"><div class="v">~3×</div><div class="k">极小三角走软光栅比硬件快</div></div>
+  </div>
+
+  <div class="callout co-rose">
+    <span class="hd">反直觉：Nanite 不总是最快</span>
+    <p>对草、小石、小叶片这种「成千上万个极小 / 移动实例」，经典 HISM（分层实例化）仍然更快。Nanite 自己处理这种极端情况时的降级手段，就是干脆画一个带贴图的 quad（Imposter）。HLOD 管 draw call 合并，Nanite 管逐 mesh LOD，二者互补而非替代。</p>
+  </div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section id="ch4">
+  <h2><span class="num">04</span>浮点精度的诅咒：21 km 与坐标重定位</h2>
+  <p class="lead">新手最常踩、最难 debug 的坑：世界越大，离原点越远，物体开始抖动、贴图错位、物理飘移。地图没错，是数字本身的精度不够了。</p>
+
+  <h3>为什么会出现</h3>
+  <p>虚幻的单位是 cm，坐标用 float32 存。float32 尾数 24 位，当物体离原点距离为 x 时，最小可分辨距离约为 <code>Δx = x·2⁻²³</code>。在 x ≈ 21 km 处，Δx 已经到 0.25 cm 级别——肉眼可见的抖动。这就是 UE4 时代「世界半径硬上限约 21 km」的来历。</p>
+
+  <div class="formula"><span class="c"># 达摩克利斯之剑：精度随距离线性变差</span>
+Δx  =  x · 2⁻²³
+x = 2²¹ cm ≈ 20.97 km  →  Δx = 0.25 cm  <span class="c"># 抖动的临界</span></div>
+
+  <h3>三条解决路线</h3>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">方案</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">做法</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">代价</th></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>Origin Rebasing</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">玩家走远，整个世界的 Actor 反向平移，让原点重新贴回脚下</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">绝不能手动改偏移值，否则坐标漂移极难查</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>Camera-relative</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">提交 GPU 的顶点坐标先减相机世界位置，GPU 永远看到贴近零的小数</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">后处理材质里用绝对世界坐标仍可能出问题</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>LWC（UE5）</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">引擎层 FVector 升为 double，只在提交 GPU 前转回 float</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">老代码的隐式 float 转换会静默丢精度</td></tr>
+</table>
+</div>
+
+  <p>UE5 起默认开启 <strong>LWC（Large World Coordinates）</strong>：世界坐标用 double，GPU 相关（顶点、粒子、骨骼）用单精度 <code>FVector3f</code>。但别以为开了就万事大吉——网络复制仍是量化 float；<code>FVector → FVector3f</code> 的隐式转换能编译通过却静默丢精度；Niagara 粒子、物理子系统内部仍是 float 路径；后处理材质里的绝对世界坐标在离原点几十公里处仍会偏差。</p>
+
+  <div class="callout co-amber">
+    <span class="hd">一句话记住</span>
+    <p>LWC 没有让坐标变准，它只是把「不准」挪到了看不见的地方。三种解法分别对应：把整套房子搬到你们中间（Rebasing）、永远用「离你几米」报地址（Camera-relative）、直接换一把 64 位游标卡尺（LWC）。</p>
+  </div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section id="ch5">
+  <h2><span class="num">05</span>虚拟纹理与 IO：PS5 的 SSD 到底改变了什么</h2>
+  <p class="lead">流式加载的终极瓶颈通常不是「文件多大」，而是「把这块内容弄进内存要多少毫秒」。PS5 的 SSD 把这条瓶颈砍掉了一大截——但也没砍掉全部。</p>
+
+  <h3>虚拟纹理：给地形一层「无限大但有分辨率」的皮</h3>
+  <p>地形叠了 8 层材质（草 / 岩 / 土 / 沙 / 雪 / 过渡…），如果每帧每像素采样 8 张贴图再混合，纹理常驻内存会被推到 4~8 GB，然后疯狂换页。虚拟纹理的思路是：先把「最终颜色」烘进一张巨大的虚拟贴图，再按可见性只把需要的 tile 分页进物理内存——把「每帧 8 次采样」变成「一次采样」。UE5 有 RVT（GPU 实时生成）和 SVT（从磁盘按需加载）两种。</p>
+
+  <h3>PS5 SSD 的数字</h3>
+  <div class="stats">
+    <div class="stat"><div class="v">5.5 GB/s</div><div class="k">PS5 原始 IO 吞吐</div></div>
+    <div class="stat"><div class="v">8–9 GB/s</div><div class="k">压缩后典型吞吐</div></div>
+    <div class="stat"><div class="v">0.27 s</div><div class="k">加载 2 GB 数据（Cerny 语）</div></div>
+    <div class="stat"><div class="v">~100×</div><div class="k">比 PS4 机械盘快</div></div>
+  </div>
+
+  <p>Mark Cerny 的话很直白：PS5 可以在 0.27 秒加载 2 GB，游戏启动只要 1 秒，没有读盘画面，快速旅行快到眨眼。它解锁的是新的设计空间——关卡不用再为了藏加载而被扭曲成电梯、窄走廊、慢开门。</p>
+
+  <div class="callout co-rose">
+    <span class="hd">最容易高估的一点</span>
+    <p>SSD 解决的是带宽，不是内存、也不是实例化 / GC 开销。PS4 时代开发者用叙事技巧藏加载，是 HDD 逼出来的。但社区大量优化记录显示：卡顿大头常常在 Instantiation（实例化）、GC、PSO 编译，而不是文件读取。Unreal 的 GC 默认 60 秒一次全量可达性分析，几十万 UObject 的开放世界每次都要 game thread 停十几毫秒——这跟 SSD 多快一点关系都没有。</p>
+  </div>
+</section>
+
+
+<!-- ============ 6 ============ -->
+<section id="ch6">
+  <h2><span class="num">06</span>程序化生成：Houdini、PCG 与「无菌感」</h2>
+  <p class="lead">手工摆 80 km² 的树石村落会累垮美术；纯程序化又有另一个问题——玩家察觉重复的速度，比你以为的快得多。最佳形态永远是混合。</p>
+
+  <h3>它是什么：不是「替你做关卡」，是「把你定的规则套到百万个对象上」</h3>
+  <p>业界标准工具是 <strong>Houdini</strong>，把节点网络打包成 HDA 进引擎当黑盒；UE5 自带 <strong>PCG 框架</strong>，用节点图画点云流水线：在表面 / 样条上采样点 → 按坡度 / 高度 / 噪声筛选 → Poisson Disk 保证最小间距 → 带上属性表 → 用 ISM / HISM 批量生成。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">噪声 + 侵蚀</b><br><span style="color:#475569;font-size:13px">生成地形高度场</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">算 biome 图</b><br><span style="color:#475569;font-size:13px">温度 × 湿度查表</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">Surface Sampler</b><br><span style="color:#475569;font-size:13px">按密度撒点</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">mask 约束</b><br><span style="color:#475569;font-size:13px">坡度 / 朝向 / 到水距离</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #9bd3a4;border-radius:11px;background:#f2fbf4;font-size:14px;text-align:left"><b style="color:#1e293b">分层 scatter</b><br><span style="color:#475569;font-size:13px">树 → 灌木 → 草</span></div>
+<div class="cap">图 4 · 程序化生成流水线：海拔每升 1000 m 约降温 6.5°C，于是同一座山从雨林到苔原</div>
+</div>
+
+  <h3>生态分布规则：让自然「看起来对」</h3>
+  <p>真实生态被非生物因素约束：海拔（每升 1000 m 降温约 6.5°C）、坡度朝向（北半球南坡更暖更干）、湿度（靠近水体、迎风坡更湿）。游戏把这些变成 scatter 的 mask——先生成 heightmap，算 humidity / temperature，查表选 biome，每个 biome 定义可放置资产与密度，再分层撒。这一步让「山脚雨林、山顶苔原」自然成立。</p>
+
+  <h3>什么时候不该用 PCG</h3>
+  <p>三件程序化做不好的事：<strong>叙事精度</strong>（推开门第一次看到龙的机位）、<strong>难度曲线</strong>（boss 前的治疗道具）、<strong>独特记忆点</strong>（黑魂的篝火、时之笛的神庙）。BotW 的米津真在 CEDEC 2017 明说：海拉鲁<strong>不是自动生成的</strong>，是做完之后走一遍、再做一遍再走一遍。</p>
+
+  <div class="callout co-amber">
+    <span class="hd">三种典型翻车</span>
+    <p>① 重复疲劳：5 种树 + 随机缩放，玩几小时就腻，解法不是加随机而是加密基础资产与参数空间；② 无菌感：程序化放桶是「覆盖率最大化」，手放桶是「有人把桶落在这儿了」，后者有叙事；③ 美术方向漂移：规则保证一致性，但规则没有审美，没有能翻译成参数的 Art Bible 系统就会跑偏。</p>
+  </div>
+</section>
+
+<!-- ============ 7 ============ -->
+<section id="ch7">
+  <h2><span class="num">07</span>海洋、天空与「空的恐惧」</h2>
+  <p class="lead">水、云、引导和密度，是让大世界「活」起来也最容易露怯的地方。这一节把三件横向技术一次讲清。</p>
+
+  <h3>海洋：Gerstner 波与 FFT</h3>
+  <p>朴素正弦波叠加只让顶点上下动，波峰波谷对称，像果冻。真实海浪波峰尖、波谷平，因为<strong>水粒子在走圆周轨道</strong>。1802 年 Gerstner 给出的摆线波，让顶点既上下也左右位移，把顶点「聚到波峰、散到波谷」，自然得到尖峰平谷。色散关系 <code>ω = √(g·k)</code>，g ≈ 9.81 m/s²——常见错误是随手定 ω 而不从波长 k 推出，导致所有波同速、像人造波浪池。实践上 steepness 总和预算 0.6~0.8，Q 过大波峰会自交翻面。</p>
+
+  <div class="formula"><span class="c"># Gerstner 单波：顶点同时做上下 + 水平位移</span>
+P(x,z,t) = ( x + Σ Qᵢ Aᵢ Dₓ cos(ωᵢ D̂·p₀ + φ t) ,
+             Σ Aᵢ sin(ωᵢ D̂·p₀ + φ t) ,
+             z + Σ Qᵢ Aᵢ D_z cos(ωᵢ D̂·p₀ + φ t) )
+ωᵢ = √(g·kᵢ)   <span class="c"># 深水色散：长波跑得快</span></div>
+
+  <p>近景用 Gerstner（几条波手调形状），远景大面用 <strong>FFT 海洋</strong>（Tessendorf 电影级方法，盗贼之海用的就是它）：在频域按 Phillips 谱给每个频率分量分配能量，GPU 上做 IFFT 合成高度场，波峰相遇叠加、波谷相遇抵消，所以永不重复。水面网格用 CDLOD / Clipmap 让近密远疏，避免多边形爆炸。浮力就是每帧问水面「我脚下 y 是多少」再施加上推与阻力；泡沫用 Jacobian（表面是否折叠）判据。</p>
+
+  <h3>天空与昼夜：最贵的是实时全局光照</h3>
+  <p>蓝天来自 Rayleigh 散射（短波蓝散得多），太阳晕来自 Mie 散射（大颗粒向前散射强）。体积云用 ray marching 真 3D 累积，能自投影。但完整昼夜循环最大的成本不是画天空，是<strong>每帧重算反弹光的实时全局光照</strong>：Lumen（UE5 实时 GI）在密集森林约 2.5~4.5 ms，而烘焙光照同场景 < 0.5 ms。所以很多游戏（如 Firewatch）宁可锁一个被精心打光的「黄金时刻」做视觉签名，而不是真做完整日夜——那不是偷懒，是艺术控制。</p>
+
+  <h3>「空的恐惧」：地图大 ≠ 空</h3>
+  <p>开放世界显空，不是因为面积大，而是因为<strong>玩家视线里没有值得走过去的东西</strong>。BotW 的「三角法则」：用三角状地形（山 / 丘）遮蔽视线，给玩家「翻还是绕」的选择，并让新目标在行进中才揭晓，形成无限发现的循环；再用「引力点」（神庙、塔、敌营）像磁铁一样把玩家吸过去。早期 BotW 用「点 + 线」导航测试，80% 玩家沿线性路径走、20% 乱逛，都没好好接触核心内容——改成地标吸引模型后才成功。</p>
+
+  <div class="callout co-teal">
+    <span class="hd">密度三把尺（来自 BotW 设计）</span>
+    <p>① 距离感：以京都实际步行感受定世界大小；② 密度感：以「遇见邮筒 / 便利店的频率」类比怪物 / 神庙密度；③ 间隔感：每处要素耗时——小迷宫 5~20 分、大迷宫 40 分、支线 20 分、主线 100 分。</p>
+  </div>
+</section>
+
+
+<!-- ============ 8 ============ -->
+<section id="ch8">
+  <h2><span class="num">08</span>塞尔达 旷野之息：聪明的谎言 + 九宫格 + 化学引擎</h2>
+  <p class="lead">塞尔达的答案是艺术家的：用一个约 10×8 km、手工雕出来而非程序化生成的小地图换密度；用「有限的聪明谎言」换自由度，而不是真实模拟。</p>
+
+  <h3>两套引擎：物理 + 化学</h3>
+  <p>GDC 2017《Change and Constant》里，技术总监堂田卓宏给出极漂亮的框架：动作游戏 = 碰撞 + 运动 + 状态。前两项叫<strong>物理</strong>，后一项叫<strong>化学</strong>。物理基于改动过的 Havok，但<strong>不用它做真实模拟</strong>——堂田称之为「贤い嘘（聪明的谎言）」：配上特效后视觉像真的，计算量小一个数量级。化学引擎把世界分两类：</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">元素</span><div style="margin-top:4px">火 / 水 / 冰 / 电 / 风 —— 无固定形状，可改变别的东西</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#0d9488;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">物质</span><div style="margin-top:4px">树 / 石 / 武器 / 林克 —— 有形状，是「被改变」的对象</div></div>
+<div class="cap">图 5 · 化学引擎的铁律：① 元素可改物质；② 元素可改元素；③ 物质不可改物质</div>
+</div>
+
+  <p>第三条是灵魂——它把「组合爆炸」从 N² 砍成 N×M + M²。物质之间不互相影响，一棵树永远不必关心旁边另一棵树的状态。结果就是「可推演的规则」，玩家能自己预判、自己组合出无数解。堂田的原话是：希望玩家玩《旷野之息》时<strong>觉得自己是天才</strong>。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">火把扔进草地</b><br><span style="color:#475569;font-size:13px">火（元素）触草（物质）</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">草 → 燃烧</b><br><span style="color:#475569;font-size:13px">规则①：元素可改物质</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">上升气流托起滑翔伞</b><br><span style="color:#475569;font-size:13px">规则①：气流改物质</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">下雨灭火</b><br><span style="color:#475569;font-size:13px">规则②：元素改元素</span></div>
+<div class="cap">图 6 · 化学引擎判定链：每一跳都是玩家能自己推演的规则</div>
+</div>
+
+  <h3>乘法式玩法与 120 座祠堂</h3>
+  <p>塞尔达不做「有趣的交互」，做「会产生有趣交互的系统」——堂田叫它乘法式玩法（Multiplicative Gameplay）。结果是一个约 80 km²（datamine，常被误传成 827.8 km² 的京都参照面积）的小世界塞进 120 座祠堂，密度参考是「现实里便利店、邮筒的频率」。它感觉比 80 km² 大得多，靠的是地形起伏让表面积远超平面投影，以及「看得到就去得了」的设计胜利。</p>
+
+  <h3>《王国之泪》：把「谎言」推到极致</h3>
+  <p>GDC 2024《Tunes of the Kingdom》披露：TotK 废弃了「运动学刚体控制」（质量视为无限、容易互相打架），<strong>把所有物体改成物理驱动</strong>；质量 / 惯量由材质 / 尺寸 / 形状自动算出，而非手工赋值；连音效都是每个零件各自发声再合成。一句话总结它的取舍：<strong>兼容性 > 真实性</strong>。同一个世界观、同一套工具磨了 6 年才做出 TotK——任天堂的做法是先把地基磨到极致，再在同一地基上加层。</p>
+
+  <div class="callout co-blue">
+    <span class="hd">最反直觉的一条</span>
+    <p>BotW 的 Havok 是<strong>被特意关掉了一部分真实性</strong>的。如果真按教科书物理跑，玩家反而会失去自由度——因为真实物理往往只有唯一解；而「假物理 + 可推演规则」能给出无数解。做大世界最难的技术，常常不是技术，是管理：把需求做成世界里的一块告示牌、用颜色做进度视图、停工一周让 300 人亲自玩游戏。</p>
+  </div>
+</section>
+
+<!-- ============ 9 ============ -->
+<section id="ch9">
+  <h2><span class="num">09</span>荒野大镖客2：把硬盘当内存 + 会呼吸的大气</h2>
+  <p class="lead">Rockstar 用自研 RAGE 引擎的「实时流送 + 把硬盘当二级内存 + 距离分级 AI」三板斧，在 2013 年的 PS4 上硬塞进一个无加载画面、草木会动、马会自己停悬崖的活着的世界。</p>
+
+  <h3>无读盘是怎么做到的</h3>
+  <p>PS4 只有 8GB 共享内存、5400 转机械盘，不可能常驻整个约 75 km² 世界（社区估计，官方未公布）。RAGE 按玩家位置实时流送：只把附近城镇、NPC、地形完全载入，远处留低精度占位；硬盘被当成「二级内存」，纹理音频按需从盘读。一个反直觉的细节：RDR2 安装体积超 100GB、故意少压缩多冗余拷贝，正是为了让机械盘磁头更快找到数据、避免卡顿——「无缝」的代价就是磁盘占用。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">玩家骑马向小镇</b><br><span style="color:#475569;font-size:13px">预测即将进入的区域</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">后台从 HDD 读入</b><br><span style="color:#475569;font-size:13px">远处低精度占位已显示</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">体积雾遮住 pop-in</b><br><span style="color:#475569;font-size:13px">抵达时高精度已就位</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">身后回收释放</b><br><span style="color:#475569;font-size:13px">无黑屏，循环往复</span></div>
+<div class="cap">图 7 · RDR2 的零读盘流送：加载永远发生在视线之外，用雾和大气 haze 藏住切换瞬间</div>
+</div>
+
+  <h3>会呼吸的大气（SIGGRAPH 2019）</h3>
+  <p>RDR2 的天空不是贴图，是真的在体积里累积光。云用覆盖全图的 Cloud Map（多层密度）定义分布，沿视线 ray marching 累积散射；天空散射查 32×16×32 的 LUT；地图铺 32×32 的 3 阶球谐探针，每个覆盖 256m×256m 作环境光。所以风暴前地面泛起冷光、云被夕阳切片，都是物理算出来的——代价是贵，靠分帧、降分辨率、探针来省，目标所有平台 30fps。</p>
+
+  <h3>马匹：3000 个动画拼出来的生命感（GDC 2021）</h3>
+  <p>RDR2 不靠一段段过场动画，而是准备约 3000 个可拼接的小动画片段，按地形类型 / 速度 / 负重 / 情绪实时缝合。内部原则「Don't stop moving」让马减速时仍保持循环、像不想停；临近悬崖触发「stop matching」插入最佳刹车动画——悬崖由美术手工标记。Euphoria 动态动作合成再叠加被击 / 失衡的物理反应。马因此能对任何地形组合做出自然反应，而不是机械执行指令。</p>
+
+  <div class="stats">
+    <div class="stat"><div class="v">~75 km²</div><div class="k">RDR2 地图（社区估计）</div></div>
+    <div class="stat"><div class="v">3000</div><div class="k">可拼接的马匹动画片段</div></div>
+    <div class="stat"><div class="v">256 m</div><div class="k">SH 探针间距</div></div>
+    <div class="stat"><div class="v">30 fps</div><div class="k">PS4 基础锁定帧率</div></div>
+  </div>
+
+  <div class="callout co-rose">
+    <span class="hd">别误解</span>
+    <p>「无加载画面」≠「整张地图常驻内存」。它靠实时流送 + 把 HDD 当二级内存，内存里永远只装眼前一小块。无压缩也不是技术落后，是 5400 转机械盘下的性能取舍。</p>
+  </div>
+</section>
+
+
+<!-- ============ 10 ============ -->
+<section id="ch10">
+  <h2><span class="num">10</span>艾尔登法环：水平大地图 + 垂直地下世界</h2>
+  <p class="lead">FromSoftware 把魂系「箱庭」改造成「水平大地图 + 垂直分层地下世界」，用雾门 / 加载区 / 电梯竖井 / 传送棺连接一张连续的竖轴地图，以 30fps 锁帧换全平台稳定的超大无缝体验。</p>
+
+  <h3>箱庭 vs 无缝：鱼与熊掌兼得</h3>
+  <p>魂系（《恶魔之魂》《黑魂》《血源》）靠「垂直互联箱庭」营造密度与谜题感，但世界显得小。法环想做「大」又不丢魂味：把水平大地图（The Lands Between）作主舞台，保留 6 个 <strong>Legacy Dungeon</strong>（史东薇尔、魔法学院等）作封闭、带雾门、垂直秘密重的传统魂关，嵌在开放世界里。VICE 的分析点出：黑魂用「上下堆叠」假装大，法环干脆把世界做大，用 Torrent（灵感来自塞尔达）解决 traversable 问题。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#6d28d9;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">地下层</span><div style="margin-top:4px">Siofra / Ainsel River、Deeproot Depths —— 与正上方地表同 X/Z 坐标，向下约 500~615 m</div></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓ 竖井电梯 / 传送棺连接</div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">地表</span><div style="margin-top:4px">The Lands Between：六大区自由探索，无硬 barrier</div></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓ 雾门 / 电梯竖井</div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#0d9488;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">Legacy Dungeon</span><div style="margin-top:4px">6 个封闭大迷宫，保留魂系垂直感与捷径</div></div>
+<div class="cap">图 8 · 法环是一张「连续竖轴地图」：地下三层在水平坐标上与地表对齐，靠遮挡剔除藏住头顶的大陆</div>
+</div>
+
+  <h3>地下世界怎么和地表对上</h3>
+  <p>社区数据挖掘（neverawakeman）测得：Siofra River Well 在 Limgrave 较低点以下约 492 m，Ainsel 约 600 m 下，Deeproot Depths 路径长至地下 615 m。普遍推断地下区域在水平坐标（X/Z）上与正上方地表对齐——Siofra 基本在 East Limgrave 正下方，Ainsel 在 Liurnia 正下方。这样「在井边垂直下降」逻辑自洽，玩家在地下能感到「头顶就是另一片大陆」。注意：这是合理的社区推论，非官方确认。</p>
+
+  <h3>引擎、内存与 30fps 锁帧</h3>
+  <p>PC 端帧率被硬编码上限 60fps（变量 <code>fFrameTick ≈ 1/60</code> 写在进程内存，改配置文件无效），且物理与帧率强耦合——只解锁渲染会让移动 / 攻击 / 重力随帧率异常加速，需物理解耦。写死节拍让全平台行为一致、好调试，代价是高刷屏被浪费，且引擎线程调度古早，在 Intel 大小核上易卡。长会话里敌人 AI、粒子、流送资源不一定干净卸载，45~90 分钟后可能撞内存天花板冻结。</p>
+
+  <div class="callout co-amber">
+    <span class="hd">别被面积数字带跑</span>
+    <p>RDR2 与法环的 km² 数字都来自社区测量 / 估算，官方从未公布精确值。法环地表约 79 km²、含垂直层「可导航」超 120 km²，属社区数据挖掘，引用时标 [待核]。</p>
+  </div>
+</section>
+
+<!-- ============ 11 ============ -->
+<section id="ch11">
+  <h2><span class="num">11</span>原神：Unity 深度改造 + 多端统一的卡通 PBR</h2>
+  <p class="lead">原神是在 Unity 基础上做了深度定制改造的跨平台开放世界：一套「基于 PBR 的风格化（卡通）渲染」管线，配合分块流式加载和激进的分辨率 / LOD 缩放，让同一份内容在手机、PC、主机上都能跑出无缝、有昼夜天气的大世界。</p>
+
+  <h3>为什么「用了 Unity」不等于「套壳」</h3>
+  <p>米哈游技术总监易任重（Yi Zhenzhong）在 Unity 技术分享中明确说：团队在 Unity 上做了「深度开发」，手机和主机用<strong>不同的渲染管线</strong>但保持同一基调（基于 PBR 的风格化渲染）。PS4 上大量使用 compute shader，借 Async compute 隐藏开销。刻意「成熟技术优先、不过度炫技」——因为开发周期短。卡通渲染本身比写实 PBR 轻，配合 PBR 又能保证 24 小时光照循环下光影不翻车。</p>
+
+  <h3>跑图不读条：分块流式加载</h3>
+  <p>世界切成网格 Cell，只保留「玩家所在 + 周围预备区块」，远景用 impostor。根据玩家位置异步加载、卸载远处区块；社区文章提到「每帧最多加载 3 个 Cell、分帧执行」避免卡顿，并用 Job System 在后台线程解压、用「视野预测」按移动方向提前 1~2 秒加载。本质像图书馆——不把整馆书堆桌上，只摊开眼前几排，走过道时馆员提前递下一排。</p>
+
+  <h3>移动端优化：把最贵的东西降分辨率</h3>
+  <p>绝大多数安卓设备 3D 渲染长边不超过 1280 像素，半透明特效甚至只在半分辨率算。阴影用 8 级 CSM 级联（比通常 4 级更暴力），前 4 级每帧更新、后 4 级逐帧轮替，再用全屏 mask 只对半影区算软阴影，把 GPU 耗时从 2~2.6 ms 降到 1.3~1.7 ms（约降 35%）。代价是画面发虚、仍有上千 Draw Call 和严重 overdraw——移动端其实「优化得很苦」。</p>
+
+  <div class="stats">
+    <div class="stat"><div class="v">1440p</div><div class="k">PS4 base 渲染（输出 1080p）</div></div>
+    <div class="stat"><div class="v">8 级</div><div class="k">PS4 阴影 CSM cascade</div></div>
+    <div class="stat"><div class="v">≤1280px</div><div class="k">安卓 3D 渲染长边</div></div>
+    <div class="stat"><div class="v">6 周</div><div class="k">小版本更新节奏</div></div>
+  </div>
+
+  <div class="callout co-rose">
+    <span class="hd">两个误解得清</span>
+    <p>① 「用了 Unity 就是套壳」——错，它重写了渲染管线、资源调度、移动端适配；② 「提瓦特有 760 km²」——官方从未公布面积，该数字来源可疑，社区测算多在几十 km² 量级（约 54~70 km²），标 [待核]。它是单机为主 + 最多 4 人联机的轻量多人，不是全球同服 MMO。</p>
+  </div>
+</section>
+
+
+<!-- ============ 12 ============ -->
+<section id="ch12">
+  <h2><span class="num">12</span>盗贼之海：FFT 真海 + 确定性跨服迁移</h2>
+  <p class="lead">Rare 在 Unreal Engine 4 上打造「共享世界」海盗游戏，最难的技术点是全程零加载画面——靠关卡流送 + 一套确定性模拟的服务器网格，让玩家在无缝海洋里航行、遭遇其他真人船队时，能在不被察觉的情况下被悄悄迁移到更热闹的海里。</p>
+
+  <h3>为什么「全程零加载」是它最难的点</h3>
+  <p>传统开放世界在区域间会黑屏读条。盗贼之海要让玩家从出港、航行、遭遇风暴、撞见敌船到沉没中间一次都不打断。世界切成 chunk：海、天空、岛屿、岛上物体分别管理；岛屿用 Level Streaming 按距离加载高模（所有平台同距离加载，避免不公平）；海洋是「无限」的，所以海本身不加载，而是程序化模拟实时生成。难点不在不黑屏，而在于<strong>任何一帧都不能因为突然要读一块地而卡住</strong>——流送必须永远领先视野。</p>
+
+  <h3>海洋：FFT 电影级实时模拟</h3>
+  <p>多数游戏用 Gerstner 波（几条正弦叠加，久看会露规律）。盗贼之海走的是 <strong>FFT Ocean</strong>（Tessendorf 2001，用于《泰坦尼克号》《加勒比海盗》）：不是手摆几个波，而是问「真实海洋里都有哪些尺度的波」，一次算出成百上千个波分量经 IFFT 合成高度场，GPU 每帧据此把海面网格捏出起伏。大涌浪慢、小涟漪快，波峰相遇叠加、波谷相遇抵消，永不重复。泡沫用 Jacobian 判据（表面折叠处即碎浪），反射用几何反射而非 SSR。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">频谱定义能量</b><br><span style="color:#475569;font-size:13px">Phillips 谱按风速风向</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">GPU IFFT</b><br><span style="color:#475569;font-size:13px">频域 → 空间高度场</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">Vertex Displacement</b><br><span style="color:#475569;font-size:13px">每帧捏出海面起伏</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">Jacobian → 泡沫</b><br><span style="color:#475569;font-size:13px">Fresnel 混反射折射</span></div>
+<div class="cap">图 9 · 一次 FFT 海面生成：联机时波浪跨机器同步，靠同一 seed 保证各主机浪形一致</div>
+</div>
+
+  <h3>服务器权威：确定性模拟让迁移无察觉</h3>
+  <p>这是「共享世界」的核心魔法。用 Azure PlayFab 专用服务器动态伸缩托管；玩家零散退出会让某些服务器变空——Rare 写了自定义游戏管理器，把玩家和状态<strong>无缝合并</strong>到更热闹的服务器，空服务器随后关闭省钱。关键在<strong>确定性模拟 + 同一 seed</strong>：所有服务器用同一个种子实例化，世界状态（时间、浪高、物体位置）完全一致。所以把「在 1 号服务器浪尖上的船」移到「2 号服务器完全相同的 x/y/z」，那道浪也在完全相同的位置——玩家毫无察觉，只给轻微视听提示。</p>
+
+  <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">服务器 A</b><br><span style="color:#475569;font-size:13px">用 seed 算当前世界</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">服务器 B</b><br><span style="color:#475569;font-size:13px">同一 seed → 完全相同世界</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #9bd3a4;border-radius:11px;background:#f2fbf4;font-size:14px;text-align:left"><b style="color:#1e293b">按相同 x/y/z 搬人 + 船</b><br><span style="color:#475569;font-size:13px">浪 / 天 / 物都一致</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">玩家无察觉</b><br><span style="color:#475569;font-size:13px">空 A 关掉省钱</span></div>
+<div class="cap">图 10 · 很多平行宇宙用同一本剧本演到同一时刻，把人从宇宙 A 挪到 B，脚下浪一模一样</div>
+</div>
+
+  <div class="callout co-blue">
+    <span class="hd">两个反直觉</span>
+    <p>① 岛屿 100% 手工打造（非程序化），只在手工核心上叠程序化「小惊喜层」（随机沉船、漂流瓶藏宝图）——手工保证可凭地标导航，程序化保证每次出海有小惊喜；② 风格化卡通不是偷懒，Rare 选它是为了「不过时」，且水下物理是 AAA 级——它是 Rare 最聪明的一次性能优化。</p>
+  </div>
+</section>
+
+<!-- ============ 13 ============ -->
+<section id="ch13">
+  <h2><span class="num">13</span>五款游戏技术对照表</h2>
+  <p class="lead">把五款游戏摊在一张表里，你会看到：底层零件高度雷同，差异在「赌注」和「组合方式」。</p>
+
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">维度</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">塞尔达 旷野之息</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">荒野大镖客2</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">艾尔登法环</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">原神</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">盗贼之海</th></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>引擎</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">自研（改 Havok）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">RAGE 自研</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">FromSoft 自研</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Unity 深度改造</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Unreal Engine 4</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>世界类型</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">手工小地图</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">无读盘大世界</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">水平 + 垂直分层</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">多端大陆</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">共享海洋</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>零加载</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">九宫格流送</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">流送 + 硬盘当内存</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">雾门 / 加载区</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">分块流式 + 预测</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Level Streaming + 跨服迁移</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>水的地位</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">化学元素之一</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">浅水方程 + 粒子</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">点缀</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">SSR + Cubemap</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">「一半的玩法」（FFT）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>程序化</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">几乎全手工</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">生态 / 植被分布</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">地下 / 箱庭手工</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">资源流式 + LOD</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">岛屿手工 + 小层</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>特色赌注</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">化学引擎 + 聪明谎言</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">会呼吸的大气</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">连续竖轴地图</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">多端统一卡通 PBR</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">真海 + 无缝共享</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>面积（估）</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">~80 km²</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">~75 km²</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">~79 km²（含垂直 120+）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">~54~70 km²</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">~65~70 km²</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>更新节奏</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">资料片</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">单机</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">资料片</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">6 周小版本</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">约 6 周季节</td></tr>
+</table>
+</div>
+
+  <div class="callout co-teal">
+    <span class="hd">看表的姿势</span>
+    <p>面积数字几乎都来自社区测算，官方很少公布；真正值得比较的不是「谁更大」，而是「谁把算力押在了哪」——塞尔达押自由度、RDR2 押生态、法环押结构、原神押多端、盗贼之海押水与共享。</p>
+  </div>
+</section>
+
+<!-- ============ 14 ============ -->
+<section id="ch14">
+  <h2><span class="num">14</span>给你的选型清单与动手建议</h2>
+  <p class="lead">假设你是个独立或小团队开发者，想做自己的开放世界。下面是按优先级排的清单。</p>
+
+  <h3>第一优先：流送是地基，先做对</h3>
+  <ul>
+    <li>用引擎现成的方案（UE5 World Partition / Unity Addressables + Additive Scene），别自己造轮子；</li>
+    <li>明确区分<strong>加载半径</strong>与<strong>显示半径</strong>两个半径；边界留 hysteresis 缓冲，吸收相机抖动导致的反复加载；</li>
+    <li>Unity 记得利用 <code>AsyncOperation.progress</code> 在 0.9 时做转场，再激活；忘记 Release 是内存泄漏头号原因。</li>
+  </ul>
+
+  <h3>第二优先：地形与精度</h3>
+  <ul>
+    <li>地形用 CDLOD / GeoClipmap 做连续 LOD，别让玩家看到裂缝和 pop；</li>
+    <li>世界超过 ~20 km 就要认真考虑 LWC / Camera-relative；UE5 默认开 LWC，但老代码的 float 隐式转换会静默丢精度，重点查；</li>
+    <li>别高估 SSD：卡顿大头常在实例化、GC、PSO，不是 IO。</li>
+  </ul>
+
+  <h3>第三优先：密度与引导</h3>
+  <ul>
+    <li>程序化只填「之间」的荒野，Hero 场景和 POI 手工做；给每个 POI 实在收益，做面包屑引导；</li>
+    <li>用三角地形遮蔽视线、用引力点吸玩家，弱化 UI 箭头；</li>
+    <li>昼夜循环想清楚：真日夜 = 实时 GI（贵），不如锁一个精心打光的固定时刻做视觉签名。</li>
+  </ul>
+
+  <div class="callout co-amber">
+    <span class="hd">小团队最该抄的一课</span>
+    <p>塞尔达的「做完之后走一遍，再做一遍再走一遍」——大地图的问题只有走过才能发现。哪怕没有 300 人停工一周的排场，自己多走几遍、录热力图、看哪些路没人走，比堆技术参数有用得多。</p>
+  </div>
+</section>
+
+<!-- ============ 15 ============ -->
+<section id="ch15">
+  <h2><span class="num">15</span>常见误区汇总</h2>
+  <p class="lead">把全文最容易踩的坑收在一处，方便回看。</p>
+
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">误区</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">真相</th></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">BotW 地图 800 多 km²</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">827.8 km² 是京都参照面积；实际约 80 km²（datamine）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">大世界难在要模拟很多东西</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">BotW 的 Havok 被故意关掉部分真实性；假物理换自由度</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">做大世界核心是某个技术方案</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">塞尔达的解法根本是管理：告示牌需求、颜色进度、全员试玩</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">加载 = 显示</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">两个独立半径：九宫格管内存，TraverseDist 管画不画</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">开了 LWC 就不用管精度</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">网络复制、隐式 float 转换、Niagara 仍是 float 路径</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">格子切得越小越好</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">多 grid 掉性能，边界抖动要配迟滞缓冲</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">SSD 解决加载卡顿</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只解决带宽；实例化、GC、PSO 才是大头</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">程序化能省掉美术</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只会把成本从做内容挪到做系统；Hero 场景仍需手工</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">法环是纯水平开放世界</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">垂直感移到地下三层 + Legacy Dungeon，地下与地表同 X/Z</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">盗贼之海地图是程序化随机</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">岛屿 100% 手工，只叠程序化小惊喜层</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">原神用了 Unity 就是套壳</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">深度重写了渲染管线、资源调度、移动端适配</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">RDR2 无读盘 = 全常驻内存</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">靠流送 + 硬盘当二级内存，内存里只装眼前一小块</td></tr>
+</table>
+</div>
+</section>
+
+<!-- ============ A ============ -->
+<section id="appa">
+  <h2><span class="num">A</span>术语速查表</h2>
+  <p class="lead">全文出现的高频术语，一次查全。</p>
+
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">术语</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">一句话</th></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">World Partition</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">UE5 把大地图自动切网格、按距离流式加载</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">九宫格加载</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">玩家周围 3×3 区块动态加载 / 卸载</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">TraverseDist</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">每个 Actor 配的描画距离，决定多远还画</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">CDLOD</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">按真实三维距离连续 morph 的地形 LOD，无裂缝无 pop</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">GeoClipmap</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">以相机为中心的同心环地形，适合无限海平线</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">HLOD</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把一堆远处物体合并成一个低模代理，降 draw call</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Imposter</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">远处物体烘成一张贴图贴在四边形上</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Nanite</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">UE5 虚拟化几何，128 三角一组 Cluster + 双 Pass 遮挡</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">HZB</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">层级深度图，GPU 侧快速遮挡查询</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">LWC</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">UE5 把世界坐标升为 double，提交 GPU 前转 float</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Origin Rebasing</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">走远后整个世界反向平移，让原点贴回脚下</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Virtual Texturing</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把最终颜色烘进虚拟贴图，按可见性分页进内存</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Gerstner 波</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">顶点上下 + 水平位移，造尖峰平谷的摆线波</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">FFT Ocean</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">频域谱 + IFFT 合成高度场，电影级真海</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Rayleigh / Mie</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">蓝天散射 / 太阳晕散射，大气物理基础</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Ray Marching</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">沿视线一步步采样累积，体积云 / 雾的核心</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Lumen</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">UE5 实时全局光照 / 反射，代价约 2.5~4.5 ms</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">PCG</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">UE5 节点图化程序化内容生成（点云流水线）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">HDA</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Houdini 打包成黑盒的可复用程序化工具</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">Server Mesh</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">多台服务器组成网，玩家可无缝迁移</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">确定性模拟</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">同一 seed 让所有服务器算出完全相同世界</td></tr>
+</table>
+</div>
+</section>
+
+<!-- ============ B ============ -->
+<section id="appb">
+  <h2><span class="num">B</span>思考题</h2>
+  <p class="lead">合上页面之前，试着自己答一遍。</p>
+  <ol>
+    <li>「加载」和「显示」为什么必须分成两个独立半径？如果只用一个半径会出什么问题？</li>
+    <li>塞尔达的化学引擎第三定律（物质不可改物质）砍掉了哪一类组合爆炸？如果去掉这条规定，开发成本会怎么变？</li>
+    <li>浮点精度在 21 km 处开始抖动的公式是什么？Origin Rebasing、Camera-relative、LWC 三者分别把「不准」藏到了哪里？</li>
+    <li>为什么 Nanite 不总是最快？草、小石这种极小实例为什么经典 HISM 反而更好？</li>
+    <li>盗贼之海的「确定性跨服迁移」靠什么保证玩家无察觉？如果两服务器用了不同 seed 会怎样？</li>
+    <li>艾尔登法环的地下世界为什么推断「与地表同 X/Z 坐标」？这个设计对遮挡剔除有什么好处？</li>
+    <li>假如你只有 3 人做开放世界，你会在哪三件事上押注？哪三件事敢用程序化？</li>
+  </ol>
+
+  <div class="callout co-teal">
+    <span class="hd">写在最后</span>
+    <p>无限大世界从来不是「把地图做大」，而是「把玩家周围那一小圈做好，并让它在每一帧都无缝地换血」。五款游戏作答不同，但地基零件一模一样：流送、地形、剔除、精度、程序化、引导。技术会换代，这套零件不会——理解了它们，你再看任何一款开放世界，都能拆出它的零件清单。</p>
+  </div>
+</section>
+
+<footer>
+  <p>本教程为联网学习提炼笔记：案例与数据来自 GDC / CEDEC / SIGGRAPH 官方讲座、Epic 与 Unity 官方文档、Digital Foundry 技术分析、社区数据挖掘（ZeldaMods / zeldaret 等）与媒体访谈，均按来源性质标注。凡标 [待核] 处为社区测算或未公开确认，引用时请二次核实。</p>
+  <p>图表为重新绘制的示意，非游戏官方素材。© ptato · 图文并茂图解教程系列</p>
+</footer>
+
+</div>
+</body>
+</html>

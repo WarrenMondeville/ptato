@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>通关！游戏设计之道 · 图解教程</title>
+<style>
+  :root{
+    --bg:#f6f8fb; --card:#ffffff; --ink:#1e293b; --ink2:#475569; --ink3:#94a3b8;
+    --line:#e2e8f0; --line2:#cbd5e1;
+    --blue:#3b5bdb; --blue-bg:#eef2ff;
+    --teal:#0d9488; --teal-bg:#ecfdf5;
+    --amber:#b45309; --amber-bg:#fffbeb;
+    --rose:#be123c; --rose-bg:#fff1f2;
+    --violet:#6d28d9; --violet-bg:#f5f3ff;
+    --green:#15803d; --green-bg:#f0fdf4;
+    --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px -12px rgba(15,23,42,.14);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:16px; line-height:1.85; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 20px 80px}
+
+  /* ---------- hero ---------- */
+  .hero{padding:64px 0 30px;text-align:center}
+  .hero .kicker{
+    display:inline-block;font-size:12.5px;letter-spacing:.14em;color:var(--blue);
+    background:var(--blue-bg);border:1px solid #dbe3ff;border-radius:999px;padding:5px 14px;margin-bottom:20px;
+  }
+  .hero h1{font-size:clamp(26px,4.4vw,40px);line-height:1.35;margin:0 0 16px;letter-spacing:-.01em}
+  .hero h1 em{font-style:normal;color:var(--blue)}
+  .hero p.sub{color:var(--ink2);font-size:16.5px;margin:0 auto;max-width:680px}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:26px}
+  .meta span{font-size:13px;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 13px}
+
+  /* ---------- section ---------- */
+  section{margin-top:64px;scroll-margin-top:24px}
+  .sec-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:8px}
+  .badge{
+    flex:0 0 auto;width:44px;height:44px;border-radius:12px;background:var(--blue);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;
+    box-shadow:0 6px 16px -8px rgba(59,91,219,.9);
+  }
+  .badge.teal{background:var(--teal);box-shadow:0 6px 16px -8px rgba(13,148,136,.9)}
+  .badge.amber{background:var(--amber);box-shadow:0 6px 16px -8px rgba(180,83,9,.9)}
+  .badge.violet{background:var(--violet);box-shadow:0 6px 16px -8px rgba(109,40,217,.9)}
+  .badge.rose{background:var(--rose);box-shadow:0 6px 16px -8px rgba(190,18,60,.9)}
+  .badge.green{background:var(--green);box-shadow:0 6px 16px -8px rgba(21,128,61,.9)}
+  .sec-head h2{font-size:23px;margin:8px 0 0;letter-spacing:-.01em;line-height:1.4}
+  .sec-head .en{font-size:13px;color:var(--ink3);font-weight:500;margin-left:8px}
+  h3{font-size:17.5px;margin:34px 0 10px;padding-left:12px;border-left:3px solid var(--blue)}
+  h3.teal{border-color:var(--teal)} h3.amber{border-color:var(--amber)}
+  h3.violet{border-color:var(--violet)} h3.rose{border-color:var(--rose)}
+  h3.green{border-color:var(--green)}
+  h4{font-size:15.5px;margin:22px 0 6px;color:var(--ink)}
+  p{margin:12px 0}
+  a{color:var(--blue)}
+  strong{color:#0f172a}
+  code{background:#f1f5f9;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:13.5px;
+       font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#0f172a;overflow-wrap:anywhere}
+  ul,ol{margin:12px 0;padding-left:22px}
+  li{margin:6px 0}
+
+  /* ---------- toc ---------- */
+  .toc{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 24px;box-shadow:var(--shadow)}
+  .toc h3{margin:0 0 12px;border:0;padding:0;font-size:15px;color:var(--ink2);letter-spacing:.05em}
+  .toclist{list-style:none;margin:8px 0 0;padding:0}
+  .toclist li{padding:6px 2px;font-size:14.5px;line-height:1.6;color:var(--ink);border-bottom:1px dashed var(--line)}
+  .toclist li:last-child{border-bottom:none}
+  .tocpart{font-weight:700;color:var(--blue);margin-top:14px;font-size:13px;letter-spacing:.04em;border-bottom:none!important}
+
+  /* ---------- card / callout ---------- */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin:18px 0;box-shadow:var(--shadow)}
+  .card h4{margin-top:0}
+  .callout{border-radius:14px;padding:16px 20px;margin:18px 0;border:1px solid;position:relative}
+  .callout .lbl{display:block;font-size:12.5px;font-weight:700;letter-spacing:.06em;margin-bottom:6px}
+  .co-blue{background:var(--blue-bg);border-color:#dbe3ff} .co-blue .lbl{color:var(--blue)}
+  .co-teal{background:var(--teal-bg);border-color:#c9f0e6} .co-teal .lbl{color:var(--teal)}
+  .co-amber{background:var(--amber-bg);border-color:#f6e3bf} .co-amber .lbl{color:var(--amber)}
+  .co-rose{background:var(--rose-bg);border-color:#fbd5dd} .co-rose .lbl{color:var(--rose)}
+  .co-violet{background:var(--violet-bg);border-color:#ddd3fb} .co-violet .lbl{color:var(--violet)}
+  .co-green{background:var(--green-bg);border-color:#bbf7d0} .co-green .lbl{color:var(--green)}
+  .callout p{margin:6px 0}
+  .callout ul{margin:6px 0}
+  .callout ol{margin:6px 0}
+
+  /* ---------- diagram shell ---------- */
+  .diagram{background:linear-gradient(180deg,#fdfefe,#f8fafc);border:1px solid var(--line);border-radius:16px;padding:22px 18px;margin:22px 0}
+  .diagram .dtitle{font-size:14px;font-weight:700;color:var(--ink2);text-align:center;margin-bottom:16px}
+  .diagram .cap{font-size:13px;color:var(--ink3);text-align:center;margin-top:12px}
+  .diagram svg{display:block;max-width:100%;height:auto;margin:0 auto}
+
+  /* ---------- css flow ---------- */
+  .flow{display:flex;flex-wrap:wrap;align-items:stretch;justify-content:center;gap:8px}
+  .box{
+    background:#fff;border:1.5px solid var(--line2);border-radius:12px;padding:10px 14px;
+    font-size:13.5px;line-height:1.5;text-align:center;min-width:96px;display:flex;flex-direction:column;justify-content:center;
+  }
+  .box b{display:block;font-size:13.5px;color:#0f172a}
+  .box small{color:var(--ink3);font-size:11.5px;display:block;margin-top:2px}
+  .box.blue{border-color:#a8b8f5;background:#f3f6ff}
+  .box.teal{border-color:#8fd9cb;background:#effbf7}
+  .box.amber{border-color:#eecb8a;background:#fffaf0}
+  .box.rose{border-color:#f0a8ba;background:#fff5f7}
+  .box.violet{border-color:#c3b0f7;background:#f8f5ff}
+  .box.green{border-color:#9adcae;background:#f2fdf5}
+  .box.dark{background:#1e293b;border-color:#1e293b;color:#fff}
+  .box.dark b{color:#fff}
+  .arw{align-self:center;color:var(--ink3);font-size:17px;font-weight:700;line-height:1;padding:0 1px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:stretch}
+  .col{display:flex;flex-direction:column;gap:8px}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+  .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+  .grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+  .stack{display:grid;gap:7px}
+  .layer{display:flex;gap:12px;align-items:center;border:1.5px solid var(--line2);border-radius:12px;padding:11px 15px;background:#fff}
+
+  /* ---------- level cards ---------- */
+  .lv{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px 18px 16px;box-shadow:var(--shadow);border-top:4px solid var(--blue)}
+  .lv.t2{border-top-color:var(--teal)} .lv.t3{border-top-color:var(--amber)} .lv.t4{border-top-color:var(--rose)}
+  .lv .no{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--ink3)}
+  .lv h4{margin:4px 0 2px;font-size:16.5px}
+  .lv .en{font-size:12px;color:var(--ink3)}
+  .lv p{font-size:13.5px;color:var(--ink2);margin:8px 0 0;line-height:1.7}
+
+  /* ---------- table ---------- */
+  .tblwrap{overflow-x:auto;margin:20px 0;border:1px solid var(--line);border-radius:14px;background:#fff}
+  table{border-collapse:collapse;width:100%;font-size:14px;min-width:520px}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{background:#f8fafc;font-size:13px;color:var(--ink2);font-weight:600;white-space:nowrap}
+  tbody tr:last-child td{border-bottom:0}
+  tbody tr:hover{background:#fcfdff}
+  td.y{color:var(--green);font-weight:600}
+  td.n{color:var(--rose);font-weight:600}
+
+  /* ---------- misc ---------- */
+  .quote{border-left:3px solid var(--line2);padding:2px 0 2px 16px;color:var(--ink2);font-size:15px;margin:16px 0}
+  .quote b{color:var(--ink)}
+  .split{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:18px 0}
+  .mini{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .mini h4{margin:0 0 6px;font-size:15px}
+  .mini.good{border-color:#bbf7d0;background:#f8fdf9}
+  .mini.bad{border-color:#fecdd3;background:#fffafb}
+  .mini p{margin:6px 0 0;font-size:13.5px;color:var(--ink2);line-height:1.7}
+  .chk{list-style:none;padding:0;margin:14px 0}
+  .chk li{position:relative;padding-left:28px;margin:9px 0;font-size:14.5px}
+  .chk li::before{content:"";position:absolute;left:0;top:6px;width:16px;height:16px;border:1.5px solid var(--line2);border-radius:4px;background:#fff}
+  .src{font-size:12.5px;color:var(--ink3);margin-top:8px}
+  footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);font-size:13px;color:var(--ink3);text-align:center}
+  @media (max-width:560px){
+    .sec-head h2{font-size:20px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ================= HERO ================= -->
+  <header class="hero">
+    <span class="kicker">读 书 图 解 教 程</span>
+    <h1>《通关！游戏设计之道》<br>把<em>做一款游戏</em>拆成 17 关</h1>
+    <p class="sub">Scott Rogers 在游戏业干了二十多年，做过《战神》《吃豆人世界》《马克西莫》《海绵宝宝》。这本书不讲灵感玄学，讲的是他每天在用的那套手艺。每一章是一关，每一关的最后都给你留了一份「攻略与秘籍」。</p>
+    <div class="meta">
+      <span>Scott Rogers（美）</span>
+      <span>人民邮电出版社 · 2013 / 2016 第 2 版</span>
+      <span>368 页 · 17 关 + 9 个奖励关</span>
+      <span>豆瓣 8.5</span>
+      <span>100+ 张手绘图</span>
+    </div>
+  </header>
+
+  <!-- ================= TOC ================= -->
+  <nav class="toc">
+<h3>目 录</h3>
+<ul class="toclist">
+<li class="tocpart">第一部分 · 立项与文档</li>
+<li>00 · 这本书在教什么，以及该怎么读</li>
+<li>01 · 第 1 关 欢迎，小白！</li>
+<li>02 · 第 2 关 创意</li>
+<li>03 · 第 3 关 给游戏编个故事</li>
+<li>04 · 第 4 关 会做游戏，但会写文档吗</li>
+<li class="tocpart">第二部分 · 3C 与界面</li>
+<li>05 · 第 5 关 3C 之一 · 角色</li>
+<li>06 · 第 6 关 3C 之二 · 镜头</li>
+<li>07 · 第 7 关 3C 之三 · 操作</li>
+<li>08 · 第 8 关 符号语言 · HUD 和图标设计</li>
+<li class="tocpart">第三部分 · 内容设计</li>
+<li>09 · 第 9 关 关卡设计</li>
+<li>10 · 第 10 关 战斗的要素</li>
+<li>11 · 第 11 关 所有人都想要你的小命</li>
+<li>12 · 第 12 关 机关中的其他重要元素</li>
+<li>13 · 第 13 关 力量与你同在</li>
+<li class="tocpart">第四部分 · 收尾与附录</li>
+<li>14 · 第 14~17 关 多人 · 音乐 · 过场 · 关底</li>
+<li>15 · 附录 · 术语表、速查与落地清单</li>
+</ul>
+</nav>
+
+  <!-- ================= 00 ================= -->
+  <section id="s0">
+    <div class="sec-head">
+      <div class="badge">00</div>
+      <h2>这本书在教什么，以及该怎么读<span class="en">How to Read This Book</span></h2>
+    </div>
+
+    <p>一句话：<strong>游戏设计不是灵感，是一套可以拆开、可以复用、可以写下来的手艺。</strong>这本书就是把那套手艺摊开给你看的那本手册。</p>
+
+    <p>它最特别的地方是<strong>用「关卡」来组织内容</strong>。第 1 关到第 17 关是主线，每一关谈一个明确的工种方向；每关结束都有一份 <strong>「第 N 关的攻略与秘籍」</strong>（英文原版叫 <code>Universal Truths and Clever Ideas</code>）—— 那是作者从二十多年从业经验里榨出来的、可以直接抄走用的那条条框框。最后还有 9 个「奖励关」，是 9 张可以直接填的模板。</p>
+
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">全书主线：从有想法，到能上架</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">1–4 关</b><br><span style="color:#475569;font-size:13px">想法 · 故事 · 文档</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">5–8 关</b><br><span style="color:#475569;font-size:13px">3C 与界面</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">9–13 关</b><br><span style="color:#475569;font-size:13px">关卡 · 战斗 · 敌人</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">14–17 关</b><br><span style="color:#475569;font-size:13px">多人 · 音乐 · 收尾</span></div>
+<div class="cap">前三段是「把游戏想清楚」，最后一段是「把它做完」。书里反复强调的其实只有一句：所有环节最终都在服务于玩点。</div>
+</div>
+
+    <h3>作者是谁，为什么值得听他讲</h3>
+    <p>Scott Rogers 入行时是美工，那还是 16 位机、以像素为单位作图的年代，后来一路做成游戏设计师。他参与过的作品包括《吃豆人世界》《马克西莫》《战神》《海绵宝宝》《暗黑血统》等。</p>
+
+    <p>他坦白得很：<strong>因为自己做的多是单人动作冒险游戏，所以书里大部分例子都从动作游戏的角度出发。</strong>这句话很重要——它意味着下面这些关于镜头、跳跃、战斗、Boss 战的内容，对一个横版动作游戏的开发者来说命中率极高。</p>
+
+    <div class="callout co-blue">
+      <span class="lbl">开篇就给的两个前提</span>
+      <p>① <strong>做游戏非常难</strong>——他在业内二十年，做出来过百万销量的作品，说这话时没有半分开玩笑。<br>
+         ② 但<strong>做游戏是全世界最好的工作之一</strong>：它会让你兴奋、沮丧、有收获、头疼、忙乱、无聊、作呕，还有最单纯的——很快乐。</p>
+    </div>
+
+    <h3>这本书的骨架，一页看完</h3>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead>
+<tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">段落</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">关卡</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">在解决什么问题</th></tr>
+</thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>立项期</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">1–4</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">游戏是什么、想法从哪来、故事怎么装进去、怎么把它写成别人能看懂的文档</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>手感期</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">5–7</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">3C：角色（Character）、镜头（Camera）、操作（Controls）—— 玩家体验的全部物理基础</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>信息期</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">8</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">HUD 与图标：怎么把信息交给玩家，又尽量不破坏沉浸</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>内容期</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">9–13</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">关卡、战斗、敌人、Boss、机关、陷阱、强化道具 —— 玩家实际在「玩」的那部分</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>收尾期</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">14–17</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">多人、音乐、过场动画，以及最难的关底：把这个东西真的做完</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>工具</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">奖励关 1–9</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">单页说明书、十页说明书、GDD 模板、敌人模板、Boss 模板、宣讲稿…… 直接可填</td></tr>
+</tbody>
+</table>
+</div>
+
+    <div class="callout co-amber">
+      <span class="lbl">阅读提示</span>
+      <p>作者自己说：<strong>如果你只想看某一章，不要纠结，因为这本书的每一章都是关于玩法的。</strong>这里按原书章节顺序整理，但你可以直接跳到最缺的那一块——比如做平台动作游戏的，把第 5、6、9、10、11 关当主线读。</p>
+    </div>
+  </section>
+
+  <!-- ================= 01 ================= -->
+  <section id="s1">
+    <div class="sec-head">
+      <div class="badge teal">01</div>
+      <h2>第 1 关 欢迎，小白！<span class="en">Welcome, N00bs!</span></h2>
+    </div>
+
+    <p>这一关是热身，但它埋了一个后面一直用得上的定义：<strong>游戏是有规则、并且有胜利条件的活动。</strong>规则给了限制，胜利条件给了方向——两者缺一个，它就不太像游戏。</p>
+
+    <p>顺着这个定义往下推，作者给了四条关于游戏本质的观察：目标可以定得非常简单；种类不固定（同一套规则换个壳就是另一类游戏）；游戏永远在适应新技术；而做游戏一定是各行各业协作的结果。</p>
+
+    <h3 class="teal">游戏是哪些人做的</h3>
+    <p>书里有一节专讲团队分工。这节看着像科普，其实是给设计师的自我保护——<strong>它会告诉你哪些事不该你一个人扛</strong>。</p>
+
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">一个游戏团队里通常有谁</div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">决定方向</span><div style="margin-top:4px"><b>制作人 / 创意总监</b> —— 排期、预算、对外沟通，以及最后拍板「这个做不做」</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#0d9488;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">决定内容</span><div style="margin-top:4px"><b>游戏设计师 / 关卡设计师</b> —— 规则、节奏、玩点、敌人与机关的摆放</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#b45309;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">让它跑起来</span><div style="margin-top:4px"><b>程序员</b> —— 引擎、工具、玩法实现、性能</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#6d28d9;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">让它能看</span><div style="margin-top:4px"><b>美工</b> —— 概念图、角色、场景、动画、特效、UI，往往是这层人最多</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#be123c;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">让它好听</span><div style="margin-top:4px"><b>作曲 / 音效设计</b> —— 主题旋律、音效、语音</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#15803d;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">保证它能交付</span><div style="margin-top:4px"><b>QA、本地化、市场、发行</b> —— 找 bug、翻语言、做预告片、谈渠道与上架</div></div>
+<div class="cap">作者的原话大意是：团队里没有「小我」。你只会说「我做了个游戏」，其实是相当省略的说法。</div>
+</div>
+
+    <h3 class="teal">可曾想过发行</h3>
+    <p>这一节提醒你：<strong>游戏做出来只是半程，它还得被看见。</strong>渠道、评级、预告片、商店页、媒体关系——这些在立项时就要有心理准备，而不是做完再说。作者用「可曾想过」这个问句，语气里带着点过来人的意思。</p>
+
+    <div class="callout co-teal">
+      <span class="lbl">第 1 关最该记住的</span>
+      <p>「游戏」的定义里有两根柱子：<strong>规则</strong>和<strong>胜利条件</strong>。后面所有章节——关卡、战斗、敌人、机关——都只是在往这两根柱子上挂东西。当你在设计里卡住时，回到这两根柱子问一句：这条规则有没有让胜利条件变得更清楚、或者更有趣？</p>
+    </div>
+  </section>
+
+  <!-- ================= 02 ================= -->
+  <section id="s2">
+    <div class="sec-head">
+      <div class="badge amber">02</div>
+      <h2>第 2 关 创意<span class="en">Ideas</span></h2>
+    </div>
+
+    <p>这一关最反直觉的地方在于：作者并不打算教你「怎么想出好创意」，他要教你的是<strong>怎么处理想出来的创意</strong>。</p>
+
+    <h3 class="amber">我讨厌「趣味性」这个词</h3>
+    <p>作者明说他不喜欢拿「有趣（fun）」当唯一的设计标准，因为它太模糊了——每个人都点头，但每个人想的东西不一样。玩家真正想要的是<strong>好游戏</strong>，而「好」可以拆成很多种不同的满足：挑战、探索、故事、社交、成就感、紧张的释放……</p>
+
+    <p>于是他给了一条非常实用的思路，业内叫「反趣味理论」：</p>
+
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">从一个有趣的创意出发，然后做减法</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">一个有趣的起点</b><br><span style="color:#475569;font-size:13px">哪怕很粗糙</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">开发中不断试</b><br><span style="color:#475569;font-size:13px">哪部分不好玩</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">剔掉不有趣的</b><br><span style="color:#475569;font-size:13px">哪怕那是你的心头好</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #9bd3a4;border-radius:11px;background:#f2fbf4;font-size:14px;text-align:left"><b style="color:#1e293b">剩下的都是有趣的</b><br><span style="color:#475569;font-size:13px">核心自然浮出水面</span></div>
+<div class="cap">注意「哪怕那是你的心头好」。这一刀砍的是自己的面子，不是别人的方案——这也是为什么它难。</div>
+</div>
+
+    <p>他还补了一句配套要求：<strong>你能保证某个创意一定有趣吗？不能。</strong>所以别在设计文档里把某个点子写成不可动摇的前提，先用一个最粗糙的原型去验证它。</p>
+
+    <h3 class="amber">头脑风暴与突破创作障碍</h3>
+    <div class="split">
+      <div class="mini">
+        <h4>头脑风暴守则</h4>
+        <p>先把所有点子记下来，<b>记录比记忆可靠</b>；不在这一轮里评判好坏；每个点子都让它说完再收口。收口是下一步的事，不是这一秒的事。</p>
+      </div>
+      <div class="mini">
+        <h4>卡住的时候怎么办</h4>
+        <p>休息一下、换个环境、去玩点别的游戏（<b>包括差的游戏</b>——差游戏更能帮你看清什么不该做）；去邻居行业取材：电影、漫画、建筑、主题公园、博物馆。</p>
+      </div>
+    </div>
+
+    <div class="callout co-rose">
+      <span class="lbl">别指望「应变游戏性」替你设计乐趣</span>
+      <p><strong>应变游戏性（Emergent Gameplay）</strong>指的是：你给玩家一套工具，让他们随便玩，玩点就会自然产生。作者的态度是：这现象是真的，也很有趣，但<strong>不要依赖它来为你的游戏制造乐趣</strong>。所有好的设计都是预先规划好的——你设计的是那套工具本身，而不是盼着运气。</p>
+    </div>
+
+    <div class="callout co-amber">
+      <span class="lbl">第 2 关最该记住的</span>
+      <p>创意不是用来「保护」的，是用来「筛选」的。<strong>你唯一可以肯定的是：现在这个点子有一半是错的。</strong>所以越早做原型、越早剔掉不有趣的部分，越省钱。</p>
+    </div>
+  </section>
+
+  <!-- ================= 03 ================= -->
+  <section id="s3">
+    <div class="sec-head">
+      <div class="badge violet">03</div>
+      <h2>第 3 关 给游戏编个故事<span class="en">Writing the Story</span></h2>
+    </div>
+
+    <p>这一关有一个流传很广的模型，也是全书最常被人引用的概念之一：<strong>剧情三角论</strong>。</p>
+
+    <h3 class="violet">剧情三角：角色、事件、世界，只能突出一个</h3>
+    <p>它借用的是项目管理里的「生产三角」：时间、质量、成本——你只能同时满足两个。而作者说，剧情三角更狠：<strong>角色、事件、世界这三样里，你只能突出一件。</strong></p>
+
+    <div class="diagram">
+      <div class="dtitle">剧情三角论（Triangle of Weirdness）</div>
+      <svg viewBox="0 0 680 290" role="img" aria-label="剧情三角论示意">
+        <polygon points="340,42 92,246 588,246" fill="#f5f3ff" stroke="#c3b0f7" stroke-width="2"/>
+        <circle cx="340" cy="42" r="9" fill="#6d28d9"/>
+        <circle cx="92" cy="246" r="9" fill="#3b5bdb"/>
+        <circle cx="588" cy="246" r="9" fill="#0d9488"/>
+        <text x="340" y="26" text-anchor="middle" font-size="14" font-weight="700" fill="#6d28d9">角色 Character</text>
+        <text x="92" y="272" text-anchor="middle" font-size="14" font-weight="700" fill="#3b5bdb">事件 Event</text>
+        <text x="588" y="272" text-anchor="middle" font-size="14" font-weight="700" fill="#0d9488">世界 World</text>
+        <text x="340" y="130" text-anchor="middle" font-size="13" fill="#475569">只突出一个</text>
+        <text x="340" y="152" text-anchor="middle" font-size="12.5" fill="#94a3b8">剩下的两个保持正常</text>
+        <text x="340" y="176" text-anchor="middle" font-size="12.5" fill="#94a3b8">——这就是「怪诞」的预算</text>
+        <text x="216" y="205" text-anchor="middle" font-size="11.5" fill="#6d28d9">主角很怪</text>
+        <text x="464" y="205" text-anchor="middle" font-size="11.5" fill="#0d9488">世界很怪</text>
+        <text x="340" y="234" text-anchor="middle" font-size="11.5" fill="#3b5bdb">事情很怪</text>
+        <text x="340" y="18" text-anchor="middle" font-size="11" fill="#94a3b8" opacity="0">.</text>
+      </svg>
+      <div class="cap">对照「生产三角」：生产三角你可以选两个角，剧情三角你只能突出一个角。任何「我三个都要」的想法，结局通常是玩家觉得理解不了。</div>
+    </div>
+
+    <p>为什么只能一个？因为玩家的理解带宽是有限的。你突出角色，那世界就该是玩家熟悉的世界、事件就该是日常能理解的事——怪只怪在「这个人」。反之亦然。<strong>三个都怪，玩家就没有任何东西可以当参照物。</strong></p>
+
+    <h3 class="violet">三类玩家，三套对策</h3>
+    <p>接下来这一段极其实用。作者引用了《生化奇兵》总监肯·列文（Ken Levine）在 2009 年 GDC 演讲里的划分——做游戏故事时你会面对三类玩家：</p>
+
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">三类玩家，你不能只讨好其中一类</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">① 凑合看看的</b><br><span style="color:#475569;font-size:13px">大多数</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">② 想深挖背景的</b><br><span style="color:#475569;font-size:13px">少数核心</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">③ 完全不在乎的</b><br><span style="color:#475569;font-size:13px">也很多</span></div>
+<div class="cap">想满足所有人是不可能的。作者的结论很干脆：让故事服从游戏性。</div>
+</div>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead>
+<tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">玩家类型</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">他的行为</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">你该怎么做</th></tr>
+</thead>
+<tbody>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>凑合看看</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">会看，但不会去查设定集</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">主线讲清楚、不绕弯，关键信息重复到位</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>想深挖背景</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">愿意为剧情付出额外时间</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把细节信息做成<b>非强制的收集物</b>——放进主线之外。原书举的例子是《生化奇兵》和《蝙蝠侠：阿卡姆疯人院》里那些可收集的录音带 / 录像带：想挖的人有得挖，不想挖的人完全不受打扰</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>完全不在乎</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">猛点跳过键，把所有对白和过场都跳掉</td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把故事<b>嵌进关卡设计和游戏进程里</b>，让他们哪怕跳过一切也大概知道发生了什么；也可以把情节做成可玩的解谜小游戏，或者倒叙形式的关卡</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+    <div class="callout co-violet">
+      <span class="lbl">一句硬结论</span>
+      <p><strong>千万不要把故事性当作游戏性，也不要把游戏性理解为故事性。</strong>这两句话是书里的原话。有的游戏需要一个故事背景，有的不需要，<strong>但所有游戏都要可玩。</strong></p>
+    </div>
+
+    <h3 class="violet">Yorda 效应：怎么让玩家在意一个角色</h3>
+    <p>书里给了一个很好用的名字，来自上田文人的《ICO》。要让玩家真的在意一个角色，需要两个条件同时成立：</p>
+    <ul>
+      <li><strong>玩家得和它相处过一段时间</strong>。感情是时间堆出来的，不能靠一段过场动画硬灌。</li>
+      <li><strong>这个角色得能帮上玩家的忙</strong>。一个纯粹需要被拖着的累赘，玩家只会烦。</li>
+    </ul>
+    <p>这两条合起来解释了为什么同伴角色难做：既要陪得久，又要有用，还不能抢玩家的戏。</p>
+
+    <h3 class="violet">其余几个要点</h3>
+    <div class="split">
+      <div class="mini">
+        <h4>故事结构</h4>
+        <p>起因、经过、结果。别过早把故事全展开；要让它<b>持续往前推</b>，保持新鲜感。角色的死亡要有价值。</p>
+      </div>
+      <div class="mini">
+        <h4>命名四路数</h4>
+        <p><b>直白型</b>（一看就懂）、<b>酷炫型</b>（情绪与气势）、<b>双关型</b>（会心一笑）、<b>惊艳型</b>（出乎意料）。共同要求：简短、有描述性、符合角色个性。</p>
+      </div>
+      <div class="mini">
+        <h4>面向孩子的游戏</h4>
+        <p>要慎重，但<b>不要做得弱智</b>。孩子能察觉到被小看，而且他们往往想要「比实际年龄更大一点」的东西。</p>
+      </div>
+      <div class="mini">
+        <h4>授权 / 改编游戏</h4>
+        <p>把原著嚼烂摸透；尽早发现原则性问题；多向授权人取资料；实地取材；<b>尊重原著，但要有自己的特色</b>——往外扩张你自己的点子。</p>
+      </div>
+    </div>
+
+    <div class="callout co-blue">
+      <span class="lbl">第 3 关最该记住的</span>
+      <p>剧情三角管的是「怪诞的预算」：<strong>三样里只准一样怪。</strong>而三类玩家的清单管的是「投入的预算」：<strong>主线服务大多数人，深度内容做成可选的。</strong></p>
+    </div>
+  </section>
+
+  <!-- ================= 04 ================= -->
+  <section id="s4">
+    <div class="sec-head">
+      <div class="badge green">04</div>
+      <h2>第 4 关 会做游戏，但会写文档吗<span class="en">Do You Have the Paperwork?</span></h2>
+    </div>
+
+    <p>这一关是在说：<strong>设计文档的目的始终是沟通</strong>——和玩家沟通，和团队沟通，和发行商沟通。沟通越清楚，你身边的人越容易被你的创意鼓舞。</p>
+
+    <h3 class="green">四份文档，一层套一层</h3>
+    <p>游戏筹备阶段你需要四种文档。它们的关系不是并列，而是<strong>后一份建立在前一份之上</strong>，最后全部汇总进 GDD。</p>
+
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">从一页纸到一本手册</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">① 单页说明书</b><br><span style="color:#475569;font-size:13px">一页，概括总览</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">② 十页说明书</b><br><span style="color:#475569;font-size:13px">十页，游戏的脊椎</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">③ 游戏流程表</b><br><span style="color:#475569;font-size:13px">结构映射表</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">④ GDD</b><br><span style="color:#475569;font-size:13px">汇总全部细节</span></div>
+<div class="cap">GDD 的长度取决于游戏复杂度：手机游戏 30 页就够，平台动作游戏的 GDD 通常会超过 300 页。</div>
+</div>
+
+    <h4>单页说明书要有什么</h4>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead>
+<tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">要素</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">说明</th></tr>
+</thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>游戏名称</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">以及一个临时的 logo 占位</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>游戏系统</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">打算上哪些平台</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>目标玩家年龄</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">以及预计的 ESRB 分级</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>故事概要</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>着重描述可玩性</b>，而不是文学性</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>玩法的独特性</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">你的游戏具体怎么玩、特殊在哪</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>与众不同卖点</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">也就是 USP，别人为什么要买</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>竞品</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">必须是<b>有名的、或广受好评的</b>游戏，否则列了没意义</td></tr>
+</tbody>
+</table>
+</div>
+    <p>要求是：<strong>既充实、又精彩生动、而且一定不能超过一页纸。</strong></p>
+
+    <h4>十页说明书：一页一个主题</h4>
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">十页说明书的十页</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">第 1 页 · 标题页</b><br><span style="color:#475569;font-size:13px">名称 / 平台 / 受众 / 分级 / 预计发售日 / logo</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">第 2 页 · 游戏总览</b><br><span style="color:#475569;font-size:13px">故事梗概（起承转合）+ 流程概述</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">第 3 页 · 角色</b><br><span style="color:#475569;font-size:13px">概念图、身世、性格、操控图</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">第 4 页 · 可玩性</b><br><span style="color:#475569;font-size:13px">类型、流程、玩法细节、硬件特性</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">第 5 页 · 游戏世界</b><br><span style="color:#475569;font-size:13px">场景、遭遇、一张简略大地图</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">第 6 页 · 游戏体验</b><br><span style="color:#475569;font-size:13px">整体感觉、开始画面、情绪、音乐、UI 流程图</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">第 7 页 · 游戏机关</b><br><span style="color:#475569;font-size:13px">机关与陷阱、收集物、经济系统（获取 / 购买）</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">第 8 页 · 敌人</b><br><span style="color:#475569;font-size:13px">敌人特征、怎么打败、Boss</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">第 9 页 · 剧情过场</b><br><span style="color:#475569;font-size:13px">表现形式、出现在什么时刻</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">第 10 页 · 奖励内容</b><br><span style="color:#475569;font-size:13px">解锁内容、重玩动力、多人模式、可下载更新</span></div>
+<div class="cap">十页说明书展示的是整个游戏的精髓，目的是让读者快速了解最终产品的雏形——所以<b>图要多于字</b>。</div>
+</div>
+
+    <h3 class="green">游戏流程表：用来找弱点的那张表</h3>
+    <p>这是全书最像「工程工具」的一件东西。它把游戏的每一关横向摊开，纵向上是各种要素——你可以一眼看到哪一关是空的、哪一关全是新东西、哪一关节奏塌了。</p>
+
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">游戏流程表（Beat Chart）的列</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">关卡 / 场景</b><br><span style="color:#475569;font-size:13px">正式名</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">游戏内时间</b><br><span style="color:#475569;font-size:13px">几时几分、早中晚</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">主要玩法</b><br><span style="color:#475569;font-size:13px">这一关在玩什么</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">主色调</b><br><span style="color:#475569;font-size:13px">视觉基调</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">机关</b><br><span style="color:#475569;font-size:13px">新出现的机关</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">强化道具</b><br><span style="color:#475569;font-size:13px">拿到什么</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">宝物</b><br><span style="color:#475569;font-size:13px">可收集物</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">背景音乐</b><br><span style="color:#475569;font-size:13px">曲目</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">剧情</b><br><span style="color:#475569;font-size:13px">这一关涉及的剧情</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">大致过关时间</b><br><span style="color:#475569;font-size:13px">节奏控制</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">敌人 / Boss</b><br><span style="color:#475569;font-size:13px">出场名单</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">陷阱</b><br><span style="color:#475569;font-size:13px">危险物</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">新技能/武器/装备</b><br><span style="color:#475569;font-size:13px">成长点</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">奖励内容</b><br><span style="color:#475569;font-size:13px">解锁物</span></div>
+<div class="cap">配三条作者给的秘籍：<b>别扎堆</b>——每关加入 2~3 个新的机关/敌人/奖励就够；<b>避免单调</b>——打乱机关与敌人的组合；<b>不时更换</b>时间和色调、音乐也要换。</div>
+</div>
+
+    <h3 class="green">游戏成长性：四种开场</h3>
+    <p>玩家从零到强的那条曲线，书中给了四种经典开场套路：</p>
+    <div class="diagram" style="text-align:center">
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">从零开始</b><br><span style="color:#475569;font-size:13px">身无长物，技能全在远方</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">带着但不会用</b><br><span style="color:#475569;font-size:13px">技能已解锁，玩法待你发现</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">强力登场后归零</b><br><span style="color:#475569;font-size:13px">打完某个 Boss 或意外后功力全失</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">华丽登场再从头</b><br><span style="color:#475569;font-size:13px">先给玩家一段无所不能的梦</span></div>
+<div class="cap">它们的共同点：先让玩家知道「后面有更强的东西」，成长才有方向。</div>
+</div>
+
+    <div class="callout co-green">
+      <span class="lbl">「一切都是可变的」</span>
+      <p>这是这一关的核心信条（原书英文是 <code>Everything is liquid</code>）。文档不是合同，是当前共识的快照。所以作者列了「别犯傻」十条：博采众长、坚持自己的主见、随时更新文档、多和团队谈、先啃硬骨头、相信自己的直觉、让你的同伴发挥最好的作用、随时存档备份、井井有条、早做准备。</p>
+    </div>
+
+    <h3 class="green">顺手记两个术语</h3>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead>
+<tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">术语</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">意思</th></tr>
+</thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>twiddley bits</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">那些做起来特别费劲、但当你向别人介绍游戏时他们完全没必要知道的细节。对制作很重要，对拿给发行商看一点都不重要</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>high concept</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">高概念：能一句话说明视觉吸引力与市场商机的内容</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>S.I.F.S.</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>S</b>ave <b>I</b>t <b>F</b>or the <b>S</b>equel —— 把它留到续作。好点子塞不下时的标准出路</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>垂直切片</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">已经完成设计、构建，并把可玩性打磨到最高水平的一关或一小段游戏。用来向外界证明品质</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>水平分层</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把游戏所有元素全部先以灰盒形式同时开工，先跑通「一个方块在一堆方块上走」，之后再替换美术</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><code>续作 30/70</code></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">续作里 30% 是新内容新点子，70% 基于原作</td></tr>
+</tbody>
+</table>
+</div>
+
+    <p class="src">排版提醒（书里专门写了一节）：正文别用花式字体；一个文档里不要多于两种字体；展示用幻灯字号别小于 24 点，正文保持在 12 点上下。</p>
+  </section>
+
+  <!-- ================= 05 ================= -->
+  <section id="s5">
+    <div class="sec-head">
+      <div class="badge">05</div>
+      <h2>第 5 关 3C 之一 · 角色<span class="en">The Three Cs, Part 1: Character</span></h2>
+    </div>
+
+    <p>从这里开始进入全书最硬核的部分：<strong>3C</strong>。作者把玩家和游戏世界之间的全部物理接触面，压缩成了三个 C：</p>
+
+    <div class="diagram">
+      <div class="dtitle">3C 的三角关系</div>
+      <svg viewBox="0 0 680 300" role="img" aria-label="3C 三角关系">
+        <polygon points="340,44 96,254 584,254" fill="#eef2ff" stroke="#a8b8f5" stroke-width="2"/>
+        <circle cx="340" cy="44" r="9" fill="#3b5bdb"/>
+        <circle cx="96" cy="254" r="9" fill="#0d9488"/>
+        <circle cx="584" cy="254" r="9" fill="#b45309"/>
+        <text x="340" y="28" text-anchor="middle" font-size="14" font-weight="700" fill="#3b5bdb">角色 Character</text>
+        <text x="96" y="280" text-anchor="middle" font-size="14" font-weight="700" fill="#0d9488">镜头 Camera</text>
+        <text x="584" y="280" text-anchor="middle" font-size="14" font-weight="700" fill="#b45309">操作 Controls</text>
+        <text x="340" y="130" text-anchor="middle" font-size="13" fill="#475569">改其中一条</text>
+        <text x="340" y="152" text-anchor="middle" font-size="13" fill="#475569">另外两条必然跟着动</text>
+        <text x="340" y="186" text-anchor="middle" font-size="12" fill="#94a3b8">比如：角色跑得更快</text>
+        <text x="340" y="206" text-anchor="middle" font-size="12" fill="#94a3b8">→ 镜头跟不上 → 操作手感变飘</text>
+      </svg>
+      <div class="cap">所以作者说：这三条在生产中不要单独改动。<b>它们是绑在一起的，必须一起规划、一起测试。</b></div>
+    </div>
+
+    <h3>角色性格：主角一定要是坏小子吗</h3>
+    <p>不。作者明确反对把「耍酷」当默认性格。相比之下<strong>「有魅力」比「酷」更值钱</strong>——酷只让人羡慕，魅力才让人愿意跟着他走一路。</p>
+
+    <p>角色性格靠四样东西共同表达，缺一样都会显得单薄：</p>
+
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">角色性格的四个出口</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">外形</b><br><span style="color:#475569;font-size:13px">剪影先说话</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">动作</b><br><span style="color:#475569;font-size:13px">怎么跑、怎么停</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">声音</b><br><span style="color:#475569;font-size:13px">语气与口头禅</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">能力</b><br><span style="color:#475569;font-size:13px">他能做什么</span></div>
+<div class="cap">「外形服从功能」（form follows function）：一个角色的长相、体型、剪影，要能一眼说明他在玩法里是干什么的。</div>
+</div>
+
+    <h3>终于，该聊聊游戏性了</h3>
+    <p>角色设计的下半段全是手感细节。作者一条一条过，其中最值得单独拎出来的几条：</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead>
+<tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">小节</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">作者在说什么</th></tr>
+</thead>
+<tbody>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>可以跑，干嘛要走</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">玩家的默认状态是「一直跑」。所以走路速度在绝大多数游戏里都只是过渡状态——<b>别把核心体验建立在走路速度上</b>，除非你的游戏就是要慢。</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>什么都不做的艺术</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">待机（idle）动作。它让角色在玩家什么都不按时依然「活着」，同时给玩家一段呼吸。别让角色静止得像一张贴图。</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>跳跳又何妨</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">跳跃是平台动作游戏的哲学核心。跳跃弧线、起跳与落地的缓冲、二段跳的可预测性——玩家会反复试同一个坑几十次，<b>手感必须像机械表一样稳定</b>。</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>攀援和趔趄</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">爬、挂、翻身、被打得趔趄。它们的共同要求是<b>输入意图要能被准确识别</b>：玩家想抓边而不是摔死，这个意图必须在 1 帧内被听懂。</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>跳起来的，就一定会掉下去</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">重力与下落。玩家对下落的恐惧是免费的张力，但下落必须有终点、有代价、也有出路。</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>水应该很好做吧……你确定吗</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">水是最难做的手感之一：浮力、阻力、进出水的瞬间切换、氧气、视野。作者的答案是「你确定吗」，意思是它比看上去贵得多。</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>多花点心思在我们的四足朋友身上</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">四条腿的角色（载具 / 坐骑 / 动物）在动作与操控上都要额外下功夫，不能拿人形动画直接改。</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>利用所有的细节</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">衣摆、披风、影子、脚步声、呼吸……这些细节堆出「活着」的感觉。</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+    <h3>你不是一个人：同伴与其余角色</h3>
+    <p>「你不是一个人」这节讲的是同伴角色的设计，它的核心判据就是前面说过的 Yorda 效应：<strong>相处得够久</strong> + <strong>真的帮得上忙</strong>。同伴的价值在于补足主角能力的缺口，而不是抢他的风头。</p>
+
+    <p>「还应该有些什么人呢」这节往外扩到 NPC 的分类与作用：给你任务的、卖你东西的、给你添麻烦的、只负责让世界显得有人住的。作者的态度是——<strong>每一个出场角色都应该有存在的理由</strong>，哪怕理由只是「让这里不像一座空城」。</p>
+
+    <div class="callout co-blue">
+      <span class="lbl">第 5 关最该记住的</span>
+      <p>角色不是一张立绘，是<strong>一组手感参数加上四层表达</strong>。你花在跳跃弧线上的每一小时，都比花在角色设定文字上的更值。</p>
+    </div>
+  </section>
+
+  <!-- ================= 06 ================= -->
+  <section id="s6">
+    <div class="sec-head">
+      <div class="badge">06</div>
+      <h2>第 6 关 3C 之二 · 镜头<span class="en">The Three Cs, Part 2: Camera</span></h2>
+    </div>
+
+    <p>镜头是 3C 里最容易被低估的一条。作者的主张是：<strong>把镜头当成一个参与者来设计，而不是一台记录设备。</strong>它是玩家唯一的世界之窗——窗子歪了，再好的世界也看不到。</p>
+
+    <h3>镜头与视角：先选一种</h3>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead>
+<tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">视角</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">感觉</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">代价</th></tr>
+</thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>第一人称</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">沉浸最强，玩家的身体就是镜头</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">看不到自己、空间感差、跳跃类动作极难做</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>第三人称</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">能看到角色，动作表现力最好</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">镜头会挡视线、会和场景碰撞、需要镜头逻辑</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>2.5D</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">三维建模、二维玩法</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">美术成本高于纯 2D，玩法却仍是线性</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>等轴镜头</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">俯视斜角，适合策略与刷宝</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">纵深判断困难，容易误判距离</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>俯视镜头</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">全局清晰，适合大场面调度</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">压迫感弱，容易像看地图</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>隧道视角</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">狭窄、幽闭、紧张</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只能用在特定段落，久了会累</td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3>镜头的控制权归谁</h3>
+    <p>这是设计镜头时最先要拍板的一个问题：</p>
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">镜头控制权的三档</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">完全由玩家控制</b><br><span style="color:#475569;font-size:13px">自由但容易迷路、容易穿帮</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">完全由系统控制</b><br><span style="color:#475569;font-size:13px">演出可控，但玩家会觉得被夺权</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #9bd3a4;border-radius:11px;background:#f2fbf4;font-size:14px;text-align:left"><b style="color:#1e293b">混合（最常用）</b><br><span style="color:#475569;font-size:13px">平时玩家控制，关键节点系统接管</span></div>
+<div class="cap">混合方案的关键在切换时刻：一旦在玩家操作中强行接管镜头，就要立刻给他明确的理由（比如 Boss 登场、剧情触发）。</div>
+</div>
+
+    <h3>借用电影语言</h3>
+    <p>作者专门写了几节「指南」，本质是把电影摄影的语汇翻译给游戏用：</p>
+    <div class="split">
+      <div class="mini">
+        <h4>镜头角度</h4>
+        <p>俯拍让人显得渺小、无助；仰拍让人显得压迫、强大；荷兰角（倾斜）制造不安。同一场戏换个角度，情绪就变了。</p>
+      </div>
+      <div class="mini">
+        <h4>镜头移动</h4>
+        <p>推（zoom in）聚焦、拉（zoom out）揭示全貌、摇（pan）扫视环境、移（track）跟随。每种移动都在替玩家做一次「该看哪儿」的决定。</p>
+      </div>
+      <div class="mini">
+        <h4>拍摄手法</h4>
+        <p>景别、构图、留白。目标只有一个：<b>让玩家在该看的时候看到该看的东西</b>，而不是靠箭头和提示硬指。</p>
+      </div>
+      <div class="mini">
+        <h4>使用镜头的其他要点</h4>
+        <p>别让镜头穿墙、别让景物挡住角色、别在玩家高速移动时抖动、注意安全区与可读性。</p>
+      </div>
+    </div>
+
+    <h3>多人游戏镜头：最难的一档</h3>
+    <p>一个人一个镜头很好办；四个人一个屏幕就变成了一道纯数学题——分屏？共享？动态缩放？这一节是全章里难度最高的部分，作者用「最难」的语气写过去。</p>
+
+    <div class="callout co-amber">
+      <span class="lbl">第 6 关最该记住的</span>
+      <p>镜头不是背景，是<strong>叙事工具 + 难度调节器 + 情绪开关</strong>。你完全可以在不改成任何关卡内容的前提下，只靠镜头把同一关变得更紧张或更舒缓。</p>
+    </div>
+  </section>
+
+  <!-- ================= 07 ================= -->
+  <section id="s7">
+    <div class="sec-head">
+      <div class="badge">07</div>
+      <h2>第 7 关 3C 之三 · 操作<span class="en">The Three Cs, Part 3: Controls</span></h2>
+    </div>
+
+    <p>操作是玩家和游戏之间那根唯一的神经。<strong>输入到反馈的延迟、按键的人体工学、以及能不能承受玩家的乱按</strong>——这一关讲的就是这三件事。</p>
+
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">一套好的操作方案要同时满足三条</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">即时响应</b><br><span style="color:#475569;font-size:13px">按下就有反馈，别让角色「想一下」</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">符合人体工学</b><br><span style="color:#475569;font-size:13px">手指不用换位置就能做完常用动作</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">扛得住乱按</b><br><span style="color:#475569;font-size:13px">「随便搓、随便按」也不崩</span></div>
+<div class="cap">「没关系，随便搓，随便按」是这一章第一节的标题——它其实是一条设计验收标准，不是宽容。</div>
+</div>
+
+    <h3>角色相关，还是镜头相关</h3>
+    <p>这是操作设计里最根本的一个决策，也是这一章最有价值的一节：<strong>你的摇杆 / 方向键，是在控制角色，还是在控制镜头？</strong></p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead>
+<tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left"></th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">角色相关（角色朝向固定）</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">镜头相关（角色朝镜头方向走）</th></tr>
+</thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>手感</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">精确、可预期，动作游戏更常用</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">直觉、上手快，适合开放空间</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>代价</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">镜头一转，玩家的方向感会错乱</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">镜头在玩家背后时容易「转圈晕」</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>适合</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">横版、固定镜头、格斗、精确跳跃</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第三人称 3D、跟随镜头</td></tr>
+</tbody>
+</table>
+</div>
+
+    <p>另外要给玩家留出路：<strong>允许自定义按键布局</strong>，并考虑无障碍——不是善意，是覆盖面。</p>
+
+    <h3>「游戏的摇滚年代」</h3>
+    <p>这一节讲的是以音乐节奏为核心的输入设计（吉他英雄一类）。它给出的启发是通用的：<strong>当输入本身有节奏时，操作就会变成一种表演</strong>。连招（作者用「四字箴言」来调侃搓招）之所以让人上瘾，也是同一个道理。</p>
+
+    <div class="callout co-teal">
+      <span class="lbl">第 7 关最该记住的</span>
+      <p>操作是唯一一件<strong>玩家每秒钟都在做</strong>的事。它的体验权重比剧情、美术、音乐加起来都高——因为它每秒都在被感受一次。</p>
+    </div>
+  </section>
+
+  <!-- ================= 08 ================= -->
+  <section id="s8">
+    <div class="sec-head">
+      <div class="badge">08</div>
+      <h2>第 8 关 符号语言 · HUD 和图标设计<span class="en">Sign Language: HUD and Icon Design</span></h2>
+    </div>
+
+    <p>HUD（Heads-Up Display）的职责可以一句话说清：<strong>把玩家必须随时知道的信息，放在不会打断沉浸的位置。</strong>难就难在「必须」和「不打断」这两个约束是互相拉扯的。</p>
+
+    <h3>HUD 的元素清单</h3>
+    <p>书里逐个讲了每一类元素的常见做法。这里把它们收成一张表：</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead>
+<tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">元素</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">它要回答的问题</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">设计要点</th></tr>
+</thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>血槽</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">我还能挨几下</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">要有明确的「危险」阈值反馈（变色 / 闪烁 / 心跳声）；分格与连续条的心理感受不同</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>瞄准镜</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">我会打到哪</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">准星应能表达状态：可命中 / 装填中 / 过热 / 锁定</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>弹药量</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">我还能打几下</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">必须一眼可读，且要在「快没了」时主动抢注意力</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>道具箱</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">我有什么</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">能不能在战斗中打开、打开时游戏是否暂停，都要早定</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>记分牌</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">我做得怎么样</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">分数本身要带来成就感；连击计数是廉价的兴奋放大器</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>雷达 / 地图</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">我在哪、往哪去</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">信息密度是最难平衡的一项，宁缺勿滥</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>情景提示</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">我现在能做什么</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">按键提示要出现在「可交互」的瞬间，而不是常驻屏幕</td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3>五条通用原则</h3>
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">HUD 的五条原则</div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">① 清爽</span><div style="margin-top:4px"><b>清爽的屏幕</b> —— 能不画就不画，能淡出就淡出。屏幕上的每一块像素都在和游戏世界抢注意力</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#0d9488;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">② 符号</span><div style="margin-top:4px"><b>图标无处不在</b> —— 一个形状胜过一句话，还能跨语言。所以符号必须能一眼认出、全局统一</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#be123c;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">③ 克制</span><div style="margin-top:4px"><b>不要滥用 QTE</b> —— 按键提示是廉价的高潮，用多了玩家会麻木，也会打断他刚刚找到的节奏</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#b45309;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">④ 摆位</span><div style="margin-top:4px"><b>HUD 要放在哪</b> —— 屏幕四角各有用处，要考虑玩家视线的自然落点与安全区（别被刘海和电视边框吃掉）</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#6d28d9;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">⑤ 字体</span><div style="margin-top:4px"><b>最后，注意字体</b> —— 可读性第一。别用花式字体，字号要够，行距要够</div></div>
+<div class="cap">另外两节容易被忽略：<b>除了 HUD 还有别的界面</b>（标题、读档、设置、商店），以及 <b>焕发活力的暂停界面</b>——它是玩家唯一会主动停留的地方，最适合拿来复习操作、看数据、喘口气。</div>
+</div>
+
+    <div class="callout co-violet">
+      <span class="lbl">第 8 关最该记住的</span>
+      <p>HUD 的设计问题从来不是「还能显示什么」，而是<strong>「这块信息真的需要一直被显示吗」</strong>。答不上来的，就该删掉或者做成按需出现。</p>
+    </div>
+  </section>
+
+  <!-- ================= 09 ================= -->
+  <section id="s9">
+    <div class="sec-head">
+      <div class="badge amber">09</div>
+      <h2>第 9 关 关卡设计<span class="en">Everything I Learned About Level Design, I Learned from Level 9</span></h2>
+    </div>
+
+    <p>这一关的标题本身就是个玩笑——第 9 关叫 Level 9，而英文里 level 既是「关卡」也是「第几关」。它是全书篇幅最长、也最实用的一章。</p>
+
+    <p>先统一称呼：关卡有时候也叫「回合」「波」「关」「幕」「章」「地图」「世界」。名字不同，本质都是<strong>一段有起点、有终点、有节奏的玩法单元</strong>。</p>
+
+    <h3 class="amber">十大老掉牙的游戏题材</h3>
+    <p>书里列了最容易撞车的十个题材。作者的态度很有意思：<strong>老套本身不丢人，丢人的是老套而且偷懒。</strong></p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead>
+<tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">#</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">题材</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">为什么它老套，以及怎么救</th></tr>
+</thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">1</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>外太空</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">黑底 + 星星几乎零成本，所以被用烂了。救法是给它一个反常的物理规则</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">2</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>冰 / 火</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">滑与烫是最省事的两种地形机制。救法是把它们做成谜题的一部分，而不只是伤害源</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">3</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>地下城 / 洞穴 / 墓地</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">黑暗 + 通道最容易量产。救法是用光做导航，让「亮起来」本身成为奖励</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">4</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>工厂</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">传送带、齿轮、熔炉是现成的机关库。救法是让机器有「正在运转」的逻辑</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">5</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>丛林</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">绿色瀑布加藤蔓。救法是换掉配色与空间结构，别只是换贴图</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">6</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>幽灵 / 鬼屋 / 墓地</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">靠惊吓撑不住长时间。救法是把它做成喜剧或悲剧，而不是一直吓人</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">7</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>海盗（船 / 城镇 / 小岛）</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">救法是把「移动的船」当玩法，而不只是布景</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">8</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>粗犷的都市</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">废墟是最没门槛的「末日感」。救法是给它一个具体的时间点与原因</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">9</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>空间站</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">救法是把封闭空间本身变成压力来源（氧气、失重、可破坏舱壁）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">10</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>下水道</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">最能偷懒的场景。救法是配套一套独特的机关（水位的涨落）</td></tr>
+</tbody>
+</table>
+</div>
+
+    <p>作者给的破局技术叫 <strong>「墨西哥披萨」</strong>：同样是饼皮和馅料，换个做法就是另一道菜。<strong>你不需要发明新食材，你需要换一种组装方式。</strong></p>
+
+    <h3 class="amber">凡是与关卡设计有关的内容，都能在迪士尼乐园找到</h3>
+    <p>这是这一章的核心比喻，也是最值得记住的一节。迪士尼的幻想工程师（Imagineer）发明了一个词：<strong>「小香肠」（weanie）</strong>。</p>
+
+    <div class="diagram">
+      <div class="dtitle">迪士尼的「小香肠」原理</div>
+      <svg viewBox="0 0 680 250" role="img" aria-label="小香肠地标引导示意">
+        <line x1="40" y1="196" x2="640" y2="196" stroke="#e2e8f0" stroke-width="3"/>
+        <rect x="286" y="58" width="108" height="138" rx="8" fill="#eef2ff" stroke="#a8b8f5" stroke-width="2"/>
+        <polygon points="340,58 286,58 340,20 394,58" fill="#c3b0f7" stroke="#a8b8f5" stroke-width="1.5"/>
+        <circle cx="340" cy="110" r="14" fill="#fff" stroke="#3b5bdb" stroke-width="2.5"/>
+        <text x="340" y="115" text-anchor="middle" font-size="13" font-weight="700" fill="#3b5bdb">◆</text>
+        <text x="340" y="222" text-anchor="middle" font-size="13" font-weight="700" fill="#3b5bdb">主城堡 = 视觉地标</text>
+        <text x="340" y="240" text-anchor="middle" font-size="11.5" fill="#94a3b8">玩家在园区任何位置都能看到它，于是知道该往哪走</text>
+        <path d="M70 196 C120 196 150 150 200 130 C230 118 260 124 286 132" fill="none" stroke="#94a3b8" stroke-width="1.6" stroke-dasharray="5 4"/>
+        <circle cx="70" cy="196" r="8" fill="#3b5bdb"/>
+        <text x="70" y="180" text-anchor="middle" font-size="11.5" fill="#475569">入口</text>
+        <rect x="386" y="112" width="60" height="26" rx="7" fill="#fffaf0" stroke="#f0c48a" stroke-width="1.5"/>
+        <text x="416" y="129" text-anchor="middle" font-size="11" fill="#b45309">岔路</text>
+        <rect x="96" y="140" width="66" height="26" rx="7" fill="#fff5f7" stroke="#f2aab8" stroke-width="1.5"/>
+        <text x="129" y="157" text-anchor="middle" font-size="11" fill="#be123c">小诱惑</text>
+        <text x="560" y="96" text-anchor="middle" font-size="12" fill="#475569">小香肠不只一个</text>
+        <text x="560" y="116" text-anchor="middle" font-size="11.5" fill="#94a3b8">远处有大的，近处有小的</text>
+        <text x="560" y="136" text-anchor="middle" font-size="11.5" fill="#94a3b8">层层引着你往前走</text>
+      </svg>
+      <div class="cap">「小香肠」原意是驯兽师在镜头外晃动的食物——它不强迫你走，它让你想走。对应到游戏里就是：<b>用玩家自己想去看的东西，代替箭头和提示</b>。</div>
+    </div>
+
+    <h4>小路型 vs 小岛型关卡</h4>
+    <div class="split">
+      <div class="mini">
+        <h4>小路型（corridor）</h4>
+        <p>玩家有一个必须抵达的目标，关卡布局就是引导他到达。<br>
+           <b>优点：</b>你知道玩家会怎么走，于是镜头触发区、脚本事件、演出节奏都变得极好安排；可以用过场动画来讲这一关的故事；可以干脆去掉镜头控制，让玩家专心玩。<br>
+           <b>缺点：</b>自由度低，天然幽闭（也可以把幽闭做成优点）。</p>
+      </div>
+      <div class="mini">
+        <h4>小岛型（island）</h4>
+        <p>开放空间，玩家自己决定去哪。<br>
+           <b>优点：</b>恢弘感、促进探索、可以把秘密和支线像自助餐一样摆在玩家眼前；载具类玩法在开阔空间里才活得起来。<br>
+           <b>缺点：</b>容易迷路、容易平淡。所以要像迪士尼那样<b>切成区分明显的独立区域</b>帮玩家定位。</p>
+      </div>
+    </div>
+
+    <div class="callout co-rose">
+      <span class="lbl">关卡设计的黄金法则</span>
+      <p><strong>如果看起来能走过去，玩家就一定能走过去。</strong>（原文：如果看上去似乎有路可走到某处，那玩家就一定有办法走到那。）<br>
+      反过来说：想表达「这里不可达」，就必须用矮墙、灌木、石墙这类明确的视觉语言——别指望玩家理解「这里其实能跳过去但我们不希望」。</p>
+      <p>还有一句同样重要：<strong>玩家总会找到打破游戏规则的方法，不管是否故意。</strong>设计者的任务是提供大量提示，让玩家自愿按你希望的方式玩，而不是靠硬墙。</p>
+    </div>
+
+    <h3 class="amber">地图、复用与幻影叙事</h3>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead>
+<tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">小节</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">内容</th></tr>
+</thead>
+<tbody>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>世界地图与「自上而下」</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">先画一张游戏世界地图，标明区域之间的空间关系与边界。它能帮你在动工前决定玩家以什么顺序、走哪条路经历这一切。<b>地图和海报也是给玩家传达期待的工具</b></td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>重点流程表</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把角色成长、剧情、题材、世界地图全部编到一张表上（见第 4 关那张 14 列的流程表）。它是用来<b>找出整个游戏设计里薄弱环节</b>的</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>复用啊复用</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">复用不是偷懒，而是让玩家「熟悉 + 变化」。同一个机关、同一类敌人换个组合、换个色调、换个时间，就又是新体验。<b>缺了复用，成本爆炸；只有复用，玩家无聊</b></td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>地图设计小节</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">作者用两个小节分别致敬 Gary Gygax 与 Dave Arneson（《龙与地下城》的两位奠基人），讲地图怎么画、伏笔怎么埋、目标怎么设定、脚本怎么搭</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>幻影叙事法</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">相当于漫画书里格与格之间的缝隙、电影里镜头与镜头之间的切换空当。<b>你只需要给玩家几张图、交代一下环境，他们自己就会把故事里的空白填满</b>——留白不是偷懒，是邀请</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>避免枯燥的五招</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">改变模式 / 加漂亮的特写镜头 / 让熟悉的变陌生 / 改变玩家移动的方向 / 利用质地和颜色</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+    <h3 class="amber">灰盒很重要，教学关留到最后</h3>
+    <p><strong>灰盒（Gray Box）</strong>：在开始思考敌人、机关、建筑细节之前，先用最简单的图形把关卡摆出来。它要确认的是四件事——<strong>比例、尺寸、镜头参数、以及关卡的节奏</strong>。作者的原话是「灰盒很重要」，因为这时候改一切都还便宜。</p>
+
+    <p>而<strong>教学关要留到最后再设计</strong>。理由很简单也很残酷：只有当你把整个游戏做完，你才知道里面到底有哪些机制要教。可是教学关又是玩家对游戏的第一印象、是勾起玩家对剩余部分热忱的那一关——所以它是<strong>最后做、却最重要的一关</strong>。</p>
+
+    <div class="callout co-amber">
+      <span class="lbl">第 9 关最该记住的</span>
+      <p>关卡设计师真正在做的不是「搭场景」，而是<strong>设计玩家的动线和情绪曲线</strong>。迪士尼那句「小香肠」是最好的检验标准：如果你的关卡必须靠箭头才走得通，那它还不够好。</p>
+    </div>
+  </section>
+
+  <!-- ================= 10 ================= -->
+  <section id="s10">
+    <div class="sec-head">
+      <div class="badge rose">10</div>
+      <h2>第 10 关 战斗的要素<span class="en">The Elements of Combat</span></h2>
+    </div>
+
+    <p>作者把战斗拆得很干净：<strong>玩家在战斗里能做的所有事，不外乎三种形式——攻击、移动、防御。</strong>整个战斗系统的设计，就是在这三者之间制造取舍。</p>
+
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">战斗的三要素，以及它们之间的取舍</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">攻击</b><br><span style="color:#475569;font-size:13px">伤害输出</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">移动</b><br><span style="color:#475569;font-size:13px">位置与距离</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">防御</b><br><span style="color:#475569;font-size:13px">承受与规避</span></div>
+<div class="cap">好的战斗设计让任何一项都不能一直做：攻击会露出破绽，移动会消耗精力，防御不能等于无敌。三者互相牵制，玩家才需要思考。</div>
+</div>
+
+    <h3 class="rose">为什么「打起来爽」其实是条回路</h3>
+    <p>书里点出了动作游戏最底层的那个机制：</p>
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">战斗的反馈回路</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">玩家做出行为</b><br><span style="color:#475569;font-size:13px">击打 / 射击</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #9bd3a4;border-radius:11px;background:#f2fbf4;font-size:14px;text-align:left"><b style="color:#1e293b">即时可见的结果</b><br><span style="color:#475569;font-size:13px">敌人被击中、被消灭</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">获得回报</b><br><span style="color:#475569;font-size:13px">经验 / 钱 / 能力提升</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">再来一次</b><br><span style="color:#475569;font-size:13px">循环变快变强</span></div>
+<div class="cap">这个回路允许玩家和游戏世界快速、频繁地互动。回路越长、反馈越迟钝，战斗就越「闷」。</div>
+</div>
+
+    <h3 class="rose">连招：「四字箴言」</h3>
+    <p>「写给新手的四字箴言」这一节讲的是连招/搓招（combo）—— 通过按键序列打出特殊动作。它的价值在于给玩家一个<strong>可练习、可炫技</strong>的空间；它的风险在于门槛，所以新手必须有「随便按也有收益」的保底路径。</p>
+
+    <h3 class="rose">枪、移动与防御</h3>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead>
+<tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">主题</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">要点</th></tr>
+</thead>
+<tbody>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>武器的 3A</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>A</b>ction（行动：装填、开火）、<b>A</b>iming（瞄准）、<b>A</b>mmo（弹药）。这三样决定了一把手感是否成立。选枪的标准不是「最酷的那把」，而是<b>最适合你游戏节奏的那把</b></td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>战斗中的移动</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">移动是战斗的一部分，不是赶路的工具。要给出「移动中射击」的代价（精度下降、速度降低），否则玩家会一直边跑边打</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>战斗中的防御</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">格挡、闪避、无敌帧。<b>防御不能等于无敌</b>——如果防御没有代价，攻击就失去了意义。所以闪避要么消耗资源，要么有无敌帧窗口，要么有硬直</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>光是开枪还不够</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">除伤害之外，你还有一整套效果可以用（见下表）</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>该死的！有哪儿不会受伤吗</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">受击反馈：硬直、击退、屏幕震动、无敌帧、受伤音效。玩家必须清楚地知道「我被打到了」</td>
+</tr>
+<tr>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>死亡，它有什么好处呢</b></td>
+<td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">死亡必须有意义：要教会玩家点什么、要有代价、也要有出路（检查点）。<b>让死亡成为一次教学，而不是一次惩罚</b></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+    <h4>除伤害之外，你还能做什么</h4>
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">战斗中的非伤害效果（原书清单）</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">格挡 / 闪避</b><br><span style="color:#475569;font-size:13px">改变攻防节奏</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">击退</b><br><span style="color:#475569;font-size:13px">改变位置</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">眩晕</b><br><span style="color:#475569;font-size:13px">剥夺行动</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">冰冻 / 麻痹 / 束缚</b><br><span style="color:#475569;font-size:13px">限制行动</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">敌人的修复 / 治疗</b><br><span style="color:#475569;font-size:13px">拉长战斗</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">敌人的增益</b><br><span style="color:#475569;font-size:13px">制造压力</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">盗窃</b><br><span style="color:#475569;font-size:13px">抢走资源</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">吸取 HP / MP</b><br><span style="color:#475569;font-size:13px">此消彼长</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">出乎意料的行动</b><br><span style="color:#475569;font-size:13px">打破预期</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">弱点 / 抗性</b><br><span style="color:#475569;font-size:13px">要求换手段</span></div>
+<div class="cap">「弱点与抗性」是最省事也最有效的一条：只有火系武器才打得动高火抗的敌人，玩家就必须准备多套方案——一招鲜吃遍天的情况被彻底堵死。</div>
+</div>
+
+    <h3 class="rose">战斗之外的冲突</h3>
+    <p>不打架也能制造紧张感。作者列了七种：</p>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead>
+<tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">手段</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">怎么用</th></tr>
+</thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>计时器</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">定时完成任务，用时间本身当敌人</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>速度</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">加快游戏速度，压缩玩家的思考窗口</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>有限的选择</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">限制可用的行动种类，逼玩家用不熟悉的招</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>有限的空间</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">限制行动范围，让「躲」这件事变难</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>精准度</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">要求精确操作，把紧张感从「打不打得死」转到「做不做得到」</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>道德两难</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">让玩家在剩下的时间里一直想「另一条路会怎样」</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>代价</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">所有选择都要付出点什么，利弊权衡本身就是内容</td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3 class="rose">顺带一提：解谜也有类型学</h3>
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">书里列出的谜题类型</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">逻辑解谜找物品再组合</b><br><span style="color:#475569;font-size:13px">找物品再组合</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">三消排列匹配</b><br><span style="color:#475569;font-size:13px">排列匹配</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">数字解谜推算出答案</b><br><span style="color:#475569;font-size:13px">推算出答案</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">实体物理解谜如愤怒的小鸟</b><br><span style="color:#475569;font-size:13px">如愤怒的小鸟</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">流体物理解谜引导水流</b><br><span style="color:#475569;font-size:13px">引导水流</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">做题 / 竞猜知识型</b><br><span style="color:#475569;font-size:13px">知识型</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">传统益智数独、填字、华容道</b><br><span style="color:#475569;font-size:13px">数独、填字、华容道</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">视觉谜题寻物</b><br><span style="color:#475569;font-size:13px">寻物</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">文字谜题拼字游戏</b><br><span style="color:#475569;font-size:13px">拼字游戏</span></div>
+<div class="cap">知道自己在做哪一类，就能知道该去哪个方向找参考。</div>
+</div>
+
+    <div class="callout co-rose">
+      <span class="lbl">第 10 关最该记住的</span>
+      <p><strong>攻击、移动、防御三者互相牵制，战斗才成立。</strong>如果其中任何一项可以无代价地一直用，这个战斗系统就已经失衡了——玩家会自己找到那个「最优解」，然后整场游戏都变得无聊。</p>
+    </div>
+  </section>
+
+  <!-- ================= 11 ================= -->
+  <section id="s11">
+    <div class="sec-head">
+      <div class="badge violet">11</div>
+      <h2>第 11 关 所有人都想要你的小命<span class="en">They All Want You Dead</span></h2>
+    </div>
+
+    <p>这一关全部在讲敌人，其中最有价值的一段是<strong>敌人的七个重要属性</strong>：</p>
+
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">敌人的七项属性</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">体积</b><br><span style="color:#475569;font-size:13px">决定情绪与打法</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">行为模式</b><br><span style="color:#475569;font-size:13px">AI 的基本性格</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">速度</b><br><span style="color:#475569;font-size:13px">追击与拉开距离</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">移动方法</b><br><span style="color:#475569;font-size:13px">跑 / 飞 / 爬 / 传送</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">攻击方式</b><br><span style="color:#475569;font-size:13px">近 / 远 / 范围</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">攻击性</b><br><span style="color:#475569;font-size:13px">会不会主动进攻</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">血量</b><br><span style="color:#475569;font-size:13px">需要几下打死</span></div>
+<div class="cap">把敌人当参数表来设计，比当「怪物设定」来设计要高效得多——因为玩家真正感受到的是这七个数的组合。</div>
+</div>
+
+    <h3 class="violet">体积那点事儿</h3>
+    <p>作者把敌人的体积分成了五个等级，而且指出体积会同时影响三件事：<strong>玩家怎么打它、它的血量该给多少、以及玩家的情绪</strong>。</p>
+
+    <div class="diagram">
+      <div class="dtitle">敌人体积的五个等级</div>
+      <svg viewBox="0 0 680 300" role="img" aria-label="敌人体积五档对照">
+        <line x1="60" y1="250" x2="640" y2="250" stroke="#cbd5e1" stroke-width="2"/>
+        <rect x="252" y="150" width="26" height="100" rx="6" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="265" y="272" text-anchor="middle" font-size="11.5" fill="#475569">玩家</text>
+
+        <rect x="86" y="212" width="22" height="38" rx="5" fill="#f5f3ff" stroke="#c4b0f5" stroke-width="1.5"/>
+        <text x="97" y="272" text-anchor="middle" font-size="11.5" font-weight="700" fill="#6d28d9">矮小</text>
+        <text x="97" y="290" text-anchor="middle" font-size="10.5" fill="#94a3b8">高不过腰</text>
+
+        <rect x="170" y="150" width="26" height="100" rx="6" fill="#eef2ff" stroke="#a8b8f5" stroke-width="1.5"/>
+        <text x="183" y="272" text-anchor="middle" font-size="11.5" font-weight="700" fill="#3b5bdb">普通</text>
+        <text x="183" y="290" text-anchor="middle" font-size="10.5" fill="#94a3b8">和玩家同高</text>
+
+        <rect x="330" y="98" width="34" height="152" rx="7" fill="#effbf7" stroke="#8fd9cb" stroke-width="1.5"/>
+        <text x="347" y="272" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0d9488">大个</text>
+        <text x="347" y="290" text-anchor="middle" font-size="10.5" fill="#94a3b8">比玩家高几头</text>
+
+        <rect x="424" y="40" width="48" height="210" rx="8" fill="#fffaf0" stroke="#f0c48a" stroke-width="1.5"/>
+        <text x="448" y="272" text-anchor="middle" font-size="11.5" font-weight="700" fill="#b45309">特大个</text>
+        <text x="448" y="290" text-anchor="middle" font-size="10.5" fill="#94a3b8">玩家的两倍以上</text>
+
+        <rect x="524" y="14" width="86" height="236" rx="9" fill="#fff5f7" stroke="#f2aab8" stroke-width="1.5"/>
+        <text x="567" y="272" text-anchor="middle" font-size="11.5" font-weight="700" fill="#be123c">巨型</text>
+        <text x="567" y="290" text-anchor="middle" font-size="10.5" fill="#94a3b8">必须拉远镜头才看得全</text>
+      </svg>
+      <div class="cap">体积也直接调情绪：<b>打败一个巨大的敌人能得到巨大的成就感；而战胜一个矮小的敌人，玩家反而会觉得自己有点仗势欺人。</b></div>
+    </div>
+
+    <h3 class="violet">坏蛋的登场设计</h3>
+    <p>作者专门为「坏蛋怎么出场」写了一节。核心意思是：<strong>敌人的强大有一半是靠出场方式建立的，而不是靠血量。</strong>一个从阴影里缓缓走出、或者先让你看到它造成的破坏的敌人，比一个直接冲上来的敌人可怕得多。</p>
+
+    <h3 class="violet">不是敌人的敌人</h3>
+    <p>敌人不一定是「会攻击你的生物」。环境、时间、陷阱、甚至玩家自己的失误，都可以充当敌人。这一节的用处是提醒你：<strong>压力源不必是人形的</strong>。</p>
+
+    <h3 class="violet">怎样创造世界上最了不起的 Boss 战</h3>
+    <p>书的这一小节由几个小问题串起来，本质上是一份 Boss 设计检查表：</p>
+
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">Boss 设计的五个问题</div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#6d28d9;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">① 谁是 Boss</span><div style="margin-top:4px">它的身份、动机、和玩家的关系。玩家要恨它，或者怕它，或者至少记得住它的名字</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">② 体积那点事儿</span><div style="margin-top:4px">Boss 的体积决定了它是一场怎样的战斗——是仰着头看它，还是和它平视</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#0d9488;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">③ 地点，地点，还是地点</span><div style="margin-top:4px">战场本身是战斗的一部分。有没有坑、有没有可用的机关、空间是开阔还是狭窄，比 Boss 有多少血更重要</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#b45309;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">④ 出场与阶段</span><div style="margin-top:4px">要有让人记住的登场；要有阶段变化，让战斗在中途改变规则而不是单纯变难</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#be123c;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">⑤ 弱点与回报</span><div style="margin-top:4px">要有可读的弱点窗口；打赢之后要有相应的回报（剧情、能力、区域开放）</div></div>
+<div class="cap">这一节的标题后面接了一句作者的自我调侃——「创造出世界上最精彩的 Boss 战，这有什么不对吗」。意思是：<b>每场都想做成史诗，玩家会累。</b>Boss 战要节制，要留白。</div>
+</div>
+
+    <div class="callout co-violet">
+      <span class="lbl">第 11 关最该记住的</span>
+      <p>还有一个几乎成了行规的细节：<strong>最终 Boss 战，要让玩家给出最后一击。</strong>哪怕过场动画里主角会赢，那一刀也必须由玩家的手按下去——否则整场胜利的感觉都会被夺走。</p>
+    </div>
+  </section>
+
+  <!-- ================= 12 ================= -->
+  <section id="s12">
+    <div class="sec-head">
+      <div class="badge teal">12</div>
+      <h2>第 12 关 机关中的其他重要元素<span class="en">The Nuts and Bolts of Mechanics</span></h2>
+    </div>
+
+    <p>书里对「机关」的定义很干脆：<strong>当玩家与之互动时，能够制造出玩点的物体。</strong>它们可以被跳上去、可以按下按钮激活、也可以被推开。</p>
+
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">常见的机关清单</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">移动的平台节奏与载具</b><br><span style="color:#475569;font-size:13px">节奏与载具</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">开门 / 关门进度闸门</b><br><span style="color:#475569;font-size:13px">进度闸门</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">可推开的阻挡物物理谜题</b><br><span style="color:#475569;font-size:13px">物理谜题</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">开关与杠杆触发事件</b><br><span style="color:#475569;font-size:13px">触发事件</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">转轮旋转类输入</b><br><span style="color:#475569;font-size:13px">旋转类输入</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">滑溜溜的地板削弱控制</b><br><span style="color:#475569;font-size:13px">削弱控制</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">传送带被动位移</b><br><span style="color:#475569;font-size:13px">被动位移</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">拉杆控制远程操纵</b><br><span style="color:#475569;font-size:13px">远程操纵</span></div>
+<div class="cap">机关本身不制造乐趣——<b>把机关和有趣的关卡布局、敌人组合起来</b>才制造乐趣。</div>
+</div>
+
+    <h3 class="teal">机关的四个设计注意</h3>
+    <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">可见性</span><div style="margin-top:4px">拉杆通常是细长的杆子，玩家很可能看不见它们。<b>要在开关或拉杆上加视觉效果</b>——发光、图标、颜色变化</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#0d9488;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">因果关系</span><div style="margin-top:4px">玩家必须能看见自己操作所造成的影响。按下去的瞬间，远处那扇门要有反应（声音 + 短暂镜头提示）</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#b45309;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">状态表达</span><div style="margin-top:4px">为了表现状态改变，开关/按钮应该有些外观上的改变——亮起、按下、变色、发出嗡鸣</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#be123c;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">组合节奏</span><div style="margin-top:4px">「机关的旋律」：机关要组合成有起伏的段落，而不是一路平铺。一个机关用得太密，就变成了噪音</div></div>
+</div>
+
+    <h3 class="teal">神圣死亡陷阱</h3>
+    <p>陷阱是免费的压力来源，但也是最容易让玩家愤怒的东西。这一节的关键词是<strong>公平</strong>：</p>
+    <ul>
+      <li><strong>可读</strong>——致命的危险必须在视觉上能提前识别。玩家死的那一刻应该能明白「是我没看清」，而不是「这游戏耍赖」。</li>
+      <li><strong>可学</strong>——第一次死可以是意外，第二次死必须是自己的失误。</li>
+      <li><strong>有节制</strong>——「死亡的时刻来了」这节讲的就是什么时候该让玩家死。陷阱用得太密，紧张感会变成疲劳。</li>
+      <li><strong>代价可控</strong>——死亡之后的损失不能太重，否则玩家会开始害怕尝试。</li>
+    </ul>
+
+    <h3 class="teal">温馨的小港湾：检查点</h3>
+    <p>「温馨的小港湾」讲的是检查点。它的设计原则可以概括成一句：<strong>检查点前面的那段路，不应该要求玩家重复做无意义的劳动。</strong></p>
+    <p>更细一点的要求：检查点本身要给玩家安全感（视觉上的温暖、安全、安静）；检查点之后应该是新内容或者新的挑战组合，而不是又把刚才那段走一遍。</p>
+
+    <h3 class="teal">猜猜看，以及迷你游戏</h3>
+    <p>「猜猜看」探讨的是谜题与机关类玩法。而「简单说说迷你游戏和微型游戏」这一节，作者直接给出了<strong>迷你游戏的反面教材，叫「打地鼠」</strong>：</p>
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">「打地鼠」式的坏迷你游戏，通常同时具备这几条</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">完全依赖反应时间</b><br><span style="color:#475569;font-size:13px">没有思考空间</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">完全随机</b><br><span style="color:#475569;font-size:13px">无法制定策略</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">玩法无变化</b><br><span style="color:#475569;font-size:13px">第一秒就学完了</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">一键输入</b><br><span style="color:#475569;font-size:13px">没有操作深度</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">无尽游戏</b><br><span style="color:#475569;font-size:13px">没有高潮与终点</span></div>
+<div class="cap">这五条同时也是检验清单：<b>你的迷你游戏只要有一条命中，它就大概率是个填充物。</b></div>
+</div>
+
+    <div class="callout co-teal">
+      <span class="lbl">第 12 关最该记住的</span>
+      <p>机关、陷阱、检查点、迷你游戏——它们共同的服务对象是<strong>节奏</strong>。玩家需要高潮，也需要喘息；需要紧张，也需要放松。<strong>只有危险没有安全屋的关卡，不叫难，叫不礼貌。</strong></p>
+    </div>
+  </section>
+
+  <!-- ================= 13 ================= -->
+  <section id="s13">
+    <div class="sec-head">
+      <div class="badge green">13</div>
+      <h2>第 13 关 力量与你同在<span class="en">Now You're Playing with Power</span></h2>
+    </div>
+
+    <p>这一关讲强化道具（power-up）。作者给的不是一份「有哪些道具」的清单，而是一份<strong>设计时的自问清单</strong>——因为道具的形态千变万化，但要想清楚的问题永远是同一批。</p>
+
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">设计一个强化道具时要问的八个问题</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #9bd3a4;border-radius:11px;background:#f2fbf4;font-size:14px;text-align:left"><b style="color:#1e293b">① 它有什么用</b><br><span style="color:#475569;font-size:13px">改变了哪条规则</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #9bd3a4;border-radius:11px;background:#f2fbf4;font-size:14px;text-align:left"><b style="color:#1e293b">② 它长什么样</b><br><span style="color:#475569;font-size:13px">形状能不能说明功能</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">③ 存在形式</b><br><span style="color:#475569;font-size:13px">漂浮、箱子里、还是买来的</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">④ 能互相组合吗</b><br><span style="color:#475569;font-size:13px">组合会不会出 bug 或失衡</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">⑤ 怎么影响玩家行动</b><br><span style="color:#475569;font-size:13px">是改能力还是改选择</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">⑥ 影响如何被知晓</b><br><span style="color:#475569;font-size:13px">玩家怎么知道自己变强了</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">⑦ 付出的代价是什么</b><br><span style="color:#475569;font-size:13px">没有代价的道具等于削难度</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">⑧ 快消失时怎么提醒</b><br><span style="color:#475569;font-size:13px">临期反馈要抢注意力</span></div>
+<div class="cap">第 ⑤ 条最值得多读两遍：好的强化道具<b>改变的是玩家的选项</b>，而不只是数值。<b>多加 10 点攻击力没有人会记住，多一个能二段跳的能力则会被记一辈子。</b></div>
+</div>
+
+    <h3 class="green">热爱玩家吧</h3>
+    <p>这一节的语气是整本书里最热烈的。作者的立场是：<strong>让玩家感觉自己在变强，是设计者的义务。</strong>玩家玩游戏是为了获得能力感、掌控感、以及「我能做到别人做不到的事」的那种表达欲。强化道具是这个承诺最直接的兑现方式。</p>
+
+    <h3 class="green">超出你想象的收获</h3>
+    <p>而另一节讲的是反面：<strong>玩家一定会用你没想到的方式使用你的机制。</strong>作者的态度是——这通常是好事。那是玩家在和你共同创作，也是「应变游戏性」真正闪光的地方。别急着拿补丁去堵，先想想它是不是其实更好玩。</p>
+
+    <p>注意这和前面第 2 关那句「不要依赖应变游戏性制造乐趣」并不矛盾：<strong>自己长出来的乐趣是礼物，但你不能把它当成计划。</strong></p>
+
+    <div class="callout co-green">
+      <span class="lbl">第 13 关最该记住的</span>
+      <p>强化道具是<strong>最便宜的内容</strong>：一个道具能反过来定义一整片关卡怎么设计。所以别把它当数值系统的一部分来规划，要把它当玩法的一部分来规划。</p>
+    </div>
+  </section>
+
+  <!-- ================= 14 ================= -->
+  <section id="s14">
+    <div class="sec-head">
+      <div class="badge rose">14</div>
+      <h2>第 14~17 关 多人 · 音乐 · 过场 · 关底<span class="en">Multiplayer / Music / Cutscenes / The Hard Part</span></h2>
+    </div>
+
+    <p>主线最后四关，主题分别是「和人一起玩」「听起来像不像游戏」「该演的时候才演」，以及最难的——<strong>把这个东西真的做完</strong>。</p>
+
+    <h3 class="rose">第 14 关 · 多人游戏——越多越开心</h3>
+    <p>第一个要回答的问题是「几人比较合适」——2 人、4 人，还是更多？人数直接决定了屏幕怎么分、镜头怎么处理、以及关卡能不能共用。而多人模式下最难的依然是镜头。</p>
+
+    <p>「大型多人在线角色扮演类游戏，或者说『他人即地狱』」这一节，列出了 MMO 需要的一系列系统。它其实也是一份「长期运营型游戏」的要素清单：</p>
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">MMO 类游戏常见的系统要素（原书清单）</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">增益魔法Buff / Debuff</b><br><span style="color:#475569;font-size:13px">Buff / Debuff</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">定制角色外观与成长</b><br><span style="color:#475569;font-size:13px">外观与成长</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">聊天社交基础</b><br><span style="color:#475569;font-size:13px">社交基础</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">生产技能制造与采集</b><br><span style="color:#475569;font-size:13px">制造与采集</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">经济系统产出与消耗</b><br><span style="color:#475569;font-size:13px">产出与消耗</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">反复刷怪收益曲线要算清</b><br><span style="color:#475569;font-size:13px">收益曲线要算清</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">地下城副本随机生成以复用</b><br><span style="color:#475569;font-size:13px">随机生成以复用</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">道具收集长期目标</b><br><span style="color:#475569;font-size:13px">长期目标</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">开放世界结构需要「闸门机制」</b><br><span style="color:#475569;font-size:13px">需要「闸门机制」</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">PVP玩家对抗</b><br><span style="color:#475569;font-size:13px">玩家对抗</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">猎杀恶意击杀要制止</b><br><span style="color:#475569;font-size:13px">恶意击杀要制止</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">工会组织与归属</b><br><span style="color:#475569;font-size:13px">组织与归属</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">玩家住所家园系统</b><br><span style="color:#475569;font-size:13px">家园系统</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">团战多人协作</b><br><span style="color:#475569;font-size:13px">多人协作</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">蹲点用多出生点解决</b><br><span style="color:#475569;font-size:13px">用多出生点解决</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">交易 / 拍卖玩家间流通</b><br><span style="color:#475569;font-size:13px">玩家间流通</span></div>
+<div class="cap">其中「开放世界需要闸门机制」那条特别有用：<b>暂时去不了的地方，要有一个玩家能理解的闸门（等级、钥匙、剧情），而不是一堵隐形的墙。</b></div>
+</div>
+
+    <h3 class="rose">第 15 关 · 音乐里的音符</h3>
+    <p>「对我来说这『听』起来像个游戏」这一节，讲的是音乐如何定义一款游戏的辨识度。这一章里最该被抄在本子上的一句是：</p>
+
+    <blockquote class="quote">
+      <strong>要让音乐比出现在屏幕上的活动更刺激。</strong>
+    </blockquote>
+
+    <p>因为音乐是你唯一能<strong>百分之百控制玩家情绪</strong>的通道——玩家的手会失误、眼睛会分心，但音乐是一直在播的。所以别让音乐只做「配合画面的背景」，让它主动一点、超前一点。</p>
+
+    <p>另一条通则：主题旋律（motif）与角色、区域绑定。同一个旋律换个编曲，玩家就知道「我回到了某个地方」。</p>
+
+    <h3 class="rose">第 16 关 · 过场动画，或者说根本没人看的东西</h3>
+    <p>章节名本身就是个自嘲——作者很清楚玩家会跳过过场。所以这一章其实讲的是两件事：<strong>第一，别把该玩的东西拍成电影；第二，如果你一定要拍，那就拍得值得看。</strong></p>
+
+    <blockquote class="quote">
+      <strong>过场动画最好留到接吻和把东西炸飞的时刻。</strong>
+    </blockquote>
+
+    <p>书里给了一份「8 个步骤，轻松写剧本」的流程，本质是把一段演出从文字一路推到可看的分镜与动画预览：</p>
+
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">过场动画从文字到成片</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">剧本 / 文字</b><br><span style="color:#475569;font-size:13px">发生了什么</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">分镜</b><br><span style="color:#475569;font-size:13px">一格一格画出来</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">动态分镜</b><br><span style="color:#475569;font-size:13px">配上时间与声音</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">动画预览</b><br><span style="color:#475569;font-size:13px">验证节奏</span></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">最终成片</b><br><span style="color:#475569;font-size:13px">替换为正式资源</span></div>
+<div class="cap">关键原则：<b>不要只把重要信息放在过场里</b>——因为前面说过，有一整类玩家会猛点跳过键。</div>
+</div>
+
+    <h3 class="rose">第 17 关 · 最难的关底</h3>
+    <p>最后一关不谈技术，谈心态。</p>
+    <div class="split">
+      <div class="mini">
+        <h4>没人关心你那愚蠢的小世界</h4>
+        <p>世界观再精妙、背景设定再深，玩家也不 care。他们关心的是<b>现在能不能玩得爽</b>。所以：先把玩法做好，再谈你的世界。</p>
+      </div>
+      <div class="mini">
+        <h4>做游戏是件非常困难的工作</h4>
+        <p>这不是安慰，是预警。项目会失去动力、会超期、会有人离开。提前知道这一点，比中途崩溃要好。</p>
+      </div>
+      <div class="mini">
+        <h4>再来一个怎么办</h4>
+        <p>续作法则：<b>30% 新内容新点子 + 70% 基于原作</b>。全换等于丢掉积累，全不换等于没人买。</p>
+      </div>
+      <div class="mini">
+        <h4>「继续？」</h4>
+        <p>原书最后一段的标题。像一个游戏通关后的询问——你还要再来一次吗？答案取决于你有多喜欢这件事。</p>
+      </div>
+    </div>
+
+    <h4>作者给同行的六条私房话</h4>
+    <div class="diagram" style="text-align:center">
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#15803d;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">对自己</span><div style="margin-top:4px"><b>你只是凡人</b> —— 不要把自己逼太紧，人都会犯错。今天完不成事，不会有人因此丢掉性命</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#15803d;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">对同事</span><div style="margin-top:4px"><b>保持公正慷慨</b> —— 要学会肯定别人</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">对专业</span><div style="margin-top:4px"><b>持续学习，持续玩各种游戏</b>，包括那些糟糕的。只有自己玩，才能理解一个游戏感觉如何、玩起来如何</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#3b5bdb;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">对人生</span><div style="margin-top:4px"><b>以你热爱的事情为主</b> —— 如果早上起床时，你并不期待这一天将要做的事情，那就不应该去做</div></div>
+<div style="display:block;max-width:560px;text-align:left;padding:11px 15px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;color:#1e293b;margin:0 auto"><span style="display:inline-block;background:#b45309;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px">对行业</span><div style="margin-top:4px"><b>尽可能回馈一些东西</b> —— 回复玩家来信、指导年轻同事、写一篇博客，通常会给你带来好的结果</div></div>
+</div>
+
+    <div class="callout co-rose">
+      <span class="lbl">另外几条散落的金句</span>
+      <ul>
+        <li><strong>设计师盲区</strong>：玩家只会玩几遍，而设计师可能会玩几千遍。不同的熟练度会带来完全不同的难度感受——这就是为什么你自己测不出游戏太难还是太简单。</li>
+        <li><strong>宣讲方程</strong>：<code>游戏 demo &gt; 游戏设计文档 &gt; 争取代理 &gt; 自我宣讲</code>。能拿东西出来，永远比能说会道有效。</li>
+        <li><strong>不要依赖应变游戏性为你的游戏制造乐趣。所有好的设计都是预先规划好的。</strong></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================= 15 ================= -->
+  <section id="s15">
+    <div class="sec-head">
+      <div class="badge">15</div>
+      <h2>附录 · 术语表、速查与落地清单<span class="en">Appendix</span></h2>
+    </div>
+
+    <h3>全书核心概念速查</h3>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead>
+<tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">概念</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">一句话解释</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">用起来是什么感觉</th></tr>
+</thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>剧情三角论</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">角色、事件、世界只能突出一个</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">像「怪诞的预算」：花多了就假</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>生产三角</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">时间、质量、成本只能选两个</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">每次加需求都要先划掉一样</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>3C</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">角色 / 镜头 / 操作，改一条动三条</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">是玩家体验的全部物理基础</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>Yorda 效应</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">角色要被在意：相处够久 + 帮得上忙</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">同伴设计的唯一及格线</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>小香肠 Weanie</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">用玩家想去看的东西做导航</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">好关卡不需要箭头</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>灰盒 Gray Box</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">先用最简单图形验证比例、镜头、节奏</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">最便宜的一次试错</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>幻影叙事法</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">给几格画面，让玩家自己补全故事</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">留白 = 邀请</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>重点流程表 Beat Chart</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把每关的各种要素横向摊开</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">用来找设计里的空洞</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>应变游戏性</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">给工具，玩点自己长出来</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">是礼物，不是计划</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>垂直切片</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一关打磨到最终品质的样板</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">拿去证明「我们能做到」</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>水平分层</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">全部元素先灰盒并行开工，再替换美术</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">早期就能看到全貌</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>续作 30/70</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">30% 新 + 70% 旧</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">全换丢积累，全不换没人买</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>S.I.F.S.</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">好点子留到续作</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">让「取舍」这件事不那么疼</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>twiddley bits</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">很费劲但对外没必要讲的细节</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">别拿它去说服发行商</td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3>9 个奖励关：可以直接抄走的模板</h3>
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">原书附带的 9 份模板</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">奖励关 1</b><br><span style="color:#475569;font-size:13px">单页说明书模板</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">奖励关 2</b><br><span style="color:#475569;font-size:13px">十页说明书模板</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">奖励关 3</b><br><span style="color:#475569;font-size:13px">游戏设计文档模板</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">奖励关 4</b><br><span style="color:#475569;font-size:13px">故事主题中型列表</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">奖励关 5</b><br><span style="color:#475569;font-size:13px">场景大列表</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">奖励关 6</b><br><span style="color:#475569;font-size:13px">机关和陷阱</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">奖励关 7</b><br><span style="color:#475569;font-size:13px">敌人设计模板</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">奖励关 8</b><br><span style="color:#475569;font-size:13px">Boss 设计模板</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">奖励关 9</b><br><span style="color:#475569;font-size:13px">吸引人的宣讲稿</span></div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">隐藏成就</b><br><span style="color:#475569;font-size:13px">如何做美味的香辣酱</span></div>
+<div class="cap">最后一个不是玩笑：作者全书一直用「做辣酱」来类比做游戏——需要合适的菜谱、工具、配料，以及足够的时间去熬。</div>
+</div>
+
+    <h3>给独立开发者 / 小团队：从这本书里能立刻执行的动作</h3>
+    <ul class="chk">
+      <li>写一页纸的单页说明书，把「玩法的独特性」和「竞品」填满（竞品要挑有名的）</li>
+      <li>用十页说明书把故事梗概、流程概述、角色、可玩性、世界、体验、机关、敌人、过场、奖励过一遍</li>
+      <li>建一张流程表，横向列到「主色调 / 机关 / 敌人 / 音乐 / 大致时长」——然后找出空白的那几格</li>
+      <li>先做灰盒：只验比例、镜头、节奏，别急着上美术</li>
+      <li>教学关放到最后做，但一定要做——它是玩家对游戏的第一印象</li>
+      <li>每个关卡至少埋一个「小香肠」，让玩家不靠箭头也知道往哪走</li>
+      <li>检查一遍：有没有一块看起来能走的地面其实走不过去？有就改成矮墙、灌木或石墙</li>
+      <li>检查战斗：攻击 / 移动 / 防御有没有互相牵制？有没有哪一招可以无代价一直用？</li>
+      <li>检查敌人：体积、速度、攻击方式、血量四个数是不是真的不同？不要只换贴图</li>
+      <li>Boss 战：确认玩家自己按下了最后一击</li>
+      <li>检查死亡陷阱：每一个致命处，玩家在死之前有没有机会看见？</li>
+      <li>检查 HUD：每一条常驻信息，问一句「它真的需要一直显示吗？」</li>
+      <li>音乐做一遍「比画面更刺激」的测试：把画面静音看一遍，再只听声音看一遍，情绪曲线对不对</li>
+    </ul>
+
+    <h3>一页速查：卡住的时候问自己哪一句</h3>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead>
+<tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">你现在的症状</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">回到哪一关</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">问自己什么</th></tr>
+</thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">点子很多，一个也落不了地</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 2 关</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">这个点子做过最粗糙的原型了吗？哪一部分被我验证过是「有趣」的？</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">故事写得很好，但玩起来不好玩</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 3 关</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">我在突出剧情三角的哪一个角？故事是不是在服从游戏性？</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">团队理解不了我的设计</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 4 关</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">我给的文档是让人看的，还是让人查的？有没有图？</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">操作手感总觉得别扭</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 5~7 关</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">角色、镜头、操作这三条我是不是只动了一条？</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">屏幕太乱、玩家跟不上</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 8 关</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">这块信息真的需要常驻吗？能不能改成按需出现？</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">关卡很漂亮但走起来难受</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 9 关</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">我做过灰盒吗？有没有小香肠？有没有走不过去却看着能走的地方？</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">战斗打两下就腻了</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 10 关</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">攻击、移动、防御是不是有一项可以无代价一直用？</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">敌人感觉都一样</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 11 关</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">七个属性里我改了几个数？体积有没有用来调情绪？</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">玩家卡关之后骂游戏</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 12 关</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">陷阱可读吗？检查点够不够密？重复劳动有没有太长？</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">玩家不觉得变强了</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 13 关</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">道具改的是数值还是选项？快消失时有没有提醒？</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">项目做不下去了</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 17 关</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">我是不是在给别人展示「我愚蠢的小世界」，而不是让人玩得爽？</td></tr>
+</tbody>
+</table>
+</div>
+
+    <div class="callout co-blue">
+      <span class="lbl">一句话带走</span>
+      <p><strong>游戏是有规则、有胜利条件的活动。你那 100 个炫酷的点子，都不如先把「角色能怎么跑、镜头怎么跟、按下键会发生什么」这三件事磨到舒服。</strong>其余的一切，都是挂在这三根柱子上的装饰。</p>
+    </div>
+  </section>
+
+  <footer>
+    图解教程 · 内容整理自《通关！游戏设计之道》（Scott Rogers 著，人民邮电出版社）中文版目录、多家读书笔记与公开书评<br>
+    图表为重新绘制；条目与术语均以中文版译名为准 &nbsp;·&nbsp; 建议回到原书对应「关卡」确认细节<br>
+    站点：ptato.github.io &nbsp;·&nbsp; 纯静态页面，无脚本依赖
+  </footer>
+</div>
+</body>
+</html>

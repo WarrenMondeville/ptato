@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>体验引擎 · 图解教程</title>
+<meta name="description" content="Tynan Sylvester《体验引擎：游戏设计全景探秘》图解教程：把 428 页拆成「机制 → 事件 → 情感 → 体验」一条因果链，含 13 类情感触发器、优雅的 9 条判据、决策范围五档、博弈论与心理战、依赖堆栈与层叠式不确定性，以及流程篇的迭代、权利与动力。" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+<style>
+  :root{
+    --bg:#f6f8fb; --card:#ffffff; --ink:#1e293b; --ink2:#475569; --ink3:#94a3b8;
+    --line:#e2e8f0; --line2:#cbd5e1;
+    --blue:#3b5bdb; --blue-bg:#eef2ff;
+    --teal:#0d9488; --teal-bg:#ecfdf5;
+    --amber:#b45309; --amber-bg:#fffbeb;
+    --rose:#be123c; --rose-bg:#fff1f2;
+    --violet:#6d28d9; --violet-bg:#f5f3ff;
+    --green:#15803d; --green-bg:#f0fdf4;
+    --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px -12px rgba(15,23,42,.14);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:16px; line-height:1.85; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 20px 80px}
+
+  /* ---------- hero ---------- */
+  .hero{padding:64px 0 30px;text-align:center}
+  .hero .kicker{
+    display:inline-block;font-size:12.5px;letter-spacing:.14em;color:var(--violet);
+    background:var(--violet-bg);border:1px solid #ddd3fb;border-radius:999px;padding:5px 14px;margin-bottom:20px;
+  }
+  .hero h1{font-size:clamp(26px,4.4vw,40px);line-height:1.35;margin:0 0 16px;letter-spacing:-.01em}
+  .hero h1 em{font-style:normal;color:var(--blue)}
+  .hero p.sub{color:var(--ink2);font-size:16.5px;margin:0 auto;max-width:720px}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:26px}
+  .meta span{font-size:13px;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 13px}
+
+  /* ---------- section ---------- */
+  section{margin-top:64px;scroll-margin-top:24px}
+  .sec-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:8px}
+  .badge{
+    flex:0 0 auto;width:40px;height:40px;border-radius:12px;background:var(--blue);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;
+    box-shadow:0 6px 16px -8px rgba(59,91,219,.9);
+  }
+  .badge.teal{background:var(--teal);box-shadow:0 6px 16px -8px rgba(13,148,136,.9)}
+  .badge.amber{background:var(--amber);box-shadow:0 6px 16px -8px rgba(180,83,9,.9)}
+  .badge.violet{background:var(--violet);box-shadow:0 6px 16px -8px rgba(109,40,217,.9)}
+  .badge.rose{background:var(--rose);box-shadow:0 6px 16px -8px rgba(190,18,60,.9)}
+  .badge.green{background:var(--green);box-shadow:0 6px 16px -8px rgba(21,128,61,.9)}
+  .sec-head h2{font-size:23px;margin:6px 0 0;letter-spacing:-.01em;line-height:1.4}
+  .sec-head .en{font-size:13px;color:var(--ink3);font-weight:500;margin-left:8px}
+  h3{font-size:17.5px;margin:34px 0 10px;padding-left:12px;border-left:3px solid var(--blue)}
+  h3.teal{border-color:var(--teal)} h3.amber{border-color:var(--amber)}
+  h3.violet{border-color:var(--violet)} h3.rose{border-color:var(--rose)}
+  h3.green{border-color:var(--green)}
+  h3 small{font-size:12.5px;color:var(--ink3);font-weight:500;margin-left:6px;font-family:ui-monospace,Menlo,monospace}
+  h4{font-size:15.5px;margin:22px 0 6px;color:var(--ink)}
+  p{margin:12px 0}
+  a{color:var(--blue)}
+  strong{color:#0f172a}
+  em.hl{font-style:normal;background:#eef2ff;color:#3b5bdb;border-radius:4px;padding:0 5px;font-weight:600}
+  code{background:#f1f5f9;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:13.5px;
+       font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#0f172a;overflow-wrap:anywhere}
+  ul,ol{margin:12px 0;padding-left:22px}
+  li{margin:6px 0}
+
+  /* ---------- toc ---------- */
+  .toc{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 24px;box-shadow:var(--shadow)}
+  .toc h3{margin:0 0 12px;border:0;padding:0;font-size:15px;color:var(--ink2);letter-spacing:.05em}
+  .toclist{list-style:none;margin:8px 0 0;padding:0}
+  .toclist li{padding:6px 2px;font-size:14px;line-height:1.6;color:var(--ink);border-bottom:1px dashed var(--line)}
+  .toclist li:last-child{border-bottom:none}
+  .tocpart{font-weight:700;color:var(--blue);margin-top:14px;font-size:13px;letter-spacing:.04em}
+
+  /* ---------- card / callout ---------- */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin:18px 0;box-shadow:var(--shadow)}
+  .card h4{margin-top:0}
+  .callout{border-radius:14px;padding:16px 20px;margin:18px 0;border:1px solid}
+  .callout .lbl{display:block;font-size:12.5px;font-weight:700;letter-spacing:.06em;margin-bottom:6px}
+  .co-blue{background:var(--blue-bg);border-color:#dbe3ff} .co-blue .lbl{color:var(--blue)}
+  .co-teal{background:var(--teal-bg);border-color:#c9f0e6} .co-teal .lbl{color:var(--teal)}
+  .co-amber{background:var(--amber-bg);border-color:#f6e3bf} .co-amber .lbl{color:var(--amber)}
+  .co-rose{background:var(--rose-bg);border-color:#fbd5dd} .co-rose .lbl{color:var(--rose)}
+  .co-violet{background:var(--violet-bg);border-color:#ddd3fb} .co-violet .lbl{color:var(--violet)}
+  .co-green{background:var(--green-bg);border-color:#bbf7d0} .co-green .lbl{color:var(--green)}
+  .callout p{margin:6px 0}
+
+  /* ---------- 意图条 ---------- */
+  .intent{background:#f8fafc;border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:0 12px 12px 0;
+          padding:11px 16px;margin:14px 0;font-size:15px}
+  .intent b{color:var(--blue)}
+  .intent.teal{border-left-color:var(--teal)} .intent.teal b{color:var(--teal)}
+  .intent.violet{border-left-color:var(--violet)} .intent.violet b{color:var(--violet)}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+  .tags span{font-size:12px;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+  .pit{background:#fffafb;border:1px solid #fecdd3;border-radius:12px;padding:12px 16px;margin:12px 0;font-size:14.2px;line-height:1.8}
+  .pit .lbl{display:block;font-size:12.5px;font-weight:700;letter-spacing:.06em;color:var(--rose);margin-bottom:4px}
+  .pit p{margin:4px 0}
+
+  /* ---------- diagram shell ---------- */
+  .diagram{background:linear-gradient(180deg,#fdfefe,#f8fafc);border:1px solid var(--line);border-radius:16px;padding:22px 18px;margin:22px 0;text-align:center}
+  .diagram .dtitle{font-size:14px;font-weight:700;color:var(--ink2);text-align:center;margin-bottom:16px}
+  .diagram .cap{font-size:13px;color:var(--ink3);text-align:center;margin-top:12px;line-height:1.7}
+  .diagram svg{display:block;max-width:100%;height:auto;margin:0 auto}
+  /* 内联样式竖向卡片流（微信友好，不依赖 flex/grid） */
+  .nbox{display:inline-block;max-width:520px;min-width:190px;padding:9px 16px;font-size:14px;text-align:left;line-height:1.6}
+  .nbox b{color:#0f172a}
+  .narw{color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0}
+
+  /* ---------- code ---------- */
+  pre{margin:16px 0;padding:16px 18px;background:#0f172a;color:#e2e8f0;border-radius:14px;overflow-x:auto;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.75}
+  pre .c{color:#94a3b8}
+  pre.bad{background:#1f1216;box-shadow:inset 3px 0 0 #be123c}
+  pre.good{background:#0d1a1a;box-shadow:inset 3px 0 0 #0d9488}
+
+  /* ---------- table ---------- */
+  .tblwrap{overflow-x:auto;margin:20px 0;border:1px solid var(--line);border-radius:14px;background:#fff}
+  table{border-collapse:collapse;width:100%;font-size:14px;min-width:520px}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{background:#f8fafc;font-size:13px;color:var(--ink2);font-weight:600;white-space:nowrap}
+  tbody tr:last-child td{border-bottom:0}
+  tbody tr:hover{background:#fcfdff}
+  td.y{color:var(--green);font-weight:600}
+  td.n{color:var(--rose);font-weight:600}
+  td code{font-size:12.5px;padding:0 4px}
+
+  /* ---------- misc ---------- */
+  .quote{border-left:3px solid var(--line2);padding:2px 0 2px 16px;color:var(--ink2);font-size:15px;margin:16px 0}
+  .quote b{color:var(--ink)}
+  .quote .who{display:block;font-size:12.5px;color:var(--ink3);margin-top:6px}
+  .split{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin:18px 0}
+  .mini{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .mini h4{margin:0 0 6px;font-size:15px}
+  .mini.good{border-color:#bbf7d0;background:#f8fdf9}
+  .mini.bad{border-color:#fecdd3;background:#fffafb}
+  .mini.info{border-color:#dbe3ff;background:#fafbff}
+  .mini p{margin:6px 0 0;font-size:13.5px;color:var(--ink2);line-height:1.7}
+  .mini p:first-of-type{margin-top:0}
+  .chk{list-style:none;padding:0;margin:14px 0}
+  .chk li{position:relative;padding-left:28px;margin:9px 0;font-size:14.5px}
+  .chk li::before{content:"";position:absolute;left:0;top:6px;width:16px;height:16px;border:1.5px solid var(--line2);border-radius:4px;background:#fff}
+  .steps{counter-reset:st;list-style:none;padding:0;margin:16px 0}
+  .steps li{counter-increment:st;position:relative;padding:10px 0 10px 44px;border-bottom:1px dashed var(--line);font-size:14.5px}
+  .steps li:last-child{border-bottom:0}
+  .steps li::before{content:counter(st);position:absolute;left:0;top:11px;width:26px;height:26px;border-radius:8px;
+                    background:var(--blue-bg);color:var(--blue);font-size:13px;font-weight:700;
+                    display:flex;align-items:center;justify-content:center}
+  .src{font-size:12.5px;color:var(--ink3);margin-top:8px}
+  .keyline{font-size:15px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 18px;margin:16px 0;box-shadow:var(--shadow)}
+  .keyline b{color:var(--blue)}
+  .stats{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0}
+  .stat{flex:1 1 150px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
+  .stat .num{font-size:23px;font-weight:700;color:var(--blue);line-height:1.25;font-variant-numeric:tabular-nums}
+  .stat .num.teal{color:var(--teal)} .stat .num.amber{color:var(--amber)}
+  .stat .num.rose{color:var(--rose)} .stat .num.violet{color:var(--violet)}
+  .stat .lab{font-size:12.5px;color:var(--ink2);margin-top:4px;line-height:1.6}
+  footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);font-size:13px;color:var(--ink3);text-align:center;line-height:2}
+  @media (max-width:560px){
+    .hero{padding:44px 0 20px}
+    .stat{flex:1 1 100%}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ================= HERO ================= -->
+  <header class="hero">
+    <span class="kicker">游 戏 设 计 图 解 教 程</span>
+    <h1>《体验引擎》：游戏不是内容，<br>是一台<em>生产体验的机器</em></h1>
+    <p class="sub">泰南·西尔维斯特把这本 428 页的书压成了一条因果链：<strong>机制 → 事件 → 情感 → 体验</strong>。向下是设计手艺（优雅、技巧、故事、决策、平衡、界面、市场），向上是团队流程（迭代、知识、依赖、权利、动力、价值）。抓住这条链，17 章各有各的位置，不用背。</p>
+    <div class="meta">
+      <span>Tynan Sylvester《Designing Games》</span>
+      <span>中文版 428 页 · 3 部分 17 章</span>
+      <span>30 余张重新绘制的图</span>
+      <span>约 55 分钟</span>
+    </div>
+  </header>
+
+  <!-- ================= TOC ================= -->
+  <nav class="toc">
+<h3>目 录</h3>
+<ul class="toclist">
+<li class="tocpart">第 1 部分 · 体验引擎</li>
+<li>01 · 先立坐标：游戏是一台「体验引擎」</li>
+<li>02 · 情感从哪来：13 类触发器与虚构层</li>
+<li>03 · 心流与沉浸：两个最容易被说错的词</li>
+<li class="tocpart">第 2 部分 · 游戏制作</li>
+<li>04 · 优雅：一章就讲完的核心（第 2 章）</li>
+<li>05 · 技巧：把技能范围拉宽（第 3 章）</li>
+<li>06 · 故事：三种叙事工具与代理权问题（第 4 章）</li>
+<li>07 · 决策：玩家玩的是「可能的未来」（第 5 章）</li>
+<li>08 · 平衡性：目标不是公平（第 6 章）</li>
+<li>09 · 多人游戏：纳什均衡与心理战（第 7 章）</li>
+<li>10 · 动机与实现：多巴胺不是快乐（第 8 章）</li>
+<li>11 · 界面：从未被传达的，等于从未发生（第 9 章）</li>
+<li>12 · 市场：每个决策都被「为什么做它」影响（第 10 章）</li>
+<li class="tocpart">第 3 部分 · 流程</li>
+<li>13 · 规划与迭代：接受自己一定会犯错（第 11 章）</li>
+<li>14 · 创造知识：设计其实是发明知识（第 12 章）</li>
+<li>15 · 依赖性：依赖堆栈与层叠式不确定性（第 13 章）</li>
+<li>16 · 权利与动力：泰勒制做不出好游戏（第 14、15 章）</li>
+<li>17 · 复杂的决策与价值：全书收尾（第 16、17 章）</li>
+<li class="tocpart">附 录</li>
+<li>18 · 速查表 · 动手清单 · 思考题</li>
+</ul>
+</nav>
+
+  <!-- ================= 01 ================= -->
+  <section id="s1">
+    <div class="sec-head">
+      <div class="badge violet">01</div>
+      <h2>先立坐标：游戏是一台「体验引擎」<span class="en">Engines of Experience</span></h2>
+    </div>
+
+    <p>大多数游戏设计书从「什么是好游戏」开始。这本书从一句更硬的话开始：</p>
+
+    <div class="quote">
+      <b>游戏设计既不存在于游戏的代码、美术风格和音效里，也不存在于棋子或棋盘中。游戏设计意味着精心打磨一些规则，而这些规则能够赋予游戏中的事物以灵魂。</b>
+      <span class="who">——《体验引擎》第 1 部分开篇（据中文版译文整理）</span>
+    </div>
+
+    <p>这句话的推论很直接：<strong>你唯一能直接写下来的东西是规则；你真正想交付的东西是体验。中间隔着一段你自己看不见的转换。</strong>整本书就是在拆解这段转换。</p>
+
+    <div class="diagram">
+      <div class="dtitle">全书的总链条：四个词，一条因果线</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>① 机制 Mechanics</b><br><span style="color:#475569;font-size:13px">一条条规则。跳键是一条机制，国际象棋里「兵可以斜着吃子」也是一条机制。<b>这是设计师唯一能亲手写的东西。</b></span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>② 事件 Events</b><br><span style="color:#475569;font-size:13px">机制和玩家交互之后，具体发生了某件事：马里奥撞到墙被弹回来、卒吃掉车、球进网之后另一队得分。<b>它不是被编排的，是被生成出来的。</b></span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>③ 情感 Emotion</b><br><span style="color:#475569;font-size:13px">事件本身没有情感，只有当它<b>改变了某项对人重要的东西</b>时才触发情感。这就是「价值」的入口。</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #c4b5fd;border-radius:11px;background:#faf5ff"><b>④ 体验 Experience</b><br><span style="color:#475569;font-size:13px">一系列情感、思绪和决策在时间上连成的一条弧线。玩家记住的、谈论的、愿意为之付钱的，是<b>这条弧线</b>，不是任何单个机制。</span></div>
+      <div class="cap">电影导演可以直接编排第 ② 步；游戏设计师不能 —— 他只能写第 ① 步，让第 ② 步自己长出来。<strong>整本书里所有的难点，都源自这一段失控。</strong></div>
+    </div>
+
+    <h3 class="violet">情感不是从事件来的，是从「价值的改变」来的</h3>
+
+    <p>书里给了一个非常干净的定义链条：<strong>情感触发器</strong>是指能激发情感的事物或观察；一个事件想激发情感，就必须<strong>改变某项对人类有价值的东西</strong>。所谓「人类价值」，就是那些可以在多种状态之间来回切换、并且对人很重要的事情。</p>
+
+    <p>价值被改变得越重要、越频繁，产生的情感越强烈。而且情感不只出现在改变发生之后 —— <strong>预感到即将发生改变，本身就会产生情感</strong>（这一点在第 5 章「决策」里会被放大成一整章）。</p>
+
+    <div class="split">
+      <div class="mini info">
+        <h4>同样是「丢掉一个卒」</h4>
+        <p>棋局刚开局时丢掉一个卒：无关痛痒，只意味着少一个棋子、布局略受影响。而在残局里丢掉一个卒，可能正好丢掉的是保护王的那个 —— 你会非常沮丧，因为这盘棋大概就这么输了。</p>
+      </div>
+      <div class="mini bad">
+        <h4>事件一模一样，意义完全不同</h4>
+        <p>系统层面发生的是同一件事，玩家感受到的是两件完全不同的事。差别不在事件，<strong>在于它动了哪一项价值、动了多少</strong>。这是整本书最容易验证、也最容易忘的一条。</p>
+      </div>
+    </div>
+
+    <h3 class="violet">情感黑盒：你看不到触发器背后的逻辑</h3>
+
+    <p>书里说，潜意识一直在分析你的处境，当条件满足时会自动触发情感。但<strong>我们无法直接感知到触发器背后的逻辑</strong> —— 情绪是一套自动、无意识的运算，所以我们能感到某样东西，却不知道自己为什么感到。</p>
+
+    <p>更麻烦的是紧接着的那一步：显意识不会容忍「不知道为什么」，它会<strong>随手给这份情感指派一个原因</strong>。而指派的原因往往是错的。书里的名字叫<strong>情感错位（emotional misattribution）</strong>。</p>
+
+    <div class="diagram">
+      <div class="dtitle">情感错位是怎么发生的</div>
+      <div class="nbox" style="border:1.5px solid #f6b8c4;border-radius:11px;background:#fff5f7"><b>真实来源</b><br><span style="color:#475569;font-size:13px">一段摇晃的吊桥、一次紧张的遭遇、一场刚结束的激烈战斗 —— 生理唤醒已经发生，但真正的来源不显眼</span></div>
+      <div class="narw">↓ 生理唤醒已经存在，但大脑需要一个解释</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>最显眼的那个东西</b><br><span style="color:#475569;font-size:13px">此刻站在你面前的、最容易被注意到的对象或属性 —— 它只是「正好在场」</span></div>
+      <div class="narw">↓ 显意识顺手指派原因</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>结论：「就是它让我有感觉」</b><br><span style="color:#475569;font-size:13px">于是玩家说「这游戏打起来手感好」，而真正打动他的可能是节奏、是那一刻的价值逆转、是旁边队友的一句话</span></div>
+      <div class="cap">对设计师的杀伤力在于：<strong>玩家的反馈会系统性地指向错误的原因。</strong>他不是在骗你，他是真的那样感觉。</div>
+    </div>
+
+    <h3 class="violet">吊桥实验：情感错位的经典证据</h3>
+
+    <p>书里引用的是心理学上著名的<strong>吊桥实验</strong>（Dutton &amp; Aron，1974）。研究者在加拿大温哥华卡皮拉诺（Capilano）的一座会摇晃、离水面很高的吊桥上，安排一位女性研究员拦住过桥的男性，请他们看一张内容中性的图片编一个故事，结束时留下自己的电话号码；另一组在另一座低矮稳固的桥上重复同样的流程。</p>
+
+    <div class="stats">
+      <div class="stat"><div class="num rose">39%</div><div class="lab">吊桥组打过电话的比例<br>（另一种流传的版本约为 50%）</div></div>
+      <div class="stat"><div class="num teal">9%</div><div class="lab">稳固桥组打过电话的比例<br>（另一种流传的版本约为 12%）</div></div>
+      <div class="stat"><div class="num amber">0</div><div class="lab">当改用男性研究员做同样实验时，<br>两座桥之间的差异消失了</div></div>
+    </div>
+
+    <p class="src">说明：吊桥实验是心理学文献里的经典研究，本书是引用者。不同二手资料给出的比率数字略有出入，上面同时列出两种常见版本。</p>
+
+    <p>结论不是「吊桥让人心动」，而是<strong>人会把紧张带来的生理唤醒，错误地归因给当时最显眼的那个人</strong>。对游戏设计师来说，这条实验几乎是一个职业隐喻：<strong>玩家永远说不准是什么打动了他。</strong></p>
+
+    <div class="callout co-violet">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>因为你既不能直接观测玩家的情感，也不能相信玩家自己的归因，所以游戏设计只有一条可靠路径：<em class="hl">先推演，再用测试去间接验证。</em>推演给你假设，测试给你反例；两者缺一个，你就是在猜。</p>
+    </div>
+
+    <p>第 1 章最后给出的定义，是全书的锚点：</p>
+
+    <div class="keyline">
+      <b>游戏，是一个用来生成体验的人造系统（an artificial system for generating experiences）。</b><br>
+      <span style="font-size:15px;color:var(--ink2)">作者说这个比喻比「讲故事」或「电影」都更准确 —— 因为它同时容纳了「你真的要造一台机器」和「这台机器的产出是看不见的」两件事。</span>
+    </div>
+  </section>
+
+  <!-- ================= 02 ================= -->
+  <section id="s2">
+    <div class="sec-head">
+      <div class="badge amber">02</div>
+      <h2>情感从哪来：13 类触发器与虚构层<span class="en">Emotional Triggers &amp; The Fiction Layer</span></h2>
+    </div>
+
+    <p>既然情感来自「价值的改变」，那第一步就是把「价值」列出来。书里给了一份清单，全是可以在正负两端来回切换的东西：</p>
+
+    <div class="tags">
+      <span>生 / 死</span><span>胜利 / 失败</span><span>陌生 / 朋友 / 敌人</span><span>富有 / 贫穷</span>
+      <span>低位 / 高位</span><span>独处 / 相伴</span><span>爱 / 冷漠 / 恨</span><span>自由 / 奴役</span>
+      <span>危险 / 安全</span><span>知道 / 不知道</span><span>熟练 / 生疏</span><span>健康 / 生病</span>
+      <span>领袖 / 追随者</span>
+    </div>
+
+    <p>带着这份清单去检查一个设计，问题就变得可回答了：<strong>这个机制在玩的过程中，能反复推动哪一项价值？推得动多远？</strong>如果一项都推不动，那它再酷也只是装饰。</p>
+
+    <h3 class="amber">13 类基本的情感触发器</h3>
+
+    <p>第 1 章真正的主体，是把「情感从哪来」拆成了下面这张清单。它的用法不是全选，而是<strong>当你的游戏某处「感觉平淡」时，来这张表里找还没用上的那一格</strong>。</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">触发器</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">它为什么能生情</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">书里的例子</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>学习</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Learning</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">学会东西本身就让人愉快，尤其是与祖先生存相关的技能（动觉、社交角色、战斗）。课程越不显见，学会时的愉悦越大；新信息让一堆旧碎片突然拼上，就是顿悟</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">《街头霸王 2》里那个起初总输的孩子，一路从失败走到胜利、从无知走到熟悉 —— 这条曲线本身就是情感来源</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>角色弧线</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Character Arc</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">人有共情本能，会镜像他人的情绪。角色经历重大困境与艰难抉择时最能打动人；琐碎的选择只会让人无聊</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">《模拟人生》里由机制与玩家交互涌现出来的家庭故事，没有一句台词写死</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>挑战</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Challenge</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对技能的考验能带来专注、能力感、支配感。它强大且通用，但<strong>只是「一种」触发器，不是必需品</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">《模拟人生》《我的世界》都没有明确的目标，照样成立</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>社交互动</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Social Interaction</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">游戏可以只是一个社交的由头。它通过改变社会性价值生效：陌生 → 朋友、低位 → 高位</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一个「接球」游戏如果抽掉社交，剩下的是相当乏味的体验</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>财富与获取</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Acquisition</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">获得东西会带来一阵愉悦。真假奖励在脑内没有本质区别 —— 虚拟货币、装备、成就一样能激活奖赏系统</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">《暗黑破坏神 3》用持续不断的掉落，把玩家长期留在游戏里</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>音乐</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Music</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">音乐是最灵活的情绪工具之一；非音乐的声音同样有效（金属摩擦声制造紧张、雨声制造安宁）。但用过头会显得做作</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">抽掉音乐，很多场景的情感强度会掉一大截；单独听原声还能唤起完整的游戏记忆</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>场景特效 / 奇观</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Spectacle</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">炫目效果能立刻拉高情绪，但回报浅、不可持续。它<strong>在强化已有情感时效果最好</strong>，无来由的爆炸只会让人麻木</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一场苦战之后的爆炸是有分量的；开场就炸十分钟，之后的爆炸就没分量了</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>美</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Beauty</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">美仅凭被感知就令人愉悦。但它不是免费的，而且<strong>可能与游戏目标直接冲突</strong>（恐怖游戏恰恰不想要美）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">《纪念碑谷》—— 少数几个小团队靠美、音乐与惊叹撑起完整体验的例子</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>环境</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Environment</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">环境的切换会整体改变情绪基调：冬季与夏季、丛林与苔原，同一套机制在不同环境里情绪完全不同</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">场景从明亮转向昏暗，玩家的紧张感不需要任何机制改动就上来了</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>新技术</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Newfangled Technology</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">新技术能带来快速的情绪上升，但很短命。<strong>而且它往往会暂时拉低设计质量</strong>，因为它卸掉了设计压力，把游戏变成技术演示</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">真正立得住的新技术，必须解锁「以前做不到的交互」或情境，而不只是画面更炫</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>原始威胁</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Primal Threats</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">有些恐惧是刻在基因里的：腐坏的食物、蜘蛛、蛇。用起来太容易，因此被过度使用而贬值</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">真正的恐怖必须作用在更深一层的心理上，光靠血腥和蜘蛛做不到</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>性暗示</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Sexual Signals</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">同样是基因层面有效、同样极易使用。但<strong>无谓的性会破坏严肃叙事的氛围与可信度</strong>，还会赶走一部分潜在玩家</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">作者的态度很直接：对严肃或广泛目标的游戏，这种便宜不值得占</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>虚构层</strong><br/><span style="font-size:12.5px;color:var(--ink3)">The Fiction Layer</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">它不是第 13 号触发器，而是<strong>套在所有触发器外面的一层意义外壳</strong>。见下一节</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">棋子只是雕塑；是虚构让它们活起来</td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3 class="amber">虚构层：机制之上再叠一层意义</h3>
+
+    <p>书里用了一个非常干净的比喻：<strong>马里奥在机制层面上只是一个会碰撞的圆柱体</strong>，但那个「意大利水管工」的虚构身份，让同一套跳跃、踩踏、吃蘑菇的机制多出了一层情绪共鸣。虚构层不改变机制，它给机制生成的情绪<strong>补上互补的意义</strong>。</p>
+
+    <p>由此引出书里对「沉浸」这类概念的批评，叫<strong>沉浸谬误（the immersive fallacy）</strong>：误以为虚构是<strong>取代或隐藏</strong>了机制。<strong>事实是两者叠加。</strong></p>
+
+    <div class="diagram">
+      <div class="dtitle">虚构层不是遮盖物，是叠加层</div>
+      <div class="nbox" style="border:1.5px solid #c4b5fd;border-radius:11px;background:#faf5ff"><b>虚构层 · 角色、情节、世界、台词</b><br><span style="color:#475569;font-size:13px">它擅长制造幽默、敬畏、共情、悲剧 —— 但<b>它给不了竞争的快感、技巧的掌握感、以及「我学会了」的愉悦</b></span></div>
+      <div class="narw">＋ 叠加，而不是覆盖</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>机制层 · 规则与交互</b><br><span style="color:#475569;font-size:13px">它擅长制造紧张、胜利、学习的愉悦、掌控感 —— 但<b>它很难做出幽默、敬畏和共情</b></span></div>
+      <div class="narw">↓ 合起来</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>一个自洽的意义系统</b><br><span style="color:#475569;font-size:13px">作者认为这是游戏设计手艺的顶点：<b>完美的机制 + 有说服力的虚构，融成一个不留缝的意义系统</b></span></div>
+      <div class="cap">麻烦在于两者经常打架：虚构上说不通的东西，往往在机制上最好用（所以游戏里到处是箱子）。这就是为什么很多游戏最后只能偏向其中一边。</div>
+    </div>
+
+    <h3 class="amber">体验不是情绪清单，是情绪的编排</h3>
+
+    <p>触发器只会给你单个情绪。体验是怎么把这些情绪组织起来的？书里给了五种排法，其中最后一种最重要。</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">排法</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">做法</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">结果与风险</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>纯粹情感</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Pure Emotion</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把所有驱动力都指向同一种情绪，叠加到峰值</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">经典街机：快节奏音乐 + 危险处境 + 暴力虚构 + 竞争性社交，全部指向「兴奋」。<strong>强，但单一</strong></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>并列</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Juxtaposition</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把看似不兼容的两种感受并置</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">《战争机器》把超暴力与哀悼并置，得到的情绪质地比纯血腥丰富得多</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>对立的情感</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Antagonistic Emotions</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把互相拆台的两种情绪硬凑在一起</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">无情的技巧竞争会直接吃掉共享的社交乐趣。<strong>「建设性并列」和「破坏性冲突」之间只隔一条细线</strong></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>氛围</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Atmosphere</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不追求单个情绪的峰值，而是培育一层弥漫全局的底色</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">《LIMBO》《DEFCON》这类：由虚构与慢节奏交互调味，通常是宁静或沉思的</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>情感变化</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Emotional Variation</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">让情绪在时间轴上变调、换轨，像三幕式故事那样</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>任何单一情绪持续太久都会疲劳。</strong>让玩家从喜悦走到愤怒再到释然，是长流程游戏的必需品</td></tr>
+</tbody>
+</table>
+</div>
+
+    <div class="callout co-amber">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>把「游戏好不好玩」这个笼统的问题，换成三个可回答的问题：<em class="hl">这台机器在推哪几项人类价值？用的是哪几类触发器？这些情绪在时间上是怎么变的？</em>能答上来，设计就有了着力点。</p>
+    </div>
+  </section>
+
+  <!-- ================= 03 ================= -->
+  <section id="s3">
+    <div class="sec-head">
+      <div class="badge teal">03</div>
+      <h2>心流与沉浸：两个最容易被说错的词<span class="en">Flow &amp; Immersion</span></h2>
+    </div>
+
+    <p>这两个词被引用的次数远多于被理解的次数。书里把它们处理得很具体。</p>
+
+    <h3 class="teal">心流：挑战与能力必须同时走</h3>
+
+    <p><strong>心流（flow）</strong>是一种专注到近乎完全投入某项活动的状态，时间感会消失。它之所以愉悦，是因为中间连续不断的小成功。而它出现的条件只有一个：<strong>挑战水平与玩家当前的能力水平相匹配</strong>。</p>
+
+    <div class="diagram">
+      <div class="dtitle">心流通道：能力涨了，挑战也得跟着涨</div>
+      <svg viewBox="0 0 560 300" role="img" aria-label="心流通道示意图：纵轴为技能，横轴为挑战，中间斜向的窄带是心流区，左上为焦虑，右下为无聊">
+        <line x1="70" y1="270" x2="525" y2="270" stroke="#cbd5e1" stroke-width="1.5"/>
+        <line x1="70" y1="270" x2="70" y2="26" stroke="#cbd5e1" stroke-width="1.5"/>
+        <text x="525" y="291" text-anchor="end" font-size="13" fill="#475569">挑战（难度）→</text>
+        <text x="58" y="22" text-anchor="start" font-size="13" fill="#475569">技能 →</text>
+
+        <polygon points="70,268 520,110 520,67 70,225" fill="#eef2ff" stroke="#a8b8f5" stroke-width="1.5"/>
+        <text x="288" y="180" text-anchor="middle" font-size="15" font-weight="700" fill="#3b5bdb" transform="rotate(-19 288 180)">心流通道</text>
+
+        <text x="118" y="86" font-size="14" font-weight="700" fill="#be123c">焦虑 / 挫败区</text>
+        <text x="118" y="106" font-size="12.5" fill="#94a3b8">挑战远高于技能</text>
+
+        <text x="404" y="242" font-size="14" font-weight="700" fill="#b45309">无聊区</text>
+        <text x="404" y="260" font-size="12.5" fill="#94a3b8">技能远高于挑战</text>
+
+        <circle cx="150" cy="200" r="4.5" fill="#0d9488"/>
+        <circle cx="300" cy="160" r="4.5" fill="#0d9488"/>
+        <circle cx="470" cy="90" r="4.5" fill="#0d9488"/>
+        <path d="M150,200 C230,215 400,140 470,90" fill="none" stroke="#0d9488" stroke-width="1.6" stroke-dasharray="5 4"/>
+        <text x="146" y="222" font-size="12" fill="#0d9488">玩久了，技能会往上长</text>
+      </svg>
+      <div class="cap">「太难会焦虑、太易会无聊」是常识；<strong>这本书补的是后半句：技能会随时间上涨，所以心流是一条需要主动维护的斜线（图中虚线），不是一个可以调好就放着的点。</strong></div>
+    </div>
+
+    <h3 class="teal">沉浸：一条可以照着配的配方</h3>
+
+    <p>沉浸发生在「玩家的真实自我」与「游戏中的化身」之间那条心理界线变模糊的时候 —— 化身身上发生的事，开始感觉像是发生在自己身上。</p>
+
+    <p>书里给的解释借用了心理学的<strong>情绪双因素理论</strong>：情绪 = 生理唤醒 + 认知标签。两者缺一，就只是一半的情绪。把这个公式套到游戏里，就得到了沉浸的配方：</p>
+
+    <div class="diagram">
+      <div class="dtitle">沉浸的三步配方（顺序不能换）</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>第一步 · 制造心流</b><br><span style="color:#475569;font-size:13px">心流把现实世界从玩家的脑子里挤出去。这一步不成立，后面两步全是空转</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>第二步 · 用机制制造唤醒</b><br><span style="color:#475569;font-size:13px">威胁、挑战、倒计时 —— 让身体真的进入唤醒状态（心跳、呼吸、手心出汗）。<b>这是「生理唤醒」那半截</b></span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #c4b5fd;border-radius:11px;background:#faf5ff"><b>第三步 · 用虚构层贴标签</b><br><span style="color:#475569;font-size:13px">让虚构告诉玩家：「你现在感受到的，正是角色感受到的」—— 恐惧、悲伤、愤怒。<b>这是「认知标签」那半截</b></span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>结果 · 机制驱动的唤醒被虚构重新命名</b><br><span style="color:#475569;font-size:13px">两半拼成一整个情绪，玩家的体验与角色的体验就此重合 —— 这就是沉浸</span></div>
+      <div class="cap">这个配方最反直觉的一点：<strong>沉浸不是靠「更像真的」实现的，而是靠「机制已经在制造唤醒，虚构及时给它一个名字」。</strong></div>
+    </div>
+
+    <div class="callout co-teal">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>把心流和沉浸当成两个<strong>有输入条件的产品</strong>来管理，而不是当成两种「做好了自然会有」的氛围。心流的输入是「挑战曲线跟着技能曲线走」；沉浸的输入是「唤醒 + 标签」两半都齐。<em class="hl">哪一半缺了，症状都很明确：缺唤醒 = 玩家很投入但没感觉；缺标签 = 玩家被吓到了但不知道为什么。</em></p>
+    </div>
+  </section>
+
+  <!-- ================= 04 ================= -->
+  <section id="s4">
+    <div class="sec-head">
+      <div class="badge">04</div>
+      <h2>优雅：一章就讲完的核心<span class="en">Elegance · 第 2 章</span></h2>
+    </div>
+
+    <p>第 2 章只有十来页，但它是整本书最常被引的一章。因为它给出了一个<strong>可以拿去当尺子用的定义</strong>：</p>
+
+    <div class="keyline">
+      <b>优雅 = 在最大化情感力量与体验多样性的同时，最小化玩家的理解成本和开发成本。</b><br>
+      <span style="font-size:15px;color:var(--ink2)">左边是收益，右边是两笔成本 —— 一笔花在玩家脑子里，一笔花在团队时间里。四件事同时权衡，才有「优雅」这个词。</span>
+    </div>
+
+    <h3>优雅从哪来：涌现</h3>
+
+    <p><strong>涌现（emergence）</strong>指的是「简单机制通过相互作用，产生出各种复杂情况」。优雅的游戏不靠机制<strong>相加</strong>，而靠机制<strong>相乘</strong>——《看、射、移动》这三个动作就能在一个射击游戏里生成无数种不同的局面。</p>
+
+    <p>但代价紧接着就来了，书里说得很清楚：<strong>机制之间的交互越紧密，优雅的设计就越难实现</strong>，因为改动任何一个机制，都会以复杂且不明显的方式影响其他所有机制。作者用自己做游戏的经历吐槽过：写机制一时爽，编数值的时候才发现是场噩梦。</p>
+
+    <h3>怎么「闻」出优雅：9 条判据</h3>
+
+    <p>既然优雅的结果无法提前预测，作者给的办法是培养一种直觉 —— 他把这一节直接命名为「我喜欢在早晨闻到优雅的味道」。下面是那 9 条可以被当作检查表使用的启发式。</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">一条机制如果……</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">它就更可能是优雅的</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">为什么</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>和很多其他机制交互</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">多功能工具</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一次设计投入，在系统里被反复兑现</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>本身很简单</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">玩家理解成本低</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">复杂度留给涌现在运行时生成，而不是压给玩家</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>能以多种方式使用</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">攻、守、战术、战略都能用</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">单用途工具只能出现在一种情境里</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>和其他机制的角色不重叠</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">引入了全新的玩法</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">某策略游戏已经有了一个侦察单位，除非新单位功能不同，否则没必要再加第二个</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>复用已有的惯例与界面</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">借用玩家已有的知识</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">玩家的学习成本近似为零</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>与现有机制处于同一量级</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">数字、速度、血量不用换算</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一致的尺度让机制之间自然交互，省掉一堆心算</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>被大量复用</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">核心机制每次使用都能生成新体验</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">作者认为这一条对优雅「至关重要」</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>不对内容设限</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不逼迫关卡、美术、叙事为它扭曲</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">它改进游戏，而不是让别人收拾残局</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>用尽界面的全部表现力</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">摇杆的角度、按键的时长都被吃满</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">给熟练玩家留出深度空间</td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3>案例：掠夺者 vs 恶火</h3>
+
+    <p>书里用《星际争霸 2》的两个单位收尾 —— 这是全书被引用最多的案例，因为它把「优雅」从形容词变成了可以对比的两件东西。</p>
+
+    <p>掠夺者（Predator）和恶火（Hellion）都是快速、中等造价、带范围伤害的单位，定位严重重叠。最后进遭遇战的是恶火。差别只在攻击的形状：</p>
+
+    <div class="split">
+      <div class="mini bad">
+        <h4>掠夺者：一圈环形攻击</h4>
+        <p><strong>攻击范围是一个圆。</strong>战术深度有限 —— 你很少会被包围，短射程又限制了和其他单位的协同；攻击频率还很高，导致「打带跑」这种高级战术做不出来。机制本身没毛病，但它能生成的情境太少。</p>
+      </div>
+      <div class="mini good">
+        <h4>恶火：一条又长又窄的火流</h4>
+        <p><strong>效果随敌人形状和地形剧烈变化</strong>：一串敌人全吃、散开就只吃前排。射程远，于是掩体和侧翼协同有了意义；攻速慢，于是「打带跑」成立了。它的机制并不比掠夺者复杂 —— 但它更优雅，因为它<strong>生成明显更多的挑战、战术与情境</strong>。</p>
+      </div>
+    </div>
+
+    <div class="callout co-blue">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>优雅通常来自简单而匠气的手工设计，它们「绽放成上百万种体验」，而不是来自花哨的噱头。<em class="hl">比较两个方案时，别问「哪个更酷」，要问「哪个能长出更多种不同的局面」。</em></p>
+    </div>
+  </section>
+
+  <!-- ================= 05 ================= -->
+  <section id="s5">
+    <div class="sec-head">
+      <div class="badge teal">05</div>
+      <h2>技巧：把技能范围拉宽<span class="en">Skill · 第 3 章</span></h2>
+    </div>
+
+    <p>第 3 章处理的是一个具体的工程问题：<strong>怎么让一个游戏既让新手玩得下去，又让老手玩得下去。</strong>书里用三个词把它拆开了。</p>
+
+    <div class="diagram">
+      <div class="dtitle">三个词：水平轴上的下限、上限，和它们之间的距离</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>无障碍 / 技能壁垒（skill barrier）</b><br><span style="color:#475569;font-size:13px">技能水平的<b>下限</b>：低于这个水平就没法玩。新手面对一个 FPS 的操作会望而生畏 —— 这一点最容易被已经很熟练的设计者低估</span></div>
+      <div class="narw">↓ 中间这一段，就是「技能范围」</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>技能范围（skill range）</b><br><span style="color:#475569;font-size:13px">能提供有意义挑战的技能水平区间。范围宽 = 易学难精，新手和专家都愉快；范围窄 = 一学会就通关</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #c4b5fd;border-radius:11px;background:#faf5ff"><b>深度 / 技巧上限（skill ceiling）</b><br><span style="color:#475569;font-size:13px">技能水平的<b>上限</b>：表现无法再提高的那条线。如果这条线超出人类能力，就叫「无限深度」</span></div>
+      <div class="cap">书里的判断是：<strong>不必人人都是宽范围。</strong>《生化奇兵》的技能范围并不宽，但它靠美术与叙事提供了别的意义，一样成立。<strong>关键是知道自己靠什么留住人。</strong></div>
+    </div>
+
+    <p>顺便说一句，没有明确目标的游戏也有技能范围。《矮人要塞》《模拟人生》《我的世界》都有「最低得会点什么才能玩」的门槛，玩家也常在这些「玩具」里自己立目标，把它变成技巧游戏。所以即使是无目标的玩具，<strong>也受益于「属性有趣且不容易一眼看穿」</strong>。</p>
+
+    <h3 class="teal">自我再造：技能范围是这样被拉宽的</h3>
+
+    <p>书里最有价值的一段，是发现游戏会随玩家水平成长<strong>反复地重新定义自己</strong>。当一层挑战被掌握，更深一层的玩法就会浮现出来。作者把它归成三种典型阶段：</p>
+
+    <div class="diagram">
+      <div class="dtitle">三次自我再造（Reinvention）：从手到脑</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>① 手动重塑 Manual</b><br><span style="color:#475569;font-size:13px">挑战集中在<b>简单的、即时的机械技能</b>和界面掌握上：瞄准、走位、跨栏、把棋子移到该去的地方。<b>所有游戏都从这里开始</b></span></div>
+      <div class="narw">↓ 手动技能熟练到不需要想</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>② 情境重塑 Situational</b><br><span style="color:#475569;font-size:13px">挑战转向<b>情境意识、模式识别、反制对手</b>：地图控制、预判敌方走位、算资源节奏。<b>绝大多数玩家和绝大多数游戏停在这一层</b></span></div>
+      <div class="narw">↓ 再往上</div>
+      <div class="nbox" style="border:1.5px solid #c4b5fd;border-radius:11px;background:#faf5ff"><b>③ 心智重塑 Mental</b><br><span style="color:#475569;font-size:13px">专家与竞技选手所在的一层：<b>预测并操控对手的心智</b>，在压力下稳定发挥，用欺骗制造优势 —— 这是第 7 章「心理战」的地盘，也是「无限深度」游戏真正的终局形态</span></div>
+      <div class="cap">这个三段式很有用：<strong>它告诉你「我的游戏在第几层」。</strong>如果玩家在第三层，你做再多教学和引导都没意义；如果玩家卡在第一层，做再多深层平衡也没意义。</div>
+    </div>
+
+    <h3 class="teal">另外六件具体的事</h3>
+
+    <p>拉宽技能范围还有一整套配套动作，书里逐条讲清了：</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">手段</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">它在干什么</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">书里的例子与要点</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>弹性挑战</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Elastic Challenge</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不做「通过 / 失败」的二元判定，而是给出<strong>多层成功</strong>或<strong>多层失败</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">飞镖的精细计分；《杀手》的「沉默刺客」评级；跳跃失败但抓住边缘。保证每个水平的人都有一个<strong>够得着又有挑战</strong>的目标</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>训练</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Training</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">帮玩家更快越过技能壁垒</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>好的训练是看不见的</strong>：织进叙事（《使命召唤 4》）、变成弹性挑战（计时赛）、或按需在合适时机给提示。最不可见的训练，是根本不需要发生的训练</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>情感维持</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Emotional Life Support</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">在玩家还没跨过壁垒之前，用<strong>不依赖技能</strong>的触发器吊住体验</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">前期堆满低技能门槛的情绪来源：壮丽美术、迷人角色、幽默、技术演出 —— 把学习过程包装成半交互的开场电影（《生化奇兵》）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>改变难度</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Difficulty Modification</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">整体搬动挑战水平，有三种做法</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>显式</strong>：让玩家选简单/普通/困难（直白，但选项本身会让玩家困惑）；<strong>自适应</strong>：根据表现静默调整（玩家不知道时效果最好，否则会被钻空子）；<strong>隐式</strong>：让玩家用策略选择自己调难度（《军团要塞 2》选职业、《使命召唤 4》推进快慢）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>处理失败</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Handling Failure</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">要悬念就必须有真的失败可能，但<strong>别惩罚玩家本人</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">惩罚玩家角色（被枪打、变穷）而不是玩家；拒绝成功或制造小挫折，让游戏在一条新路上继续（《星际争霸 2》战役）；让失败本身导向有趣的新局面（《矮人要塞》）；绝不让重开打断心流（《超级食肉男孩》）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>失败陷阱</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Failure Traps</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">玩家长时间卡在「失败已成定局」的状态里出不来</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">可能是涌现出来的：比如存档点触发时身上已经没弹药了。对策：弹性失败条件（备用武器无限弹药）、竞技游戏的投降机制、单人游戏的替代挑战。有些陷阱（体育里的「垃圾时间」）到现在也没有干净解法</td></tr>
+</tbody>
+</table>
+</div>
+
+    <div class="callout co-teal">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>「难度」不是一根滑块，而是一组分工明确的装置：<em class="hl">壁垒要有人帮你翻（训练），翻不过去的时候要有人接住你（情感维持），翻过去之后要有台阶往上走（再造），掉下来的时候别把你摔疼（处理失败）。</em>四件事各管一段，混在一起调就永远调不好。</p>
+    </div>
+  </section>
+
+  <!-- ================= 06 ================= -->
+  <section id="s6">
+    <div class="sec-head">
+      <div class="badge violet">06</div>
+      <h2>故事：三种叙事工具与代理权问题<span class="en">Narrative · 第 4 章</span></h2>
+    </div>
+
+    <p>这一章的态度很明确：<strong>不要只从电影的角度理解游戏叙事。</strong>游戏有一整套比电影更古老、也更宽的叙事工具箱 —— 从编排好的过场，到可以被探索的空间，再到运行时自己长出来的故事。</p>
+
+    <p>书里先给了「叙事工具」的定义：<strong>用来在玩家心里拼出故事碎片的装置</strong>。然后按「叙事在多大程度上被写死」分成三档。</p>
+
+    <div class="diagram">
+      <div class="dtitle">三种叙事工具：控制权与心流的取舍</div>
+      <div class="nbox" style="border:1.5px solid #f6b8c4;border-radius:11px;background:#fff5f7"><b>① 脚本故事 Scripted</b><br><span style="color:#475569;font-size:13px">直接写进游戏、每次都以同样方式发生的事件。最基本的工具是<b>过场动画</b>：电影手法齐全，但<b>必然通过禁用交互来打断心流</b></span></div>
+      <div class="narw">↓ 想保住心流，就得放掉一部分控制</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>② 软脚本 Soft Scripting</b><br><span style="color:#475569;font-size:13px">在<b>玩家仍保有一定交互</b>的前提下推进预设事件。代价是：玩家可能从奇怪的角度看、可能错过、甚至可能来捣乱</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #c4b5fd;border-radius:11px;background:#faf5ff"><b>③ 世界性故事 World Narrative</b><br><span style="color:#475569;font-size:13px">一个地方的<b>历史与人的故事，靠这个地方本身和里面的物件来讲</b>。玩家像侦探一样，通过环境线索、物品摆放、藏起来的文档拼出真相</span></div>
+      <div class="cap">软脚本是一条很实的中间路线：从《半条命》的电车（有限交互），到《死亡空间 2》的地铁车厢（禁移动但可射击），再到《光环：致远星》的 AI 战术提示（AI 遵循大致指令，但自主回应玩家的行动）。<strong>多放一点交互，就多丢一点控制 —— 这是一个必须显式做选择的滑块。</strong></div>
+    </div>
+
+    <h3 class="violet">世界性故事：为什么它对游戏特别有用</h3>
+
+    <p>书里对世界性故事的评价非常高，理由是它<strong>一次性解决了三个问题</strong>：</p>
+
+    <div class="tags">
+      <span><strong>不可侵犯</strong>：玩家没法干扰已经发生过的故事</span>
+      <span><strong>非线性</strong>：内容可以任意顺序被消费，不需要强制引导</span>
+      <span><strong>可重玩</strong>：从大概到细节分层展开，鼓励反复探索</span>
+    </div>
+
+    <p>具体怎么讲？书里列了一整套方法：</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">方法</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">说明</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>特征的存在或缺失</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">小镇的城墙暗示这里曾有过军事威胁；没有坟场的村庄暗示另一种历史</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>文化符号</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">罗马式建筑唤起帝国想象，黑暗哥特唤起邪恶感</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>场面调度（Mise-en-scène）</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">安排「某件事的残留物」：尸体的摆放方式本身就说明了一场处决</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>文档</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">散落的 PDA、笔记、信件，透露角色的生活与情节细节（《杀出重围》）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>音频日志</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">同时传达情绪与事件录音（《生化奇兵》）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>视频日志</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把残留的电视节目、新闻、监控录像摆在世界里</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>跨越性工具</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">新闻广播、宣传口号、平民的闲聊 —— 直接传达这个世界的性质</td></tr>
+</tbody>
+</table>
+</div>
+
+    <p>但有效果的前提是<strong>世界观要自洽</strong>：精心构造的虚构世界是「一张关系与意义的谜题」，每一件事都在历史、物理、文化上说得通。不连贯的世界只是一堆断开的细节，没有深度，也不优雅。书里举的正例是《死亡空间 2》里的念力装置 —— 它不只机制优雅，叙事上也优雅，因为它的存在被反射在了世界的文化、经济和建筑里。</p>
+
+    <h3 class="violet">浮现的故事：让玩家的大脑替你写完</h3>
+
+    <p>这是这一章最有用的一组概念，因为它解释了「为什么《矮人要塞》用 ASCII 字符也能讲出那么好的故事」。</p>
+
+    <p>所谓<strong>浮现的故事（emergent story）</strong>，是由游戏机制与玩家的交互在游玩中生成的故事。设计师没法直接写它，只能<strong>通过设计机制来间接决定「什么样的故事有可能涌现」</strong>。而作者强调：只有涌现的故事能真正打破虚构与现实之间的墙 —— 比如现实中你赢了弟弟一盘国际象棋，那个故事是真的。</p>
+
+    <p>让涌现故事好看，有五个可操作的手法：</p>
+
+    <div class="diagram">
+      <div class="dtitle">五个手法：把一半创作交给玩家</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>① 妄想（Apophenia）</b><br><span style="color:#475569;font-size:13px">人类天生会在复杂数据里看到并不存在的模式，尤其会给没有生命的对象安上人格。<b>游戏不需要真的模拟人心，只需要做到「玩家的心智愿意把它解释成一个有智能的主体」</b></span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>② 标识（Labeling）</b><br><span style="color:#475569;font-size:13px">给已经存在的机制贴一个虚构标签：给每个士兵起名字（《近距离作战》），给贵族加性格特征（《中世纪：全面战争》）。玩家会自己把关系脑补得更深 —— <b>这很优雅，因为大部分工作是玩家的大脑做的</b></span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>③ 抽象（Abstraction）</b><br><span style="color:#475569;font-size:13px"><b>展示得越少，留给妄想填空的空间越大。</b>画面越细致，想象性解释反而越少。《矮人要塞》的 ASCII 是极端例子。任何表现上的留白，都在邀请玩家补细节</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #c4b5fd;border-radius:11px;background:#faf5ff"><b>④ 保存记录（Recordkeeping）</b><br><span style="color:#475569;font-size:13px">保留发生过的事，并提醒玩家：《文明 4》里随时间变化的边界地图、《神话》里长期留存的尸体与血迹重建出的那场战斗、《模拟人生》里自动生成的相册</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f6b8c4;border-radius:11px;background:#fff5f7"><b>⑤ 体育解说系统</b><br><span style="color:#475569;font-size:13px">用系统把游戏事件解释并串成一个连贯故事。《杀手：血钱》会按玩家的行动生成报纸文章 —— 潜行程度、精准度、暴力程度都会改变报道的写法。<b>这类系统很难做好，最佳用法是「启动玩家自己的妄想过程」，而不是试图把故事讲完</b></span></div>
+      <div class="cap">这一整节其实是一个杠杆：<strong>你越少说，玩家的心智参与得越多，故事就越像「他的」。</strong></div>
+    </div>
+
+    <h3 class="violet">把故事排出顺序：5 个装置、4 种结构</h3>
+
+    <p>故事内容有了，还得控制玩家<strong>什么时候遇到它</strong>。书里列了五个排序装置：关卡（一段一段的线性推进）、任务（嵌在无序世界里的自包含小故事，内部顺序固定、起止时间灵活）、阻塞（锁门、守卫这类物理或叙事障碍）、技能门控（内容技术上可达，但需要一定技能或升级，用来温和地引导新手）、基于时间的事件（在世界里的固定时刻发生，《丧尸围城》）。</p>
+
+    <p>把它们组合起来，就得到几种结构：</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">结构</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">形状</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">典型与代价</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>珍珠串</strong><br/><span style="font-size:12.5px;color:var(--ink3)">String of Pearls</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">关卡接关卡的线性推进</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">《雷神之锤》《超级马里奥兄弟》。最好做，控制力最强</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>轮毂与辐条</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Hub and Spokes</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">中心枢纽连接若干自包含内容块，顺序随意</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">《洛克人》。给了玩家选择，但要求每块内容能独立成立</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>分支事件</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Branching Events</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">给每个可能的决策都建模结果</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>会迅速爆炸</strong>：可能的时间线呈指数增长，玩家还必然错过大量内容 —— 除非这些事件大部分是涌现的</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>支线任务与故事汇聚</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">用可选内容分流，或让分出去的线再收回来</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">《质量效应 2》的流行配方：线性开头 + 任务驱动中段 + 线性结尾，既保留引导又给了自由</td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3 class="violet">代理权问题：玩家为什么要在老板的桌子上跳舞</h3>
+
+    <p><strong>代理权（agency）</strong>是「做出决策、并影响游戏世界」的能力。有了它，故事就必然失控：玩家会跟故事元素对着干，或者干脆错过它们。</p>
+
+    <p>很多麻烦都来自一个源头：<strong>玩家的动机和角色的动机不是一回事</strong>。书里给这种现象起了个很形象的名字 —— <strong>跳桌（desk jumping）</strong>：角色绝不可能做的事，玩家做得兴高采烈。比如扮演詹姆斯·邦德的时候，跑到上司的办公桌上跳。</p>
+
+    <p>玩家跳桌的动机很实在：想试探模拟的边界、想消耗内容、想制造笑料。书里承认这个问题在《侠盗猎车手 4》里尤其明显 —— 角色本身在做细腻的道德抉择，玩家却在制造混乱。</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">解法</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">做法</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">代价</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>禁止跳桌</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">直接不允许行动</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">有效，但容易让机制显得人为，削弱玩家的参与感。<strong>若能在虚构上正当化，效果就好</strong>（《传送门》的封闭世界）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>忽略跳桌</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">允许做，但游戏不承认</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">成本最低，会让这个行为变得不那么有吸引力</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>纳入跳桌</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">拥抱玩家的行为，并围绕它织叙事</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">《杀出重围》里上司的幽默回应、《永远的毁灭公爵》的自我值条。<strong>以封闭、完整的方式纳入时效果最好</strong></td></tr>
+<tr><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>为动机一致而设计</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">让玩家的动机天然和角色对齐</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">最佳方案。例子是《使命召唤》—— 快节奏战斗压过了「做傻事」的冲动</td></tr>
+</tbody>
+</table>
+</div>
+
+    <p>与之并列的还有<strong>人类交互问题</strong>：受输入输出限制和 AI 能力限制，游戏很难做丰富的人际交互。书里给了四条路：在虚构上禁止直接交互（角色只在无线电里说话，或者一照面就发疯）；对话树（预设选项 + 预设回应，控制力满分但选项有限）；复用标准游戏动词（用射击或走开来表达社交选择）；以及交给真实玩家 —— 就像《龙与地下城》里由人来做地下城主持，代价是得让匿名玩家愿意认真扮演。</p>
+
+    <h3 class="violet">案例：《辐射 3》</h3>
+
+    <p>这一章最后用一段个人的《辐射 3》游玩经历收尾，把上面所有工具串了一遍：</p>
+
+    <ul>
+      <li><strong>世界性故事</strong>：干枯的地貌、兆吨镇临时的拼装建筑、莫伊拉那条脏兮兮的工装裤，都在讲后末日的生活和这个人。</li>
+      <li><strong>玩家选择</strong>：玩家自己探索世界的行动，在背景故事之外生成了涌现故事。</li>
+      <li><strong>对话树</strong>：和 NPC 的对话是硬脚本的，常常绕回轮毂辐条式的结构。</li>
+      <li><strong>涌现遭遇</strong>：随机出现的猎人撞上脚本里的掠夺者，打出一场谁也没写过的战斗。</li>
+      <li><strong>妄想</strong>：猎人临死前的虚张声势、最后一个掠夺者的「伏击」—— 这些全是玩家从简单游戏元素里在心里构造出来的。</li>
+      <li><strong>标识</strong>：掠夺者头上那个鹿角装饰，就给了他一个独一份的人格。</li>
+      <li><strong>傻气的底色</strong>：莫伊拉那种过分的热情冲淡了情绪负载，也让那些不那么写实的游戏元素变得可以接受。</li>
+      <li><strong>内容顺序与节奏</strong>：脚本推进（商店前的那片停车场）和玩家随便离开又回来交错；节奏是不规则的尖刺状，紧张战斗与对话、探索、治疗穿插，让人不疲惫也不脱钩。</li>
+      <li><strong>背景设定</strong>：后末日世界同时为「持续战斗」和「低人口密度」做了正当化 —— 前者支撑机制，后者容纳技术限制。</li>
+    </ul>
+
+    <div class="callout co-violet">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>游戏叙事不是「写好一个故事再想办法塞进去」，而是<em class="hl">在三档叙事工具之间持续分配控制权</em>：写死得越多，控制越强、心流越容易被切断；放开得越多，玩家越自由、也越容易错过你精心准备的东西。而最划算的一档是<strong>世界性故事</strong> —— 它几乎不要控制权，却能同时买到不可侵犯、非线性和可重玩。</p>
+    </div>
+  </section>
+
+  <!-- ================= 07 ================= -->
+  <section id="s7">
+    <div class="sec-head">
+      <div class="badge amber">07</div>
+      <h2>决策：玩家玩的是「可能的未来」<span class="en">Decisions · 第 5 章</span></h2>
+    </div>
+
+    <p>这一章是全书最技术、也最实用的一章。它的起点是一个观察：<strong>玩家经历的不只是已经发生的事，还有所有他检测到的「可能发生的事」。</strong></p>
+
+    <p>玩家的心智会持续模拟未来。这份充满期待、不确定与后果的内部过程，才是国际象棋这类游戏真正迷人的地方。反过来，<strong>没有有意义的决策，游戏就可能是情感空洞的 —— 哪怕屏幕上一直在打。</strong></p>
+
+    <h3 class="amber">第一条前提：结果必须「部分可预测」</h3>
+
+    <div class="diagram">
+      <div class="dtitle">可预测性的两端都是死路</div>
+      <div class="nbox" style="border:1.5px solid #f6b8c4;border-radius:11px;background:#fff5f7"><b>完全不可预测</b><br><span style="color:#475569;font-size:13px">规划不可能，游戏退化成<b>条件反射式的挣扎</b></span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>部分可预测 ← 唯一的活路</b><br><span style="color:#475569;font-size:13px">玩家能规划，但算不出唯一答案。<b>这依赖游戏系统一致且可理解</b>：马里奥跳跃的物理规则始终如一，玩家才敢去规划、才能「感受」到那个还没发生的结果</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f6b8c4;border-radius:11px;background:#fff5f7"><b>完全可预测</b><br><span style="color:#475569;font-size:13px">答案唯一，决策消失</span></div>
+      <div class="cap">由此得到一条对 AI 的反直觉建议：<strong>AI 常常应该被当成一台可预测的机制，而不是一个写实的模拟器。</strong>过于聪明或过于混乱的 AI 会破坏可预测性 —— 玩家看不懂它在干什么，就没法规划。</div>
+    </div>
+
+    <h3 class="amber">信息平衡：决策的性格由信息决定</h3>
+
+    <p>决策的难度、复杂度和「感觉」，几乎完全由<strong>玩家手上有多少信息</strong>决定。而两边都有病：</p>
+
+    <div class="split">
+      <div class="mini bad">
+        <h4>信息匮乏（Information Starvation）</h4>
+        <p>信息太少，决策变得混乱随机，玩家只能乱扑 —— 就像蒙着眼睛玩《海战棋》。来源可能是机制隐藏（RPG 里未来的挑战），也可能是虚构线索太模糊。</p>
+        <p><strong>一个实用的警告信号：如果你的游戏需要一份 FAQ 才能玩明白，那就是信息匮乏。</strong>它特别阴险，因为掌握全部知识的设计者根本察觉不到；也特别难承认，因为承认它很难受。</p>
+      </div>
+      <div class="mini bad">
+        <h4>信息过剩（Information Glut）</h4>
+        <p>信息太多会直接抹掉决策 —— 答案变得显而易见。比如射击游戏里给你一个显示所有敌人位置的心跳传感器。</p>
+        <p>解法有三条：减掉信息、增加限制、或者<strong>延迟信息的送达时间</strong>以制造战略深度。</p>
+      </div>
+    </div>
+
+    <p>那么，看起来信息完整的游戏怎么藏信息？书里给了三种藏法，这一条特别值得记住：</p>
+
+    <div class="tags">
+      <span><strong>藏在复杂的因果里</strong>：三步之后的棋盘状态，藏在交互链的后面</span>
+      <span><strong>藏在玩家的内部状态里</strong>：对手的计划与弱点被藏起来，这驱动了心理战</span>
+      <span><strong>被速度藏起来</strong>：来得太快、根本来不及处理的信息，事实上等于被隐藏</span>
+    </div>
+
+    <h3 class="amber">案例：扑克的历史，就是一部「信息结构」的演化史</h3>
+
+    <p>书里用扑克的演化来说明信息平衡有多重要 —— 机制几乎没变，改的只是信息结构，游戏就彻底变了：</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">阶段</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">信息结构</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">结果</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">早期扑克</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">20 张牌，只下一轮注</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">信息匮乏 → 技巧低、随机性高</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">抽牌扑克</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">52 张牌，多轮抽牌与下注</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">补进了信息，策略性上升</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">明牌扑克（Stud）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">部分牌公开</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">滑向信息过剩 —— 赢家往往太明显</td></tr>
+<tr><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">公共牌玩法（德州等）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">共享明牌 + 隐藏底牌 + 下注模式</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">接近完美平衡：共享牌防止赢家一目了然，隐藏牌与下注又制造了细腻的决策</td></tr>
+</tbody>
+</table>
+</div>
+
+    <div class="callout co-amber">
+      <span class="lbl">这一节最该记住的一条（信息篇）</span>
+      <p>当你觉得一个游戏「没策略」或「太靠运气」时，先别动机制，<em class="hl">先动信息结构</em>。谁在什么时候知道什么 —— 这一件事的改动，往往比加十个新机制有效。</p>
+    </div>
+
+    <h3 class="amber">两个有问题的信息源</h3>
+
+    <div class="split">
+      <div class="mini info">
+        <h4>虚构的歧义（Fictional Ambiguity）</h4>
+        <p>从虚构里来的信息天生含糊，因为玩家不知道虚构的哪些方面<strong>真的被机制实现了</strong>。看到火堆上架着烤火鸡，你到底能不能烤？当玩家尝试一个「虚构上完全合理」的动作，机制却不支持时，挫败感就来了。</p>
+        <p>作者的建议很具体：<strong>好谜题应该建立在「以显而易见的方式运作的机制」的非显而易见的用法上，而不是依赖含糊的虚构线索。</strong></p>
+      </div>
+      <div class="mini info">
+        <h4>游戏超信息（Metagame Information）</h4>
+        <p>玩家从游戏之外收集到的知识：类型惯例、开发者的习惯、预告片。它可能反过来造成信息过剩 —— 比如因为「这个游戏很公平」的惯例，玩家在生存恐怖游戏里期待血包。</p>
+        <p>对策只有两条：<strong>要么把超信息当成约束接受下来，要么故意打破惯例，制造真正的威胁。</strong></p>
+      </div>
+    </div>
+
+    <h3 class="amber">决策范围：五档，决定游戏的手感</h3>
+
+    <p>「决策范围（decision scope）」是做出一个决策所需的思考量。书里把它分成五档 —— 这张表几乎可以直接当成「我给玩家的决策是什么级别」的自检表。</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">档位</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">思考量</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">典型形态</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>非决策</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Nondecision</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">答案太显然</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把牛奶倒进麦片。它不调动心智，不算决策</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>瞬发决策</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Twitch</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一秒以内</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">出拳还是踢腿？动作游戏的基础节奏</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>战术决策</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Tactical</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">1–5 秒</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">买哪件装备？用多少信息调动有意识思考</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>深刻决策</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Profound</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">10 秒以上</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">国际象棋大师的长考。它来自最优雅、最微妙的系统，能推动玩家深度自省</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>不可能决策</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Impossible</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">超出理解能力</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只能随机选，<strong>直接打断心流</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+    <p>重要的一点是：<strong>同一个决策，档位会随玩家技能变化。</strong>对新手是深刻决策的，对专家可能已经变成非决策 —— 这条线定义的正是技巧上限。</p>
+
+    <h3 class="amber">心流断层与决策溢出</h3>
+
+    <p>心流的维持，书里用了一个非常好的比喻：<strong>要像一个不停往杯子里倒水的人，既不能溢出来，也不能让杯子空着。</strong></p>
+
+    <div class="diagram">
+      <div class="dtitle">喂决策的两端失败</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>心流断层（Flow Gap）</b><br><span style="color:#475569;font-size:13px">玩家的大脑有段时间无事可嚼，于是无聊。来源是工具延迟、菜单切换、对话。<br><b>三个解法</b>：延迟期间让其他能力保持可用 / 把决策塞进这段空隙 / 重新设计机制，让它干扰操作而不完全剥夺能动性 —— 比如《现代战争 2》的眩晕手雷只是减慢移动，不禁止行动</span></div>
+      <div class="narw">↓ 另一端</div>
+      <div class="nbox" style="border:1.5px solid #f6b8c4;border-radius:11px;background:#fff5f7"><b>决策溢出（Overflow）</b><br><span style="color:#475569;font-size:13px">玩家被决策淹没。比断层更容易被观察到（测试者会明显紧张），通常靠降低决策压力来修。<b>技能较低的玩家更容易被淹</b></span></div>
+      <div class="cap">回合制游戏把节奏交给玩家，但仍有它自己的两病：<strong>微观管理</strong>（太多小决策把人拖进无脑的繁琐操作）和 <strong>分析瘫痪</strong>（单个决策太大，想太久）。</div>
+    </div>
+
+    <p>最后是「决策变化」：让心流有趣，就要<strong>改变决策的密度和范围</strong>，把瞬发、战术、深刻三种混着排。经典三幕节奏（钩子、上升、高潮、收尾）是可用准则之一，但唯一的硬性规则是 —— <strong>节奏必须变化</strong>，不能长时间慢，也不能长时间累。极端一点，甚至可以去逐秒模拟一次游玩，来分析决策节奏。</p>
+
+    <h3 class="amber">案例：《反恐精英》</h3>
+
+    <p>书里说，《反恐精英》能靠机制（而不是虚构）流行十三年以上，靠的就是平衡、节奏、技巧与决策这几样。它同时展示了前面所有概念：</p>
+
+    <ul>
+      <li><strong>开场是一个深刻决策</strong>：等待阶段里，玩家分析地图、队伍构成、对手水平，规划战术。</li>
+      <li><strong>决策节奏是动态的</strong>：低决策期（执行计划）与高决策尖峰（敌人一死、新信息来了）反复切换。</li>
+      <li><strong>信息被速度藏起来</strong>：玩家必须在信息不全的情况下快速选择，只能靠直觉判断。</li>
+      <li><strong>持续产生的战术谜题</strong>：瞬发射击、战术移动、团队策略混在一起，新谜题不断。</li>
+      <li><strong>武器致命</strong>：一两枪毙命，因此「交战之前」的决策变得至关重要，猫鼠博弈由此成立。</li>
+    </ul>
+
+    <p>作者对它的总结很漂亮：<strong>《反恐精英》与其说是射击，不如说是一场「心智评估与反评估」的复杂舞蹈</strong> —— 这个日本麻将与格斗游戏圈常用的词，叫 <em class="hl">yomi</em>。它正是第 7 章的主角。</p>
+
+    <div class="callout co-amber">
+      <span class="lbl">这一节最该记住的一条（决策篇）</span>
+      <p>把「游戏好不好玩」翻译成一句可检查的话：<em class="hl">我每隔多久，递给玩家一个「信息不全、但不至于无法判断」的问题？</em>太久不给 ⇒ 心流断层；一次给太多 ⇒ 决策溢出；给的答案太显然 ⇒ 非决策。<strong>这三句话能解释掉大半的「腻了」。</strong></p>
+    </div>
+  </section>
+
+  <!-- ================= 08 ================= -->
+  <section id="s8">
+    <div class="sec-head">
+      <div class="badge teal">08</div>
+      <h2>平衡性：目标不是公平<span class="en">Balance · 第 6 章</span></h2>
+    </div>
+
+    <p>「平衡」这个词几乎总被默认等同于「公平」。这本书第一件事就是把这个等式拆开：平衡只是手段，<strong>它服务于好几个目标，而公平和深度是其中最高的两个</strong>。</p>
+
+    <div class="split">
+      <div class="mini good">
+        <h4>为公平而平衡</h4>
+        <p>没有人一开局就占优，游戏才在竞技意义上成立。对称游戏（冰球）天生公平；非对称游戏（《星际争霸》的三个种族、先手走的国际象棋）需要仔细调。</p>
+        <p>也有一些游戏<strong>故意不公平</strong>，用来说明历史或制造幽默（《宇宙遭遇》）。公平不是天条。</p>
+      </div>
+      <div class="mini good">
+        <h4>为深度而平衡</h4>
+        <p>深度游戏能持续生成细腻决策，连专家都不确定最优解。它的目标<strong>不是让所有工具在孤立状态下一样强</strong>，而是平衡玩家在<strong>任何给定情境下能选到的策略</strong>。</p>
+        <p>这会鼓励玩家对多变量和突发情况做复杂思考，从而抬高技巧上限。</p>
+      </div>
+    </div>
+
+    <p>此外还要为<strong>其他原因</strong>平衡：叙事连贯性、心流、节奏、无障碍、清晰度。一把平衡但不真实的武器、一份公平但无聊的移动速度，都会伤到整体体验。<strong>平衡牵动一切，所以每一处取舍都要显式管理。</strong></p>
+
+    <h3 class="teal">策略退化：平衡的真正敌人</h3>
+
+    <p><strong>退化策略（degenerate strategy）</strong>是在某个决策上明显最优的选择 —— 它的存在会把有意义的选择整体抹掉。它可能藏在复杂的涌现交互里，比如《晨风》里那瓶让玩家能秒杀龙的「速度药水」。</p>
+
+    <p>这里有一个很有意思的悖论：玩家会不断寻找这种失衡，<strong>但一旦找到，他们又会讨厌设计者允许自己「毁掉」这个游戏</strong>。</p>
+
+    <h3 class="teal">一个被反复引用的反驳：可选策略数量的误区</h3>
+
+    <p>作者明确反对「平衡就是最大化可行策略的数量」这个流行观点。理由很干净：<strong>一旦游戏有一个以上的可行策略，继续加更多，并不会自动带来更深的决策或更丰富的思维过程。</strong>他举的反例是「石头剪子布蜥蜴斯波克」—— 选项从 3 个涨到 5 个，深度并没有涨。</p>
+
+    <div class="keyline">
+      <b>真正的目标是：在玩家心里造出一个更细腻的思维过程。</b><br>
+      <span style="font-size:15px;color:var(--ink2)">不是「多几个选项」，而是「同一个选择，值不值得多想三层」。这是两种完全不同的设计动作。</span>
+    </div>
+
+    <h3 class="teal">平衡与技巧：为谁平衡</h3>
+
+    <div class="diagram">
+      <div class="dtitle">只可能为某一个技能水平平衡</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>原因</b><br><span style="color:#475569;font-size:13px">不同技能水平的玩家能接触到的策略本来就不同。对专家已经退化的东西，对新手可能还是一个迷人的谜；而在高水平让游戏平衡的策略（《星际争霸 2》的速攻），对缺少应对技能的新手看起来就是失衡</span></div>
+      <div class="narw">↓ 于是只剩两个选项</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>为高技能平衡</b><br><span style="color:#475569;font-size:13px">代价昂贵：需要大量测试、必须否决一些虚构上很好的想法、并且<b>接受低技能端的不平衡</b>。对掌握型游戏（《星际争霸 2》《反恐精英》）这是不能谈判的</span></div>
+      <div class="narw">↓ 或者</div>
+      <div class="nbox" style="border:1.5px solid #c4b5fd;border-radius:11px;background:#faf5ff"><b>为低到中技能平衡</b><br><span style="color:#475569;font-size:13px">便宜得多，因为休闲玩家不太可能发现并利用退化策略。适合那些「意义来自非技能型情感触发器」的叙事驱动游戏（《生化奇兵》《晨风》）</span></div>
+      <div class="cap">这一节的价值在于：<strong>它把「要不要为高手调平衡」从审美争论变成了成本决策。</strong>你付不付得起那笔测试费和创意上的让路。</div>
+    </div>
+
+    <h3 class="teal">平衡的根本困难，与六条方法</h3>
+
+    <p>困难的本质是：<strong>调一个机制，会改变所有牵涉到它的策略，而不只是你想要影响的那几个。</strong>游戏是复杂系统，变化会以指数级涟漪扩散开。书里给了六条应对：</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">方法</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">做法</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>先锁定核心，再调外围</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">识别一个工具最本质的方面，把它锁在极端值上，然后通过调整非本质属性、或创造新机制来加强或削弱它。<strong>这样做出来的工具更有辨识度，策略空间也更大</strong></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>需要时切得够深</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">如果一个工具没法在不损害核心身份的前提下被平衡，通常<strong>直接删掉</strong>，好过用一条不优雅的规则把它削弱（暴雪处理《星际争霸 2》雷神单位的做法）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>不要反应式修改</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">急着修一个单点问题，常常在别处制造更多问题。改动应当「解决的问题多于制造的」，并且同时考虑显性目标和隐性目标</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>来一次「调到 11」</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">定期把机制推到极端、看似疯狂的水平，<strong>用来发现新机会，并防止游戏变得平淡可预测</strong></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>用反馈收集「体验」，而不是「建议」</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">测试要用来揭示「设计在行动中是怎么运作的」，而不是收集「玩家觉得该改什么」</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>先建立系统层面的心智模型</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">在做平衡决策之前，通过大量测试，先理解这个游戏能生成哪些体验</td></tr>
+</tbody>
+</table>
+</div>
+
+    <div class="callout co-teal">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>把「平衡」从一个形容词换成一句提问：<em class="hl">我是为哪一个水平段的玩家在调，以及我愿意为它放弃什么？</em>没有这句话，平衡讨论会永远停在「这个太强了」的循环里。</p>
+    </div>
+  </section>
+
+  <!-- ================= 09 ================= -->
+  <section id="s9">
+    <div class="sec-head">
+      <div class="badge violet">09</div>
+      <h2>多人游戏：纳什均衡与心理战<span class="en">Multiplayer · 第 7 章</span></h2>
+    </div>
+
+    <p>第 7 章是全书理论密度最高的一章，核心是把「两个人在互相猜」这件事拆成可设计的结构。</p>
+
+    <p>先分清术语：博弈论里的 <code>game</code> 指的是「若干策略之间的一次特定交互」（比如一轮石头剪子布），而不是整个游戏。所以这本书用<strong>策略交互（strategy interactions）</strong>来谈这个概念。博弈论最适合用在<strong>那些具体的、短促的交互上</strong>，而不是拿来分析整个设计。</p>
+
+    <h3 class="violet">纳什均衡：一不小心就设计出一个死游戏</h3>
+
+    <div class="keyline">
+      <b>纳什均衡：一种策略组合，其中没有任何一个玩家，能仅靠改变自己的策略而改善自己的结果。</b><br>
+      <span style="font-size:15px;color:var(--ink2)">因为稳定，游玩会自然向它滑过去。</span>
+    </div>
+
+    <div class="diagram">
+      <div class="dtitle">均衡的数量 = 游戏的死法或活法</div>
+      <div class="nbox" style="border:1.5px solid #f6b8c4;border-radius:11px;background:#fff5f7"><b>只有一个纯纳什均衡</b><br><span style="color:#475569;font-size:13px"><b>这是一次失败的设计。</b>玩家永远知道该做什么，战略决策被抹掉，游戏单调</span></div>
+      <div class="narw">↓ 好一点</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>存在多个均衡</b><br><span style="color:#475569;font-size:13px">玩家必须去预测别人会选哪个 —— 思考量上来了</span></div>
+      <div class="narw">↓ 最好</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>完全没有纯纳什均衡</b><br><span style="color:#475569;font-size:13px">玩家被迫进入持续的预测、欺骗与心理博弈。<b>这是多人设计最想要的终点</b></span></div>
+      <div class="cap">所以设计多人游戏时，「有没有一个所有人都想选的答案」这个问题，值得反复问。</div>
+    </div>
+
+    <h3 class="violet">两种基本骨架：石头剪子布 与 猜硬币</h3>
+
+    <div class="split">
+      <div class="mini info">
+        <h4>石头剪子布模式</h4>
+        <p>三角反制结构：A 胜 B、B 胜 C、C 胜 A。它是<strong>在对称游戏里造出「无纯均衡」的最简单办法</strong>，常见于格斗游戏的「格挡 / 出拳 / 投技」。</p>
+      </div>
+      <div class="mini info">
+        <h4>猜硬币模式（Matching Pennies）</h4>
+        <p>用在<strong>非对称</strong>游戏里：一方想「猜中」另一方的选择，另一方想「不被猜中」。比如防守方猜进攻方从哪个口进。</p>
+        <p>书里的例子是《星际争霸 2》里飞龙 / 机枪兵 对上 毒爆虫 / 坦克的交互 —— 复杂的猜硬币情境，没有纯均衡存在，因此持续驱动战略预测。</p>
+      </div>
+    </div>
+
+    <p>当游戏里没有纯均衡时，玩家会退到<strong>混合策略（mixed strategy）</strong>：按一定概率随机地选。书里的例子是点球 —— 踢球者最优的做法，就是按某个频率随机选强侧和弱侧。而在均衡状态下，<strong>每一个可能的招数，平均收益都是相等的</strong>。现实中的玩家不需要算数，靠直觉也能摸到这个混合比例。</p>
+
+    <h3 class="violet">心理战（Yomi）：比数学模型更高一层</h3>
+
+    <p>均衡是数学，而真实对局是<strong>yomi</strong> —— 预测、欺骗、在纯数学之外赢过对手的心智游戏。它在收益无法量化、策略无法干净切分的地方最繁盛。书里列了五个让 yomi 繁荣的条件：</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">条件</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">说明</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>策略之间可以平滑混合</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">有细腻、可以无限组合的策略空间（《星际争霸 2》里精确的兵种配比），专家才能利用微小差异</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>收益复杂、难以量化</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">结果取决于单位造价、位置、情境、技能差等一堆变量 —— 评估收益本身成了很深的逻辑与情绪挑战</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>随机性的心理学</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">人类做不出完美随机。于是对手的「随机」选择里就有偏差可以利用</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>信息可以被操控</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">玩家会去找信息、拒绝信息、或者植入假信息（侦察兵、烟雾弹、幻象单位），由此形成多层欺骗</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>玩家数量少</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">yomi 需要在大脑里给对手建模，超过 2–3 个人就很难做到。大游戏可以通过临时把玩家隔离成小组来培育 yomi</td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3 class="violet">案例：《现代战争 2》</h3>
+
+    <p>书里用《现代战争 2》说明一个看似简单的射击游戏，为什么能靠 yomi 撑起长期流行：</p>
+
+    <ul>
+      <li><strong>核心交互是一次「猜硬币」</strong>：在看不到对方的情况下，判断他会不会出现在某个路口、你会不会去那个路口。</li>
+      <li><strong>边缘是模糊的</strong>：除了「看哪个口」之外，还有一堆选项 —— 换观察姿势、在掩体里挪动、直接冲出去。</li>
+      <li><strong>信息被速度藏起来</strong>：必须在不完整信息下快速决定，只能靠直觉。</li>
+      <li><strong>武器致命</strong>：一两枪毙命，所以交锋之前的决策至关重要。yomi 在双方的视线之外就已经打完了。</li>
+      <li><strong>收益复杂</strong>：结果取决于位置、武器类型、特殊装备、队内通讯、目标、个人技术 —— 组合出的决策复杂度相当高。</li>
+    </ul>
+
+    <p>结论是那句总结：它不是无脑的，它是<strong>脑力的</strong> —— 玩家参与的是一场心智评估与反评估的复杂舞蹈。</p>
+
+    <h3 class="violet">破坏性的玩家行为</h3>
+
+    <p>多人游戏里，玩家自己的目标可能为所有人毁掉游戏，因为它会打乱精心调好的结构。两类问题：</p>
+
+    <div class="split">
+      <div class="mini bad">
+        <h4>目标分歧（Divergent Goals）</h4>
+        <p>玩家追求的目标会破坏别人的体验：只顾击杀不管目标、或者试图在合作游戏里「单刷」。其中故意破坏他人游玩体验的行为就是 griefing。</p>
+        <p><strong>四种对策</strong>：让分歧目标与官方目标对齐（把「击杀」也算进目标）；用大玩家数来缓冲；让破坏行为变得不可能（允许玩家互相穿过）；引入监管机制（投票、管理员）。</p>
+      </div>
+      <div class="mini bad">
+        <h4>技巧差异（Skill Differentials）</h4>
+        <p>差距过大时，技术差的玩家被压得难受，技术好的玩家觉得无聊或恼火。</p>
+        <p><strong>五种对策</strong>：把设计做得更简单优雅（降低技能壁垒）；匹配算法（把水平相近的人配到一起）；结构性方案（组队前允许新手单玩，《魔兽世界》）；自适应训练（《求生之路》的即时指导）；降低相互依赖（允许共享胜利，但不强制共享失败，比如射击游戏里可选、短期的联盟）。</p>
+      </div>
+    </div>
+
+    <div class="callout co-violet">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>多人设计的成败，先看一个结构性问题：<em class="hl">我的游戏里，有没有一个「所有人都该选」的答案？</em>有，就先用石头剪子布或猜硬币的骨架把它拆掉；拆不掉，再好的美术和手感也只能延缓它变无聊。</p>
+    </div>
+  </section>
+
+  <!-- ================= 10 ================= -->
+  <section id="s10">
+    <div class="sec-head">
+      <div class="badge rose">10</div>
+      <h2>动机与实现：多巴胺不是快乐<span class="en">Motivation &amp; Fulfillment · 第 8 章</span></h2>
+    </div>
+
+    <p>这一章从一开始就纠正一个被广泛误用的常识。</p>
+
+    <div class="keyline">
+      <b>多巴胺标记的是「想要」（wanting），不是「喜欢」（liking）。</b><br>
+      <span style="font-size:15px;color:var(--ink2)">早期的自我刺激实验让人以为多巴胺就是愉悦；后来的研究显示，多巴胺在奖励<strong>之前</strong>激增，驱动的是对目标的追求。而且人可以「想要」某样东西，同时并不「喜欢」它 —— 反过来也成立。</span>
+    </div>
+
+    <p>这条区别是整个第 8 章的支点。游戏正是通过<strong>制造奖励预期</strong>来驱动玩家的多巴胺：真实世界的奖励（食物、金钱、安全）很强，但虚拟奖励（经验值、游戏内货币、装备、剧情推进、高分）同样能引发多巴胺 —— 因为大脑并不区分真实与虚拟。这就是为什么游戏明明无关紧要，玩家却停不下来。</p>
+
+    <h3 class="rose">强化程序：行为主义那一套真的在这里生效</h3>
+
+    <p><strong>强化程序（reinforcement schedule）</strong>定义了「什么时候给奖励」。书里按斯金纳的框架逐条对照到游戏里：</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">程序</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">规则</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">在游戏里的效果</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>固定比率</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Fixed Ratio</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">每 N 次行动给一次</td><td class="n" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">差劲的激励者：活动会一阵爆发、然后低落（每击败第 10 个兽人给一个金币）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>可变比率</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Variable Ratio</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">随机次数之后给（如每次 10% 概率）</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">最强的简单程序：持续希望下一个就是大奖，活动量高而稳定 —— 也是赌博与老虎机的原理</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>固定间隔</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Fixed Interval</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">固定时间之后奖励可用</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">临近奖励之前动机低</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>可变间隔</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Variable Interval</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">随机时间之后奖励可用</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">动机持续但强度较低</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>差别强化</strong><br/><span style="font-size:12.5px;color:var(--ink3)">DRL / DRH</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">按活动速率给奖励</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">奖励「慢下来」或「快起来」这类特定节奏</td></tr>
+</tbody>
+</table>
+</div>
+
+    <p>两个延伸概念特别值得记住：</p>
+
+    <div class="split">
+      <div class="mini info">
+        <h4>叠加的强化程序</h4>
+        <p>为了消除动机低谷，游戏会<strong>同时跑好几套程序</strong>：某套进入间隙时，另一套正处在峰值。</p>
+        <p>「刷怪 RPG」就是靠这个：掉落、升级、制作，总有一条指向「几分钟后的下一个奖励」。《文明 5》的「再来一回合」综合症，来自几十套叠加的程序。<strong>关键是要让它们保持不同步，别让玩家只盯着其中一套。</strong></p>
+      </div>
+      <div class="mini info">
+        <h4>浮现的强化程序</h4>
+        <p>游戏里大多数强化程序并不是显式设计的，而是<strong>从底层系统里涌现出来的</strong>。</p>
+        <p>国际象棋里吃子的节奏本身就是一个涌现的可变比率程序；死斗游戏里随机出现的击杀数也一样。<strong>玩家对涌现程序的反应，和面对显式程序没有区别。</strong></p>
+      </div>
+    </div>
+
+    <h3 class="rose">内在动机为什么会被奖励毁掉</h3>
+
+    <p>书里把奖励分成两类：<strong>外在奖励</strong>与工作本身分离（打完一段给钱）；<strong>内在奖励</strong>与活动不可分（你就是喜欢和兽人打架这件事本身）。</p>
+
+    <p>要命的地方在于：<strong>外在奖励可以取代、甚至摧毁内在动机。</strong>研究显示，给本来出于内在愉悦而做的事付钱，等奖励拿掉之后人会失去兴趣 —— 这种效应对探索性和创造性任务最强。外在奖励还有两个副作用：制造反常激励（开发者之间出现破坏性竞争、恐惧和自私，抑制创造力），以及分散注意力（把宝贵的脑力从工作上拉走，换成一堆奖励最大化的计算）。</p>
+
+    <p>那还能不能用奖励？能，条件是<strong>奖励的一致性（rewards alignment）</strong>：奖励所鼓励的行为，和玩家在没有奖励时本来就会做的事，有多接近。<strong>只奖励玩家本来就想做的事。</strong></p>
+
+    <div class="diagram">
+      <div class="dtitle">奖励一致性的三个难度档</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>容易对齐</b><br><span style="color:#475569;font-size:13px">赛车游戏奖励更快的圈速 —— 快就是玩家本来想干的事</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>困难对齐</b><br><span style="color:#475569;font-size:13px">创造性或社交类游戏：内在目标难以检测、难以奖励。比如在《模拟城市》里建一座「像你家」的城市</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>精心制作的对齐</b><br><span style="color:#475569;font-size:13px">《滑板 3》的花式计分系统能准确评判一段让人印象深刻的花式连招，<b>和玩家「想耍帅」的内在欲望完全对齐</b>；同时还为竞速、受伤这类非标准目标做了专门模式</span></div>
+      <div class="cap">这一节的判据可以简化成一句：<strong>如果你必须靠奖励去改变玩家的行为，说明机制本身没给出足够的理由。</strong></div>
+    </div>
+
+    <h3 class="rose">玩家的悔恨感：这一章真正的落点</h3>
+
+    <p><strong>玩家的悔恨感（player's remorse）</strong>是指：玩家在一个「能激励他、却没有满足他」的游戏上花掉时间之后产生的那种感觉。</p>
+
+    <p>这是一个伦理问题，而且是有意被写成伦理问题的。游戏可以调用史前的多巴胺机制，逼出不理性、自我毁灭的行为。作者给这类东西起了个名字：<strong>强迫机器（compulsion machines）</strong> —— 把「最大化动机」放在「满足玩家」之上的游戏。伊恩·博格斯特的玩笑之作《Cow Clicker》就是极端的讽刺：整个游戏就是一圈赤裸的固定间隔强化程序。</p>
+
+    <div class="callout co-rose">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>作者的立场很清楚：<strong>造斯金纳箱不是关心手艺的设计者该有的目标。</strong>他给出的长远理由也很务实 —— 等玩家的战利品欲耗尽、所有花招都被看穿之后，他们想要的还是那些从头到尾都在要的东西：<em class="hl">新想法、新朋友、新体验。</em></p>
+    </div>
+  </section>
+
+  <!-- ================= 11 ================= -->
+  <section id="s11">
+    <div class="sec-head">
+      <div class="badge green">11</div>
+      <h2>界面：从未被传达的，等于从未发生<span class="en">Interface · 第 9 章</span></h2>
+    </div>
+
+    <p>这一章的第一句话就值得贴在墙上：<strong>从来没有被传达出去的东西，就等于从来没有发生过。</strong>你把一个绝妙的机制做进了代码，玩家没感知到，那对它来说这个机制不存在。</p>
+
+    <p>章分两半：<strong>游戏怎么把信息送出去</strong>（象征、信号、层次、冗余、间接控制），以及<strong>玩家怎么把意图送进来</strong>（输入）。</p>
+
+    <h3 class="green">上半：把信息送出去</h3>
+
+    <h4>象征（Metaphor）：用熟悉的外形包装陌生的机制</h4>
+
+    <p>书里的用词是「象征」（日常叫隐喻）：<strong>给新事物一个熟悉的外观，让它更容易被理解。</strong>整个虚构层其实就是一层巨大的象征 —— 把复杂机制包在熟悉图像里，来摊平学习曲线。象征的来源有好几种：真实物体（汽车、书、背包）、文化原型（尖山羊胡 = 邪恶）、游戏惯例（食物瞬间治愈枪伤、金色盔甲更强）、逻辑系统（牛顿物理、电、火）、更高层的概念（经济、政治、心理）、以及抽象数学系统（数字、时间、空间）。</p>
+
+    <p>但这里有一个关键推论：<strong>真实物体的功能里，只有一小部分子集真的被机制实现了。</strong>所以游戏必须建立一套<strong>象征词汇表</strong> —— 一组前后一致的视听觉线索，用来指示「这个可以交互」「那个和机制有关」。比如《波斯王子》里只有特定花纹的砖块可以攀爬。没有这套词汇表，玩家就会做错假设，然后撞上那个经典的「冒险游戏问题」：一个在虚构上完全合理的方案，在游戏里就是不成立。</p>
+
+    <h4>信号与噪声</h4>
+
+    <p><strong>噪声</strong>就是那些没能传达有意义信息的信号。玩家被淹没或困惑时，信号就退化成噪声。书里点出一个特别容易被忽视的来源：<strong>美术复杂度本身就是噪声</strong> —— 再漂亮的环境细节，只要与机制无关，就在挤占玩家辨别重要元素的注意力。灰盒关卡一旦盖上完整美术就变得不直观，就是这个原因。这就要求设计者和艺术家合作，做出既抢眼又清晰的美术。有些游戏干脆靠独特的艺术风格从源头降噪（《军团要塞 2》《镜之边缘》）。</p>
+
+    <p>另一个限制是：<strong>玩家一次只能吸收有限数量的信号</strong>，超过就会过载。</p>
+
+    <h4>视觉层次：让重要的东西自己跳出来</h4>
+
+    <p>管理信号密度的办法就是<strong>视觉层次</strong>：越重要的信息做得越显眼，让玩家先注意到它。它利用的是人类无意识里「优先看更大、更近、更亮、更快的东西」的倾向。好处是<strong>不同水平的玩家会自动只接收到对自己有用的信息</strong>，既不过载，也不会漏掉关键数据。</p>
+
+    <div class="tags">
+      <span>敌人做得大、且在画面中心</span>
+      <span>远处的敌人更小</span>
+      <span>血量濒危时改变可见性（比如红色覆盖）</span>
+      <span>弹药数放在角落，但低弹量时更显眼</span>
+    </div>
+
+    <h4>冗余：重要的信息，说三遍</h4>
+
+    <div class="split">
+      <div class="mini info">
+        <h4>同质冗余</h4>
+        <p>用同一种方式重复同一条消息：五个地方都放同一段音频日志。</p>
+      </div>
+      <div class="mini info">
+        <h4>多样冗余</h4>
+        <p>用不同方式传达同一条信息：同伴喊一声 + 视觉上挥手 + 路径高亮 + HUD 目标标记。<strong>这种「四重冗余」大幅提高消息送达的概率。</strong></p>
+      </div>
+    </div>
+
+    <p>还有一种更省的：<strong>被动冗余</strong> —— 次要消息只在主消息失败时才显示。</p>
+
+    <h4>间接控制：不让玩家察觉你在引路</h4>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">手段</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">怎么做</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">要点</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>微影响</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Nudging</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">改变选项的<strong>呈现方式</strong>（默认项、亮着灯的门），而不改变选项本身</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">玩家会自然走阻力最小的那条路</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>灌输</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Priming</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">激活玩家心里的某个概念，影响他之后的行为（战争片让攻击性上升；与「礼貌」相关的词让人更礼貌）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">游戏里：看到医生会想到治疗；一段战斗画面的铺垫可以让玩家开枪打线人。<strong>灌输改变的是偏好，不是虚构上的动机</strong></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>社会模仿</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Social Imitation</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">玩家会自然模仿别人 —— 不管是 NPC（电脑车在弯道减速）还是其他玩家（多人里流行的打法）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">同伴角色在这件事上价值极高：他们可以把玩家引到目标点，或示范某种行为</td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3 class="green">下半：把意图送进来</h3>
+
+    <p>输入设计的目标只有一个：<strong>让玩家的意图和游戏内的动作同步。</strong>好的输入会让交互本身变成愉悦；坏的输入可以毁掉一个其他方面都很出色的游戏。</p>
+
+    <h4>操作布局</h4>
+
+    <p>两个词：<strong>映射（mapping）</strong> —— 在物理操作和它的游戏内效果之间建立相似性（左扳机对应左手技能），它充当记忆辅助，降低学习负担；以及<strong>控制排他性</strong> —— 让物理按键的限制和游戏内动作的限制对上（不能一边换武器一边开火），这样能避免挫败，并自然地教会玩家机制。</p>
+
+    <h4>操作感</h4>
+
+    <p><strong>操作感（control feel）</strong>是通过界面逐帧投射意图时的那种体验。它背后往往是一堆复杂、甚至不写实的底层规则 —— 《超级马里奥兄弟》的跳跃就包含可变重力、空中控制和输入缓冲，这些隐藏的复杂性正是那种「快乐、跟手」的来源。<strong>这是优雅的一个例外：设计成本很高，但对玩家完全不可见，最后的效果是界面「消失」。</strong></p>
+
+    <h4>输入协助</h4>
+
+    <p><strong>输入协助</strong>会预处理玩家的原始输入，智能猜测意图并轻微推动输入去匹配，理想状态下玩家察觉不到。主机射击游戏的<strong>瞄准辅助</strong>就是典型：它用好几套交错的子系统来帮助追踪目标、让准星停在目标身上、微妙地修正瞄准方向。这些调整发生在输入流的「角落和缝隙」里，玩家感知不到。瞄准辅助还可以当成平衡工具 —— 在非预期的用法里，它可以被用来微妙地削弱武器。</p>
+
+    <h4>操作延迟：一个被低估的、有具体数字的取舍</h4>
+
+    <p>操作延迟是输入与可感知反馈之间的时间差。硬件管线的处理决定了它不可能为零（通常在 3–4 帧），写得差的代码会把它放大。其中最硬的取舍是帧率：</p>
+
+    <div class="stats">
+      <div class="stat"><div class="num rose">100–133 ms</div><div class="lab">30 fps 下的典型延迟<br>换来更丰富的画面</div></div>
+      <div class="stat"><div class="num teal">50–67 ms</div><div class="lab">60 fps 下的典型延迟<br>更跟手，但图形算力代价显著</div></div>
+      <div class="stat"><div class="num amber">↑ 越大</div><div class="lab">延迟越大，玩家越需要提前输入<br>操作感就越不同步</div></div>
+    </div>
+
+    <p>书里还点了一个很现实的观察：内部常有反对 60 fps 的压力，因为帧率对艺术家和程序员的直接影响是具体的，而 60 fps 的好处却更难被感知。所以<strong>必要的时候，设计者必须为它站出来辩护</strong>。理想帧率取决于玩家技能（射击、格斗这类高响应需求的游戏，高技能玩家需要 60 fps）、界面类型和情绪触发器 —— 视觉或叙事驱动的游戏，可能会选择 30 fps 去换更丰富的画面。</p>
+
+    <p>最后一条提醒很诚实：<strong>输入之所以难设计，是因为它难以被感知</strong> —— 它的复杂性是被刻意对玩家隐藏的，所以它的重要性长期被低估、投入长期不足。但作者说，输入几乎总是值得投入，因为它从根本上塑造着玩家逐帧的体验，即使它自己不被注意到。</p>
+
+    <div class="callout co-green">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>把界面看作<strong>一条预算有限的信道</strong>：噪声（与机制无关的美术细节）在偷带宽，冗余在提高送达率，视觉层次在做优先级排序，间接控制在替玩家省决策成本。而它的另一端 —— 输入 —— 是<em class="hl">唯一一个「做好了没人夸、做砸了毁一切」的部件。</em></p>
+    </div>
+  </section>
+
+  <!-- ================= 12 ================= -->
+  <section id="s12">
+    <div class="sec-head">
+      <div class="badge amber">12</div>
+      <h2>市场：每个决策都被「为什么做它」影响<span class="en">The Market · 第 10 章</span></h2>
+    </div>
+
+    <p>这一章放在设计手艺的最后，不是因为它更高级，而是因为它是一个<strong>前置约束</strong>：</p>
+
+    <div class="keyline">
+      <b>每一个游戏的诞生都有目的 —— 而每一个设计决策，都会被这个目的影响。</b><br>
+      <span style="font-size:15px;color:var(--ink2)">目的是赚钱（销售、订阅、内购），也可以是非金钱的（艺术表达、学术实验、自娱自乐）。两者都行，但你不能不知道自己的是哪个。</span>
+    </div>
+
+    <p>书里给了一组很直观的对照：街机游戏为快速利润设计 —— 机制快、视觉表现强、单局时间短、操作简单、成功条件有弹性，一切都是为了让你再投一枚币；MMO 的目标是每月留住玩家 —— 海量内容、深度升级系统、加上社区社交功能；传统盒装游戏靠销量和口碑驱动 —— 最鼓励「为伟大体验而设计」；非商业游戏则聚焦表达某个想法。</p>
+
+    <h3 class="amber">锦标赛市场与马太效应</h3>
+
+    <p>游戏是<strong>非竞争性商品</strong>（可以近乎零成本无限复制），这让游戏市场变成一个<strong>赢者通吃的锦标赛</strong>：最好的一款可以吃掉整个市场，剩下的人一无所有。它给赢家带来巨大回报，同时<strong>把海量的失败者藏了起来 —— 你看到的成功案例是被幸存者偏差筛过的。</strong></p>
+
+    <p>而已经流行的游戏还会持续获得优势，这就是<strong>马太效应</strong>：玩的人越多越好玩（社区更强、伙伴更多、用户内容更多）；成功的工作室拿到钱、信誉和地位；消费者天然偏向熟悉的品牌。不过书里也补了一句安慰：即便如此，占主导的系列仍然会被定期掀翻 —— 靠的正是下一条。</p>
+
+    <h3 class="amber">创新者的窘境</h3>
+
+    <p><strong>创新者的窘境</strong>描述的是在位者面对的两难：<strong>要不要为了创新而放弃自己的旗舰产品？</strong>成功的工作室被内部惯性、股东要求、根深蒂固的习惯和对损失的恐惧捆住，慢慢失去创作之火。</p>
+
+    <p>这恰好抵消了马太效应：<strong>更小、更没包袱的新贵可以冒险创新，最终掀翻停在原地的在位者。</strong></p>
+
+    <h3 class="amber">价值曲线：为什么「少做几件事」反而能赢</h3>
+
+    <p>书里用两个概念把市场定位变成可以画出来的东西：<strong>市场价值</strong>是游戏体验里能吸引某群人的方面（一个游戏常有多种）；<strong>价值曲线</strong>则是把不同游戏在各项市场价值上打分后画出的曲线，用来看出「差异、优势、重叠」。</p>
+
+    <p>核心判断是：<strong>真正重要的是那些「比其他所有供给都更好」、尤其是完全没有竞争的价值。</strong>《生化奇兵》就是靠「装饰艺术风格的世界」「大老爹 / 小妹妹生态」这类独特价值站住的。</p>
+
+    <p>而价值是要花资源的，堆太多会导致过度复杂、体验稀释，甚至互相冲突。这里有一组很好用的形状比喻：</p>
+
+    <div class="split">
+      <div class="mini good">
+        <h4>尖刺状曲线：小而成功游戏的形状</h4>
+        <p>在一两个大游戏没服务好的价值上<strong>极度聚焦</strong>，做成一根高而窄的尖刺。例子是《Garry's Mod》《超级食肉男孩》《我的世界》。</p>
+        <p>原则一句话：<strong>在一件事上做到最好，胜过在十件事上平庸。</strong></p>
+      </div>
+      <div class="mini bad">
+        <h4>树桩状曲线：失败游戏的形状</h4>
+        <p>什么都想做一点，结果变成大游戏的一个平庸版本，<strong>没有任何独特价值</strong>。</p>
+        <p>作者的处方是「让野心匹配资源」：小团队必须把资源收得更窄，专注在少数几个能起最大作用的价值上。</p>
+      </div>
+    </div>
+
+    <h3 class="amber">未开发的细分市场：《模拟人生》</h3>
+
+    <p>市场并不是完美均衡的，所以<strong>服务不足的细分市场，对能找到它的人意味着异常高的利润</strong> —— 代价是：没有现成玩家、没有惯例可循，必须下大注，而且需要运气。</p>
+
+    <p>书里举的正例是威尔·赖特的《模拟人生》——它最初被焦点小组和高管拒绝，还被叫做「厕所游戏」，最后却发现了一个巨大且未被服务的「家庭管理游戏」市场，成了史上最畅销的 PC 系列之一。</p>
+
+    <h3 class="amber">没有人什么都知道</h3>
+
+    <p>紧接着是整章最诚实的一节。市场模型都是简化，真实市场极其复杂且不可预测：名人代言、新闻报道、政治风向，任何一件都能戏剧性地改变一款游戏的命运。书里的例子是《星际争霸》在韩国的爆发 —— 它由 PC 网吧、宽带基础设施和当时已有的围棋电视转播渠道共同促成，事后可以说成必然，事前没人能预测。这就是那句编剧界的箴言：<strong>Nobody knows anything!</strong></p>
+
+    <h3 class="amber">证实偏见：营销其实在塑造体验</h3>
+
+    <p><strong>证实偏见</strong>是「人倾向于以确认既有信念的方式去感知事物」。由营销、标题和口碑设定的预期，会深刻影响游玩体验本身 —— 一瓶被描述成很差的啤酒，喝起来就是很差，哪怕它实际上更优秀。</p>
+
+    <p>同理，如果游戏被打上「令人满足的挑战」这个标签，玩家就会把挫败的失败解释成有意的设计。<strong>所以设计者不能忽视营销 —— 它在玩家开始游玩之前，就已经在塑造玩家的感知了。</strong></p>
+
+    <p>由此，「设置预期」成了设计工作的一部分：游戏标题是第一个预期设定者（《毁灭战士》和《模拟城市》这两个名字传达的东西完全不同）；广告、访谈、文章为角色、动作、情绪和主题设定预期；而口碑是最强的一个，它被社会压力放大 —— 玩家会同步彼此的看法，并调整自己的记忆来匹配共识。</p>
+
+    <div class="callout co-amber">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>把营销人员当作核心体验团队的一员，而不是事后帮忙卖东西的人。<em class="hl">标题和传播话术是在「设置预期」，而预期会反过来改写玩家的实际感受</em> —— 这是一条真实存在的设计变量，不是一个宣传口径问题。</p>
+    </div>
+  </section>
+
+  <!-- ================= 13 ================= -->
+  <section id="s13">
+    <div class="sec-head">
+      <div class="badge rose">13</div>
+      <h2>规划与迭代：接受自己一定会犯错<span class="en">Planning &amp; Iteration · 第 11 章</span></h2>
+    </div>
+
+    <p>第 3 部分「流程」从这一章开始，态度比前两部分更硬：<strong>游戏设计本质上是一项充满不确定性的工作，你的计划一定会在接触到现实之后失效。</strong></p>
+
+    <div class="split">
+      <div class="mini bad">
+        <h4>规划太少 · 代价</h4>
+        <p><strong>白干</strong>：做了后来发现不需要、或已经过时的任务。<br>
+        <strong>协作崩坏</strong>：没有清晰的整体愿景，不同人的工作在接口上对不上。<br>
+        <strong>饿死外部相关方</strong>：没法给投资人、市场、招聘经理提供他们需要的信息。<br>
+        最后得到一个「没有焦点的弗兰肯斯坦怪物」。</p>
+      </div>
+      <div class="mini bad">
+        <h4>规划太多 · 代价</h4>
+        <p><strong>时间和精力</strong>：写、辩论、维护大量计划本身是巨大负担。<br>
+        <strong>削减成本</strong>：从详细计划里砍想法，心理上和政治上都极其困难。<br>
+        <strong>虚假的确定感</strong>：书面计划充满假设，一旦假设被证伪，变化会以指数级连锁穿过整个设计 —— 结果就是错过截止日期和加班。</p>
+      </div>
+    </div>
+
+    <p>书里举的两个真实例子足以说明问题：《光环》最初并不是 FPS，而是一款俯视视角的策略游戏；《生化奇兵》最初的设定在宇宙飞船上，而不是海底城市。</p>
+
+    <h3 class="rose">迭代：把预测换成一次次现实检验</h3>
+
+    <div class="keyline">
+      <b>迭代 = 制定短期计划 → 实施 → 测试 → 重复。</b><br>
+      <span style="font-size:15px;color:var(--ink2)">它看起来是线性的，实际上是循环的。它的价值在于：<strong>你不需要预测遥远的未来，只需要知道这一圈要做什么。</strong>每一圈都拿一次现实检验，换回一条可靠的知识。</span>
+    </div>
+
+    <p>作者描述了一次具体的迭代循环（以 FPS 的战斗场景为例）：先在灰盒里粗糙地搭出战斗、尽快让它可玩，哪怕它很糟；然后快速循环，做大的概念改动（把塔改成桥）并在几分钟到几小时内重测；概念凝固后再把循环拉长、改动变小（调整掩体位置）；接着拉进艺术家确认可行性；当自测不再产生新见解时，引入外部测试者，只在旁边看、不干扰；最后把音频、对白、世界叙事等其他学科并入循环。</p>
+
+    <h3 class="rose">规划周期：五个决定「能看多远」的因素</h3>
+
+    <p>规划周期（planning horizon）是设计者向未来规划的时间跨度。书里给了五条判断规则：</p>
+
+    <ol class="steps">
+      <li><strong>不确定性越强，周期越短。</strong>如果计划高度不确定（比如一款原创游戏），周期应该短到以天计。</li>
+      <li><strong>确定性允许长周期。</strong>非原创、衍生的游戏构建在已有知识上，可以规划得更远。</li>
+      <li><strong>周期应当随项目推进而逐渐延长。</strong>核心元素越确定，就越敢往后看。</li>
+      <li><strong>测试成本越低，周期越短、越可以实验。</strong></li>
+      <li><strong>如果目标是概念性的飞跃，可以规划得更远 —— 但风险更高。</strong>失去测试的深层规划能做到激进的新想法，代价是没人给你兜底。</li>
+    </ol>
+
+    <h3 class="rose">那为什么我们还总是过度规划？</h3>
+
+    <p>这一节是整章的心理学核心，五个原因层层递进：</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">原因</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">说明</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>文化习性</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">社会一直在教我们「提前规划、考虑未来」。它对某些任务（比如建水坝）确实有效，但对天生不确定的游戏设计无效</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>与生俱来的自负</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">人类有乐观偏差，会系统性地高估自己的预测能力。<strong>一个 90% 自信的估计，实际可能只有 30% 的准确率</strong></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>治愈性规划</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">面对不确定的未来，规划能减轻内心焦虑 —— 但它<strong>并没有解决实际问题</strong>，只是提供了一种确定感</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>群体规划偏差</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">团队会奖励自信、看起来果断的领导者，而不是理性地表达不确定的人 —— 哪怕前者的自信是妄想</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>后见偏差</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">记忆会被悄悄重排，让过去的事显得比实际更可预测。这让人无法从错误中学习，还不断强化「深层规划是可能的」这个信念</td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3 class="rose">测试协议：看的人比问的人更重要</h3>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">环节</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">要点</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>自测</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">最便宜的协议，能揭示心流、节奏、平衡的大部分问题，也能抓技术 bug。适合早期循环</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>肩后测试</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">看别人玩，比自测好，因为对方知道得更少、反应更多样。<strong>最关键的一条纪律：设计者必须保持沉默</strong>，不要说话、不要提示，否则测试就被污染了</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>选择测试者</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">按「对游戏的熟悉度」（完全新手测初始反应，专精玩家测高技能平衡）和人口特征（年龄、性别、文化）来选，要匹配目标市场</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>样本量</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">需要足够多的场次，才能建立起「这个游戏能生成哪些体验」的心智模型。当你发现测试者反复得到相同的体验时，就可以停了</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>询问技巧</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">口头报告不可靠。用<strong>记忆探针</strong>（「跟我讲讲刚才发生了什么」）和间接提问（「你为什么选那条路？」）去理解玩家的内部体验，同时不引导他。保持专业、开放的语调</td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3 class="rose">灰盒：这一章最实用的一条</h3>
+
+    <p><strong>灰盒（grayboxing）</strong>是用低保真的占位内容，去做机制、系统或关卡的可玩版本。书里的判断很重：</p>
+
+    <div class="quote">
+      <b>游戏设计最接近「剧本」的东西，不是一个设计文档，而是一个能跑的灰盒原型。</b>
+      <span class="who">—— 第 11 章「剧本象征」一节</span>
+    </div>
+
+    <p>理由很扎实：剧本让人能靠填补视听细节去想象一部电影；而设计文档描述的是机制，它要求读者在脑子里模拟玩家的选择和系统交互 —— <strong>这超出了人类的能力</strong>。灰盒把机制模拟这部分替你跑掉了，于是你的心智可以专心去想象画面，就像读剧本一样。</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">概念</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">说明</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>早产型创作</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Premature Production</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">在「为了拿到下一轮测试数据」需要之前，就给灰盒加上美术和音频。<br/><strong>好处短暂</strong>（视觉带来的情绪提升立刻耗散），<strong>代价长期</strong>（不断重做美术来匹配变化的机制，拖慢迭代；还会掩盖机制上的弱点，导致将来想修就得撕掉昂贵的成品）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>不能灰盒的内容</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对视听驱动的体验不太管用 —— 《LIMBO》这类游戏里，美术和音乐本身就是主要的情感触发器</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>灰盒评估技巧</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">评估灰盒是一项<strong>需要练习的能力</strong>，因为一个好灰盒「感觉上」并不像一个好成品。缺乏这项能力的人（尤其是没做过实操的人）容易被<strong>光环效应</strong>误导：仅仅因为缺少视觉润色，就否掉一个优秀的灰盒设计</td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3 class="rose">三条更难接受、也更有价值的结论</h3>
+
+    <div class="diagram">
+      <div class="dtitle">迭代的三个反直觉推论</div>
+      <div class="nbox" style="border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0"><b>品质的矛盾性</b><br><span style="color:#475569;font-size:13px">在游戏设计里，<b>暂时接受低质量的工作，最终会导向更高质量的工作</b>。痴迷于每个早期阶段的质量会拖慢迭代、减少循环次数，最后做出更差的产品。因为游戏里的一切都会被反复修订和重建，早期工作只是未来的「跳板」</span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #f6b8c4;border-radius:11px;background:#fff5f7"><b>幻想的误区（Fallacy of Vision）</b><br><span style="color:#475569;font-size:13px">误以为「脑内那部体验电影」就等于「生成该体验的系统的设计」。愿景鼓舞人心，但它不考虑取舍、代价，也不考虑这套系统还会生成哪些别的体验。它天然会隐藏缺陷、只挑最好结果展示，因此导致过度自信和过度规划。<b>解药是：刻意去设想最可能的糟糕体验</b></span></div>
+      <div class="narw">↓</div>
+      <div class="nbox" style="border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9"><b>机缘巧合（Serendipity）</b><br><span style="color:#475569;font-size:13px">「未知的未知」既是灾难的来源，也是设计中最有价值的东西的来源 —— 很多革命性的设计是被意外发现的，而不是被创作出来的（《龙与地下城》长出了《Rogue》，《模拟城市》长出了《模拟人生》）。<b>迭代对「未知的未知」是稳健的</b>，因为它允许你适应新发现。作者因此说：游戏设计是一个观察和发现的过程，而不只是创作的过程</span></div>
+      <div class="cap">最后一节叫「相信迭代」。作者的观察很扎心：<strong>多数设计者只有在经历了多年由深层规划带来的失败之后，才会真正相信迭代</strong> —— 而且通常需要把一款游戏一路做完、发布给真实玩家，拿到那份不可辩驳、令人难受的反馈，情绪上才会真的转向。</div>
+    </div>
+
+    <div class="callout co-rose">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>这一章其实只要求你接受一件事：<em class="hl">你现在对这款游戏的想象，是错的。</em>不是「可能有偏差」，是「一定是错的」。接受这一点之后，规划、测试、灰盒、删掉重做，都只是自然动作而已。</p>
+    </div>
+  </section>
+
+  <!-- ================= 14 ================= -->
+  <section id="s14">
+    <div class="sec-head">
+      <div class="badge violet">14</div>
+      <h2>创造知识：设计其实是发明知识<span class="en">Knowledge Creation · 第 12 章</span></h2>
+    </div>
+
+    <p>这一章把游戏设计重新定义了一次：</p>
+
+    <div class="keyline">
+      <b>游戏是一个知识系统。游戏设计中最困难的部分不是「实现」，而是发明和提炼关于这个设计的知识。</b><br>
+      <span style="font-size:15px;color:var(--ink2)">这份知识，是所有改进、测试、讨论，以及把它们搭成一个能完美运行的整体的基础。</span>
+    </div>
+
+    <p>由此，掌握设计过程的核心能力，就变成了<strong>知道什么时候该用哪一种获取知识的方法</strong>，并对项目状态持续做出反应。</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">方法</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">它在做什么</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">用对的姿势</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>沉思</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Rumination</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">长时间思考一个问题，常常是无意识的（洗澡、走路时）。它在旧想法之间形成新连接</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">需要两样东西：<strong>知识</strong>（大量多样的想法储备 —— 玩各种游戏，也包括无关领域的知识）和<strong>放松</strong>（愤怒、恐惧、过度专注会在神经层面抑制创造力，点子会跑掉）。一个实用技巧是交替思考不同问题</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>研究</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>定向研究</strong>解答具体问题（中世纪的建筑长什么样）；<strong>半随机研究</strong>不预设用途地学，扩大一般知识以喂养沉思</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">为了摆脱信息茧房，应该有意识地培养不寻常的兴趣。《生化奇兵》那个独特的世界（销魂城、客观主义）就是从这类研究里长出来的</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>美术方法</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">靠「手上一直在做东西 + 记录想法」来生成新思路</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">概念艺术、故事板、预可视化、雕刻、写短篇、即兴短剧、音景 —— 这些方法利用物理动作和错误，强制产生新想法</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>头脑风暴</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">半正式流程，目标是快速产出<strong>大量且多样</strong>的观点</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">适合产数量，<strong>不适合提炼质量</strong>，产出也参差不齐</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>书面分析</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一种结构化的思考形式 —— 写作会强迫你去想细节，这是非正式讨论做不到的</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">深度分析可以结合正式方法和研究</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>辩论</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">唯一目的就是<strong>找出观点里的缺陷</strong>，类似法律或科学的过程</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">四个前提：擅长攻防的辩手；<strong>思维的多样性</strong>（不同知识、意见与假设）；尊重（能把个人感受和逻辑过程分开）；<strong>没有恐惧</strong> —— 权力不对等会腐化辩论，因为下属不敢认真辩</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>测试</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不同测试提供不同种类的知识</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>可用性测试</strong>看界面与操作；<strong>QA 测试</strong>找技术 bug；<strong>焦点测试</strong>是对产品想法的市场研究（注意：不是对正在做的游戏）；<strong>指标</strong>是自动收集的游玩数据（战利品、完成时间），对微调小模式和发现罕见边缘情况极有价值 —— 《半条命》用指标做难度平衡，《光环：致远星》用自定义按钮追踪「感知到的延迟」</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>发明的方法</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">当既有的方法都不够用时，回到第一性原理，自己造一个获取知识的方式</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">书里的例子：换到不同地区做头脑风暴、设计不常见的经济系统</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>有机流程</strong><br/><span style="font-size:12.5px;color:var(--ink3)">The Organic Process</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">真实的设计过程远比「规划 → 建造 → 测试」这张图复杂</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">计划一直在变，各种工作互相影响、互相重叠。<strong>创造知识是一件极其细致灵活的工作，每时每刻、每个开发者都在创造知识</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3 class="violet">莱特兄弟隐喻</h3>
+
+    <p>这一章用莱特兄弟发明飞机来给「有机流程」收尾 —— 重点不在于他们造出了什么，而在于他们<strong>精通了「创造知识」这件事本身</strong>：</p>
+
+    <ul>
+      <li><strong>无情的迭代</strong>：上千次测试，持续修改、持续学习。</li>
+      <li><strong>多样的知识来源</strong>：风洞实验、实地试飞、数学计算、沉思，全都用上。</li>
+      <li><strong>盯住缺失的那块</strong>：竞争对手都在死磕发动机，他们却识别出真正的空白是<strong>空气动力学与控制</strong>。</li>
+      <li><strong>意外发现</strong>：威尔伯是从一个扭动的箱子上，得到了「机翼扭转」这个关键洞察。</li>
+    </ul>
+
+    <p>作者用这个类比说明：游戏设计面对的是<strong>系统，不是物体</strong>。所以那个僵硬的「规划—建造—测试」循环是一种过度简化 —— <strong>真实的游戏设计是有机的、流动的、深不可测的</strong>，知识从每个开发者身上不断涌现。领导者只能把握大方向，因为现实永远比构想更复杂。</p>
+
+    <div class="callout co-violet">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>当项目卡住时，先问「我缺的是知识，还是缺实现」：<em class="hl">如果是缺知识，那就别继续讨论和写文档了 —— 去用测试、指标或一场有纪律的辩论把它弄出来。</em>用错方法获取知识，是项目里最隐蔽的浪费。</p>
+    </div>
+  </section>
+
+  <!-- ================= 15 ================= -->
+  <section id="s15">
+    <div class="sec-head">
+      <div class="badge">15</div>
+      <h2>依赖性：依赖堆栈与层叠式不确定性<span class="en">Dependencies · 第 13 章</span></h2>
+    </div>
+
+    <p>这一章解决的是项目管理里最实际的一个问题：<strong>先做什么？</strong>而它的答案，来自一个很朴素的观察 —— 设计元素之间是互相牵动的。</p>
+
+    <div class="keyline">
+      <b>依赖：设计两部分之间的关系 —— 其中一部分改变，会迫使另一部分也改变。</b><br>
+      <span style="font-size:15px;color:var(--ink2)">关卡的美术依赖于关卡布局，关卡布局依赖于玩家的工具。理解依赖，就是减少「因为底层变了、上面的工作全部白做」的风险。</span>
+    </div>
+
+    <h3>依赖堆栈：三步画出来</h3>
+
+    <ol class="steps">
+      <li><strong>把游戏拆成单个元素</strong>：机制、操作、界面、子系统。</li>
+      <li><strong>找出强依赖</strong>：A 改变后，是否<strong>几乎肯定</strong>会影响到 B。只标强的，不要标「可能有点关系」。</li>
+      <li><strong>画图</strong>：把最基础的元素放底部。这张图是<strong>还原性的</strong>，它刻意聚焦最强依赖，以避免分析瘫痪 —— 它是决策工具，不是学术作业。</li>
+    </ol>
+
+    <h3>层叠式的不确定性：为什么上面的东西总在返工</h3>
+
+    <p>这是全章最有冲击力的一段，它给了「为什么游戏开发总是这么乱」一个数学上的解释。</p>
+
+    <div class="diagram">
+      <div class="dtitle">不确定性会沿依赖堆栈相乘，而不是相加</div>
+      <div class="nbox" style="border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff"><b>假设每个元素有 80% 的概率「按预期运作」</b><br><span style="color:#475569;font-size:13px">这个概率其实已经很乐观了 —— 设计很少在纸上就能跑通</span></div>
+      <div class="narw">↓ 往上叠五层：0.8 × 0.8 × 0.8 × 0.8 × 0.8</div>
+      <div class="nbox" style="border:1.5px solid #f6b8c4;border-radius:11px;background:#fff5f7"><b>只剩约 33%：堆栈上五层的元素，有三分之二会变</b><br><span style="color:#475569;font-size:13px">因为它的地基可能已经动了</span></div>
+      <div class="narw">↓ 推论</div>
+      <div class="nbox" style="border:1.5px solid #c4b5fd;border-radius:11px;background:#faf5ff"><b>对高风险、原创的设计，堆栈上层的元素几乎必然需要大幅重做</b><br><span style="color:#475569;font-size:13px">作者认为，<b>这种级联不确定性，才是许多游戏开发过程中那些巨大、不可预测的变化和混乱的真正元凶</b></span></div>
+      <div class="cap">对应的策略也只有一条：<strong>从堆栈底部开始，一个迭代循环一个循环地往上走。</strong>把底层元素迭代、测试到高度确定，再在它上面盖依赖它的东西。</div>
+    </div>
+
+    <h3>设计 backlog 与核心玩法</h3>
+
+    <div class="split">
+      <div class="mini info">
+        <h4>设计 backlog（设计积压）</h4>
+        <p>既然上层设计如此不确定，把它们的细节全部定下来就是低效的。<strong>backlog 是一个「未处理、近期也不会处理」的想法、概念和印象的液态储存库。</strong></p>
+        <p>多数想法应该待在这里，只有马上要处理的东西才进入固定计划。设计就这样<strong>自下而上生长</strong>：一次凝固一小片，随着地基变确定，再从 backlog 里取。</p>
+      </div>
+      <div class="mini info">
+        <h4>核心玩法（Core Gameplay）</h4>
+        <p><strong>它从依赖堆栈底部那些「不可再约减」的机制中涌现出来 —— 是让这个游戏在情感上有价值的最小机制集合。</strong></p>
+        <p><strong>怎么找</strong>：砍掉一切能砍掉而不使游戏变得没有意义的东西，剩下的就是核心。《文明 5》的核心是地图、城市、移民、战士；《虚幻竞技场》的核心是地图、玩家、枪。</p>
+        <p>它同时也是<strong>类型定义</strong>（「塔防」的核心就是地图、防御对象、塔、敌人）。有些游戏存在多个可能的核心 —— 《辐射 3》可以做成一款射击游戏、一个对话故事、或者一座艺术画廊。</p>
+      </div>
+    </div>
+
+    <div class="callout co-blue">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>这一章给了一个非常实用的纪律：<em class="hl">不要在还不稳定的东西上面盖新东西。</em>「先做核心玩法」这句话人人会说，但它的真正含义是 —— 底部的机制没有通过测试、还没稳定之前，上面所有关于关卡、叙事、美术的讨论都应当只留在 backlog 里。</p>
+    </div>
+  </section>
+
+  <!-- ================= 16 ================= -->
+  <section id="s16">
+    <div class="sec-head">
+      <div class="badge teal">16</div>
+      <h2>权利与动力：泰勒制做不出好游戏<span class="en">Authority &amp; Motivation · 第 14、15 章</span></h2>
+    </div>
+
+    <p>这两章谈的是人。它们的前提是第 11、12 章留下的那个结论：<strong>你要的东西是发明出来的，而不是执行出来的。</strong>而这件事，决定了一支团队该怎么组织、该怎么被驱动。</p>
+
+    <h3 class="teal">第 14 章：万恶的平庸</h3>
+
+    <p>书的开篇判断很尖锐：<strong>一个组织的「个性」，不是所有成员个性的平均值，而和这些成员的组织架构紧密相关。</strong>同样的一批普通人，放进某种结构与文化里，会做出他们单独绝不会做的事。</p>
+
+    <h4>泰勒制度：把大脑留在家里的管理法</h4>
+
+    <p>游戏开发里有一种反面教材的管理方法，书里叫<strong>泰勒制度</strong>：极度追求效率 —— 与其让工人知道自己在干什么，不如就让他们做规定的动作、越快越好。所有决策都集中在少数非常聪明的人手里。</p>
+
+    <p>它有明确的适用边界：<strong>它处理不了所有类型的工作。</strong>如果一项工作牵扯的知识非常多、不是重复性任务，执行者的大脑就会过载。而游戏开发里恰好全是这类工作，其中还有很多<strong>隐性知识</strong> —— 那种很难掌握、甚至难以言传的知识。书里的例子很具体：一个 CS 老手看新手打两分钟就知道他哪里有问题，因为「意识」这种东西需要多年经验才能长出来。这类知识<strong>不在任何人写的文档里</strong>，它只在那个人的身上。</p>
+
+    <div class="callout co-teal">
+      <span class="lbl">推论</span>
+      <p>如果最关键的知识长在具体的人身上，那么<em class="hl">把决策权收走，等于主动丢弃那部分知识。</em>这不是管理风格问题，是知识分布问题。</p>
+    </div>
+
+    <h4>分布式思维：把决策放到离知识最近的地方</h4>
+
+    <p>书里给的对立面叫<strong>分布式思维</strong>：每个人做好自己的工作，把权利分发到整个团队里。它有两个好处：</p>
+
+    <div class="split">
+      <div class="mini good">
+        <h4>第一，用的是脑子，不是身体</h4>
+        <p>泰勒制利用的是人的身体；分布式思维把每个人的脑子都用上。</p>
+      </div>
+      <div class="mini good">
+        <h4>第二，用的是局部知识</h4>
+        <p>每个开发者都比其他任何人更贴近、更了解自己的工作。于是他对项目里自己熟悉的领域，天然拥有一份<strong>「自然权利」—— 他比团队里任何人都更适合做这个决策</strong>。</p>
+      </div>
+    </div>
+
+    <p>为了让决策奔向目标而不是变成盲目的民主，沟通是必需的：开会时把不同职位的知识（美术、程序、设计）摆到同一张桌子上共同决策。</p>
+
+    <h4>霸占与信任：为什么「微管理」是一种认知偏差</h4>
+
+    <p><strong>霸占</strong>是指夺走原本属于他人的自然权利的决策权。它的常见形式就是微管理：上级发出具体指令，却忽略了执行者手上那部分相关知识。书里直接点名了这事的日常版本 —— 甲方提的那类要求。它的根因是<strong>不信任</strong>：领导觉得自己知道得比下属多，而实际上并不是。</p>
+
+    <p>但光有信任也不够。领导掌握的是整体结构，仍然需要指挥工作 —— 区别在于<strong>指挥的是目的，而不是动作</strong>：要说清「这个角色为什么设计成穿破衣服」「这个关卡里为什么放尖刺」，而把「穿牛仔裤还是运动裤」「尖刺具体摆在哪」交给下属自己判断。反过来，下属也必须主动向上沟通自己获得的知识，并且说清楚。</p>
+
+    <h3 class="teal">第 15 章：动力</h3>
+
+    <p>第 15 章从「奖励」开始，而且结论相当反常识。<strong>外部奖励</strong>是指与工作本身分开的奖励，通常对应某些考核标准下的业绩。书里列了它<strong>在游戏设计领域注定行不通的四个原因</strong>：</p>
+
+    <ol class="steps">
+      <li><strong>从外部很难判断游戏开发工作的优劣。</strong>这类工作很难被量化考核，所以以考核为依据的奖励，本身就建立在一个测不准的东西上。</li>
+      <li><strong>它会磨灭开发者内心对工作的热爱。</strong>对需要创造力的工作，负面影响极大 —— 这正是第 8 章讲过的「外在奖励摧毁内在动机」在团队里的翻版。</li>
+      <li><strong>它经常会制造出不适当的激励，反而损害项目。</strong>人会把精力投到「被奖励的那件事」上，而不是「对游戏好的那件事」上。</li>
+      <li><strong>它会分散注意力，而且常常伴随惩罚。</strong>降薪、威胁 —— 拿走「奖励」本身就是一种惩罚手段。</li>
+    </ol>
+
+    <p>那该靠什么？作者的答案是：<strong>开发者想做的是有意义的工作。</strong>而让一个创造者满足，靠的不是给很多钱，而是给他<strong>责任、荣誉、挑战，以及对项目的信心</strong>。书里给最高境界起了一个名字 —— <strong>自我奉献</strong>：开发者相信自己的工作不只是工作，而是他自己的事业。<strong>你混一份不喜欢的东西，是混过去的；你真正想做成的事，是时时刻刻都在想怎么做好。</strong></p>
+
+    <h4>风气：无处不在的那个变量</h4>
+
+    <p><strong>风气</strong>是人们在日常工作过程中感受到的情感，说白了就是氛围。作者认为它是<strong>决定游戏质量的最有力因素之一，因为它无处不在</strong>。</p>
+
+    <p>书里有一个非常具体、也很有洞察力的提醒：<strong>在游戏开发中，领导用「发火」当手段，起不到它在别的工作里那种防懒的作用。</strong>因为游戏设计要求承担风险、允许失败，并且在各个层面都需要创造力。发火可能一时让某个员工效率变高，但所有看到这个后果的其他人，都会一起被影响。这也解释了「畏惧和热爱」这一节：恐惧能换来服从与产量，换不来冒险与创造。</p>
+
+    <h4>社交动力：三个具体的东西</h4>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">来源</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">它在做什么</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>来自游戏测试的动力</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">游戏测试能为开发决策提供真实、开放、可靠的结果 —— 而可靠的结果本身会产生巨大的动力。这是为什么测试不只是「验错」，也是「加油」</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>来自期望的动力</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>如果你相信别人会努力工作，这份相信本身就会成为他们努力工作的动力。</strong>期望是一种真实的资源</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>橡皮鸡</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">那些不严重、不明显、偶尔出现的社交奖励与惩罚，能够在<b>不破坏创造力风气</b>的前提下传递信息。具体做法是：谁负责的东西出了错，就在他桌上放一只橡皮鸡，直到下一个人犯错为止 —— 隐性地提醒，但不会让人过度沮丧</td></tr>
+</tbody>
+</table>
+</div>
+
+    <h4>进步原则：这一章最实用的一条</h4>
+
+    <div class="keyline">
+      <b>对「内在工作状况」贡献最大的，是每天取得有规律、且可见的进步。</b><br>
+      <span style="font-size:15px;color:var(--ink2)">所谓内在工作状况，就是工作里的情感、观念、动机的总和。而这条研究结论对安排工作有直接的指导意义：<strong>进步的频率比幅度更重要。</strong></span>
+    </div>
+
+    <p>它的实践含义很朴素：把工作拆成能每天看到进展的样子。不用多，但要每天都有 —— 因为这种微小的前进会让人得到「我今天确实做到了点什么，明天也应该可以」的反馈。而且这份反馈<strong>不需要任何外部帮助，从自身进步就能获得</strong>。</p>
+
+    <div class="callout co-teal">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>把这两章压缩成一句可执行的话：<em class="hl">决策权要放在离知识最近的人手上，任务要拆到每天都能看见进展。</em>前者解决「决策做不准」，后者解决「做着做着就散了」—— 恰好对应流程篇最主要的两类失败。</p>
+    </div>
+  </section>
+
+  <!-- ================= 17 ================= -->
+  <section id="s17">
+    <div class="sec-head">
+      <div class="badge violet">17</div>
+      <h2>复杂的决策与价值：全书收尾<span class="en">Complex Decisions &amp; Values · 第 16、17 章</span></h2>
+    </div>
+
+    <h3 class="violet">第 16 章：一个决策的影响远不止于游戏本身</h3>
+
+    <p><strong>决策效应（design effect）</strong>指的是一个设计决策所产生的影响 —— 而它不止落在游戏上，还落在市场、人际、商务上。做决策时要看的，至少是下面这七本账：</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">账目</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">它是什么</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>开发成本</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">执行这个决策需要的资源</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>不成熟的负担</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">因为手头的工作不得不依赖「游戏里还没做完的部分」而产生的成本：半成品的机制、有问题的工具、还在变动的背景故事。<strong>依赖堆栈能帮你避开对不成熟设计的依赖，但不能完全消除这份负担</strong></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>重大故障风险</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">系统不成熟所引起的重大故障的成本：bug、平衡性问题、叙事漏洞。它<strong>隐蔽性很强，而且会波及别的流程</strong></td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>流程负担</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">跟进和规划工作所需的成本。人一多，协调就变难，于是团队要用专门的制作团队、缺陷跟踪系统、设计百科来协调 —— 这些投入都是流程负担</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>政治效应</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">它影响的是开发者之间的关系</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>文化效应</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">它改变开发人员的习惯和团队的风气。比如团队里有人特别偏爱某种风格，即使另一种更合适，也可能因为喜好而改变选择</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>决策成本</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">「做出正确的决定」本身需要的成本。不重要的决策让设计师自己定就行；重要的决策必须仔细权衡 —— 开会、写报告，这些都是成本，而且是应该被显式承认的成本</td></tr>
+</tbody>
+</table>
+</div>
+
+    <p>这一章的价值不在于它给了什么新工具，而在于它明确了一件事：<strong>你做的每一个设计决定，都在同时消耗五本不同的账。</strong>只算开发成本的人，会在另外四本上透支。</p>
+
+    <h3 class="violet">第 17 章：价值</h3>
+
+    <p>全书最后一章很短，作者在这里说得也很直白：做游戏除了需要知识和技巧，还需要<strong>价值</strong>。</p>
+
+    <div class="keyline">
+      <b>价值，是在情感的驱动下，我们对「想成为什么样的人」所做的一种选择。</b><br>
+      <span style="font-size:15px;color:var(--ink2)">它是人追求的一种品质。没有人能把价值「具体化」地写下来，但我们通过不断尝试，来完善工作和我们自身。</span>
+    </div>
+
+    <p>他列了四条值得游戏设计者信仰的价值：</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">价值</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">它到底要求你做什么</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>开放</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Openness</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">尊重并接受你并不认可的意见，<strong>并相信自己的想法也具有不确定性</strong>。注意它要求的是两件事，缺一件都不成立：既接受别人的，也怀疑自己的</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>坦率</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Candor</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不要老是附和别人的想法 —— 但也不意味着全都要反驳。拥有自己的想法，并且乐意把它表达出来</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>谦虚</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Humility</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">游戏设计非常难：一个好游戏有数百个机制在互相交互，还要靠各种各样的算法实现出来。<strong>很多设计问题，根源在于「我们以为自己理解了，其实并没有」。</strong>谦虚让人认识到自己懂得太少，帮助你去思考、去观察那些之前没看到的东西</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>渴望</strong><br/><span style="font-size:12.5px;color:var(--ink3)">Desire</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">想要把它做好的那股劲 —— 这四条里唯一一条不是「约束自己」的，它提供的是持续做下去的能量</td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3 class="violet">结语：如果这篇教程只留三句话</h3>
+
+    <ol class="steps">
+      <li><strong>你交付的不是内容，是这台机器的产出。</strong>机制是你唯一能写下来的东西，情感和体验是它跑起来之后才生成的。所以每次争论「这个设计好不好」时，先问它在推动哪项人类价值、用哪类触发器。</li>
+      <li><strong>你会预测错，这不用讨论，唯一的问题是你多快能发现。</strong>迭代、灰盒、肩后测试、依赖堆栈、backlog —— 这五个词全都是同一件事的不同侧面：用最便宜的方式，尽快拿到现实给你的反例。</li>
+      <li><strong>最后卡住你的往往不是知识，而是人和结构。</strong>决策权有没有放在离知识最近的人手里，任务有没有拆到每天看得见进展 —— 这两条不通，前面所有的设计方法都只是纸面上的漂亮话。</li>
+    </ol>
+
+    <div class="callout co-rose">
+      <span class="lbl">这一节最该记住的一条</span>
+      <p>全书最狠的一句自我提醒，来自第 11 章那个名字：<em class="hl">幻想的误区</em>。作者说，你脑子里那部关于这款游戏的电影，是一个「只挑了最好结果展示」的预告片 —— 它天然隐藏缺陷。解药不是更努力地想象，而是刻意去设想<strong>最可能的糟糕体验</strong>。</p>
+    </div>
+
+    <div class="callout co-blue">
+      <span class="lbl">本教程的资料基础</span>
+      <p>本书原名 <em class="hl">Designing Games: A Guide to Engineering Experiences</em>（O'Reilly，2013，413 页），作者 Tynan Sylvester 有十余年游戏设计经验，曾参与《生化奇兵：无限》的设计；中文版《体验引擎：游戏设计全景探秘》由秦彬翻译，电子工业出版社 2015 年 3 月出版，428 页，ISBN 978-7-121-25379-9。</p>
+      <p>本教程没有拿到原书，是按「联网学习」的方式写成的：章节骨架<strong>直接照搬中文版目录</strong>（3 部分 17 章，以及各章小节名，如「浮现的优雅」「掠夺者 VS. 恶火」「信息匮乏 / 信息过剩」「避免心流断层」「层叠式的不确定性」「进步的代价」等），核心概念与案例来自公开的英文逐章摘要、中英文读书笔记与心理学文献的交叉核对。因此：</p>
+      <ul style="margin-bottom:0">
+        <li><strong>术语与译名以中文版目录为准</strong>，例如书里用「象征」而不是「隐喻」、「微影响（nudging）」「灌输（priming）」「信息匮乏」而不是「信息饥饿」。</li>
+        <li><strong>引用数字均已标注来源性质</strong>。吊桥实验的比率（39% / 9%）取自心理学教材的记载，另有 50% / 12% 的流传版本，两种都写了 —— 原书只是引用这个实验，不是它的出处。</li>
+        <li><strong>本教程不做原书逐句翻译</strong>。所有示意图、流程图、速查表都是为便于理解重新绘制和编写的，不是原书插图；个别引文的措辞以括号注明「据中文版译文整理」。若要核对具体表述，建议回到原书对应章节。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================= 18 ================= -->
+  <section id="s18">
+    <div class="sec-head">
+      <div class="badge green">18</div>
+      <h2>速查表 · 动手清单 · 思考题<span class="en">Cheat Sheet</span></h2>
+    </div>
+
+    <h3 class="green">第一张：17 章一句话速查</h3>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left;width:26%">章节</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">一句话</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>1 · 体验引擎</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">游戏是生成体验的人造系统：机制 → 事件 → 情感。情感来自「人类价值的改变」，而玩家会错误地归因自己的感受</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>2 · 优雅</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">优雅 = 情感力量 × 体验多样性 ÷ （玩家的理解成本 × 开发成本）。它来自涌现，可以靠 9 条判据去「闻」</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>3 · 技巧</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">让新手进得来（壁垒）、老手留得住（上限）；靠三次自我再造拉宽技能范围，靠弹性挑战、隐形训练与情感维持兜住下限</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>4 · 故事</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">三档叙事工具 × 五大排序装置；世界性故事最划算，涌现的故事最好看，而代理权问题永远需要显式取舍</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>5 · 决策</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">玩家玩的是「可能的未来」。决策的性格由信息平衡决定，节奏由决策密度和范围决定</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>6 · 平衡性</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">平衡服务于公平与深度，且只可能为某一个技能水平服务。真正的敌人是「所有人都想选」的退化策略</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>7 · 多人游戏</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">纯纳什均衡 = 破碎的设计。用石头剪子布或猜硬币骨架消除它，然后在它上面培育 yomi（心理战）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>8 · 动机与实现</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">多巴胺是「想要」不是「喜欢」。奖励只能奖励玩家本来就想做的事，否则你会造出一台强迫机器</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>9 · 界面</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">从未被传达的等于从未发生。一边管好信号的带宽（噪声 / 层次 / 冗余 / 间接控制），一边管好输入的同步与延迟</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>10 · 市场</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">游戏目的决定设计决策；「少做几件事但做成尖刺」胜过「什么都做但都是树桩」；预期会在游玩之前就改写体验</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>11 · 规划与迭代</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">两端都有代价，中间是迭代。规划周期随不确定性缩短，灰盒原型比设计文档更接近剧本</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>12 · 创造知识</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">设计是发明知识，不是实现物体。关键在于「什么时候用哪种方法」—— 沉思、研究、辩论、测试、指标各管一段</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>13 · 依赖性</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">从依赖堆栈底部往上做；基础元素的不确定性会沿堆栈相乘，所以上层的细节应当留在 backlog 里</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>14 · 权利</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">泰勒制利用身体，分布式思维利用局部知识。霸占决策权 = 主动丢弃那份知识</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>15 · 动力</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">外在奖励会毁掉创造性工作的内在动机。靠责任、荣誉、挑战、风气与「每天可见的进步」驱动</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>16 · 复杂的决策</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一个决策同时消耗七本账：开发成本、不成熟的负担、重大故障风险、流程负担、政治、文化、决策成本</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><strong>17 · 价值</strong></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">开放、坦率、谦虚、渴望 —— 它们不是道德装饰，是「我可能理解错了」这件事的制度化</td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3 class="green">第二张：从症状直接查章节</h3>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left;width:34%">你观察到的症状</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">翻哪一章</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">先做的动作</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">游戏不丑、不卡，但就是「没感觉」</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 1、2 章</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">列一遍它推动了哪些人类价值，看是不是一项都没推</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">机制很多，玩家还是觉得浅</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 2 章</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">数一数「机制之间的交互」有几条，而不是数机制有几个</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">新手三分钟就退，老手三天就腻</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 3 章</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">分开测：壁垒问题（训练 / 情感维持）还是上限问题（再造 / 深度）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">玩家说剧情「无所谓」</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 4 章</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">检查是不是全靠过场；试试世界性故事和「标识」</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">玩家说没策略、靠运气</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 5 章</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">动信息结构（谁在什么时候知道什么），不要先动机制</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">有一段玩起来特别「闷」</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 5 章</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">找心流断层：那段时间玩家有没有任何决策可做</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">所有人都用同一套打法</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 6、7 章</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">先找退化策略，再看有没有一个「所有人都该选」的纯均衡</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">数据好看，但玩家事后后悔</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 8 章</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">检查奖励是否只奖励了「本来就想做的事」</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">玩家一直问「这个能干嘛」</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 9 章</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">建象征词汇表；检查视觉层次是不是在替玩家做优先级</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">别的游戏同类，卖得比你好</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 10 章</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">画价值曲线：哪一项你比他好？有没有一项只有你有</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">进度慢、反复返工、也不知道错在哪</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 11、13 章</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">缩短规划周期；把还没稳定的底层挪出计划、上面的事先放进 backlog</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">团队天天吵架但推不动</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 12、14、15、16 章</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">先分清是缺知识还是缺实现；再看决策权在不在离知识最近的人手里</td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3 class="green">第三张：可以直接照做的清单</h3>
+
+    <ul class="chk">
+      <li>写下这款游戏<strong>推动的三项人类价值</strong>，以及每一项<strong>一次游玩里被推动几次</strong>。</li>
+      <li>把当前设计里所有机制列出来，画出<strong>「谁和谁交互」的连线</strong>；只连一条线的机制，标出来重点审视。</li>
+      <li>找出两个功能重叠的机制，问一句：<strong>留下哪个能长出更多种局面？</strong></li>
+      <li>给每个挑战列出<strong>多层成功</strong>（至少三层），而不是只有通过 / 失败。</li>
+      <li>检查有没有「失败已成定局但玩家还在里面磨」的状态（失败陷阱）。</li>
+      <li>逐个检查每段玩法：<strong>玩家此刻手上有没有一个信息不全但可判断的决策？</strong></li>
+      <li>把「玩家什么时候知道什么」写成一张时间表，找找有没有信息匮乏或过剩的窗口。</li>
+      <li>用石头剪子布 / 猜硬币的骨架检查每一个对抗交互：<strong>有纯均衡吗？</strong></li>
+      <li>检查所有奖励：它奖励的行为，和玩家本来就爱做的行为，重合度有多高？</li>
+      <li>给所有可交互元素做一份<strong>象征词汇表</strong>（这个花纹 = 能爬，这个颜色 = 有危险）并保证前后一致。</li>
+      <li>做一版<strong>灰盒</strong>，在机制跑通之前<strong>不加美术和音频</strong>；写清楚「什么条件下才算跑通」。</li>
+      <li>做一次<strong>肩后测试</strong>，全程不说话、不提示，只记录「他哪里卡住了、哪里笑了」。</li>
+      <li>画一次<strong>依赖堆栈</strong>，把最下面三层挑出来，作为接下来两个迭代周期的全部内容。</li>
+      <li>为这款游戏<strong>刻意设想一次最糟的游玩过程</strong>，写成一段话 —— 用来对冲幻想的误区。</li>
+      <li>把「每天能看见的进展」写进排期：<strong>每一到两天，要有一个能让团队看见的东西</strong>。</li>
+    </ul>
+
+    <h3 class="green">第四张：留给自己的思考题</h3>
+
+    <div class="card">
+      <ol style="margin-bottom:0">
+        <li>你正在做的游戏，如果明天删掉一半机制，剩下的还能不能立起来？<strong>剩下的那一半就是你的核心玩法。</strong></li>
+        <li>你最想在玩家身上激起的那个情绪，有没有对应的触发器？如果没有，你打算靠什么让它出现 —— 还是其实只是想让它「自然发生」？</li>
+        <li>你有没有过这样的经历：测试者夸了你根本没在意的地方，却对你在意的部分毫无反应？<strong>那很可能不是他不懂，而是情感错位。</strong></li>
+        <li>如果让你现在写下「这款游戏最可能的糟糕体验」，你能写得出来吗？写不出来，说明你的认知里只有幻想的误区那一半。</li>
+        <li>你上一次因为测试结果而<strong>砍掉</strong>一个自己喜欢的设计，是什么时候？</li>
+        <li>想一想你最讨厌的那个「强迫机器」式设计，然后诚实地检查一下：你自己的养成 / 奖励系统里，有没有它的影子？</li>
+      </ol>
+    </div>
+  </section>
+
+  <footer>
+    <span>体验引擎 · 图解教程</span><br>
+    <span>本教程为联网学习后的阅读提炼笔记，非原书翻译；全部图表为重新绘制，案例与术语以中文版《体验引擎：游戏设计全景探秘》（电子工业出版社，秦彬译）目录为准。</span>
+  </footer>
+
+</div>
+</body>
+</html>

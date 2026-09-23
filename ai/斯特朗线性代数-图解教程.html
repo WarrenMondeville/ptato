@@ -181,6 +181,32 @@
   .toc a .tx{flex:1}
   .toc a .tx small{display:block;font-size:12px;color:var(--ink3);line-height:1.5}
 
+  /* ---------- example / application ---------- */
+  .ex{
+    background:var(--card);border:1px solid var(--line);border-left:3px solid var(--green);
+    border-radius:12px;padding:16px 20px;margin:22px 0;box-shadow:var(--shadow);
+  }
+  .ex .h{font-size:12.5px;font-weight:700;color:var(--green);letter-spacing:.08em;margin-bottom:10px;display:block}
+  .ex .h::before{content:"算一遍 · "}
+  .ex p{margin:0 0 10px;font-size:14.8px;line-height:1.8}
+  .ex ol,.ex ul{margin:0;padding-left:20px;color:var(--ink2);font-size:14.5px}
+  .ex li{margin-bottom:6px}
+  .ex .res{
+    background:var(--green-bg);border:1px solid #bbf0c8;border-radius:9px;padding:10px 14px;
+    font-size:14.3px;color:#12693a;margin-top:12px;line-height:1.75;
+  }
+  .ex .res b{color:#0b5330}
+  .app{
+    background:var(--card);border:1px solid var(--line);border-left:3px solid var(--amber);
+    border-radius:12px;padding:14px 20px;margin:18px 0;box-shadow:var(--shadow);
+    font-size:14.7px;color:var(--ink2);line-height:1.8;
+  }
+  .app .h{font-size:12.5px;font-weight:700;color:var(--amber);letter-spacing:.08em;margin-bottom:6px;display:block}
+  .app .h::before{content:"用在哪 · "}
+  .app b{color:var(--ink)}
+  .app p{margin:0 0 8px}
+  .app p:last-child{margin-bottom:0}
+
   /* ---------- misc ---------- */
   ul.clean{margin:0 0 14px;padding-left:20px;color:var(--ink2)}
   ul.clean li{margin-bottom:7px}
@@ -232,7 +258,8 @@
       Gilbert Strang 的《Introduction to Linear Algebra》第 6 版，440 页。
       这本书最不一样的地方是：它一上来就让你把 <code>A<i>x</i></code> 看成「<i>A</i> 的列的加权组合」，
       然后把整门课组织成「四个基本子空间 + 五大矩阵分解」这一张图。
-      这篇笔记把它压成 20 多张图，顺着第 1 章到第 10 章走一遍。
+      这篇笔记把它压成 20 多张图，顺着第 1 章到第 10 章走一遍 ——
+      每一章都配了<b>能跟着算的具体数字</b>和<b>它到底用在哪</b>。
     </p>
     <div class="facts">
       <span class="fact"><b>Gilbert Strang</b> · MIT</span>
@@ -373,24 +400,51 @@
       线性代数从此从算术变成了几何。
     </div>
 
-    <h4 class="sub">三个必须熟悉的运算</h4>
-    <ul class="clean">
-      <li><strong>点积 <i>a</i>ᵀ<i>b</i></strong> = |<i>a</i>||<i>b</i>|cos θ。它是「相似度」的代数形式：为 0 就是垂直（正交）。</li>
-      <li><strong>长度</strong> ‖<i>a</i>‖ = √(<i>a</i>ᵀ<i>a</i>)。柯西-施瓦茨不等式 |<i>a</i>ᵀ<i>b</i>| ≤ ‖<i>a</i>‖‖<i>b</i>‖ 和三角不等式都由它长出。</li>
-      <li><strong>矩阵乘向量</strong>：<i>A</i> 乘 <i>x</i> 有两种算法（行点积 / 列组合），第二种才是理解后续一切的关键。</li>
-    </ul>
+    <div class="ex">
+      <span class="h">点积就是一次结账</span>
+      <p>苹果 2 元/斤、香蕉 3 元/斤、樱桃 5 元/斤，写成单价向量 <i>w</i> = (2, 3, 5)。
+         周一买了 3 斤苹果、1 斤香蕉、2 斤樱桃，购物篮 <i>x</i>₁ = (3, 1, 2)：</p>
+      <p style="font-family:var(--mono);font-size:14px;text-align:center;color:var(--ink)">
+        <i>w</i>ᵀ<i>x</i>₁ = 3×2 + 1×3 + 2×5 = <b>19 元</b>
+      </p>
+      <p>周二买了 <i>x</i>₂ = (0, 4, 1)，账单 0×2 + 4×3 + 1×5 = <b>17 元</b>。
+         把两天的篮子并排成矩阵的两列，<b>一次矩阵乘法就结完两笔账</b>：</p>
+      <div class="matwrap" style="margin:12px 0">
+        <div>
+          <div class="mat" style="grid-template-rows:repeat(1,1fr)"><span>2</span><span>3</span><span>5</span></div>
+          <div class="tagm">wᵀ（单价）</div>
+        </div>
+        <span class="op">×</span>
+        <div>
+          <div class="mat" style="grid-template-rows:repeat(3,1fr)">
+            <span>3</span><span>0</span>
+            <span>1</span><span>4</span>
+            <span>2</span><span>1</span>
+          </div>
+          <div class="tagm">X（两列 = 两天）</div>
+        </div>
+        <span class="op">=</span>
+        <div>
+          <div class="mat" style="grid-template-rows:repeat(1,1fr)"><span class="p">19</span><span class="p">17</span></div>
+          <div class="tagm">两天总价</div>
+        </div>
+      </div>
+      <div class="res">
+        <b>三种读法一起出现：</b>① 行视角 —— <i>w</i>ᵀ 这一行分别和 X 的每一列做点积；
+        ② 列视角 —— 结果是「<i>w</i>ᵀ 乘每一列」；
+        ③ 把 X 的两列看成两个篮子，<b>每一列都是一个独立的"配方"</b>。
+        换 100 个顾客，就把 X 扩成 100 列，一次算完 —— 这正是矩阵乘法存在的理由。
+      </div>
+    </div>
 
-    <div class="diagram" style="text-align:center">
-<div class="lbl">向量的三种"加法"，取决于你把它当什么</div>
-<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">向量 = 箭头可加、可缩放</b></div>
-<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">+</div>
-<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">向量 = 空间中的点n 个坐标</b></div>
-<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">+</div>
-<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">向量 = 一次配方线性组合的权重</b></div>
-<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
-<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">张成空间 span所有能配出来的结果</b></div>
-<div class="cap">"张成"(span) 是本书出现频率最高的动词：几个列能张成一条线、一个平面，或整个空间</div>
-</div>
+    <div class="app">
+      <span class="h">点积是"相似度"，这是半个互联网的地基</span>
+      <p><b>余弦相似度</b> cos θ = <i>a</i>ᵀ<i>b</i> / (‖<i>a</i>‖‖<i>b</i>‖)，就是点积除掉长度的影响。
+         推荐系统里，用户的口味是一个向量、电影的特征是一个向量，<b>两者的点积就是"预测评分"</b> ——
+         Netflix 那类算法的雏形，本质就是一堆点积（第 7 章会用 SVD 把它做得更好）。</p>
+      <p>另一个例子：屏幕上的任意颜色都是 R、G、B 三个基色的线性组合，
+         一张彩色照片因此是三个矩阵叠在一起 —— 后面 SVD 压缩图像时，就是对每个通道分别做。</p>
+    </div>
   </section>
 
   <!-- ==================== CH1.4 ==================== -->
@@ -496,6 +550,16 @@
       </div>
     </div>
 
+    <div class="app">
+      <span class="h">一面纯条纹国旗，就是一个秩 1 矩阵</span>
+      <p>拿 800×1200 的俄罗斯国旗（白蓝红三条横杠）举例：它的<b>每一列都长得一模一样</b>，
+         所以整张图可以写成「一个 800 维的列向量 × 一个全是 1 的 1200 维行向量」—— 恰好是秩 1。</p>
+      <p style="font-family:var(--mono);font-size:14px;text-align:center;color:var(--ink)">
+        原本 800×1200 = 960000 个数 → 只存 800 + 1 + 1200 = <b>2001 个数</b> → <b>压缩 479 倍</b>，图像分毫不差
+      </p>
+      <p>真实照片当然不是秩 1，但奇异值掉得极快，通常留前 20～50 项肉眼就分辨不出差别。第 7 章会把这笔账完整算一遍。</p>
+    </div>
+
     <div class="callout co-amber">
       <span class="h">反直觉点</span>
       「列秩 = 行秩」一点都不显然 —— 一个 3×5 的矩阵，列的独立性（在 3 维空间里）和行的独立性（在 5 维空间里）凭什么相等？
@@ -566,6 +630,29 @@
         </div>
       </div>
       <div class="cap">解 Ax=b 变成两步三角方程：先 L<i>c</i>=<i>b</i>，再 U<i>x</i>=<i>c</i>，各只需 O(n²)</div>
+    </div>
+
+    <div class="ex">
+      <span class="h">拿上面这个 A，从 b 一路算到 x</span>
+      <p>取 <i>b</i> = (1, 2, 3)，完整走一遍：</p>
+      <ol>
+        <li><b>消元（只碰 A）</b>：第 2 行 − ½×第 1 行 → (0, 1.5, 1)；第 3 行 − ⅔×第 2 行 → (0, 0, 1⅓)。
+            这两个乘数 <b>½ 和 ⅔ 顺手就填进了 L</b>。</li>
+        <li><b>前代 L<i>c</i> = <i>b</i></b>：<i>c</i>₁ = 1；<i>c</i>₂ = 2 − ½·1 = 1.5；<i>c</i>₃ = 3 − ⅔·1.5 = 2。</li>
+        <li><b>回代 U<i>x</i> = <i>c</i></b>：<i>x</i>₃ = 2 ÷ 1⅓ = 1.5；<i>x</i>₂ = (1.5 − 1×1.5) ÷ 1.5 = 0；<i>x</i>₁ = (1 − 0) ÷ 2 = 0.5。</li>
+        <li><b>检验</b>：A·(0.5, 0, 1.5) = (1, 2, 3) = <i>b</i> ✓</li>
+      </ol>
+      <div class="res">
+        关键在第 1 步只做一次。换成 <i>b</i> = (4, 5, 6)，<b>只有第 2、3 步重算</b>（各 3 次乘除），
+        A 再也不用碰 —— 这就是 "一次分解、反复求解" 的全部含义。
+      </div>
+    </div>
+
+    <div class="app">
+      <span class="h">"同一个 A、换一万个 b" 在哪儿出现</span>
+      <p><b>电路仿真</b>：A 由电阻网络决定，b 是电源电压。改电源、不改电路 → 分解一次，换 100 组电源随便算。</p>
+      <p><b>结构力学</b>：A 是建筑的刚度矩阵，b 是载荷。自重、风载、地震各算一遍，用的是同一个 LU。</p>
+      <p><b>游戏物理</b>：约束求解器里雅可比矩阵每帧几乎不变，变的是外力。能预分解就预分解，这是帧预算的老办法。</p>
     </div>
 
     <p>
@@ -713,19 +800,46 @@
 </div>
 
     <p>
-      顺带把三个词钉死，它们在第 4 章和第 7 章会被反复使用：
+      顺便把三个词钉死（第 4 章和第 7 章会反复用到）：<strong>线性无关</strong> = <i>A<i>x</i></i>=0 只有零解；
+      <strong>张成</strong> = 这些向量的所有组合；<strong>基</strong> = 既独立又张成的一组向量，它的个数就是维数。
+      看个例子比背定义快得多：
     </p>
 
-    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
-<table style="width:100%;border-collapse:collapse;font-size:13.5px">
-<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">术语</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">定义</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">怎么判断</th></tr></thead>
-<tbody>
-<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">线性无关</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只有全 0 系数才能让组合为 0</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><i>A<i>x</i></i>=0 只有零解 ⇔ 列无关</td></tr>
-<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">张成 span</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">这些向量的所有线性组合</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">张成整个 Rᵐ ⇔ 行有 <i>m</i> 个主元</td></tr>
-<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">基 basis</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">既独立、又张成这个空间的一组向量</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">该空间里任何一组基，向量个数都一样 = 维数</td></tr>
-</tbody>
-</table>
-</div>
+    <div class="ex">
+      <span class="h">拿一个 2×3 的矩阵，把四个空间全算出来</span>
+      <p style="font-family:var(--mono);font-size:14.5px;text-align:center;color:var(--ink)">
+        A = [ 1 2 3 ; 2 5 7 ]　（2 行 3 列，m=2, n=3）
+      </p>
+      <ol>
+        <li><b>消元</b>：第 2 行 − 2×第 1 行 → (0, 1, 1)。主元在<b>第 1 列和第 2 列</b>，所以 <b>r = 2</b>。</li>
+        <li><b>行空间</b>（在 R³ 里，dim = 2）：基取阶梯形两行 (1,2,3) 和 (0,1,1)。</li>
+        <li><b>列空间</b>（在 R² 里，dim = 2）：回到<b>原矩阵 A</b> 取主元列 → (1,2) 和 (2,5)。它们张满整个 R²。</li>
+        <li><b>零空间</b>（dim = 3−2 = 1）：解 <i>x</i>₂+<i>x</i>₃ = 0、<i>x</i>₁+2<i>x</i>₂+3<i>x</i>₃ = 0，
+            取 <i>x</i>₃ = 1 得特解 <b>s = (−1, −1, 1)</b>。验证 A·s = (−1−2+3, −2−5+7) = (0,0) ✓</li>
+        <li><b>左零空间</b>（dim = m−r = 0）：只有零向量 —— 因为列空间已经占满 R²，没有"剩下的地方"。</li>
+      </ol>
+      <p style="margin-top:10px">再解一个 <i>A<i>x</i></i>=<i>b</i>，取 <i>b</i> = (1,1)：令自由变量 <i>x</i>₃ = 0，
+         解出特解 <i>x<sub>p</sub></i> = <b>(3, −1, 0)</b>（检查：3−2 = 1，6−5 = 1 ✓）。于是完整解是：</p>
+      <div class="res">
+        <i>x</i> = (3, −1, 0) + <i>c</i>·(−1, −1, 1)　——　一条穿过特解、方向为零空间的<b>直线</b><br>
+        代入任意 <i>c</i> 都得到同一个 <i>b</i>，因为 A·(−1,−1,1) = 0。
+      </div>
+    </div>
+
+    <div class="app">
+      <span class="h">零空间最有意思的应用：配平化学方程式</span>
+      <p>配平 <b>CH₄ + O₂ → CO₂ + H₂O</b>，设系数为 <i>x</i> = (a, b, c, d)。三种原子各自守恒，把产物移到左边带负号：</p>
+      <p style="font-family:var(--mono);font-size:14px;text-align:center;color:var(--ink)">
+        C: a − c = 0　　H: 4a − 2d = 0　　O: 2b − 2c − d = 0
+      </p>
+      <p>这是一个 3×4 的齐次方程组 <i>A<i>x</i></i> = 0。<b>零空间维数 = 4 − 3 = 1</b>，
+         所以解只有一条线 —— 求出基向量再缩成最小整数比即可：</p>
+      <p style="font-family:var(--mono);font-size:14px;text-align:center;color:var(--ink)">
+        a = c，d = 2a，b = 2a　→　取 a = 1 得　<b>(1, 2, 1, 2)</b>
+      </p>
+      <p style="margin-bottom:0">即 <b>CH₄ + 2O₂ → CO₂ + 2H₂O</b>。
+        零空间"多余的那一个自由度"，正好对应化学里"方程式可以整体放大倍数"这件事 —— 数学和化学在这里严丝合缝。</p>
+    </div>
   </section>
 
   <!-- ==================== CH4 ==================== -->
@@ -803,6 +917,35 @@
 <div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">p = Ax̂= PbP = A(AᵀA)⁻¹Aᵀ 是投影矩阵</b></div>
 <div class="cap">投影矩阵 P 满足 P² = P（投影两次 = 投影一次），Pᵀ = P（对称）</div>
 </div>
+
+    <div class="ex">
+      <span class="h">三点拟合一条直线，把正规方程算到底</span>
+      <p>测到三组数据：<b>(1, 1)、(2, 2)、(3, 2)</b>。想找一条直线 <i>y</i> = <i>C</i> + <i>D</i>·<i>t</i>
+         穿过它们 —— 三点不共线，方程无解，于是做最小二乘。</p>
+      <p style="font-family:var(--mono);font-size:14px;text-align:center;color:var(--ink)">
+        A = [ 1 1 ; 1 2 ; 1 3 ]　<i>b</i> = (1, 2, 2)　未知 <i>x̂</i> = (C, D)
+      </p>
+      <ol>
+        <li>算 AᵀA = [ 3 6 ; 6 14 ]　（3 = 行数；6 = 1+2+3；14 = 1+4+9）</li>
+        <li>算 Aᵀ<i>b</i> = ( 1+2+2 , 1·1+2·2+3·2 ) = (5, 11)</li>
+        <li>解 [ 3 6 ; 6 14 ]<i>x̂</i> = (5, 11)：行列式 = 42 − 36 = 6，
+            得 <b>C = (70−66)/6 = 2/3</b>，<b>D = (33−30)/6 = 1/2</b></li>
+      </ol>
+      <p style="margin-top:10px">所以拟合直线是 <b><i>y</i> = 2/3 + ½·<i>t</i></b>。把它代回去检验"垂直"这个条件：</p>
+      <div class="res">
+        预测值 <i>p</i> = (7/6, 5/3, 13/6)，误差 <i>e</i> = <i>p</i>−<i>b</i> = <b>(1/6, −1/3, 1/6)</b><br>
+        检查 Aᵀ<i>e</i>：第一行 = 1/6 − 1/3 + 1/6 = <b>0</b>；第二行 = 1/6 − 2/3 + 3/6 = <b>0</b> ✓<br>
+        误差确实垂直于 A 的两列 —— 垂直性一旦成立，你就知道这已经是最优解，不可能再小了。
+      </div>
+    </div>
+
+    <div class="app">
+      <span class="h">超定方程几乎统治了测量世界</span>
+      <p><b>GPS 定位</b>：3 颗卫星理论上够定出经纬度高度，但时钟误差让方程不准。
+         实际收到 8～12 颗卫星 → 12 个方程、4 个未知数（x, y, z, 时钟偏差），用最小二乘求"最接近的那一点"。</p>
+      <p><b>传感器标定</b>：拿 100 组已知输入/输出去拟合一条校准曲线，本质上就是上面那道三点拟合题放大版。</p>
+      <p style="margin-bottom:0"><b>趋势预测</b>：销量、温度、股价的"趋势线"，背后都是同一个 AᵀA<i>x̂</i> = Aᵀ<i>b</i>。</p>
+    </div>
 
     <div class="callout co-teal">
       <span class="h">AᵀA 的一个坑（书里专门提醒）</span>
@@ -891,23 +1034,43 @@
       <div class="cap">三维就是平行六面体的体积；n 维同理。行列式为 0 ⟺ 列线性相关 ⟺ 体积被压扁 ⟺ 矩阵不可逆</div>
     </div>
 
-    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
-<table style="width:100%;border-collapse:collapse;font-size:13.5px">
-<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">#</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">性质</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">直觉</th></tr></thead>
-<tbody>
-<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">1</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">det I = 1</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">单位立方体体积为 1，定了标尺</td></tr>
-<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">2</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">交换两行，det 变号</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">朝向翻转</td></tr>
-<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">3</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对单行线性（可拆分、可提倍数）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">体积对一条边可加、可缩放</td></tr>
-<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">4</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">两行相等 ⟹ det = 0</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">由 2 推出：换了自己又变号，只能是 0</td></tr>
-<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">5</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">行减去另一行的倍数，det 不变</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>这就是为什么消元能用它</b></td></tr>
-<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">6</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">有一行全 0 ⟹ det = 0</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">体积塌了</td></tr>
-<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">7</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">三角矩阵 det = 主对角线之积</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">消元的终点，也是算法的核心</td></tr>
-<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">8</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">det A = 0 ⟺ A 奇异</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">与可逆性等价</td></tr>
-<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">9</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">det(AB) = det A · det B</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">体积放大倍数相乘</td></tr>
-<tr><td class="k" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">10</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">det Aᵀ = det A</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">行和列完全对称</td></tr>
-</tbody>
-</table>
-</div>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>#</th><th>性质</th><th>为什么要在意</th></tr></thead>
+        <tbody>
+          <tr><td class="k">1</td><td>det I = 1、换行变号、对单行线性</td><td>这三条就是定义，其余全部性质都能从它们推出来</td></tr>
+          <tr><td class="k">2</td><td>行减去另一行的倍数，det 不变</td><td><b>消元能拿来计算行列式，全靠这一条</b></td></tr>
+          <tr><td class="k">3</td><td>三角矩阵 det = 主对角线之积</td><td>消元的终点，也是算法的落点</td></tr>
+          <tr><td class="k">4</td><td>det = 0 ⟺ 矩阵奇异</td><td>一次性的可逆性体检</td></tr>
+          <tr><td class="k">5</td><td>det(AB) = det A · det B</td><td>两个变换复合，体积放大倍数相乘</td></tr>
+          <tr><td class="k">6</td><td>det Aᵀ = det A</td><td>行和列完全对称，不用分开记</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ex">
+      <span class="h">用行列式算一块地的面积</span>
+      <p>三角形三个顶点：<b>P₁ = (0, 0)、P₂ = (4, 1)、P₃ = (1, 3)</b>。
+         从 P₁ 出发的两条边是 <i>a</i> = (4, 1)、<i>b</i> = (1, 3)，把它们排成矩阵：</p>
+      <p style="font-family:var(--mono);font-size:14.5px;text-align:center;color:var(--ink)">
+        det [ 4 1 ; 1 3 ] = 4×3 − 1×1 = <b>11</b>　⟹　三角形面积 = ½ × 11 = <b>5.5</b>
+      </p>
+      <p>为什么是一半？因为行列式给的是这两条边张成的<b>平行四边形</b>面积，三角形正好是它的一半。</p>
+      <div class="res">
+        顺手得到一条判据：<b>det = 0 ⟺ 三点共线</b>。
+        想判断一个点是否落在某条线段上、三个点是否退化成一条线，一个 2×2 行列式就够了。
+      </div>
+    </div>
+
+    <div class="app">
+      <span class="h">行列式真正出场的地方：换坐标时的"面积汇率"</span>
+      <p><b>游戏与图形学</b>：三角形面积 = ½|det| 是光栅化、点在多边形内判定、叉积求法线的基础操作，
+         每一帧要跑几十万次。二维叉积 a×b 本质上就是这个 2×2 行列式。</p>
+      <p><b>换元积分</b>：从笛卡尔坐标换成极坐标时，面积元 d<i>x</i>d<i>y</i> 变成 <i>r</i> d<i>r</i>dθ ——
+         中间那个 <i>r</i> 就是雅可比矩阵的行列式。它告诉你"新坐标下每一小块被放大了多少倍"。</p>
+      <p style="margin-bottom:0"><b>可逆性检查</b>：写一个物理仿真、一个相机变换，如果变换矩阵 det = 0，
+         说明某个维度被压扁了，信息丢了 —— 这个矩阵没法还原回去。</p>
+    </div>
 
     <div class="diagram" style="text-align:center">
 <div class="lbl">怎么真正算 det（不是背公式，而是用性质）</div>
@@ -999,6 +1162,41 @@
 <div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:14px;text-align:left"><b style="color:#1e293b">k→∞ 时看 |λ|&lt;1决定迭代收敛还是发散</b></div>
 <div class="cap">这就是"幂法"和 PageRank 的原理：反复乘 A，最后只剩下 |λ| 最大的那个特征方向</div>
 </div>
+
+    <div class="ex">
+      <span class="h">Fibonacci：特征值给出一个"闭式公式"</span>
+      <p>数列 0, 1, 1, 2, 3, 5, 8, 13… 的每一步是「前两项相加」。把它写成二维向量的一步转移：</p>
+      <p style="font-family:var(--mono);font-size:14.5px;text-align:center;color:var(--ink)">
+        [ F<sub>k+1</sub> ; F<sub>k</sub> ] = [ <b>1 1</b> ; <b>1 0</b> ] · [ F<sub>k</sub> ; F<sub>k−1</sub> ]　　记 A = [1 1; 1 0]
+      </p>
+      <ol>
+        <li>求特征值：det(A − λI) = λ² − λ − 1 = 0 →
+            <b>λ₁ = (1+√5)/2 ≈ 1.618</b>（黄金比例），<b>λ₂ = (1−√5)/2 ≈ −0.618</b>。</li>
+        <li>因为 |λ₂| &lt; 1，反复乘 A 时 λ₂ 那一项会逐渐消失 ——
+            <b>数列的增长率收敛到 λ₁ = 1.618</b>，每步大约乘 1.618。</li>
+        <li>把 A 对角化，就得到闭式解：<b>F<sub>k</sub> = (λ₁<sup>k</sup> − λ₂<sup>k</sup>)/√5</b>。</li>
+      </ol>
+      <div class="res">
+        代入 k = 100：λ₂¹⁰⁰ 小到可以忽略，于是 F₁₀₀ ≈ 1.618¹⁰⁰ / √5 ≈ <b>3.54 × 10²⁰</b>
+        （精确值 354224848179261915075）。<br>
+        不用递推 100 次，<b>一次特征值分解就跳到了终点</b> —— 这就是对角化的全部价值。
+      </div>
+    </div>
+
+    <div class="app">
+      <span class="h">马尔可夫链与 PageRank：稳态就是 λ = 1 的特征向量</span>
+      <p>每年有 10% 的城市人口搬到郊区、20% 的郊区人口搬进城市。写成列和为 1 的转移矩阵：</p>
+      <p style="font-family:var(--mono);font-size:14px;text-align:center;color:var(--ink)">
+        A = [ <b>0.9 0.2</b> ; <b>0.1 0.8</b> ]　（第一列：留在城市 0.9、搬走 0.1）
+      </p>
+      <p>马尔可夫矩阵一定有特征值 <b>λ = 1</b>，对应的特征向量就是<b>稳态分布</b>。
+         解 0.9<i>c</i> + 0.2<i>s</i> = <i>c</i> 得 <i>s</i> = 0.5<i>c</i>，归一化后：</p>
+      <p style="font-family:var(--mono);font-size:14px;text-align:center;color:var(--ink)">
+        稳态 = 城市 <b>2/3</b>、郊区 <b>1/3</b>　（不管从哪儿开始，反复乘 A 都会收敛到这里）
+      </p>
+      <p style="margin-bottom:0">Google 最早的 PageRank 完全是同一套东西：网页之间的链接构成一个大得多的转移矩阵，
+         排名就是 λ = 1 的那个特征向量 —— 只是 A 有几十亿维，只能用「反复乘」（幂法）去逼近。</p>
+    </div>
 
     <h4 class="sub">两个必须分清的特殊类型</h4>
 
@@ -1148,6 +1346,32 @@
         <div class="d">越大越病态，误差越容易被放大</div>
       </div>
     </div>
+    <div class="ex">
+      <span class="h">算一笔真实的压缩账</span>
+      <p>拿一张 <b>64×64 的灰度人脸</b>（4096 个像素）做 SVD，只留前 <i>k</i> 项：</p>
+      <ul>
+        <li><b>k = 10</b>：存 <i>U</i> 的 64×10 = 640、10 个 σ、<i>V</i>ᵀ 的 10×64 = 640，
+            合计 <b>1290 个数</b> —— 只有原图的 <b>31%</b>，人脸已经能认出来。</li>
+        <li><b>k = 20</b>：2580 个数 = <b>63%</b>，大部分细节回来了，不放大基本看不出差别。</li>
+      </ul>
+      <p>换成 <b>1000×1000</b> 的照片、k = 50：50×(1000+1000+1) = <b>100,050</b> 个，
+         对比原始 1,000,000 个 —— <b>压缩 10 倍</b>。矩阵越大，低秩近似越划算。</p>
+      <div class="res">
+        判断该留几项，看「能量占比」：<b>Σ<sub>1..k</sub>σ<sub>i</sub>² / Σ<sub>1..r</sub>σ<sub>i</sub>²</b>。
+        留到 95% 或 99% 就够了，剩下的尾巴基本是噪声 —— 截断 SVD 因此<b>同时是压缩器和降噪器</b>。
+      </div>
+    </div>
+
+    <div class="app">
+      <span class="h">SVD 藏在哪些产品里</span>
+      <p><b>推荐系统</b>：把「用户 × 商品」的评分矩阵做低秩近似，那 <i>k</i> 个主成分就是隐藏的
+         「口味因子」（口味偏甜 / 喜欢科幻 / 价格敏感）。Netflix Prize 时代的协同过滤，核心就是它。</p>
+      <p><b>图像与信号降噪</b>：噪声通常均匀铺在所有奇异方向上，信号集中在前几个。
+         把小 σ 砍掉再重建，噪声就没了 —— 一张糊照片变干净，用的就是这个。</p>
+      <p><b>LoRA（大模型低秩微调）</b>：微调一个 4096 维的大模型，全量权重是 4096×4096 ≈ <b>16.8M</b> 个参数；
+         LoRA 只学一个低秩增量 Δ<i>W</i> = <i>B</i>·<i>A</i>（秩 r = 8），参数量 2×4096×8 = <b>65K</b>，
+         只有原来的 <b>1/256</b>。这是当下最时髦的应用，而它骨子里就是一句「矩阵可以用低秩来近似」。</p>
+    </div>
 
     <div class="diagram">
       <div class="lbl">奇异值衰减曲线（典型的真实数据，前几项吃掉绝大部分能量）</div>
@@ -1228,6 +1452,45 @@
 </table>
 </div>
 
+    <div class="ex">
+      <span class="h">求导就是一个矩阵</span>
+      <p>取基 {1, <i>x</i>, <i>x</i>²}，多项式 <i>p</i>(<i>x</i>) = <i>a</i> + <i>bx</i> + <i>cx</i>² 用坐标 (<i>a</i>, <i>b</i>, <i>c</i>) 表示。
+         求导之后是 <i>b</i> + 2<i>cx</i>，坐标 (<i>b</i>, 2<i>c</i>, 0)。于是：</p>
+      <div class="matwrap" style="margin:12px 0">
+        <div>
+          <div class="mat" style="grid-template-rows:repeat(3,1fr)">
+            <span>0</span><span>0</span><span>0</span>
+            <span class="p">1</span><span>0</span><span>0</span>
+            <span>0</span><span class="p">2</span><span>0</span>
+          </div>
+          <div class="tagm">D（求导矩阵）</div>
+        </div>
+        <span class="op">×</span>
+        <div>
+          <div class="mat" style="grid-template-rows:repeat(3,1fr)">
+            <span><i>a</i></span>
+            <span><i>b</i></span>
+            <span><i>c</i></span>
+          </div>
+          <div class="tagm">p 的坐标</div>
+        </div>
+        <span class="op">=</span>
+        <div>
+          <div class="mat" style="grid-template-rows:repeat(3,1fr)">
+            <span><i>b</i></span>
+            <span>2<i>c</i></span>
+            <span class="z">0</span>
+          </div>
+          <div class="tagm">p′ 的坐标</div>
+        </div>
+      </div>
+      <div class="res">
+        乘两次得 D²<i>p</i> = (2<i>c</i>, 0, 0)（二阶导），<b>乘三次 D³ = 0</b> —— 因为三次求导必为 0。
+        这个矩阵的<b>特征值全是 0</b>，却不是零矩阵。它是"幂零"的，
+        也是"矩阵没有 n 个独立特征向量 ⇒ 不能对角化"的标准反例。
+      </div>
+    </div>
+
     <div class="diagram" style="text-align:center">
 <div class="lbl">换基的完整流程（相似变换 B = M⁻¹AM）</div>
 <div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">输入向量 v在旧基下的坐标</b></div>
@@ -1249,6 +1512,18 @@
       ② <b>正交基</b> → 矩阵变成 <i>Q</i>Λ<i>Q</i>ᵀ 或 <i>U</i>Σ<i>V</i>ᵀ（数值稳定，可截断）；<br>
       ③ <b>小波基 / 傅里叶基</b> → 矩阵变稀疏（可压缩，算得快）。<br>
       过去五十年的数值线性代数，本质上就是在为不同问题寻找第 ③ 种基。
+    </div>
+
+    <div class="app">
+      <span class="h">换对一组基，算法从 O(n²) 变成 O(n log n)</span>
+      <p>周期信号的<b>循环卷积</b>，在标准基下是一个稠密的循环矩阵，做一次卷积要 n² 次乘法。
+         但正弦/余弦（傅里叶基）恰好是它的特征向量 —— 换到这组基，矩阵<b>变成对角的</b>，
+         卷积退化为逐元素相乘。</p>
+      <p style="font-family:var(--mono);font-size:14px;text-align:center;color:var(--ink)">
+        n = 1000：10⁶ 次乘法 → FFT 之后约 10⁴ 次，<b>快 100 倍</b>
+      </p>
+      <p style="margin-bottom:0">JPEG、MP3、雷达信号、图像模糊与去卷积，全都是这一招。
+        所谓"快速傅里叶变换"，本质就是<b>一次聪明的换基</b>。</p>
     </div>
   </section>
 
@@ -1342,6 +1617,34 @@
     </div>
 
     <p>
+    <div class="ex">
+      <span class="h">线性回归，其实就是"没有隐藏层的神经网络"</span>
+      <p>拿回第 4 章那组数据 (1,1)、(2,2)、(3,2)。用一个<b>只有一层、没有 ReLU</b> 的网络去拟合：</p>
+      <p style="font-family:var(--mono);font-size:14px;text-align:center;color:var(--ink)">
+        X = [ 1 1 ; 1 2 ; 1 3 ]　<i>y</i> = (1, 2, 2)　预测 ŷ = X<i>w</i>　损失 L = ‖X<i>w</i> − <i>y</i>‖²
+      </p>
+      <ol>
+        <li>梯度：<b>∇L = 2Xᵀ(X<i>w</i> − <i>y</i>)</b> —— 注意 Xᵀ 出现了，这就是反向传播里"转置"的来源。</li>
+        <li>从 <i>w</i>₀ = (0, 0) 出发，步长 s = 0.01：Xᵀ<i>y</i> = (5, 11)，
+            于是 <i>w</i>₁ = (0,0) + 0.01·(5, 11) = <b>(0.05, 0.11)</b>。</li>
+        <li>反复迭代，<i>w</i> 收敛到 <b>(2/3, 1/2)</b> —— 和第 4 章正规方程算出来的<b>一模一样</b>。</li>
+      </ol>
+      <div class="res">
+        这条线索把两章接上了：<b>闭式解（正规方程）和迭代解（梯度下降）是同一道题的两种解法</b>。
+        深度网络做的三件事：把一层叠成很多层、在层间插入 ReLU 让它变成分段线性、
+        以及因为参数太多矩阵太大，<b>放弃闭式解，改用 SGD 一小批一小批地走</b>。
+      </div>
+    </div>
+
+    <div class="app">
+      <span class="h">深度学习里到处都是线性代数</span>
+      <p><b>卷积层</b> = 一个稀疏且权重共享的矩阵（Toeplitz 结构）。一张 1000×1000 的图用全连接要 10¹² 个参数，
+         用 3×3 卷积只要 9 个 —— 省下来的全是线性代数里的"结构性稀疏"。</p>
+      <p><b>注意力机制</b>：核心是 <i>Q</i>·<i>K</i>ᵀ —— 一个巨大的<b>点积矩阵</b>，每个元素是"两个词有多相关"。
+         然后再乘 <i>V</i> 得到加权组合。Transformer 的主力运算，就是矩阵乘法和转置。</p>
+      <p style="margin-bottom:0"><b>词嵌入</b>：一个 one-hot 向量乘嵌入矩阵 = 直接取出矩阵的某一行。
+         "查表"和"线性组合"在这里是同一件事 —— 这正是第 1 章 <i>A<i>x</i></i> = 列的组合 的最简形式。</p>
+    </div>
       第 9 章剩下的部分是约束优化：<strong>拉格朗日乘子</strong>（∇<i>f</i> = λ∇<i>g</i>，几何上是两个函数的等高线相切）
       和 <strong>最小范数解</strong>（在 <i>A<i>x</i></i>=<i>b</i> 的所有解里挑 ‖<i>x</i>‖ 最小的 —— 又回到伪逆 <i>A</i>⁺<i>b</i>）。
       第 9.4 节还讲了线性规划与博弈论的对偶，那里「对偶问题」的思路和第 3 章的左零空间是一回事。
@@ -1382,6 +1685,26 @@
 </tbody>
 </table>
 </div>
+
+    <h4 class="sub">遇到问题，该掏哪个工具</h4>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>你手上的问题</th><th>该掏的工具</th><th>章节</th></tr></thead>
+        <tbody>
+          <tr><td>方程比未知数多，测量还有噪声</td><td class="k">最小二乘 AᵀAx̂ = Aᵀb（实现上用 QR / SVD）</td><td>4</td></tr>
+          <tr><td>解有无穷多个，想要"最短那个"</td><td class="k">伪逆 x = A⁺b</td><td>4.5 / 7</td></tr>
+          <tr><td>同一个矩阵，右端项换来换去</td><td class="k">LU 分解一次，之后只做三角回代</td><td>2</td></tr>
+          <tr><td>解不出来，怀疑列之间有依赖</td><td class="k">看秩 r，把零空间的基找出来</td><td>3</td></tr>
+          <tr><td>想知道系统长期会变成什么样</td><td class="k">马尔可夫矩阵 λ = 1 的特征向量</td><td>6</td></tr>
+          <tr><td>要算 A 的高次幂、长期增长率</td><td class="k">对角化 A = SΛS⁻¹，只把 λ 取幂</td><td>6</td></tr>
+          <tr><td>数据维度太高、想降维又不想丢信息</td><td class="k">截断 SVD / PCA，按能量占比选 k</td><td>7</td></tr>
+          <tr><td>矩阵太大存不下、传不动</td><td class="k">低秩近似 A ≈ C·R 或 U<sub>k</sub>Σ<sub>k</sub>V<sub>k</sub>ᵀ</td><td>1.4 / 7</td></tr>
+          <tr><td>解出来的结果飘得厉害、误差被放大</td><td class="k">查条件数 κ = σ₁/σᵣ</td><td>7</td></tr>
+          <tr><td>每次求解都慢，且矩阵有明显结构</td><td class="k">换一组基（傅里叶 / 小波）让它变对角或稀疏</td><td>8</td></tr>
+          <tr><td>要拟合一个复杂的输入输出关系</td><td class="k">矩阵权重 + ReLU 的分段线性函数，用 SGD 训练</td><td>9–10</td></tr>
+        </tbody>
+      </table>
+    </div>
 
     <h4 class="sub">中英术语对照</h4>
     <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">

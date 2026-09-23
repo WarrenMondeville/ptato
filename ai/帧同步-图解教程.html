@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>帧同步原理与架构设计 · 图解教程</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%233b5bdb'/><rect x='6' y='12' width='4' height='8' rx='1' fill='%23fff'/><rect x='14' y='12' width='4' height='8' rx='1' fill='%23fff'/><rect x='22' y='12' width='4' height='8' rx='1' fill='%23fff'/></svg>">
+<style>
+:root{
+  --bg:#f6f8fb; --card:#fff; --ink:#1e293b; --ink2:#475569; --ink3:#94a3b8;
+  --line:#e2e8f0; --line2:#cbd5e1;
+  --blue:#3b5bdb; --amber:#b45309; --teal:#0d9488; --violet:#6d28d9; --rose:#be123c; --green:#15803d;
+  --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px -12px rgba(15,23,42,.14);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",sans-serif;
+  font-size:16px; line-height:1.85; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:920px;margin:0 auto;padding:0 20px 80px}
+a{color:var(--blue);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ---------- hero ---------- */
+.hero{
+  background:linear-gradient(160deg,#fff 0%,#f3f6ff 55%,#eef4ff 100%);
+  border:1px solid var(--line); border-radius:20px; padding:44px 38px; margin:28px 0 26px;
+  box-shadow:var(--shadow); position:relative; overflow:hidden;
+}
+.hero::after{
+  content:""; position:absolute; right:-70px; top:-70px; width:260px; height:260px; border-radius:50%;
+  background:radial-gradient(circle,rgba(59,91,219,.10),transparent 70%);
+}
+.kicker{font-size:13px;letter-spacing:.16em;color:var(--blue);font-weight:700;margin-bottom:14px}
+.hero h1{font-size:33px;line-height:1.3;margin:0 0 12px;letter-spacing:-.01em}
+.hero .sub{font-size:16.5px;color:var(--ink2);margin:0 0 22px;max-width:680px}
+.hero .meta{display:flex;flex-wrap:wrap;gap:10px}
+.chip{
+  background:#fff;border:1px solid var(--line2);border-radius:999px;
+  padding:5px 14px;font-size:12.5px;color:var(--ink2);
+}
+.chip b{color:var(--ink);font-weight:600}
+
+/* ---------- 目录 ---------- */
+.toc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-bottom:30px;box-shadow:var(--shadow)}
+.toc h2{font-size:15px;margin:0 0 16px;color:var(--ink3);font-weight:700;letter-spacing:.08em}
+.toclist{list-style:none;margin:8px 0 0;padding:0}
+.toclist li{padding:6px 2px;font-size:14px;line-height:1.6;color:var(--ink);border-bottom:1px dashed var(--line)}
+.toclist li:last-child{border-bottom:none}
+.tocpart{font-weight:700;color:var(--blue);margin-top:14px;font-size:13px;letter-spacing:.04em}
+
+/* ---------- 章节 ---------- */
+section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:34px 38px;margin-bottom:26px;box-shadow:var(--shadow)}
+section>h2{font-size:24px;margin:0 0 6px;letter-spacing:-.01em;scroll-margin-top:20px}
+section>h2 .num{color:var(--line2);font-weight:800;margin-right:10px;font-size:20px}
+.lead{color:var(--ink2);font-size:15.5px;margin:0 0 22px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+h3{font-size:18px;margin:32px 0 10px;color:var(--ink)}
+h3:first-of-type{margin-top:8px}
+h4{font-size:15px;margin:22px 0 8px;color:var(--ink2)}
+p{margin:0 0 14px}
+ul,ol{margin:0 0 16px;padding-left:22px}
+li{margin-bottom:7px}
+strong{font-weight:650;color:var(--ink)}
+code{
+  font-family:"SFMono-Regular",Menlo,Consolas,monospace;font-size:13px;
+  background:#f1f5f9;border:1px solid var(--line);border-radius:5px;padding:1px 5px;color:#0f172a;
+  overflow-wrap:anywhere;word-break:break-word;
+}
+.small{font-size:13.5px;color:var(--ink3)}
+
+/* ---------- 图 ---------- */
+.diagram{background:linear-gradient(180deg,#fdfefe,#f8fafc);border:1px solid var(--line);border-radius:14px;padding:22px 18px;margin:22px 0}
+.cap{font-size:12.5px;color:var(--ink3);text-align:center;margin-top:12px;line-height:1.6}
+svg{max-width:100%;height:auto}
+
+/* ---------- 高亮框 ---------- */
+.callout{border-radius:12px;padding:16px 18px;margin:20px 0;font-size:14.5px;border:1px solid;line-height:1.75}
+.callout .hd{font-weight:700;font-size:13px;letter-spacing:.05em;margin-bottom:6px;display:block}
+.callout p:last-child{margin-bottom:0}
+.co-blue{background:#f3f6ff;border-color:#c7d2fe;color:#1e3a8a}
+.co-blue .hd{color:var(--blue)}
+.co-teal{background:#f0fbf9;border-color:#99e6d9;color:#134e4a}
+.co-teal .hd{color:var(--teal)}
+.co-amber{background:#fffaf0;border-color:#fcd9a5;color:#78350f}
+.co-amber .hd{color:var(--amber)}
+.co-rose{background:#fff5f7;border-color:#f8c2cd;color:#831843}
+.co-rose .hd{color:var(--rose)}
+.co-violet{background:#f8f5ff;border-color:#ddd0fb;color:#4c1d95}
+.co-violet .hd{color:var(--violet)}
+
+/* ---------- 数据卡 ---------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0}
+.stat{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:14px 16px;text-align:center}
+.stat .v{font-size:23px;font-weight:750;color:var(--blue);line-height:1.2;letter-spacing:-.02em}
+.stat .k{font-size:12px;color:var(--ink3);margin-top:4px;line-height:1.4}
+
+/* ---------- 表格 ---------- */
+.tblwrap{overflow-x:auto;margin:20px 0;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13.5px;background:#fff}
+th{background:#f8fafc;text-align:left;padding:10px 13px;font-weight:700;color:var(--ink2);border-bottom:1px solid var(--line);white-space:nowrap;font-size:13px}
+td{padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#fcfdff}
+
+/* ---------- 公式 ---------- */
+.formula{
+  background:#f8fafc;border:1px solid var(--line);border-left:3px solid var(--blue);
+  border-radius:0 10px 10px 0;padding:12px 16px;margin:16px 0;
+  font-family:"SFMono-Regular",Menlo,Consolas,monospace;font-size:13.5px;line-height:2;color:#0f172a;
+  overflow-x:auto;white-space:pre;
+}
+.formula .c{color:var(--ink3)}
+
+/* ---------- 代码 ---------- */
+pre{
+  background:#0f172a;color:#e2e8f0;border-radius:12px;padding:16px 18px;overflow-x:auto;
+  font-family:"SFMono-Regular",Menlo,Consolas,monospace;font-size:12.8px;line-height:1.75;margin:18px 0;
+}
+pre .k{color:#93c5fd}
+pre .t{color:#86efac}
+pre .cm{color:#94a3b8}
+pre .n{color:#fcd34d}
+
+/* ---------- 其他 ---------- */
+.q{border-left:3px solid var(--line2);padding:2px 0 2px 16px;color:var(--ink2);font-size:14.5px;margin:16px 0}
+footer{text-align:center;color:var(--ink3);font-size:13px;padding:30px 20px 0;line-height:1.9}
+.divider{height:1px;background:var(--line);margin:34px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hero">
+  <div class="kicker">图 解 教 程 · 网 络 同 步</div>
+  <h1>帧同步（Lockstep）原理与架构设计</h1>
+  <p class="sub">两台手机、同一场战斗、同一个结果 —— 靠的不是互传状态，而是「只传你按了什么键」。从 Doom 的锁步、星际争霸的确定性，到 GGPO 的预测回滚，把帧同步这条技术路线从头拆到尾：原理、确定性、分层架构、网络层、手感优化与线上排查。</p>
+  <div class="meta">
+    <span class="chip">主题 <b>帧同步 / Lockstep</b></span>
+    <span class="chip">覆盖 <b>原理 · 确定性 · 架构 · 手感</b></span>
+    <span class="chip">案例 <b>Doom · 星际 · GGPO · 王者荣耀</b></span>
+    <span class="chip">示例语言 <b>C# / Unity</b></span>
+    <span class="chip">阅读时长 <b>约 50 分钟</b></span>
+  </div>
+</div>
+
+<div class="toc">
+<h2>目 录</h2>
+<ul class="toclist">
+<li class="tocpart">开篇</li>
+<li>0 · 一道题：两台手机，同一场战斗</li>
+<li class="tocpart">第一部分 · 先把地图画出来</li>
+<li>1 · 三种同步模型，一张图分清</li>
+<li>2 · 选型：你的游戏该用哪一个</li>
+<li class="tocpart">第二部分 · 帧同步的骨架</li>
+<li>3 · 逻辑帧：这个世界唯一的时钟</li>
+<li>4 · 指令：只传「按了哪个键」</li>
+<li>5 · 经典锁步：最朴素也最刚硬的做法</li>
+<li>6 · 乐观帧锁定与时间桶：不让慢的人拖住全场</li>
+<li class="tocpart">第三部分 · 确定性：地基</li>
+<li>7 · 确定性的四条腿</li>
+<li>8 · 头号敌人：浮点数，与定点数解法</li>
+<li>9 · 另外五个雷：随机、容器、时间、物理、第三方库</li>
+<li>10 · 确定性自查清单</li>
+<li class="tocpart">第四部分 · 架构设计</li>
+<li>11 · 分层：逻辑层与表现层必须离婚</li>
+<li>12 · 主循环：帧率控制、追帧与抖动缓冲</li>
+<li>13 · 网络层：为什么帧同步最终都会离开 TCP</li>
+<li>14 · 服务器：中转站、裁判与录像机</li>
+<li class="tocpart">第五部分 · 手感</li>
+<li>15 · 输入延迟预算表：慢在哪一环</li>
+<li>16 · 回滚（GGPO）：预测，然后重算</li>
+<li>17 · 不回滚也能跟手：预表现与掩盖</li>
+<li class="tocpart">第六部分 · 工程实践</li>
+<li>18 · 不同步了怎么查：校验和与录像定位</li>
+<li>19 · 断线重连、观战、录像与反作弊</li>
+<li>20 · 上线清单</li>
+<li class="tocpart">附录</li>
+<li>A · 术语速查表</li>
+<li>B · 常见误区与反直觉点</li>
+<li>C · 思考题</li>
+</ul>
+</div>
+
+<!-- ============ 0 ============ -->
+<section id="ch0">
+  <h2><span class="num">00</span>一道题：两台手机，同一场战斗</h2>
+  <p class="lead">两个人各自拿着一台手机，在同一局对战里厮杀。网络往返 60ms，设备一台是骁龙旗舰，一台是三年前的千元机。十分钟后，两边画面里的血量、冷却、胜负判断，<strong>完全一致</strong>。这一致性是怎么来的？</p>
+
+  <p>最直觉的答案是：服务器算好了，把结果发下来。这就是<strong>状态同步</strong>。它很好用，但有两个代价：服务器要扛全部运算；带宽要传全部物体状态。</p>
+
+  <p>帧同步给了另一条路，而且是把思路反过来的：<strong>服务器什么都不算，只转发指令；每个客户端自己算，而且必须算出完全一样的结果。</strong></p>
+
+  <div class="diagram" style="text-align:center">
+    <div style="display:inline-block;max-width:660px;min-width:220px;padding:14px 18px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left;color:#1e293b"><b>前提假设</b><br><span style="color:#475569;font-size:13px">「相同的初始状态 ＋ 相同的输入序列 ＋ 相同的逻辑代码」 ⇒ <b>必然得到相同的结果</b></span></div>
+    <div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:4px 0">↓ 只要守住这一条</div>
+    <div style="display:inline-block;max-width:660px;min-width:220px;padding:14px 18px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left;color:#1e293b"><b>那么网络上根本不需要传「谁在哪里、还剩多少血」</b><br><span style="color:#475569;font-size:13px">只需要传「A 在第 120 帧按下攻击、B 在第 121 帧往左走」</span></div>
+    <div class="cap">图 0 · 帧同步的全部信仰，就压在这一条假设上。后面所有工程手段，都是在拼命维持它</div>
+  </div>
+
+  <p>这一个换位换来了三个巨大的好处，也埋下了三个致命的坑。整个教程就是围绕这张对照表展开的。</p>
+
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">换来</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">代价</th></tr></thead>
+<tbody>
+<tr>
+  <td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>带宽极低</b><br><span style="color:#475569">只传按键，单帧几十字节。屏幕上有 200 个单位还是 20 个，带宽几乎一样。</span></td>
+  <td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>必须绝对确定性</b><br><span style="color:#475569">任意两台机器上，任何一次浮点误差、任意一次遍历顺序不同，都会让两边世界分叉。</span></td>
+</tr>
+<tr>
+  <td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>服务器极轻</b><br><span style="color:#475569">一台机器能扛的房间数远多于状态同步；服务器只做收包、打包、广播。</span></td>
+  <td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>逻辑全在客户端</b><br><span style="color:#475569">外挂可以直接改本地内存。安全性必须用另外的机制补回来。</span></td>
+</tr>
+<tr>
+  <td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>回放天生免费</b><br><span style="color:#475569">录下一局的全部指令（几 KB），就能完整重演一局，还能当反作弊证据。</span></td>
+  <td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>对延迟与弱网敏感</b><br><span style="color:#475569">等输入就卡、丢包就断节奏。必须有专门的缓冲与追帧机制。</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+  <div class="callout co-amber">
+    <span class="hd">一句话记住区别</span>
+    <p><strong>状态同步传「结果」，帧同步传「原因」。</strong>传原因省带宽、省算力，但要付出一个远比结果更苛刻的要求：两台完全不同的机器，必须每一步都算得一模一样。这就是整篇文章的主线。</p>
+  </div>
+</section>
+
+<!-- ============ 1 ============ -->
+<section id="ch1">
+  <h2><span class="num">01</span>三种同步模型，一张图分清</h2>
+  <p class="lead">谈同步必须先把三个模型并列摆好，否则后面所有讨论都是混的。它们不是「新与旧」的关系，而是分别解决不同的问题。</p>
+
+  <h3>模型一：帧同步（确定性锁步 / Deterministic Lockstep）</h3>
+  <p>所有客户端并行跑同一份模拟。每一帧，每个客户端把自己的输入广播给所有人；谁的输入没到齐，谁就<strong>卡住等</strong> —— 所有人一起停。因为大家跑的是同一份代码、同一组输入，结果自然一致。</p>
+  <p>它要的是「绝对的公平」：<strong>要卡一起卡，要快一起快</strong>。这是局域网时代的天然选择，也是 Doom、星际争霸、帝国时代的做法。</p>
+
+  <h3>模型二：状态同步 / 快照插值（Snapshot Interpolation）</h3>
+  <p>服务器跑唯一权威的模拟。它每几十毫秒给客户端发一份世界快照（谁在哪、多少血），客户端在两张快照之间插值，画出平滑画面。客户端的操作上行给服务器，本地靠预测先动起来。</p>
+  <p>它要的是「体验的连续性」：客户端渲染的其实是<strong>过去的、被抹平的世界</strong>。网络抖动被插值缓冲吃掉了，代价是你看到的是一百毫秒前的世界。</p>
+
+  <h3>模型三：预测回滚（Rollback Netcode）</h3>
+  <p>它是帧同步的激进改良：<strong>不等了</strong>。远端输入还没到，就按「他应该还会继续按着方向键」来猜，先往下算。等真实输入到了，如果猜错了，就把世界回滚到分歧那一帧，用真输入重新算一遍，再快进到当前帧。</p>
+  <p>它要的是「零感延迟」：GGPO 能把一百毫秒左右的延迟藏到几乎察觉不到。代价是模拟一帧可能要跑好几遍，CPU 开销与实现复杂度都上一个台阶。</p>
+
+  <div class="diagram" style="text-align:center">
+    <div style="display:inline-block;max-width:680px;min-width:220px;padding:13px 17px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:13.5px;text-align:left;color:#1e293b"><b>① 帧同步 Lockstep</b><br><span style="color:#475569;font-size:12.5px">传：输入 · 算：每个客户端算全部 · 确定性：<b>必须</b> · 延迟感：最慢的人决定全场 · 适合：RTS、MOBA、回合制</span></div>
+    <div style="color:#94a3b8;font-size:15px;line-height:1.3;margin:5px 0">↓ 加上「不等」</div>
+    <div style="display:inline-block;max-width:680px;min-width:220px;padding:13px 17px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:13.5px;text-align:left;color:#1e293b"><b>③ 预测回滚 Rollback</b><br><span style="color:#475569;font-size:12.5px">传：输入 ＋ 偶尔的状态同步 · 算：本地立即算，猜错就回滚重算 · 确定性：<b>必须</b> · 延迟感：接近线下 · 适合：格斗、1v1 竞技、小队对抗</span></div>
+    <div style="color:#94a3b8;font-size:15px;line-height:1.3;margin:5px 0">↔ 另一条路线</div>
+    <div style="display:inline-block;max-width:680px;min-width:220px;padding:13px 17px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:13.5px;text-align:left;color:#1e293b"><b>② 状态同步 Snapshot / 服务器权威</b><br><span style="color:#475569;font-size:12.5px">传：世界状态 ＋ 输入 · 算：服务器算全部，客户端只渲染 · 确定性：<b>不需要</b> · 延迟感：由插值缓冲吸收 · 适合：FPS、MMO、开放世界、大逃杀</span></div>
+    <div class="cap">图 1 · 两条路线的分岔点只有一个：<b>「世界由谁算」</b>。由每个客户端自己算 ⟶ 必须确定性；由服务器算 ⟶ 不需要确定性，但服务器要扛</div>
+  </div>
+
+  <h3>用一次「按了攻击键」把它们并排看一遍</h3>
+  <p>假设 A 与 B 之间网络往返 80ms，逻辑帧率 30Hz（每帧 33ms）。同样一次普攻，三种模型的时间线完全不同。</p>
+
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">维度</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">帧同步</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">状态同步</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">预测回滚</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>上行内容</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">按键位掩码</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">按键 ＋ 意图校验数据</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">按键</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>下行内容</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">所有玩家的按键</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">世界快照（随物体数增长）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">所有玩家的按键</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>带宽随规模</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只随玩家数增长</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">随可见物体数增长</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只随玩家数增长</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>服务器压力</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">极低（只转发）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">高（跑全部逻辑）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">低（可只转发）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>弱网表现</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">差（一人卡全队等）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">好（插值吃掉抖动）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">好（先算后补）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>断线重连</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">难（要快放全部历史帧）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">容易（拿一份快照即可）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">较难（快放 ＋ 状态校验）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>反作弊</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">弱（逻辑在本地）＋ 事后验算</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">强（服务器权威）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">弱 ＋ 事后验算</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>回放能力</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">天生支持，几 KB 一局</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">要靠录状态流，体积大</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">天生支持</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>开发难度</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">确定性是长期负担</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">服务端开发量大</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">两者都要，最难</td></tr>
+</tbody>
+</table>
+</div>
+
+  <div class="callout co-blue">
+    <span class="hd">现实里没有纯血统</span>
+    <p>今天的主流项目大多是混合体：<strong>用帧同步的指令广播来省带宽，同时把关键判定（伤害结算、命中、经济）搬到服务器做权威校验</strong>，这就是常说的「服务器权威的帧同步」。它保住了帧同步的带宽优势，又把最容易被改的那些数值收回到服务器手里。</p>
+  </div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section id="ch2">
+  <h2><span class="num">02</span>选型：你的游戏该用哪一个</h2>
+  <p class="lead">同步模型不是技术口味问题，而是被玩法倒逼出来的。判定标准只有三个：<strong>玩家数量、确定性是否做得到、操作精度要求多高</strong>。</p>
+
+  <h3>一张决策表</h3>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">你的游戏</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">推荐模型</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">理由</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">RTS、塔防、自走棋</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>帧同步</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">单位数量动辄上百，状态同步带宽会爆；操作频率低，等几十毫秒无所谓</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">MOBA（5v5／10 人）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>帧同步 ＋ 服务器校验</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">玩家数可控，操作频率中等，需要精准判定与录像；关键数值必须服务器兜底</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">格斗、1v1 竞技</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>预测回滚</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">玩家数固定为 2，帧级操作精度是命门，必须把延迟压到接近线下</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">FPS、大逃杀</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>状态同步 ＋ 客户端预测</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">物理复杂、参战人多、作弊危害大；帧同步的确定性成本几乎不可承受</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">MMO、开放世界</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>状态同步</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">需要随时快照支持自由进出与随时重连；世界状态本就只存在服务器上</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">休闲小游戏、房间式派对玩法</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>帧同步（最简版）</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">逻辑简单，确定性容易做到；服务器成本压到最低，方便上量</td></tr>
+</tbody>
+</table>
+</div>
+
+  <h3>自问三题，就能定下来</h3>
+  <div class="diagram" style="text-align:center">
+    <div style="display:inline-block;max-width:660px;min-width:220px;padding:13px 17px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left;color:#1e293b"><b>问题 1：同一时刻，场上需要同步的「单位」有多少？</b><br><span style="color:#475569;font-size:13px">超过几十个，且状态字段很多 → 状态同步的带宽会先撑不住，倾向帧同步</span></div>
+    <div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:3px 0">↓</div>
+    <div style="display:inline-block;max-width:660px;min-width:220px;padding:13px 17px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left;color:#1e293b"><b>问题 2：结果对操作精度的敏感度多高？</b><br><span style="color:#475569;font-size:13px">差一帧就影响胜负（格斗／抢技能）→ 回滚；差几十毫秒无所谓 → 帧同步；只关心位置体感 → 状态同步</span></div>
+    <div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:3px 0">↓</div>
+    <div style="display:inline-block;max-width:660px;min-width:220px;padding:13px 17px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left;color:#1e293b"><b>问题 3：你能把整个游戏逻辑做成确定性的吗？</b><br><span style="color:#475569;font-size:13px">能用定点数重写移动与碰撞、能封掉所有不确定来源 → 走帧同步；否则别硬上</span></div>
+    <div class="cap">图 2 · 第三问最容易被忽略。很多团队的失败不是输在网络层，而是输在「物理引擎改不动」</div>
+  </div>
+
+  <div class="callout co-rose">
+    <span class="hd">别硬上帧同步的三种情况</span>
+    <p>① 逻辑重度依赖引擎自带的物理系统（尤其是带刚体求解的）；② 需要随时自由进出对局、随时合流（大世界）；③ 项目已经跑了大半年、逻辑层与渲染层搅在一起 —— 改造成本常常超过收益。这些情况老老实实做状态同步，才是省钱的答案。</p>
+  </div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section id="ch3">
+  <h2><span class="num">03</span>逻辑帧：这个世界唯一的时钟</h2>
+  <p class="lead">帧同步的第一个决定，是把「时间」从真实世界里抢出来。<strong>游戏世界不再按真实时间前进，而是按逻辑帧前进。</strong>渲染帧率可以是 30／60／120，逻辑帧率必须死板得像心跳。</p>
+
+  <h3>为什么不能用真实时间</h3>
+  <p>如果用引擎的帧间隔（<code>deltaTime</code>）驱动逻辑，两台机器上每帧的 dt 都不一样：一台是 16.7ms，另一台因为卡顿是 33ms。哪怕物理公式完全相同，<code>position += velocity * dt</code> 的累加路径也完全不同，几十帧后位置就分叉了。</p>
+  <p>所以帧同步的第一条规矩：<strong>逻辑层只认帧号，不认时间</strong>。任何一次位移、冷却、动画推进，都用「第 N 帧到第 N+1 帧」来表达，而不是「过去了 16.7 毫秒」。</p>
+
+  <div class="formula">dt <span class="c">// 逻辑层里永远是一个常量</span>
+dt = 1 / LOGIC_FPS        <span class="c">// 例如 LOGIC_FPS = 30 → dt 固定为 1/30 秒</span>
+
+<span class="c">// 任何时候都写成：</span>
+pos += vel * DT_FIXED     <span class="c">// 确定性写法</span>
+pos += vel * deltaTime    <span class="c">// 帧同步里的自杀写法</span></div>
+
+  <h3>逻辑帧率该选多少</h3>
+  <p>帧率越低，带宽越省、算力越省，但操作响应越迟钝；帧率越高，响应越好，但服务器广播压力越大。行业里常见的落点是 <strong>10 ～ 30Hz</strong>。</p>
+
+  <div class="stats">
+    <div class="stat"><div class="v">10–15</div><div class="k">RTS / 自走棋<br>指令稀疏，容得下延迟</div></div>
+    <div class="stat"><div class="v">15–30</div><div class="k">MOBA 主流区间<br>响应与带宽的折中</div></div>
+    <div class="stat"><div class="v">30–60</div><div class="k">格斗 / 竞技<br>精度优先，带宽代价大</div></div>
+    <div class="stat"><div class="v">60+</div><div class="k">回滚制游戏<br>一帧都不能省</div></div>
+  </div>
+
+  <h3>渲染帧 ≠ 逻辑帧</h3>
+  <p>这是初学者最容易混的一处。假设逻辑帧 15Hz（每 66ms 一步），而渲染跑 60fps（每 16.6ms 一帧）。那么<strong>平均每渲染 4 次，逻辑才走一步</strong>。如果直接拿逻辑状态去画，画面就是「跳一次、停三下」，非常卡。</p>
+  <p>解法是<strong>表现层插值</strong>：逻辑层每步给出目标状态，表现层在两步之间用浮点数平滑地把物体挪过去。逻辑是台阶，渲染是斜坡。</p>
+
+  <div class="diagram" style="text-align:center">
+    <div style="display:inline-block;max-width:660px;min-width:220px;padding:13px 17px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:13.5px;text-align:left;color:#1e293b"><b>逻辑帧 15Hz</b> · 每 66ms 走一步<br><span style="color:#475569;font-size:12.5px">只算「到哪儿了」：frame 100 → 101 → 102 …… 状态是离散的</span></div>
+    <div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:3px 0">↓ 插值</div>
+    <div style="display:inline-block;max-width:660px;min-width:220px;padding:13px 17px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:13.5px;text-align:left;color:#1e293b"><b>渲染帧 60fps</b> · 每 16.6ms 画一次<br><span style="color:#475569;font-size:12.5px">在 frame 100 与 101 之间取 t = 0.25 / 0.5 / 0.75，用浮点算出中间位置 → 看起来是连续移动</span></div>
+    <div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:3px 0">↓</div>
+    <div style="display:inline-block;max-width:660px;min-width:220px;padding:13px 17px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13.5px;text-align:left;color:#1e293b"><b>关键约束</b><br><span style="color:#475569;font-size:12.5px">插值只允许改变「看起来在哪」，绝不能改变「逻辑上在哪」。渲染层的漂亮特效，一行都不能回流进逻辑层。</span></div>
+    <div class="cap">图 3 · 逻辑给台阶，渲染铺斜坡。两者一旦互相污染，帧同步就完了</div>
+  </div>
+
+  <div class="callout co-teal">
+    <span class="hd">一个反直觉的推论</span>
+    <p>因为逻辑帧率固定，所以<strong>「技能冷却 0.5 秒」在帧同步里应该写成「冷却 15 帧」</strong>（15Hz 下）。所有数值配置表都应该用帧数表达。这不只是为了确定性，也让策划与程序说的是同一种语言：讨论平衡时讲「快 3 帧」，比讲「快 0.2 秒」精确得多。</p>
+  </div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section id="ch4">
+  <h2><span class="num">04</span>指令：只传「按了哪个键」</h2>
+  <p class="lead">既然世界由每个客户端自己算，那么网络上唯一需要走的东西，就是<strong>「这一帧，每个玩家按了什么」</strong>。这就是指令（Command / Input）。整条帧同步链路的带宽成本全在这里。</p>
+
+  <h3>指令长什么样</h3>
+  <p>一个玩家的操作，本质上是有限的几个键的状态。用位掩码（bitmask）打包，8 个玩家一帧的全部操作，可以塞进几个 32 位整数里。</p>
+
+<pre><span class="cm">// 用 1 个 int 描述一名玩家这一帧的全部按键</span>
+<span class="k">public</span> <span class="k">struct</span> <span class="t">FrameInput</span>
+{
+    <span class="k">public</span> <span class="k">uint</span> Buttons;   <span class="cm">// 低 16 位放按键</span>
+    <span class="k">public</span> <span class="t">sbyte</span> MoveX;    <span class="cm">// 摇杆：-127 ~ 127，或量化成 8 个方位</span>
+    <span class="k">public</span> <span class="t">sbyte</span> MoveY;
+}
+
+<span class="cm">// 按键定义：每一路占一个 bit</span>
+<span class="k">public</span> <span class="k">static</span> <span class="k">class</span> <span class="t">Btn</span>
+{
+    <span class="k">public</span> <span class="k">const</span> <span class="k">uint</span> Up     = <span class="n">1</span> &lt;&lt; <span class="n">0</span>;
+    <span class="k">public</span> <span class="k">const</span> <span class="k">uint</span> Down   = <span class="n">1</span> &lt;&lt; <span class="n">1</span>;
+    <span class="k">public</span> <span class="k">const</span> <span class="k">uint</span> Left   = <span class="n">1</span> &lt;&lt; <span class="n">2</span>;
+    <span class="k">public</span> <span class="k">const</span> <span class="k">uint</span> Right  = <span class="n">1</span> &lt;&lt; <span class="n">3</span>;
+    <span class="k">public</span> <span class="k">const</span> <span class="k">uint</span> Attack = <span class="n">1</span> &lt;&lt; <span class="n">4</span>;
+    <span class="k">public</span> <span class="k">const</span> <span class="k">uint</span> Skill1 = <span class="n">1</span> &lt;&lt; <span class="n">5</span>;
+}
+
+<span class="cm">// 一帧的完整数据：帧号 + 每个玩家的操作</span>
+<span class="k">public</span> <span class="k">struct</span> <span class="t">FrameCommand</span>
+{
+    <span class="k">public</span> <span class="k">int</span>  Frame;              <span class="cm">// 逻辑帧号，全局自增</span>
+    <span class="k">public</span> <span class="k">uint</span>[] PlayerButtons;    <span class="cm">// 长度 = 房间人数，10 人 = 40 字节</span>
+}</pre>
+
+  <p>算一下带宽：10 人房间，每人每帧 1 个 32 位按键 ＋ 帧号，30Hz 下每秒广播 30 次 ——<strong>下行不到 2KB/s</strong>。同样场景如果走状态同步，每个单位每帧同步位置／朝向／血量／状态机，轻松上到几十 KB/s。</p>
+
+  <h3>指令有三种来源，必须分清</h3>
+  <div class="diagram" style="text-align:center">
+    <div style="display:inline-block;max-width:660px;min-width:220px;padding:13px 17px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:13.5px;text-align:left;color:#1e293b"><b>① 本地玩家指令</b><br><span style="color:#475569;font-size:12.5px">从设备读到的真实操作。上行给服务器。这一路有自己的时间戳，需要对齐到帧。</span></div>
+    <div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:3px 0">↓</div>
+    <div style="display:inline-block;max-width:660px;min-width:220px;padding:13px 17px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:13.5px;text-align:left;color:#1e293b"><b>② 远端玩家指令</b><br><span style="color:#475569;font-size:12.5px">从服务器下发。可能迟到、可能丢包、可能乱序 —— 网络层要负责补齐与去重。</span></div>
+    <div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:3px 0">↓</div>
+    <div style="display:inline-block;max-width:660px;min-width:220px;padding:13px 17px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:13.5px;text-align:left;color:#1e293b"><b>③ 系统指令</b><br><span style="color:#475569;font-size:12.5px">不是人按的，但同样改变世界：掉线托管（AI 接管）、超时默认空指令、开局随机种子。它们也必须是被所有客户端一致接受的输入。</span></div>
+    <div class="cap">图 4 · 三类指令在逻辑层里是同一种东西：<b>某个帧号上的一个操作</b>。逻辑层不关心它从哪来</div>
+  </div>
+
+  <div class="callout co-amber">
+    <span class="hd">「玩家没操作」也要发指令</span>
+    <p>一个常见 bug：只有玩家按键时才发包，导致远端玩家不知道「对面这一帧什么都没按」，状态机一直沿用上一帧。正确做法是<strong>每帧都要有值</strong>，没操作就是全 0 的空指令。服务器在没人操作时也必须按节奏持续广播，<strong>哪怕内容完全一样</strong> —— 因为帧号本身在推进，它就是这个世界的节拍器。</p>
+  </div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section id="ch5">
+  <h2><span class="num">05</span>经典锁步：最朴素也最刚硬的做法</h2>
+  <p class="lead">最早的帧同步实现简单粗暴：<strong>这一帧所有玩家的输入没到齐，谁都不许往下走。</strong>Doom、早期的局域网 RTS 都是这个形态。理解它的缺陷，才能理解后面所有改良的动机。</p>
+
+  <h3>流程拆解</h3>
+  <p>每个客户端都有一个内部时钟，按固定间隔（比如 100ms，即 10Hz）触发一次「回合」。回合开始时：</p>
+  <ol>
+    <li>把本地这一回合的操作打包，发给其他所有人（对等网络里直接发，C/S 下发给服务器）。</li>
+    <li>同时把操作写进本地缓冲。</li>
+    <li>等到<strong>所有人的这一回合指令都到齐</strong>，把大家（包括自己）的指令一起交给逻辑层，推进到下一回合。</li>
+    <li>如果本地时钟已经到点，但别人的指令还没来 —— <strong>停住，等</strong>。画面卡住，进度不动。</li>
+  </ol>
+  <p>注意第 4 条：这是关键。所有人的帧号永远一致，代价是所有人的速度被最慢的那个人拉平。</p>
+
+  <div class="diagram" style="text-align:center">
+    <div style="display:inline-block;max-width:700px;min-width:220px;padding:14px 18px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:12.5px;text-align:left;color:#1e293b;font-family:Menlo,Consolas,monospace;white-space:pre;overflow-x:auto">回合  N-1          回合  N                回合  N+1
+  │                │                      │
+A ─── 输入A ───────┤ 收齐全部 → 执行 ─────┤ 继续
+  │                │                      │
+B ─── 输入B ───────┘                      │
+  │
+C ─── 输入C ────────────────────── ✗ 迟到
+  │                │                ↑
+  └── 所有人卡在这里，等 C 的输入 ───┘</div>
+    <div class="cap">图 5 · 经典锁步：一个人的网络波动，会变成全场所有人的画面冻结</div>
+  </div>
+
+  <h3>它的优点，其实不少</h3>
+  <ul>
+    <li><strong>绝对公平</strong>：所有人的时间线严格对齐，没有谁快谁慢；</li>
+    <li><strong>实现极简</strong>：只有一条「等齐再走」的规则，不需要预测、不需要插值、不需要回滚；</li>
+    <li><strong>天然可回放</strong>：每个回合的指令都有留痕，按序重演就是整场比赛；</li>
+    <li><strong>带宽极低</strong>：还是只传指令。</li>
+  </ul>
+
+  <h3>它的致命伤</h3>
+  <p>致命伤只有一个，但足以杀死产品：<strong>网络体验的短板效应</strong>。四个人里只要有一个人在地铁里，另外三个人就要陪着一起卡。更糟的是，这种卡不是「画面卡一下」，而是「整个世界停止推进」—— 因为帧号不动，连本地输入都会被吞掉。</p>
+
+  <div class="callout co-rose">
+    <span class="hd">为什么今天几乎不用纯经典锁步</span>
+    <p>因为玩家的耐心只有几百毫秒。经典锁步可以理解为「把网络质量最差的那个人的体验，强加给所有人」。它只在两种环境里成立：局域网（延迟稳定在几十毫秒内），或者玩家愿意接受整局卡顿的回合制序列同步。公网产品必须改良。</p>
+  </div>
+</section>
+
+<!-- ============ 6 ============ -->
+<section id="ch6">
+  <h2><span class="num">06</span>乐观帧锁定与时间桶：不让慢的人拖住全场</h2>
+  <p class="lead">改良的方向非常明确：<strong>把「等人」改成「定时」</strong>。服务器不再等谁，而是像广播电台一样，每 66ms（15Hz）固定播出一帧，收到谁的指令就算谁的，没收到就留空。慢的人自己掉队，快的人不受影响。</p>
+
+  <h3>乐观帧锁定（定时不等待）</h3>
+  <p>服务器的节奏变成纯定时：</p>
+  <div class="formula">每隔 Interval（例如 66ms）:
+    frame++                        <span class="c">// 帧号无条件自增</span>
+    把当前已收集到的所有玩家指令打包
+    广播给所有客户端                <span class="c">// 没收到的人 → 该帧补「空指令」</span></div>
+  <p>客户端这边，收帧包变成了一件很像「放录像」的事：<strong>有数据就播，没数据就等，攒了很多就快进</strong>。慢网玩家的指令会被排到下一个时间桶，或者被丢弃 —— 但无论如何，不会有人因为他而停下来。</p>
+
+  <div class="diagram" style="text-align:center">
+    <div style="display:inline-block;max-width:700px;min-width:220px;padding:14px 18px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:12.5px;text-align:left;color:#1e293b;font-family:Menlo,Consolas,monospace;white-space:pre;overflow-x:auto">服务器时间桶（每 66ms 一桶，雷打不动）
+ 桶:  [  N  ]      [ N+1 ]     [ N+2 ]     [ N+3 ]
+      ├─A指令─┤   ├─A指令─┤   ├─A指令─┤   ├─A指令─┤
+      ├─B指令─┤   ├─B指令─┤   ├─B指令─┤   ├─B指令─┤
+      └─C指令─┘   └─ 空 ──┘   ├─C指令─┘   └─C指令─┘
+                                ↑ C 迟到的帧被跳过，没有任何人在等</div>
+    <div class="cap">图 6 · 时间桶：桶的时间边界是硬性的。收不齐不是「等」，而是「少一个人」</div>
+  </div>
+
+  <h3>它换来了什么，又丢掉了什么</h3>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">换来</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">丢掉</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一个人卡不再拖住全场，体验上限大幅提升</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">「所有人看到的一切完全一致」被削弱：慢的人会漏掉自己的操作</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">服务器实现反而更简单（不需要状态机来回等）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">丢指令 ＝ 玩家觉得「我明明按了却没反应」，非常伤手感，必须靠客户端缓冲与重发补回来</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">服务端可稳定按固定频率广播，压测与容量好估算</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">公平性议题出现：网络好的人获得了「更多有效帧」</td></tr>
+</tbody>
+</table>
+</div>
+
+  <h3>配套的一个安全补丁：预提交哈希</h3>
+  <p>乐观帧锁定放宽了同步约束，也开出了一个很狡猾的作弊口子 —— <strong>偷看（Lookahead Cheat）</strong>：如果我把操作故意晚发一帧，就能先看到对手这一帧做了什么，再决定自己做什么。这在实时性要求高的对战里就是降维打击。</p>
+  <p>对抗手段是「先押注、再开牌」：</p>
+  <div class="formula">第 K 帧：
+  1. 本地生成指令 → 立刻算哈希 H(指令) → 广播哈希   <span class="c">// 先押注，不泄露内容</span>
+  2. 等收到所有人的哈希
+  3. 再广播明文指令
+  4. 收到所有人明文 → 各自算哈希，与第 1 步收到的对比
+     不一致 → 判定该客户端作弊</div>
+  <p>代价是带宽翻倍（哈希 ＋ 明文两轮）与延迟增加（要等两轮）。所以实际项目里通常是<strong>抽样使用</strong>：只在关键帧启用，或者干脆不在客户端做，交给服务器事后验算录像。</p>
+
+  <div class="callout co-violet">
+    <span class="hd">术语小抄</span>
+    <p>「锁步同步 / 严格帧锁定 / 确定性锁步」指的是要等齐的那一种；「乐观帧锁定 / 定时不等待 / 时间桶 / Bucket Synchronization」指的是不等的那一种。中文社区常把两者都叫「帧同步」，讨论问题时最好先对齐说的是哪一个。</p>
+  </div>
+</section>
+
+<!-- ============ 7 ============ -->
+<section id="ch7">
+  <h2><span class="num">07</span>确定性的四条腿</h2>
+  <p class="lead">架构聊完，进入帧同步真正的深水区。<strong>只要你写了帧同步，确定性就是你每天都要还的债。</strong>它不是某个函数写对了就行，而是四条腿同时立住 —— 缺一条，两边世界就会分叉。</p>
+
+  <div class="diagram" style="text-align:center">
+    <div style="display:inline-block;max-width:660px;min-width:220px;padding:13px 17px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:13.5px;text-align:left;color:#1e293b"><b>腿一 · 初始状态一致</b><br><span style="color:#475569;font-size:12.5px">开局时，所有客户端的对象、属性、随机种子完全相同。连「随机生成的地图」也必须用同一颗种子生成。</span></div>
+    <div style="color:#94a3b8;font-size:15px;line-height:1.3;margin:3px 0">↓ 缺一不可</div>
+    <div style="display:inline-block;max-width:660px;min-width:220px;padding:13px 17px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:13.5px;text-align:left;color:#1e293b"><b>腿二 · 输入一致</b><br><span style="color:#475569;font-size:12.5px">每一帧、每个玩家、所有输入都必须严格对齐到同一个帧号，不能多不能少不能乱序。丢包靠网络层补，不靠逻辑层猜。</span></div>
+    <div style="color:#94a3b8;font-size:15px;line-height:1.3;margin:3px 0">↓</div>
+    <div style="display:inline-block;max-width:660px;min-width:220px;padding:13px 17px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:13.5px;text-align:left;color:#1e293b"><b>腿三 · 执行顺序一致</b><br><span style="color:#475569;font-size:12.5px">同一帧里谁先更新、谁后更新必须钉死。容器遍历顺序、排序的稳定性、事件回调顺序，全部要固定。</span></div>
+    <div style="color:#94a3b8;font-size:15px;line-height:1.3;margin:3px 0">↓</div>
+    <div style="display:inline-block;max-width:660px;min-width:220px;padding:13px 17px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:13.5px;text-align:left;color:#1e293b"><b>腿四 · 计算过程一致</b><br><span style="color:#475569;font-size:12.5px">同一组输入、同一帧，数值运算结果必须逐位相同。浮点、数学库、随机数、物理求解器都是这里的地雷。</span></div>
+    <div class="cap">图 7 · 四条腿一起立着，世界才不分叉。任何一条塌了，症状都一样：<b>「两边不一样了」</b>，但找错的方向完全不同</div>
+  </div>
+
+  <h3>「分叉」（Desync）到底有多严重</h3>
+  <p>分叉不是「画面有点不同」，而是<strong>世界模型的彻底分裂</strong>：A 客户端认为自己的技能命中了、已经回血；B 客户端认为那次没打中。从这一帧起，两边的后续一切都不同 —— 伤害、走位、AI、胜负。而且<strong>没有自动收敛的可能</strong>，因为双方都「按规则算得没错」。</p>
+
+  <div class="callout co-amber">
+    <span class="hd">一个真实的教训</span>
+    <p>曾有人排查很久的一次分叉，最后定位到：某个逻辑模块在遍历一个列表时会条件性地执行一次排序，而<strong>排序的比较器里用到了浮点数</strong>。两台设备的浮点舍入不同，排序结果就不同，后面所有依赖顺序的逻辑全变了。这类 bug 的特点是：<strong>复现率极低、越查越像玄学</strong>。</p>
+  </div>
+
+  <p>所以帧同步团队必须建立一种肌肉记忆：<strong>写逻辑层的每一行代码，都要先问一句「这行在两个平台上会算出一样的东西吗？」</strong> 下面是具体的雷区。</p>
+</section>
+
+<!-- ============ 8 ============ -->
+<section id="ch8">
+  <h2><span class="num">08</span>头号敌人：浮点数，与定点数解法</h2>
+  <p class="lead">确定性四大雷里，浮点数排第一，因为它<strong>看起来人畜无害</strong>。你在两台机器上写 <code>0.1f + 0.2f</code>，直觉上必然相等，实际上在很多链路里不保证逐位相同。</p>
+
+  <h3>浮点为什么不保险</h3>
+  <ul>
+    <li><strong>编译器会做优化</strong>：把 <code>a*b+c</code> 融合成一条 FMA 指令，中间结果的舍入位置就变了；不同平台编出的指令不同。</li>
+    <li><strong>数学库不是同一份实现</strong>：各平台的 <code>sin</code>／<code>cos</code>／<code>sqrt</code> 精度与算法不同，同一个输入可能返回最后一位不同的结果。</li>
+    <li><strong>舍入模式与扩展精度</strong>：x86 的 80 位扩展寄存器、不同 ARM 版本的指令集，都会影响中间值的保留位数。</li>
+    <li><strong>浮点加法不满足结合律</strong>：<code>(a+b)+c</code> 与 <code>a+(b+c)</code> 可能不等。累加顺序一变，结果就变。</li>
+  </ul>
+  <p>注意：这些问题在「同一台设备、同一份构建」里通常不会暴露。所以最常见的现象是 —— <strong>开发期一切正常，一上真机、一混平台（iOS ＋ Android）就开始偶发分叉</strong>。</p>
+
+  <h3>解法：定点数（Fixed-Point）</h3>
+  <p>核心思路一句话：<strong>用整数表示小数</strong>。约定一个缩放因子，把「真实值 × 2^n」存成整数，所有运算都在整数域里做。整数加减乘在全世界所有 CPU 上都是逐位精确的。</p>
+
+  <div class="diagram" style="text-align:center">
+    <div style="display:inline-block;max-width:700px;min-width:220px;padding:14px 18px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:12.5px;text-align:left;color:#1e293b;font-family:Menlo,Consolas,monospace;white-space:pre;overflow-x:auto">Q16.16 —— 1 个 32 位整数，切成两半
+┌──────────────┬────────────────┐
+│ 整数部分 16 位 │ 小数部分 16 位  │  分辨率 = 1/65536 ≈ 0.0000153
+└──────────────┴────────────────┘
+ 范围约 ±32768，2D 游戏与小地图够用，运算快
+
+Q48.16 —— 1 个 64 位整数（Photon Quantum 的选择）
+┌────────────────────────────┬──────────┐
+│        整数部分 48 位        │ 小数 16 位│  范围极大，精度仍是 1/65536
+└────────────────────────────┴──────────┘
+ 适合 3D、大世界坐标</div>
+    <div class="cap">图 8 · 定点数的两难：小数位多则精度高但范围小、乘法易溢出；小数位少则反之。Q48.16 是 3D 场景的常见折中</div>
+  </div>
+
+  <p>整数部分存的是「真实值 × 2^16」。比如 <code>1.5</code> 存成 <code>1.5 × 65536 = 98304</code>。加减直接算，乘法要先把中间结果扩大、再右移回来。</p>
+
+<pre><span class="cm">// 一个够用的 64 位定点数实现（Q48.16）</span>
+<span class="k">public</span> <span class="k">struct</span> <span class="t">Fix64</span>
+{
+    <span class="k">public</span> <span class="k">const</span> <span class="k">int</span>  FRAC = <span class="n">16</span>;
+    <span class="k">public</span> <span class="k">const</span> <span class="k">long</span> ONE  = <span class="n">1L</span> &lt;&lt; FRAC;        <span class="cm">// 表示 1.0</span>
+    <span class="k">public</span> <span class="k">long</span> Raw;                              <span class="cm">// 真实值乘 65536</span>
+
+    <span class="k">public</span> <span class="k">static</span> <span class="t">Fix64</span> <span class="k">operator</span> +(<span class="t">Fix64</span> a, <span class="t">Fix64</span> b) =&gt; FromRaw(a.Raw + b.Raw);
+    <span class="k">public</span> <span class="k">static</span> <span class="t">Fix64</span> <span class="k">operator</span> -(<span class="t">Fix64</span> a, <span class="t">Fix64</span> b) =&gt; FromRaw(a.Raw - b.Raw);
+
+    <span class="cm">// 乘法：用宽中间类型防溢出，再右移 FRAC 位</span>
+    <span class="k">public</span> <span class="k">static</span> <span class="t">Fix64</span> <span class="k">operator</span> *(<span class="t">Fix64</span> a, <span class="t">Fix64</span> b)
+    {
+        <span class="t">Int128</span> t = (<span class="t">Int128</span>)a.Raw * b.Raw;
+        <span class="k">return</span> FromRaw((<span class="k">long</span>)(t &gt;&gt; FRAC));   <span class="cm">// 舍入策略必须全局统一</span>
+    }
+
+    <span class="k">public</span> <span class="k">static</span> <span class="t">Fix64</span> <span class="k">operator</span> /(<span class="t">Fix64</span> a, <span class="t">Fix64</span> b)
+        =&gt; FromRaw((<span class="k">long</span>)(((<span class="t">Int128</span>)a.Raw &lt;&lt; FRAC) / b.Raw));
+
+    <span class="k">public</span> <span class="k">static</span> <span class="t">Fix64</span> FromRaw(<span class="k">long</span> v) =&gt; <span class="k">new</span> <span class="t">Fix64</span> { Raw = v };
+
+    <span class="cm">// 只在渲染前转换，逻辑层绝不调用</span>
+    <span class="k">public</span> <span class="k">float</span> ToFloat() =&gt; Raw / (<span class="k">float</span>)ONE;
+}</pre>
+
+  <div class="callout co-rose">
+    <span class="hd">两条铁律</span>
+    <p><strong>一、绝不在逻辑层里从浮点转定点。</strong>形如 <code>FromFloat(1.1f)</code> 的转换本身就是不确定的 —— 编译器可能把它算成 1.0999999 或 1.1000001，转出来的整数值就不一样。定点数只能来自整数常量、字符串解析（注意固定区域设置），或者由前面步骤的定点运算得出。Photon Quantum 干脆把这类函数命名成 <code>FromFloat_UNSAFE</code>，就是在提醒这件事。</p>
+    <p><strong>二、舍入策略必须统一。</strong>右移是「截断」还是「四舍五入」，正负数怎么处理，全项目只能用同一套。中途换一次策略，等于制造一次全量分叉。</p>
+  </div>
+
+  <h3>三角函数、开方：查表 ＋ 迭代</h3>
+  <p>定点数本身不解决 <code>sin</code>／<code>sqrt</code>／<code>atan2</code>。这些在逻辑层里必须自己实现：</p>
+  <ul>
+    <li><strong>sin / cos</strong>：预计算一张查找表（比如 1024 或 4096 项），用线性插值取中间值。表是常量，所有客户端一致；插值也全在定点域内完成。</li>
+    <li><strong>sqrt</strong>：整数牛顿迭代，固定迭代次数（比如 4 次或 8 次）。次数固定很重要 —— 如果按「误差小于阈值就停」，两端停在不同次数上就会算出不同结果。</li>
+    <li><strong>atan2</strong>：同样用查表 ＋ 定点插值，或多项式逼近但系数与运算顺序完全固定。</li>
+    <li><strong>向量归一化</strong>：<code>v / sqrt(v·v)</code>，全部走定点版本，别图省事调引擎的数学库。</li>
+  </ul>
+
+  <div class="callout co-teal">
+    <span class="hd">性能上其实是划算的</span>
+    <p>定点数四则运算确实比原生浮点慢（每次乘法多了移位与宽整数运算），但<strong>查表版三角函数往往比系统 <code>sin</code> 更快</strong>，因为省掉了函数调用与内部的多项式展开。在每秒几十次逻辑帧、每帧几万个运算的游戏里，这个差距通常完全吃得下 —— 真正的成本是「改写代码」这件事，而不是运行时的 CPU。</p>
+  </div>
+</section>
+
+<!-- ============ 9 ============ -->
+<section id="ch9">
+  <h2><span class="num">09</span>另外五个雷：随机、容器、时间、物理、第三方库</h2>
+  <p class="lead">把浮点换成定点，只堵住了一个洞。下面这五处，每一处都能独立制造分叉，而且症状往往比浮点更难查。</p>
+
+  <h3>雷一：随机数</h3>
+  <p>引擎的全局随机数是天生的不确定性来源：它内部有状态，调用次数不同、顺序不同，取到的值就不同。解法是<strong>自建随机器，并且把它当成世界状态的一部分</strong>：</p>
+<pre><span class="cm">// 确定性随机器：状态属于「世界状态」，可存档、可回滚</span>
+<span class="k">public</span> <span class="k">struct</span> <span class="t">DeterministicRandom</span>
+{
+    <span class="k">private</span> <span class="k">ulong</span> _state;
+
+    <span class="k">public</span> <span class="t">DeterministicRandom</span>(<span class="k">ulong</span> seed)
+        =&gt; _state = seed == <span class="n">0</span> ? <span class="n">88172645463325252UL</span> : seed;
+
+    <span class="cm">// xorshift64*：纯整数运算，跨平台逐位一致</span>
+    <span class="k">public</span> <span class="k">ulong</span> NextULong()
+    {
+        _state ^= _state &gt;&gt; <span class="n">12</span>;
+        _state ^= _state &lt;&lt; <span class="n">25</span>;
+        _state ^= _state &gt;&gt; <span class="n">27</span>;
+        <span class="k">return</span> _state * <span class="n">2685821657736338717UL</span>;
+    }
+
+    <span class="cm">// 取模用无符号整数，避免负数取模的符号差异</span>
+    <span class="k">public</span> <span class="k">int</span> Range(<span class="k">int</span> minInc, <span class="k">int</span> maxExc)
+        =&gt; minInc + (<span class="k">int</span>)(NextULong() % (<span class="k">ulong</span>)(maxExc - minInc));
+}</pre>
+  <p>还有三条配套规矩：<strong>① 每局开局由服务器下发同一个种子；② 按用途分开多个随机器实例</strong>（战斗随机、表现随机、掉落随机）—— 表现随机不该消耗逻辑随机的状态，否则「多播了一次粒子」就会改变后面的暴击判定；<strong>③ 它必须能被存档与回滚</strong>，否则回滚重算时随机序列接不上。</p>
+
+  <h3>雷二：容器与遍历顺序</h3>
+  <p>用哈希字典／哈希集合存游戏对象，是帧同步里最隐蔽的坑之一。哈希容器的遍历顺序依赖内部哈希分布与插入历史，两端可能不同。</p>
+  <ul>
+    <li>逻辑层只用<strong>数组／有序列表</strong>，或者用「对象 ID 作键 ＋ 每帧按 ID 排序后遍历」。</li>
+    <li>对象增删改必须走<strong>缓冲队列</strong>：本帧只记录意图，统一在下一帧初按 ID 排序后批量处理，避免「遍历中改容器」。</li>
+    <li>排序要用<strong>稳定排序 ＋ 确定性比较器</strong>（比较器里只能有整数）。注意大部分语言的默认排序是不稳定排序，等价元素的前后关系不保证，这一点尤其要留心。</li>
+  </ul>
+
+  <h3>雷三：时间与时序</h3>
+  <ul>
+    <li>逻辑层<strong>禁止访问系统时间</strong>（<code>DateTime.Now</code>、真实运行时长、帧计数器以外的任何时间源）。</li>
+    <li>禁止协程／异步回调参与逻辑推进 —— 它们的执行时机与帧的对应关系不可控。</li>
+    <li>禁止「物理帧」与「逻辑帧」各自独立计时（例如引擎的 <code>FixedUpdate</code> 与自定义逻辑帧并行跑）。</li>
+    <li>所有「每隔 N 秒」的逻辑，改写成「每隔 N 帧」。</li>
+  </ul>
+
+  <h3>雷四：物理</h3>
+  <p>这是帧同步项目最容易翻车的地方。Unity 的 2D／3D 物理系统、以及绝大多数商用物理库，都<strong>不保证跨平台逐位一致</strong>：它们内部用浮点、用可能并行的宽相检测与迭代求解。</p>
+  <p>结论很硬：<strong>帧同步项目通常要自己写移动与碰撞</strong>。而好消息是，大多数竞技游戏需要的那点物理并不复杂：</p>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">你想要的</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">确定性做法</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">角色移动</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">用定点数做运动学积分，每帧固定步长；不要用刚体</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">碰撞检测</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">自己写 AABB／圆／胶囊等基础形状检测，全整数或定点运算</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">阻挡与推挤</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">固定迭代次数的位置修正（如 4 次），不允许「收敛即停」</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">寻路</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">A* 用整数代价；取最小节点要按 (代价, 节点 ID) 双键比较，避免同代价时随机取</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">浮空、抛物线</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">定点重力 ＋ 定点速度积分；不要用引擎的施力接口</td></tr>
+</tbody>
+</table>
+</div>
+
+  <h3>雷五：第三方库与「顺手」的引擎 API</h3>
+  <p>物理引擎只是最显眼的一个。凡是逻辑层里调用的东西，都在责任范围内：</p>
+  <ul>
+    <li><strong>数学库</strong>：引擎的向量、四元数、数学常量都是浮点实现，逻辑层不能用。</li>
+    <li><strong>动画系统</strong>：动画驱动的位移（Root Motion）、动画事件回调如果不确定性，就必须挪到表现层；逻辑层只接受「技能进入第 K 帧」这类整数状态。</li>
+    <li><strong>序列化／反射</strong>：反射遍历成员的顺序不保证稳定，逻辑层应显式手写序列化。</li>
+    <li><strong>对象池与分配顺序</strong>：池化本身没问题，但如果「谁先被分配」影响了逻辑，就出事了。</li>
+    <li><strong>异常</strong>：被悄悄吞掉的异常会让一段逻辑「在一端跑了、在另一端没跑」。逻辑层里任何异常都应当被当成致命错误暴露出来。</li>
+  </ul>
+
+  <div class="callout co-violet">
+    <span class="hd">一个判断标准</span>
+    <p>问自己：<strong>「这段代码在两个不同平台、不同编译器、不同帧率下跑，会不会给出最后一位不同的结果？」</strong> 只要答案不确定，它就不该出现在逻辑层。判断力比清单更重要 —— 清单永远列不全。</p>
+  </div>
+</section>
+
+<!-- ============ 10 ============ -->
+<section id="ch10">
+  <h2><span class="num">10</span>确定性自查清单</h2>
+  <p class="lead">把上面的雷区压成一张可以贴墙上的清单。开新模块前过一遍，能省掉后面几周的玄学排查。</p>
+
+  <h3>数值</h3>
+  <ul>
+    <li>逻辑层无 <code>float</code>／<code>double</code>；全部使用定点数类型。</li>
+    <li>没有任何浮点转定点的操作进入逻辑层。</li>
+    <li>除法的舍入策略、右移的舍入策略全项目统一，并有单元测试覆盖负数情况。</li>
+    <li>定点乘法使用宽中间类型，并明确溢出边界与饱和策略。</li>
+    <li>三角函数、开方、<code>atan2</code> 全部是自实现的查表／迭代版本，迭代次数固定。</li>
+  </ul>
+
+  <h3>数据与顺序</h3>
+  <ul>
+    <li>逻辑层的随机数来自固定种子的确定性随机器，且随机器状态可存档、可回滚。</li>
+    <li>遍历顺序固定；容器增删走缓冲队列，遍历过程不修改容器。</li>
+    <li>排序使用稳定排序 ＋ 只含整数的比较器（多键要比较到「唯一 ID」为止）。</li>
+    <li>同一帧内的更新顺序被显式定义（先系统 A 再系统 B 再对象 C），并写进文档。</li>
+    <li>所有逻辑实体有确定性的唯一 ID 生成器（不能用内存地址或随机 GUID）。</li>
+  </ul>
+
+  <h3>时间与环境</h3>
+  <ul>
+    <li>逻辑推进只依赖帧号；帧间隔是常量。</li>
+    <li>逻辑层没有任何系统时间、协程、异步调用。</li>
+    <li>没有使用引擎物理系统做逻辑判定。</li>
+    <li>逻辑层不读取任何设备信息（分辨率、语言、机型、时区）。</li>
+  </ul>
+
+  <h3>机制</h3>
+  <ul>
+    <li>每 N 帧计算一次世界状态校验和（CRC32／xxHash）并与服务器比对。</li>
+    <li>有「逻辑帧调试器」：能暂停、单步、查看每帧输入与该帧状态。</li>
+    <li>有网络模拟开关：可注入固定延迟、抖动与丢包率。</li>
+    <li>有本地回放工具：能把一局的指令流重演出来，用于复现分叉。</li>
+  </ul>
+
+  <div class="callout co-blue">
+    <span class="hd">最后一条最重要</span>
+    <p>清单的价值不在「写代码时看」，而在<strong>新人入职时看</strong>。确定性是被整个团队共同维护的：任何一个人随手写的一行浮点，都可能毁掉几个月的调试成果。把这份清单做成代码审查里的固定检查项，比事后排查便宜一百倍。</p>
+  </div>
+</section>
+
+<!-- ============ 11 ============ -->
+<section id="ch11">
+  <h2><span class="num">11</span>分层：逻辑层与表现层必须离婚</h2>
+  <p class="lead">确定性解决「算得一样」，架构要解决的是「算得干净」。帧同步项目的架构可以浓缩成一句话：<strong>逻辑层是一台没有画面的机器，表现层是一个只读的观众。</strong></p>
+
+  <h3>一条清晰的分界线</h3>
+  <div class="diagram" style="text-align:center">
+    <div style="display:inline-block;max-width:680px;min-width:220px;padding:14px 18px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:13.5px;text-align:left;color:#1e293b"><b>逻辑层 Simulation</b>（纯数据，不依赖引擎）<br><span style="color:#475569;font-size:12.5px">输入：<code style="background:#e8eeff;border-color:#c7d2fe">FrameCommand[frame]</code>　输出：世界状态（定点数）<br>禁止：渲染、音效、特效、动画播放、UI、浮点、系统时间</span></div>
+    <div style="color:#94a3b8;font-size:15px;line-height:1.3;margin:5px 0">↓ 每帧发布状态（只读）</div>
+    <div style="display:inline-block;max-width:680px;min-width:220px;padding:14px 18px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:13.5px;text-align:left;color:#1e293b"><b>表现层 Presentation</b>（引擎重，随便用浮点）<br><span style="color:#475569;font-size:12.5px">输入：逻辑状态 ＋ 上一帧状态　输出：画面、音效、粒子、动画、UI<br>职责：插值补间、播放、预表现、掩盖延迟</span></div>
+    <div style="color:#94a3b8;font-size:15px;line-height:1.3;margin:5px 0">↑ 只允许「上行意图」，不允许直接改状态</div>
+    <div style="display:inline-block;max-width:680px;min-width:220px;padding:14px 18px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:13.5px;text-align:left;color:#1e293b"><b>输入层 Input</b><br><span style="color:#475569;font-size:12.5px">把设备输入采样、量化、对齐到帧号，产出指令。这是唯一「从外界进世界」的合法通道。</span></div>
+    <div class="cap">图 9 · 唯一合法的数据流向：输入 → 逻辑 → 表现。<b>反向的箭头只有一种：「我要按攻击键」这样的意图</b></div>
+  </div>
+
+  <h3>为什么必须这么绝</h3>
+  <p>因为一旦表现层能改状态，确定性就失守了。举三个真实会发生的场景：</p>
+  <ul>
+    <li>表现层为了「打击感」在命中时加了一点位移 —— 这在逻辑上改变了距离，后续判定全变。</li>
+    <li>动画系统在播放结束时触发一个事件改血条 —— 事件触发时机依赖渲染帧率，两端不同。</li>
+    <li>为了省事，UI 直接读逻辑对象并顺手四舍五入写回 —— 浮点污染了整个数值链。</li>
+  </ul>
+
+  <h3>工程上的三个实操建议</h3>
+  <ol>
+    <li><strong>逻辑层独立成程序集／独立目录，不引用引擎命名空间。</strong>Unity 项目里可以用单独的 asmdef，让编译器帮你拦住「不小心用了引擎数学库」。</li>
+    <li><strong>逻辑层提供「单机模式」入口。</strong>不联机、不联网、直接喂指令就能跑。做得到，说明分层是干净的；做不到，说明逻辑层还粘着表现层。</li>
+    <li><strong>服务器能跑同一份逻辑层代码。</strong>这是帧同步最划算的一笔投资：服务器能跑逻辑，就能验算录像、就能做权威校验、就能在服务端复现线上 bug。同一份代码，三处复用。</li>
+  </ol>
+
+  <div class="callout co-teal">
+    <span class="hd">反过来看：这层分离也是帧同步最值钱的部分</span>
+    <p>很多团队当初为了联机才做分层，最后发现真正的收益在别处：<strong>战斗回放、观战、断线重连、AI 训练、自动化战斗回归测试</strong> —— 逻辑层一旦干净，这些都变成「顺手做掉」的小功能。</p>
+  </div>
+</section>
+
+<!-- ============ 12 ============ -->
+<section id="ch12">
+  <h2><span class="num">12</span>主循环：帧率控制、追帧与抖动缓冲</h2>
+  <p class="lead">逻辑帧率固定，但真实设备每秒的渲染次数会上下浮动，网络包的到达时间更是忽快忽慢。主循环的任务就是在这两者之间做一道<strong>缓冲坝</strong>：把不规律的输入，变成规律的输出。</p>
+
+  <h3>主循环的骨架</h3>
+<pre><span class="cm">// 帧同步主循环（简化版）</span>
+<span class="k">void</span> Update()
+{
+    <span class="cm">// 1) 采样本地输入，量化到「待执行帧号」</span>
+    CollectLocalInput();
+
+    <span class="cm">// 2) 累加真实时间，换算成「应该已经跑了几帧」</span>
+    _accumulator += Time.unscaledDeltaTime;
+
+    <span class="k">int</span> steps = <span class="n">0</span>;
+
+    <span class="cm">// 3) 攒够一帧、且该帧输入已就位，就推进一帧</span>
+    <span class="k">while</span> (_accumulator &gt;= DT &amp;&amp; steps &lt; MAX_STEPS_PER_FRAME)
+    {
+        <span class="k">int</span> frame = _currentFrame + <span class="n">1</span>;
+
+        <span class="k">if</span> (!_inputBuffer.Has(frame))          <span class="cm">// 输入还没到</span>
+        {
+            <span class="k">if</span> (IsHanging(frame)) <span class="k">break</span>;        <span class="cm">// 还在容忍窗口内 → 等一等</span>
+            _inputBuffer.FillMissing(frame);      <span class="cm">// 超时 → 用空指令补齐，继续跑</span>
+        }
+
+        _simulation.Step(frame, _inputBuffer.Get(frame));  <span class="cm">// 纯确定性逻辑</span>
+        _currentFrame = frame;
+        _accumulator -= DT;
+        steps++;
+    }
+
+    <span class="cm">// 4) 表现层：用两次逻辑状态插值，画连续画面</span>
+    _presentation.Render(_currentFrame, _accumulator / DT);
+}</pre>
+
+  <p>这段代码里有三个关键点，值得单独说。</p>
+
+  <h3>关键点一：单帧最多跑几步</h3>
+  <p>如果设备卡了 500ms，累加器会攒下十几帧的量。若不限制，一次 Update 里要跑十几帧逻辑，只会更卡，形成雪崩。所以要设上限（常见 5～10 帧），剩下的留给后面的帧慢慢消化。这也自然形成了「追赶」。</p>
+
+  <h3>关键点二：追帧（Catch-up）</h3>
+  <p>断线重连、长时间卡顿之后，客户端落后了几百帧。系统的处理方式像「快放录像」：<strong>加速跑逻辑帧，但不渲染</strong>。</p>
+  <div class="formula">正常节奏:   每秒 15 帧    <span class="c">← 每 66ms 一帧，配合渲染插值</span>
+追帧模式:   每秒 150 帧   <span class="c">← 一帧里连续跑很多步，跳过全部表现层开销</span></div>
+  <p>追帧期间必须<strong>屏蔽所有表现层的副作用</strong>：不播音效、不放特效、不弹 UI、不触发需要玩家交互的剧情。要是一边快放三百帧一边播技能音效，玩家会以为手机坏了。这就要求前面那条「逻辑与表现分离」做得足够彻底 —— <strong>能不能干净地追帧，是分层的验收标准</strong>。</p>
+
+  <h3>关键点三：抖动缓冲（Jitter Buffer）</h3>
+  <p>网络包的到达时间是不均匀的。如果来一帧跑一帧，逻辑推进就会忽快忽慢，画面一顿一顿。解法是在客户端留一个<strong>滞后缓冲</strong>：</p>
+  <ul>
+    <li>不要「收到第 N 帧就跑第 N 帧」，而是<strong>始终落后网络最新帧 2～4 帧再执行</strong>。</li>
+    <li>这样即使某一帧晚到 100ms，也不会打断当前的执行节奏。</li>
+    <li>缓冲深度可以自适应：网络抖动大就加深，网络稳就减浅，减少延迟。</li>
+  </ul>
+
+  <div class="diagram" style="text-align:center">
+    <div style="display:inline-block;max-width:700px;min-width:220px;padding:14px 18px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:12.5px;text-align:left;color:#1e293b;font-family:Menlo,Consolas,monospace;white-space:pre;overflow-x:auto">网络到达:  ─N───N+1──────N+2─N+3────────N+4──→   （忽快忽慢）
+                  ↓ 放进缓冲
+缓冲区:    [N][N+1][N+2][N+3][N+4] ...            （排队，抹平抖动）
+                  ↓ 按本地稳定节奏取
+本地执行:  ─N─────N+1─────N+2─────N+3─────N+4──→   （每 66ms 一步，恒定）</div>
+    <div class="cap">图 10 · 抖动缓冲的作用：用一点延迟（几帧）换一个稳定的世界节拍。这笔交易几乎总是划算的</div>
+  </div>
+
+  <div class="callout co-amber">
+    <span class="hd">「等等看」与「直接跳过」的取舍</span>
+    <p>输入没到齐时，主循环有两个选择：<strong>挂起等待</strong>（像经典锁步，画面会停）或<strong>补齐继续</strong>（流畅，但那个玩家的操作会丢失）。实践中通常是<strong>分档处理</strong>：落后 1～2 帧时等一等（多是网络抖动，马上就到）；超过容忍窗口就补齐继续，并在客户端侧做「输入补发」补偿。这个容忍窗口的大小，就是这款游戏「手感 vs 严格同步」的调参旋钮。</p>
+  </div>
+</section>
+
+<!-- ============ 13 ============ -->
+<section id="ch13">
+  <h2><span class="num">13</span>网络层：为什么帧同步最终都会离开 TCP</h2>
+  <p class="lead">帧同步对网络只有一个硬要求：<strong>按序、可靠、低延迟地送达每一帧数据</strong>。听起来这正是 TCP 的卖点，但实践下来，几乎所有的实时帧同步项目都会换成「可靠 UDP」。</p>
+
+  <h3>TCP 的三宗罪</h3>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">问题</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对帧同步的伤害</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>队头阻塞</b><br><span style="color:#475569">丢了一个包，后面所有已到达的包都要在缓冲区等它重传</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">第 100 帧丢了，第 101～105 帧明明已经收到却不能交给逻辑层，整个人停住</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>重传超时太长</b><br><span style="color:#475569">超时重传常按数百毫秒估算，快速重传也要等若干个重复确认</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">帧同步一帧只有 66ms 的预算，等两三百毫秒重传等于卡死</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>拥塞控制</b><br><span style="color:#475569">丢包后主动降低发送速率</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">关键时期（团战瞬间）恰恰是数据最多的时候，TCP 反而在减油门</td></tr>
+</tbody>
+</table>
+</div>
+
+  <h3>可靠 UDP 的三件套</h3>
+  <p>自己基于 UDP 造一层轻量可靠协议（KCP、ENet 是常见选择，也可以自己写），核心是三招。</p>
+
+  <h4>① 冗余发包：把「重传」提前成「提前发」</h4>
+  <p>与其等丢包后重传，不如每次都多发一点。帧数据很小，代价极低。</p>
+<pre><span class="cm">// 每个包都带上最近 3 帧的数据（N-2, N-1, N）</span>
+<span class="cm">// 收包方按帧号去重，任何一帧都能从后续包里被「救」回来</span>
+<span class="k">void</span> SendFrameWindow(<span class="k">int</span> currentFrame)
+{
+    <span class="k">var</span> pkt = <span class="k">new</span> <span class="t">Packet</span>();
+    <span class="k">for</span> (<span class="k">int</span> i = Math.Max(<span class="n">0</span>, currentFrame - <span class="n">2</span>); i &lt;= currentFrame; i++)
+        pkt.Append(_frameBuffer[i]);      <span class="cm">// 附带冗余帧</span>
+    _socket.Send(pkt);
+}</pre>
+  <p>这样设计的妙处：<strong>丢一个包最多影响一帧，而这一帧几乎必然被下一个包带上</strong>。用带宽换延迟，在帧同步里非常划算（一帧数据才几十字节）。</p>
+
+  <h4>② 帧号单调推进：用序号做去重、排序与断包检测</h4>
+<pre><span class="cm">// 接收侧：只接受比当前大的帧号，重复帧直接丢</span>
+<span class="k">void</span> OnReceive(<span class="t">FrameCommand</span> fc)
+{
+    <span class="k">if</span> (fc.Frame &lt;= _lastReceivedFrame) <span class="k">return</span>;      <span class="cm">// 冗余帧，丢掉</span>
+
+    <span class="k">if</span> (fc.Frame &gt; _lastReceivedFrame + <span class="n">1</span>)             <span class="cm">// 中间有缺口 → 请求补发</span>
+        RequestRetransmit(_lastReceivedFrame + <span class="n">1</span>, fc.Frame - <span class="n">1</span>);
+
+    _inputBuffer.Put(fc);
+    _lastReceivedFrame = fc.Frame;
+}</pre>
+
+  <h4>③ 帧聚合：把多帧合成一个包</h4>
+  <p>15Hz 的逻辑帧，每帧只有一个几十字节的小包 —— 网络利用率极低，每个包还要背二十多字节的 IP／UDP 头。常见优化是把 2～3 帧攒成一个包发（比如每 100～200ms 发一次），进一步省带宽。代价是增加了「攒包」的延迟，所以要控制聚合深度。</p>
+
+  <h3>UDP 还是 TCP？一个实用的结论</h3>
+  <p>把可靠性做在 UDP 之上以后，<strong>网络层实现与上层逻辑可以解耦</strong>：上层只看到「按序到达的帧流」，底下是 TCP 还是可靠 UDP，变成一个配置参数。</p>
+  <ul>
+    <li><strong>追求操作延迟最低</strong> → 可靠 UDP（把重传超时压到很短、丢包立即快速重发、容忍有界乱序）。</li>
+    <li><strong>追求服务器承载最大、网络环境最杂</strong> → 用 TCP 也常常可行，尤其当逻辑帧率较低（10～15Hz）且客户端已有抖动缓冲时，队头阻塞的影响会被缓冲吸收一部分。</li>
+    <li><strong>主流组合</strong>：客户端与网关之间走 UDP（KCP 之类），网关到游戏服之间走内网可靠通道。</li>
+  </ul>
+
+  <div class="callout co-rose">
+    <span class="hd">别忘了一条最容易被忽视的规则</span>
+    <p>不管底层是什么，「断线」都必须被显式处理。要有<strong>心跳</strong>（比如每 500ms 一次）、要有<strong>超时判定</strong>、要有<strong>超时后的托管逻辑</strong>（AI 接管或空指令），还要有<strong>重连恢复流程</strong>。否则一次地铁进隧道，就会让整局陷入「所有人陪着等一个已经不在的人」的僵局 —— 而这正是帧同步最怕的事。</p>
+  </div>
+</section>
+
+<!-- ============ 14 ============ -->
+<section id="ch14">
+  <h2><span class="num">14</span>服务器：中转站、裁判与录像机</h2>
+  <p class="lead">帧同步里的服务器看起来「什么都不算」，但它其实承担了四件不能少的事：<strong>收集与广播、时序控制、存档与重连、事后验算</strong>。它不管世界怎么变，它管「世界按什么节奏变，以及历史有没有被篡改」。</p>
+
+  <h3>职责一：指令中转与节奏控制</h3>
+  <p>服务器维护房间的帧状态机，每 <code>1/LogicFps</code> 秒推进一次帧号，把当前收集到的所有玩家指令打包广播。两个设计要点：</p>
+  <ul>
+    <li><strong>服务器是唯一的时钟源。</strong>帧号由服务器定义并下发，客户端不许自己发明帧号。客户端只做「我在第 N 帧，请把 N 之后的数据给我」这类请求。</li>
+    <li><strong>指令必须归属到确定的帧。</strong>玩家点击「攻击」时，这个指令落在哪一帧必须由服务器裁决（客户端带的时间戳只作参考），否则同一操作在不同客户端会落到不同帧上，直接分叉。</li>
+  </ul>
+
+  <h3>职责二：全帧历史存档</h3>
+  <p>服务器把从开局到当前的<strong>每一帧广播内容都存下来</strong>。这份历史一物多用，是整个系统最值钱的数据：</p>
+  <div class="diagram" style="text-align:center">
+    <div style="display:inline-block;max-width:680px;min-width:220px;padding:13px 17px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left;color:#1e293b"><b>一份「帧历史」，五种用法</b></div>
+    <div style="color:#94a3b8;font-size:15px;line-height:1.3;margin:4px 0">↓</div>
+    <div style="display:inline-block;max-width:680px;min-width:220px;padding:13px 17px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:13px;text-align:left;color:#1e293b"><b>断线重连</b>：客户端说「我在第 1200 帧」，服务器把 1200 之后全给它，客户端快放追上</div>
+    <div style="color:#94a3b8;font-size:15px;line-height:1.3;margin:4px 0">↓</div>
+    <div style="display:inline-block;max-width:680px;min-width:220px;padding:13px 17px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:13px;text-align:left;color:#1e293b"><b>观战与中途加入</b>：同一份数据，落后多少个身位都能补上</div>
+    <div style="color:#94a3b8;font-size:15px;line-height:1.3;margin:4px 0">↓</div>
+    <div style="display:inline-block;max-width:680px;min-width:220px;padding:13px 17px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:13px;text-align:left;color:#1e293b"><b>录像与回放</b>：整局指令序列序列化 ＋ 压缩，一场对局常能压到几 KB 量级</div>
+    <div style="color:#94a3b8;font-size:15px;line-height:1.3;margin:4px 0">↓</div>
+    <div style="display:inline-block;max-width:680px;min-width:220px;padding:13px 17px;border:1.5px solid #9bd3a4;border-radius:11px;background:#f2fbf4;font-size:13px;text-align:left;color:#1e293b"><b>反作弊验算</b>：服务器跑一遍同一份逻辑得出权威结果，与玩家上报的结果比对</div>
+    <div style="color:#94a3b8;font-size:15px;line-height:1.3;margin:4px 0">↓</div>
+    <div style="display:inline-block;max-width:680px;min-width:220px;padding:13px 17px;border:1.5px solid #cbd5e1;border-radius:11px;background:#fff;font-size:13px;text-align:left;color:#1e293b"><b>线上问题复现</b>：拿到一局的指令流，本地跑一遍就能复现分叉 —— 排查确定性 bug 的唯一可靠手段</div>
+    <div class="cap">图 11 · 存下「原因」（指令流）的收益，远大于只存「结果」（状态快照）</div>
+  </div>
+
+  <h3>职责三：权威裁判（补上帧同步最大的短板）</h3>
+  <p>帧同步的逻辑在客户端跑，外挂可以改内存、改数值、改结果。服务器不需要在战斗过程中实时拦截（那样延迟太高），而是<strong>在关键节点验算</strong>：</p>
+  <ul>
+    <li><strong>校验和比对</strong>：客户端每 N 帧上报一次世界状态的哈希；服务器可以用自己那份逻辑重算，或者至少比对多个客户端上报的哈希是否一致，不一致就标记本局异常。</li>
+    <li><strong>结果验算</strong>：一局结束时，服务器拿这局的指令流跑一遍权威逻辑，得到「标准答案」，与客户端上报的胜负／经济／伤害比对。</li>
+    <li><strong>行为统计检测</strong>：命中率、反应时间、操作间隔等统计特征，异常值（比如永远零失误、反应快过人眼极限）可用于标记可疑账号。</li>
+  </ul>
+  <p>这套机制之所以成立，前提还是那句老话：<strong>逻辑层代码能在服务器上跑</strong>。所以服务器验算不是额外工程，而是分层架构的自然红利。</p>
+
+  <h3>职责四：匹配与房间管理</h3>
+  <p>这部分与同步模型关系不大，但帧同步对它有额外要求：<strong>尽量把网络质量接近的玩家匹配到一起</strong>。理由很直接 —— 在时间桶模型里，延迟高的玩家会持续丢帧、持续被托管，体验很差；把他和同延迟区间的玩家放一起，这个问题会显著缓解。</p>
+
+  <div class="callout co-violet">
+    <span class="hd">一个常见的误解</span>
+    <p>「帧同步不需要服务器」是错的。准确说法是：<strong>帧同步不需要服务器算游戏逻辑</strong>。服务器要管的时序、存档、重连、验算、匹配一样都不能少 —— 只是它的负载模型从「算世界」变成了「搬数据 ＋ 存历史」，容量估算的维度完全不同。</p>
+  </div>
+</section>
+
+<!-- ============ 15 ============ -->
+<section id="ch15">
+  <h2><span class="num">15</span>输入延迟预算表：慢在哪一环</h2>
+  <p class="lead">玩家说「手感不好」，通常指的是输入延迟。而延迟不是一个数字，是<strong>一长串环节的加总</strong>。想优化，先得把它拆开称重。</p>
+
+  <h3>把一次点击拆成六段</h3>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">环节</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">典型耗时</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">能不能压</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">① 采样到成帧</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">半个逻辑帧（15Hz 下约 33ms）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">提高逻辑帧率；按键即采即发，不要等帧边界</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">② 上传到服务器</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">半个往返（例如 40ms）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">机房就近部署、走 UDP、关掉小包合并发送</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">③ 服务器等到下一个广播点</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">0 ～ 一个帧间隔</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">「有指令立即发」＋「定时补发」两者结合</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">④ 下发到客户端</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">半个往返（40ms）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">同上</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">⑤ 客户端抖动缓冲</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">缓冲深度 × 帧间隔（2～4 帧 → 130～260ms）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">自适应缓冲；抖动小的时候降到 1～2 帧</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">⑥ 本地执行到表现</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">一个渲染帧到几个渲染帧</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">预表现、取消多余插值延迟、减少渲染流水线积压</td></tr>
+</tbody>
+</table>
+</div>
+
+  <p>把它们加起来，一次纯帧同步的操从按下到画面上动起来，很容易落到 <strong>200～300ms</strong>。这个量级在快节奏对战里已经明显发粘。所以第五部分要讲的，全都是围绕这张表做减法。</p>
+
+  <div class="stats">
+    <div class="stat"><div class="v">0.06s</div><div class="k">人眼觉得「立刻响应」<br>的粗略阈值</div></div>
+    <div class="stat"><div class="v">0.1s</div><div class="k">高端竞技玩家<br>能察觉延迟的量级</div></div>
+    <div class="stat"><div class="v">≥0.2s</div><div class="k">普通玩家开始抱怨<br>「不跟手」</div></div>
+    <div class="stat"><div class="v">15→30</div><div class="k">逻辑帧率翻倍<br>直接砍掉约 33ms</div></div>
+  </div>
+
+  <h3>三把常见的斧头</h3>
+  <ol>
+    <li><strong>提高逻辑帧率</strong>：15Hz → 30Hz，采样与等待各减半，代价是带宽与算力翻倍。这是最直接的一刀。</li>
+    <li><strong>抖动缓冲自适应</strong>：网络好的时候不要一直背着 4 帧的缓冲。把「缓冲深度」做成动态的，可以让好网络玩家白赚 100ms。</li>
+    <li><strong>本地输入先行</strong>：这是最大的一刀 —— 本地操作不再等服务器确认，直接就地生效。代价是可能与最终真相反，所以要配上「预测 ＋ 回滚」或者「预表现 ＋ 掩盖」。这就是接下来两章的内容。</li>
+  </ol>
+</section>
+
+<!-- ============ 16 ============ -->
+<section id="ch16">
+  <h2><span class="num">16</span>回滚（GGPO）：预测，然后重算</h2>
+  <p class="lead">回滚是帧同步最漂亮的一次进化。它的出发点是一句反问：<strong>为什么要等？</strong> 远端玩家的输入虽然还没到，但我可以猜 —— 而且大概率猜得对。猜对了没有代价，猜错了就倒回去重算。</p>
+
+  <h3>三个概念，先把牌摆清楚</h3>
+  <div class="diagram" style="text-align:center">
+    <div style="display:inline-block;max-width:680px;min-width:220px;padding:13px 17px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:13.5px;text-align:left;color:#1e293b"><b>帧延迟（Input Delay）</b><br><span style="color:#475569;font-size:12.5px">我按下攻击，但游戏规定它要到第 N+2 帧才生效。用一点点人为延迟，换取「远端输入有更大概率及时赶到」。GGPO 允许 0～8 帧可调。</span></div>
+    <div style="color:#94a3b8;font-size:15px;line-height:1.3;margin:4px 0">＋</div>
+    <div style="display:inline-block;max-width:680px;min-width:220px;padding:13px 17px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:13.5px;text-align:left;color:#1e293b"><b>预测（Prediction）</b><br><span style="color:#475569;font-size:12.5px">远端输入没到，就假设「和上一帧一样」。人在连续操作时，输入是高度重复的 —— 按住方向键、连打普攻，这个猜测命中率很高。</span></div>
+    <div style="color:#94a3b8;font-size:15px;line-height:1.3;margin:4px 0">＋</div>
+    <div style="display:inline-block;max-width:680px;min-width:220px;padding:13px 17px;border:1.5px solid #c4b0f5;border-radius:11px;background:#f8f5ff;font-size:13.5px;text-align:left;color:#1e293b"><b>回滚（Rollback）</b><br><span style="color:#475569;font-size:12.5px">真输入到了、发现猜错，就把世界恢复到「最后一个全程确定的帧」，用真输入重算一遍，再一路快进到现在。</span></div>
+    <div class="cap">图 12 · 三者组合起来的效果：玩家感受不到等待，而世界最终严格正确</div>
+  </div>
+
+  <h3>一次回滚的完整过程</h3>
+  <div class="diagram" style="text-align:center">
+    <div style="display:inline-block;max-width:700px;min-width:220px;padding:14px 18px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:12.5px;text-align:left;color:#1e293b;font-family:Menlo,Consolas,monospace;white-space:pre;overflow-x:auto">时间 →
+确认帧                                        远端真输入到达
+  │                                                │
+  ●────○────○────○────○────○   正在预测跑          │
+  ↑    └─ 这几帧都是「猜的」 ─┘                    │
+  │                                                ↓
+  1. 快照：每个逻辑帧都保存一份状态副本（用于回滚）
+  2. 回退：状态 = 快照[确认帧 K]
+  3. 重算：for f in K..当前帧 → 用「真输入」跑一遍
+  4. 快进：把重算后的状态作为新的当前状态，继续预测</div>
+    <div class="cap">图 13 · 回滚四步：快照 → 回退 → 重算 → 快进。整个过程在同一帧内完成，玩家看到的是画面「轻微修正」，而不是卡顿</div>
+  </div>
+
+<pre><span class="cm">// 回滚核心逻辑（概念版）</span>
+<span class="k">void</span> OnRemoteInputArrived(<span class="k">int</span> frame, <span class="t">FrameCommand</span> real)
+{
+    <span class="k">if</span> (_predictions[frame] == real) <span class="k">return</span>;      <span class="cm">// 猜对了，什么都不用做</span>
+
+    <span class="k">int</span> rollbackTo = FindLastConfirmedFrame(frame);  <span class="cm">// 回退到仍未过期的确定帧</span>
+
+    <span class="cm">// 1) 恢复状态：从环形缓冲里取出那一帧的世界快照</span>
+    _simulation.Restore(_snapshotRing[rollbackTo]);
+
+    <span class="cm">// 2) 用真输入重算，一路跑到当前帧</span>
+    <span class="k">for</span> (<span class="k">int</span> f = rollbackTo + <span class="n">1</span>; f &lt;= _currentFrame; f++)
+    {
+        <span class="t">FrameCommand</span> cmd = _inputBuffer.Has(f)
+            ? _inputBuffer.Get(f)                    <span class="cm">// 已确认的真输入</span>
+            : _inputBuffer.Predict(f);               <span class="cm">// 还没到的，继续猜</span>
+        _simulation.Step(f, cmd);
+    }
+
+    <span class="cm">// 3) 表现层不需要重新播动画，只需接受「位置被修正了」</span>
+    _presentation.SmoothCorrectTo(_simulation.State);
+}</pre>
+
+  <h3>为什么这招能成立</h3>
+  <p>因为它吃的是两笔便宜：</p>
+  <ul>
+    <li><strong>模拟很便宜。</strong>格斗游戏一帧的逻辑通常是几十个对象的位置与状态机，重算 5 帧的成本远低于一帧渲染。只要游戏逻辑够轻，回滚在 CPU 上完全吃得消。</li>
+    <li><strong>预测命中率很高。</strong>真人对战里的输入是「连续信号」：按住方向、连按攻击、蓄力不放。沿用上一帧的输入，命中率通常能到很高的水平，所以平均回滚次数并不多。</li>
+  </ul>
+
+  <h3>代价：三件必须提前做好的事</h3>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">前提</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">要求</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>状态可序列化</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">整个游戏状态必须能一键「存」和「取」。不能有藏在引擎对象里、散落在闭包中、或者依赖外部引用的状态。这是最难的一条，通常要求逻辑层本来就是纯数据结构</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>快照要快</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">每帧一次内存拷贝。常用做法是「环形缓冲 ＋ 预分配固定大小的结构体」，避免任何运行时分配；状态变化少时可以用差分快照优化</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>逻辑与表现彻底分离</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">回滚重算时<strong>绝不能重复播放音效、特效、动画</strong>。要用一个「是否正在重演」的开关把所有副作用关掉，重演结束后由表现层按差值平滑修正</td></tr>
+</tbody>
+</table>
+</div>
+
+  <div class="callout co-rose">
+    <span class="hd">回滚的两个典型副作用</span>
+    <p><strong>橡皮筋：</strong>预测错得离谱时（比如对手突然反向跳），画面会出现角色被「拉回」的瞬间。缓解办法是表现层做平滑修正（在 100～200ms 内渐变到正确位置），而不是瞬间硬切。</p>
+    <p><strong>观感抖动：</strong>回滚本身会带来微小的视觉不一致（比如一次本该命中的攻击被判成未命中）。这类问题只能靠<strong>提高预测准确度</strong>（例如记录玩家的操作习惯）与<strong>控制回滚窗口深度</strong>（超过 7～8 帧就不预测、转为轻微等待）来缓解。</p>
+  </div>
+
+  <h3>GGPO 的调参旋钮：帧延迟</h3>
+  <p>帧延迟是「延迟」和「回滚频率」之间的滑杆：</p>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">帧延迟</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">适用网络</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">回滚频率</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">0 帧</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">任意（延迟全交给预测承担）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">高</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">1～2 帧</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">延迟在 2 帧以内</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">中</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">3～5 帧</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">延迟在 5 帧以内</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">低</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">动态可调</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">根据实测往返延迟自动选择</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">自适应</td></tr>
+</tbody>
+</table>
+</div>
+  <p>实践中，帧延迟通常取「两端玩家设置值的较大者」，因为延迟小的一方多做一点预测就行，而延迟大的一方如果被强行要求零延迟，回滚会爆炸。</p>
+
+  <div class="callout co-teal">
+    <span class="hd">一句话总结回滚的性价比</span>
+    <p>它用 <strong>CPU（多跑几遍模拟）</strong> 换来了 <strong>手感（零等待）</strong>，代价是对架构的要求变得苛刻 —— 状态必须可存可取、逻辑必须与表现绝缘。对 2～8 人、逻辑轻、精度要求高的游戏，这是目前最划算的方案。</p>
+  </div>
+</section>
+
+<!-- ============ 17 ============ -->
+<section id="ch17">
+  <h2><span class="num">17</span>不回滚也能跟手：预表现与掩盖</h2>
+  <p class="lead">回滚不是唯一的答案，而且它的实现成本不低。如果不想动架构，还有一批更「轻」的手段可以用来改善手感 —— 它们的共同思路是：<strong>逻辑上老实等着，但画面上先演给你看。</strong></p>
+
+  <h3>手段一：本地预表现（Prediction Presentation）</h3>
+  <p>本地玩家按下攻击键，逻辑层老老实实等到第 N+2 帧才真正执行；但表现层立刻播放「抬手」动画与音效。等逻辑真正执行时，动画刚好走到出招的那一帧 —— 玩家感觉是「立刻响应」，而世界状态没有任何提前。</p>
+  <p>它和回滚的区别是：<strong>回滚是在逻辑上抢跑，预表现只是在视觉上抢跑。</strong> 所以预表现不需要状态可回滚，但它的可用范围有限 —— 只适合那些「结果几乎必然如此」的操作（比如走路、普攻），不适合胜负判定（技能命中、格挡成功）。</p>
+
+  <h3>手段二：输入提前量 ＋ 前摇动画</h3>
+  <ul>
+    <li><strong>把操作提前到最早的合法帧。</strong>服务器收到「我要在第 N 帧攻击」这类意图时，只要该帧还没被广播，就把它插进去，而不是排到下一帧。</li>
+    <li><strong>前摇动画当缓冲。</strong>把技能设计成「有起手动作」的形态：起手 6～10 帧再判定。这段起手时间天然吸收了网络延迟，玩家感觉不到等，只觉得「这招有分量」。</li>
+    <li><strong>连招预输入缓冲。</strong>记录玩家在硬直期间按下的按键，硬直结束立刻消费掉，避免「按了没反应」。</li>
+  </ul>
+
+  <h3>手段三：表现层平滑修正</h3>
+  <p>当逻辑状态与表现状态出现偏差（服务器纠偏、回滚重演、追帧结束），不要瞬间硬切 —— 那会看到「瞬移」。正确做法是<strong>在一段短时间（100～200ms）里把表现位置渐变到正确位置</strong>，并且优先修正位置、尽量不修正在播的动画。</p>
+  <div class="formula">每渲染帧:
+    visualPos = Lerp(visualPos, logicPos, k)   <span class="c">// k 由修正时间反推</span>
+    偏差 &gt; 阈值（例如 2 米）: 直接瞬移        <span class="c">// 差太多时平滑反而诡异</span></div>
+
+  <h3>手段四：让请求延迟变成「设计选择」</h3>
+  <p>这条最容易被忽略：<strong>游戏设计本身可以吃掉一部分延迟</strong>。</p>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">设计手法</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">为什么有效</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">技能有可见的前摇</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">给双方公平的反应窗口，延迟被「规则」而不是「网络」解释</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">判定宽容（命中范围略大于视觉）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">几十毫秒的误差被宽容度吸收，玩家不会觉得「明明打中了」</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不需要精确到帧的玩法</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">帧同步的延迟在宽松玩法里几乎无感；硬要 1v1 拼帧，就必须上回滚</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把「即死」改成「有血量空间」</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">单次判定的误差不再直接决定胜负，体验容错更高</td></tr>
+</tbody>
+</table>
+</div>
+
+  <div class="callout co-amber">
+    <span class="hd">四种手段的适用边界</span>
+    <p><strong>预表现</strong>只用于「结果几乎确定」的操作；<strong>前摇与宽容</strong>是设计层手段，越早定越好改；<strong>平滑修正</strong>是万能兜底，但要注意「偏差过大时改为瞬移」。三者都不需要回滚那么重的架构，是性价比很高的第一步。</p>
+  </div>
+</section>
+
+<!-- ============ 18 ============ -->
+<section id="ch18">
+  <h2><span class="num">18</span>不同步了怎么查：校验和与录像定位</h2>
+  <p class="lead">分叉这件事，一定会在某个时刻发生。团队之间的差距，不在于是否能避免它，而在于<strong>从「玩家反馈不同步」到「定位到那一行代码」要花多久</strong>。这一章讲怎么把这段时间从「两周」压缩到「两小时」。</p>
+
+  <h3>第一步：让它自己开口说话 —— 校验和</h3>
+  <p>逻辑层每 N 帧（例如 30 帧）计算一次整个世界的哈希值，上报给服务器。服务器把同一局、同一帧、不同客户端上报的哈希排在一起比对：</p>
+  <div class="diagram" style="text-align:center">
+    <div style="display:inline-block;max-width:700px;min-width:220px;padding:14px 18px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:12.5px;text-align:left;color:#1e293b;font-family:Menlo,Consolas,monospace;white-space:pre;overflow-x:auto">帧号    客户端A      客户端B      客户端C
+ 30     a3f1  ✔      a3f1  ✔      a3f1  ✔
+ 60     77c0  ✔      77c0  ✔      77c0  ✔
+ 90     b19e  ✔      b19e  ✔      b19e  ✔
+120     4d22  ✘      4d22  ✔      4d22  ✔      ← 分叉起点就在 91~120 之间
+150     9f0a  ✘      9f0a  ✔      9f0a  ✔</div>
+    <div class="cap">图 14 · 校验和把「整局都不对」缩小成「第 91～120 帧之间出问题」。这是排查里最关键的一次降维</div>
+  </div>
+  <p>哈希要覆盖<strong>所有影响后续的字段</strong>：对象 ID、位置、速度、血量、状态机状态、计时器、随机器内部状态。别只哈希位置 —— 那样会把「随机器状态不同」这类分叉藏起来。</p>
+
+  <h3>第二步：拿到「案发时段的录像」</h3>
+  <p>因为帧历史存在服务器上，你可以把这一局从开局（或从某个快照点）到分叉帧的指令流完整取下来，在本地重演：</p>
+  <div class="formula">回放模式:
+  1. 用同一颗种子初始化世界
+  2. 逐帧喂入服务器存档的指令
+  3. 每到 30 帧的倍数，打印一次校验和
+  4. 在「本地校验和 ≠ 线上校验和」的那一帧停下来
+  5. 此时对比该帧的所有对象属性，逐字段找出第一个不同的值</div>
+  <p>这套流程能进行的前提，是<strong>帧历史 + 同一个逻辑层 + 可复现的初始化</strong>。所以前面反复强调的那三件事（分离、存档、服务器能跑逻辑），在排查阶段全部变现。</p>
+
+  <h3>第三步：准备四个工具</h3>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">工具</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">作用</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>确定性校验仪</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">每 N 帧打印世界哈希；能对比两份运行的哈希序列，直接指出第一处不同</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>逻辑帧调试器</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">能暂停、单步执行逻辑帧、查看该帧输入与全量状态。配上断点，就能盯着分叉那一刻</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>指令流回放器</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">输入一份录像，重现整局。线上 bug 在本地 100% 复现的唯一途径</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>网络模拟器</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">注入延迟、抖动、丢包、乱序，用来复现「只有在弱网下才出现」的问题</td></tr>
+</tbody>
+</table>
+</div>
+
+  <h3>自动化：让它自己找出分叉</h3>
+  <p>光有工具还不够，还要让它<strong>持续跑</strong>。一个成熟的做法是搭建自动化战斗回归：</p>
+  <ul>
+    <li>让多台真机（不同芯片、不同系统版本）跑同一批脚本对局，每天固定轮次；</li>
+    <li>每局结束自动比对各方校验和序列，一旦发现分叉，自动保存「录像 ＋ 差异文档」并上传；</li>
+    <li>差异文档里打印每个对象的每个属性，并用标记指出哪些相同、哪些不同。</li>
+  </ul>
+  <p>这样分叉就会从「线上偶发、无法复现」变成「早上上班就看到一份现成的案卷」。<strong>把不确定性从生产环境挪到测试环境，是帧同步最值钱的一笔工程投资。</strong></p>
+
+  <div class="callout co-violet">
+    <span class="hd">常见的分叉凶手排行</span>
+    <p>按经验，排查结果大致集中在：① 某处偷偷用了浮点（尤其是排序比较器、插值、距离判定）；② 哈希字典的遍历顺序；③ 某个随机数消耗次数与另一端不同；④ 一段「按条件触发」的代码在两端走了不同分支；⑤ 对象 ID 分配顺序不同。这五类能覆盖绝大多数案例，可以在排查时优先怀疑。</p>
+  </div>
+</section>
+
+<!-- ============ 19 ============ -->
+<section id="ch19">
+  <h2><span class="num">19</span>断线重连、观战、录像与反作弊</h2>
+  <p class="lead">这四件事在帧同步里其实是同一件事的四个用法：<strong>都是「按帧号重演历史」</strong>。因为世界由指令流决定，所以只要能拿到历史指令，就能重构出任何一个过去时刻。</p>
+
+  <h3>断线重连与追帧</h3>
+  <p>玩家断线重连后需要快速赶上。做法是：</p>
+  <ol>
+    <li>客户端告诉服务器「我最后确认收到的帧号是 N」；</li>
+    <li>服务器把这局从 N 到最新帧的全部指令发给它（帧数据很小，几百上千帧也就几十 KB）；</li>
+    <li>客户端进入<strong>追帧模式</strong>：以远高于实时的速度连续演算，直到追上当前帧；</li>
+    <li>追帧期间关闭所有表现层副作用（不播音效、不弹 UI、不放特效），追平后无缝切回实时。</li>
+  </ol>
+  <p>更快的做法是「快照 ＋ 追帧」：服务器或房主定期保存世界状态快照，重连时直接给「最近的快照 ＋ 之后的少量指令」，落后几百帧的情况可以在瞬间补齐。</p>
+
+  <h3>观战与录像</h3>
+  <p>观战本质就是「以慢一档的速率播同一份指令流」，所以它几乎不需要额外开发 —— 只是多一个不发送输入的客户端。录像同理：把整局的指令序列按帧号存储、去掉空帧、整体压缩，一局对战的体量常常能小到几 KB 级别。</p>
+  <p>这也是帧同步在内容生态上的一件隐形福利：<strong>回放、观战、剪辑、精彩时刻、AI 训练数据</strong>，全部共用同一套机制。</p>
+
+  <h3>反作弊：三层防线</h3>
+  <div class="diagram" style="text-align:center">
+    <div style="display:inline-block;max-width:680px;min-width:220px;padding:13px 17px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:13.5px;text-align:left;color:#1e293b"><b>第一层 · 过程掩盖</b><br><span style="color:#475569;font-size:12.5px">关键数值加密存储、多份冗余、内存校验、逻辑关键部分下沉到脚本虚拟机。提高改内存的门槛，但不指望它决定胜负。</span></div>
+    <div style="color:#94a3b8;font-size:15px;line-height:1.3;margin:4px 0">↓</div>
+    <div style="display:inline-block;max-width:680px;min-width:220px;padding:13px 17px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:13.5px;text-align:left;color:#1e293b"><b>第二层 · 时序约束</b><br><span style="color:#475569;font-size:12.5px">预提交哈希对抗「延迟发送偷看对手操作」；关键操作要求在下发帧之后才生效，堵住抢跑；服务器裁决每个指令归属哪一帧。</span></div>
+    <div style="color:#94a3b8;font-size:15px;line-height:1.3;margin:4px 0">↓</div>
+    <div style="display:inline-block;max-width:680px;min-width:220px;padding:13px 17px;border:1.5px solid #9bd3a4;border-radius:11px;background:#f2fbf4;font-size:13.5px;text-align:left;color:#1e293b"><b>第三层 · 事后验算（最有效）</b><br><span style="color:#475569;font-size:12.5px">服务器拿录像重跑一遍逻辑，得到权威结果；客户端上报的结果与它不一致就有问题。校验和定期比对还能提前发现篡改。</span></div>
+    <div class="cap">图 15 · 帧同步的反作弊逻辑：<b>不追求「阻止」，追求「事后必然发现」</b>。因为战斗只在本地跑，拦不住，但可以结算时算总账</div>
+  </div>
+  <p>一个重要的心态转变：帧同步项目的反作弊<strong>不是「防住」而是「可审计」</strong>。局中让外挂自娱自乐（反正只影响他自己和他的队友体验），局后统一清算 —— 这样既避免了实时校验的性能开销，又保住了长期公平。</p>
+</section>
+
+<!-- ============ 20 ============ -->
+<section id="ch20">
+  <h2><span class="num">20</span>上线清单</h2>
+  <p class="lead">把前面 19 章压成一张可以逐条打勾的清单。如果你的帧同步项目要上线，这几项没有一项是可选。</p>
+
+  <h3>开工前（架构决策）</h3>
+  <ul>
+    <li>确认玩法适合帧同步（单位多／操作精度要求高／需要回放），而不是硬套。</li>
+    <li>逻辑层独立成模块，不引用引擎命名空间；能单机跑、能在服务器跑。</li>
+    <li>选好定点数精度（2D 用 Q16.16，3D 用 Q48.16 之类），写进团队规范。</li>
+    <li>定好逻辑帧率（10／15／30）与协议格式，帧率越早定越好改。</li>
+  </ul>
+
+  <h3>开发中（确定性纪律）</h3>
+  <ul>
+    <li>逻辑层没有浮点、没有系统时间、没有引擎物理、没有哈希容器遍历。</li>
+    <li>随机数走自建随机器；随机器状态纳入存档。</li>
+    <li>同帧更新顺序被显式定义并落在文档里。</li>
+    <li>代码审查里有「确定性检查」一项；新人有自查清单。</li>
+  </ul>
+
+  <h3>联调前（工程能力）</h3>
+  <ul>
+    <li>有校验和机制，每 N 帧上报一次。</li>
+    <li>有指令流回放器与逻辑帧调试器。</li>
+    <li>有网络模拟（延迟／抖动／丢包／乱序）。</li>
+    <li>有自动化战斗回归，多机型跑同一批脚本并比对结果。</li>
+  </ul>
+
+  <h3>上线前（体验与安全）</h3>
+  <ul>
+    <li>抖动缓冲自适应；弱网下不崩、不无限等。</li>
+    <li>断线重连能追帧；长时间无输入有托管逻辑。</li>
+    <li>追帧与重演期间屏蔽所有表现层副作用。</li>
+    <li>输入延迟经过实测（真机、弱网），在可接受范围。</li>
+    <li>服务器有全帧历史存档；结算有权威验算。</li>
+    <li>校验和异常会自动告警并留存案卷。</li>
+  </ul>
+
+  <div class="callout co-blue">
+    <span class="hd">上线后的第一条守则</span>
+    <p><strong>永远不要为了「性能」或「省事」在逻辑层里打开一个口子。</strong>帧同步的确定性像一间无菌室：一次侥幸的浮点、一次顺手的字典遍历、一次「就这一次」的时间调用，都可能在两周后变成一个查不出来的线上分叉。守住纪律本身，就是这个技术方案的核心成本。</p>
+  </div>
+</section>
+
+<!-- ============ 附录 A ============ -->
+<section id="apa">
+  <h2><span class="num">A</span>术语速查表</h2>
+  <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">术语</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;background:#f1f5f9;font-weight:700;text-align:left;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">含义</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>逻辑帧 / Tick / Turn</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">游戏世界推进一步的最小单位。所有逻辑都挂在帧号上，与渲染帧率无关</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>指令 / Command / Input</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">某个玩家在某一帧的操作。帧同步中唯一需要跨网络传输的游戏数据</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>确定性 / Determinism</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">相同初始状态 ＋ 相同输入 ＋ 相同代码 ⇒ 逐位相同的结果</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>分叉 / Desync</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不同客户端的世界状态出现差异，且不会自动收敛</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>定点数 / Fixed-Point</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">用整数表示小数（真实值 × 2^n），保证跨平台逐位一致</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>锁步 / Lockstep</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">严格等待所有玩家输入的同步方式，帧号严格同步</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>时间桶 / Bucket Sync</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">把时间切成固定桶，按桶广播指令，不等待迟到的玩家（乐观帧锁定）</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>抖动缓冲 / Jitter Buffer</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">客户端缓存若干帧后再执行，把网络到达时间的抖动抹平</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>追帧 / Catch-up</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">以加速方式补跑落后的逻辑帧，且不渲染中间过程</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>回滚 / Rollback</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">预测远端输入并抢先执行；发现猜错就恢复快照、重算到当前帧</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>帧延迟 / Input Delay</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">玩家的输入被统一推迟若干帧生效，用来降低回滚频率</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>校验和 / Checksum</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">世界状态的哈希值，用于比对两端是否一致、定位分叉帧</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- ============ 附录 B ============ -->
+<section id="apb">
+  <h2><span class="num">B</span>常见误区与反直觉点</h2>
+
+  <h3>误区一：「帧同步就是同步每一帧的状态」</h3>
+  <p>恰恰相反。帧同步同步的是<strong>输入</strong>，状态是自己算出来的。名字里的「帧」指的是逻辑帧号，不是「把帧里的状态发过去」。很多沟通事故都源于这个名字的误导。</p>
+
+  <h3>误区二：「帧同步不需要服务器」</h3>
+  <p>不需要服务器<strong>算逻辑</strong>，但极度需要服务器<strong>定节奏、存历史、做验算、管重连</strong>。少了这些，一个掉线就能让整局僵死。</p>
+
+  <h3>误区三：「浮点只要精度够高就没问题」</h3>
+  <p>问题不在精度，而在<strong>一致性</strong>。float128 该分叉还是会分叉。定点数的价值不是「更准」，而是「在哪儿算都一样」。</p>
+
+  <h3>误区四：「先做功能，最后再统一处理确定性」</h3>
+  <p>这是最常见的致命顺序。确定性必须从第一天就作为架构约束存在 —— 等逻辑层写完再回头改定点数，代价接近于重写。这也是为什么很多团队在中后期评估时，最终选择放弃帧同步。</p>
+
+  <h3>误区五：「卡顿是网络问题，加带宽就好」</h3>
+  <p>帧同步的卡顿大多是<strong>时序问题</strong>：抖动缓冲太浅、追帧没做、没有超时托管、聚包延迟太大。加带宽解决不了「慢的人拖住别人」，只有时间桶、缓冲与托管能解决。</p>
+
+  <h3>误区六：「回滚能解决一切延迟」</h3>
+  <p>回滚能藏住延迟，但不能藏住<strong>连续大幅抖动</strong>。如果对手忽然改变操作方向，预测必然错，回滚窗口会持续加深；超过一定深度就必须转为「轻微等待」，否则画面会变成橡皮筋。回滚是「概率性地藏延迟」，不是魔法。</p>
+
+  <h3>一句话反直觉总结</h3>
+  <div class="callout co-amber">
+    <span class="hd">三条最值得记住的</span>
+    <p>① 帧同步省的是带宽与服务器算力，付出的是<strong>确定性的长期税</strong>；<br>
+    ② 帧同步项目里最难的不是网络代码，而是<strong>纪律</strong> —— 让二十个人的每一行逻辑代码都守同一套规矩；<br>
+    ③ 帧同步最大的隐形红利是<strong>「世界可重演」</strong>：回放、观战、重连、AI 训练、自动化回归测试，全部白送。</p>
+  </div>
+</section>
+
+<!-- ============ 附录 C ============ -->
+<section id="apc">
+  <h2><span class="num">C</span>思考题</h2>
+  <p class="lead">用来检验有没有真正读进去。每道题都能在正文里找到依据，但都需要自己想一遍。</p>
+  <ol>
+    <li>你的游戏要做 1v1 实时对战，逻辑层已经在用引擎物理跑了一年。现在要求上线帧同步，你会怎么评估改造成本？有没有折中方案？</li>
+    <li>逻辑帧率从 15Hz 提到 30Hz，输入延迟能降多少？代价是什么？在什么情况下不值得？</li>
+    <li>为什么「玩家没操作」也必须按帧发送空指令？不发会产生什么连锁后果？</li>
+    <li>时间桶模型下，一个玩家的指令连续丢了三帧。从玩家视角、其他玩家视角、以及最终结算三个角度，分别会发生什么？</li>
+    <li>如果让你只保留一个调试工具来排查分叉，你选校验和还是指令流回放器？为什么？（提示：两者的作用其实互补）</li>
+    <li>回滚要求「整个状态可序列化」。请举出三个在真实项目里很难序列化的东西，并说明怎么隔离它们。</li>
+    <li>为什么说帧同步的反作弊目标是「可审计」而不是「防住」？这个判断在什么前提下成立？</li>
+    <li>假设你们要把游戏搬到服务端权威的帧同步（服务器跑逻辑），架构上需要额外做哪些事？服务器成本会怎么变？</li>
+  </ol>
+</section>
+
+<section>
+  <h2><span class="num">✦</span>写在最后</h2>
+  <p style="color:var(--ink2)">帧同步是一条<strong>把复杂度从服务器搬到客户端</strong>的路线。它用一条优雅的假设 —— 「相同的输入必然得到相同的结果」—— 换来了极低的带宽、极轻的服务器和天然的录像能力，但也换来了一份必须长期偿还的债：确定性。</p>
+  <p style="color:var(--ink2)">它不像状态同步那样「随便写写也能跑」，更像是一种纪律：每一行逻辑代码都要经得起「两台不同机器会算出一样吗」这一问。理解了这一点，你就能理解为什么这种看起来古老的技术，至今仍站在 RTS、MOBA 和格斗游戏的底层。</p>
+  <p style="text-align:center;color:var(--ink2)">传原因，还是传结果 —— 这是网络同步的第一个问题，也是最重要的那个。</p>
+</section>
+
+
+
+</div>
+</body>
+</html>
