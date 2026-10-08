@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>梦幻西游的经济学 · 用现代货币理论看懂一个 20 年不崩的虚拟经济体</title>
+<style>
+  :root{
+    --bg:#f6f8fb; --card:#ffffff; --ink:#1e293b; --ink2:#475569; --ink3:#94a3b8;
+    --line:#e2e8f0; --line2:#cbd5e1;
+    --blue:#3b5bdb; --blue-bg:#eef2ff;
+    --teal:#0d9488; --teal-bg:#ecfdf5;
+    --amber:#b45309; --amber-bg:#fffbeb;
+    --rose:#be123c; --rose-bg:#fff1f2;
+    --violet:#6d28d9; --violet-bg:#f5f3ff;
+    --green:#15803d; --green-bg:#f0fdf4;
+    --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px -12px rgba(15,23,42,.14);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:16px; line-height:1.85; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 20px 80px}
+
+  /* ---------- hero ---------- */
+  .hero{padding:64px 0 30px;text-align:center}
+  .hero .kicker{
+    display:inline-block;font-size:12.5px;letter-spacing:.14em;color:var(--blue);
+    background:var(--blue-bg);border:1px solid #dbe3ff;border-radius:999px;padding:5px 14px;margin-bottom:20px;
+  }
+  .hero h1{font-size:clamp(26px,4.4vw,40px);line-height:1.35;margin:0 0 16px;letter-spacing:-.01em}
+  .hero h1 em{font-style:normal;color:var(--blue)}
+  .hero p.sub{color:var(--ink2);font-size:16.5px;margin:0 auto;max-width:680px}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:26px}
+  .meta span{font-size:13px;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 13px}
+
+  /* ---------- section ---------- */
+  section{margin-top:64px;scroll-margin-top:24px}
+  .sec-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:8px}
+  .badge{
+    flex:0 0 auto;width:40px;height:40px;border-radius:12px;background:var(--blue);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;
+    box-shadow:0 6px 16px -8px rgba(59,91,219,.9);
+  }
+  .badge.teal{background:var(--teal);box-shadow:0 6px 16px -8px rgba(13,148,136,.9)}
+  .badge.amber{background:var(--amber);box-shadow:0 6px 16px -8px rgba(180,83,9,.9)}
+  .badge.violet{background:var(--violet);box-shadow:0 6px 16px -8px rgba(109,40,217,.9)}
+  .badge.rose{background:var(--rose);box-shadow:0 6px 16px -8px rgba(190,18,60,.9)}
+  .sec-head h2{font-size:23px;margin:6px 0 0;letter-spacing:-.01em;line-height:1.4}
+  .sec-head .en{font-size:13px;color:var(--ink3);font-weight:500;margin-left:8px}
+  h3{font-size:17.5px;margin:34px 0 10px;padding-left:12px;border-left:3px solid var(--blue)}
+  h3.teal{border-color:var(--teal)} h3.amber{border-color:var(--amber)}
+  h3.violet{border-color:var(--violet)} h3.rose{border-color:var(--rose)}
+  h4{font-size:15.5px;margin:22px 0 6px;color:var(--ink)}
+  p{margin:12px 0}
+  a{color:var(--blue)}
+  strong{color:#0f172a}
+  code{background:#f1f5f9;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:13.5px;
+       font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#0f172a}
+  ul,ol{margin:12px 0;padding-left:22px}
+  li{margin:6px 0}
+
+  /* ---------- toc ---------- */
+  .toc{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 24px;box-shadow:var(--shadow)}
+  .toc h3{margin:0 0 12px;border:0;padding:0;font-size:15px;color:var(--ink2);letter-spacing:.05em}
+  .toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:6px 20px}
+  .toc li a{display:flex;gap:10px;text-decoration:none;color:var(--ink);font-size:14.5px;padding:6px 8px;border-radius:8px}
+  .toc li a:hover{background:var(--blue-bg)}
+  .toc li b{color:var(--blue);font-variant-numeric:tabular-nums;font-weight:600;min-width:16px}
+
+  /* ---------- card / callout ---------- */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin:18px 0;box-shadow:var(--shadow)}
+  .card h4{margin-top:0}
+  .callout{border-radius:14px;padding:16px 20px;margin:18px 0;border:1px solid;position:relative}
+  .callout .lbl{display:block;font-size:12.5px;font-weight:700;letter-spacing:.06em;margin-bottom:6px}
+  .co-blue{background:var(--blue-bg);border-color:#dbe3ff} .co-blue .lbl{color:var(--blue)}
+  .co-teal{background:var(--teal-bg);border-color:#c9f0e6} .co-teal .lbl{color:var(--teal)}
+  .co-amber{background:var(--amber-bg);border-color:#f6e3bf} .co-amber .lbl{color:var(--amber)}
+  .co-rose{background:var(--rose-bg);border-color:#fbd5dd} .co-rose .lbl{color:var(--rose)}
+  .co-violet{background:var(--violet-bg);border-color:#ddd3fb} .co-violet .lbl{color:var(--violet)}
+  .callout p{margin:6px 0}
+
+  /* ---------- diagram shell ---------- */
+  .diagram{background:linear-gradient(180deg,#fdfefe,#f8fafc);border:1px solid var(--line);border-radius:16px;padding:22px 18px;margin:22px 0}
+  .diagram .dtitle{font-size:14px;font-weight:700;color:var(--ink2);text-align:center;margin-bottom:16px}
+  .diagram .cap{font-size:13px;color:var(--ink3);text-align:center;margin-top:12px}
+  .diagram svg{display:block;max-width:100%;height:auto;margin:0 auto}
+
+  /* ---------- css flow ---------- */
+  .flow{display:flex;flex-wrap:wrap;align-items:stretch;justify-content:center;gap:8px}
+  .box{
+    background:#fff;border:1.5px solid var(--line2);border-radius:12px;padding:10px 14px;
+    font-size:13.5px;line-height:1.5;text-align:center;min-width:96px;display:flex;flex-direction:column;justify-content:center;
+  }
+  .box b{display:block;font-size:13.5px;color:#0f172a}
+  .box small{color:var(--ink3);font-size:11.5px;display:block;margin-top:2px}
+  .box.blue{border-color:#a8b8f5;background:#f3f6ff}
+  .box.teal{border-color:#8fd9cb;background:#effbf7}
+  .box.amber{border-color:#eecb8a;background:#fffaf0}
+  .box.rose{border-color:#f0a8ba;background:#fff5f7}
+  .box.violet{border-color:#c3b0f7;background:#f8f5ff}
+  .box.green{border-color:#9adcae;background:#f2fdf5}
+  .box.dark{background:#1e293b;border-color:#1e293b;color:#fff}
+  .box.dark b{color:#fff}
+  .arw{align-self:center;color:var(--ink3);font-size:17px;font-weight:700;line-height:1;padding:0 1px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:stretch}
+  .col{display:flex;flex-direction:column;gap:8px}
+
+  /* ---------- table ---------- */
+  .tblwrap{overflow-x:auto;margin:20px 0;border:1px solid var(--line);border-radius:14px;background:#fff}
+  table{border-collapse:collapse;width:100%;font-size:14px;min-width:520px}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{background:#f8fafc;font-size:13px;color:var(--ink2);font-weight:600;white-space:nowrap}
+  tbody tr:last-child td{border-bottom:0}
+  tbody tr:hover{background:#fcfdff}
+  td.y{color:var(--green);font-weight:600}
+  td.n{color:var(--rose);font-weight:600}
+
+  /* ---------- stats ---------- */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow)}
+  .stat .num{font-size:25px;font-weight:700;color:var(--blue);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .stat.amber .num{color:var(--amber)}
+  .stat.teal .num{color:var(--teal)}
+  .stat .lab{font-size:13px;color:var(--ink2);margin-top:4px;line-height:1.6}
+
+  /* ---------- misc ---------- */
+  .quote{border-left:3px solid var(--line2);padding:2px 0 2px 16px;color:var(--ink2);font-size:15px;margin:16px 0}
+  .quote b{color:var(--ink)}
+  .split{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:18px 0}
+  .mini{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .mini h4{margin:0 0 6px;font-size:15px}
+  .mini.good{border-color:#bbf7d0;background:#f8fdf9}
+  .mini.bad{border-color:#fecdd3;background:#fffafb}
+  .mini p{margin:6px 0 0;font-size:13.5px;color:var(--ink2);line-height:1.7}
+  .chk{list-style:none;padding:0;margin:14px 0}
+  .chk li{position:relative;padding-left:28px;margin:9px 0;font-size:14.5px}
+  .chk li::before{content:"";position:absolute;left:0;top:6px;width:16px;height:16px;border:1.5px solid var(--line2);border-radius:4px;background:#fff}
+  .src{font-size:12.5px;color:var(--ink3);margin-top:8px}
+  footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);font-size:13px;color:var(--ink3);text-align:center}
+  @media (max-width:560px){
+    .toc ol{grid-template-columns:1fr}
+  }
+
+.toclist{list-style:none;margin:8px 0 0;padding:0}
+.toclist li{padding:6px 2px;font-size:14px;line-height:1.6;color:var(--ink);border-bottom:1px dashed var(--line)}
+.toclist li:last-child{border-bottom:none}
+.tocpart{font-weight:700;color:var(--blue);margin-top:14px;font-size:13px;letter-spacing:.04em}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ================= HERO ================= -->
+  <header class="hero">
+    <span class="kicker">游 戏 经 济 学 漫 谈</span>
+    <h1>《梦幻西游》的<em>经济学</em><br>用现代货币理论看懂一个 20 年不崩的虚拟经济体</h1>
+    <p class="sub">一款 2003 年上线、点卡收费的国产网游，凭什么让游戏币 20 年不恶性通胀、金价稳如磐石？答案不在策划运气里，而藏在现代货币理论（MMT）的几个核心命题中——点卡就是「税收」，官方就是货币的垄断发行者。</p>
+    <div class="meta">
+      <span>2003 年上线</span>
+      <span>2025 同时在线破 275 万</span>
+      <span>20 年无恶性通胀</span>
+      <span>金价稳在 1:10 附近</span>
+      <span>基于 MMT 与公开资料整理</span>
+    </div>
+  </header>
+
+  <!-- ================= TOC ================= -->
+  <nav class="toc">
+<h3>目 录</h3>
+<ul class="toclist">
+<li>01 · 引言：一个运行 20 年不崩的经济体</li>
+<li>02 · 读懂 MMT：六个必须知道的概念</li>
+<li>03 · 梦幻西游经济系统全景</li>
+<li>04 · 概念映射总表：MMT ↔ 梦幻</li>
+<li>05 · 点卡 = 税收驱动货币</li>
+<li>06 · 官方 = 货币的垄断发行者</li>
+<li>07 · 垂直交易 vs 水平交易</li>
+<li>08 · 三部门均衡：官方 / 玩家 / 藏宝阁</li>
+<li>09 · 通胀是唯一的硬约束：金价稳定机制</li>
+<li>10 · 功能财政：网易的操盘术与自动稳定器</li>
+<li>11 · 日常任务 = 最后雇佣者计划</li>
+<li>12 · 反例：哪些设计会引爆恶性通胀</li>
+<li>13 · 结语 · 速查表与思考题</li>
+</ul>
+</nav>
+
+  <!-- ================= 01 ================= -->
+  <section id="s1">
+    <div class="sec-head">
+      <div class="badge">01</div>
+      <h2>引言：一个运行 20 年不崩的经济体<span class="en">Why This Matters</span></h2>
+    </div>
+
+    <p>绝大多数网络游戏逃不过一个宿命：运营几年后，游戏币烂大街、物价飞涨、老玩家财富归零、经济系统名存实亡。<strong>《梦幻西游》（电脑版）是个例外。</strong>它 2003 年上线，采用点卡计时收费，游戏内货币「梦幻币」（玩家常简称 MHB）到今天都没有经历过恶性通胀，游戏币与现金的兑换比例（玩家口中的「金价」）长期稳定在「约 3000 万梦幻币 ≈ 220~240 元人民币」这一带，也就是俗称的「1:10」量级。</p>
+
+    <p>网易自己总结过这套系统被称为业内<strong>「奇迹」</strong>的原因：它不是单靠策划设计出来的，而是天时、地利、人和、运气息息相关的极致组合。但抛开「奇迹」叙事，如果我们换一副经济学眼镜——尤其是现代货币理论（Modern Monetary Theory，简称 MMT）——去看，会发现梦幻西游的经济设计几乎是一份 MMT 教科书式的实操手册。</p>
+
+    <div class="stats">
+      <div class="stat"><div class="num">2003</div><div class="lab">上线年份，点卡计时收费时代</div></div>
+      <div class="stat teal"><div class="num">275万+</div><div class="lab">2025 年同时在线人数峰值（历史新高）</div></div>
+      <div class="stat amber"><div class="num">20年</div><div class="lab">从未出现恶性通胀</div></div>
+      <div class="stat"><div class="num">1:10</div><div class="lab">游戏币与现金兑换比例长期锚定量级</div></div>
+    </div>
+
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">梦幻西游经济的「不可能三角」被同时做到了</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:11px 16px;border:1.5px solid #9adcae;border-radius:11px;background:#f2fdf5;font-size:14px;text-align:left"><b style="color:#1e293b">① 货币稳定</b><br><small style="color:#475569">20 年无恶性通胀，金价不崩</small></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">＋</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:11px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">② 自由市场</b><br><small style="color:#475569">玩家间海量交易，官方只抽佣</small></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">＋</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:11px 16px;border:1.5px solid #eecb8a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">③ 长生命周期</b><br><small style="color:#475569">三代玩家、22 年沉淀、仍破纪录</small></div>
+<div class="cap">传统网游通常只能占住其中一到两项。梦幻被业内视为「奇迹」，正是因为三者长期共存。</div>
+</div>
+
+    <div class="callout co-blue">
+      <span class="lbl">本教程的主线</span>
+      <p>我们不评价游戏好不好玩，也不教你怎么搬砖赚钱。我们借 MMT 的六块理论透镜，把梦幻西游的货币、产出、消耗、交易、通胀调控逐层拆开，让你看明白：<strong>一个虚拟经济体，是如何被设计成「既不缺钱、又不烂钱」的。</strong></p>
+    </div>
+
+    <p>下面先花一节的篇幅，把 MMT 的核心概念讲清楚——这是后面所有类比的地基。如果你本来就懂 MMT，可以直接跳到第四节的映射总表。</p>
+  </section>
+
+  <!-- ================= 02 ================= -->
+  <section id="s2">
+    <div class="sec-head">
+      <div class="badge">02</div>
+      <h2>读懂 MMT：六个必须知道的概念<span class="en">Six Lenses</span></h2>
+    </div>
+
+    <p>现代货币理论是 20 世纪 90 年代由兰德尔·雷（L. Randall Wray）等人在克纳普的「国家货币论」、凯恩斯主义、内生货币理论基础上系统化的异端宏观经济学派。它最反直觉、也最常被误解。下面六个概念，是看懂梦幻经济的关键钥匙。</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">概念</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">一句话</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">为什么反直觉</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>货币国定论</b><br><span style="font-size:12.5px;color:#94a3b8">Chartalism</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">货币不是商品，是「国家发行的借据」，价值来自国家法令与强制义务</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">我们从小被教「钱因为有黄金/价值背书才值钱」，MMT 说不是</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>税收驱动货币</b><br><span style="font-size:12.5px;color:#94a3b8">Taxes Drive Money</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">人们之所以需要货币，是因为必须用货币去缴税；政府先花钱、人们才有钱纳税</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">传统认为「先收税才有钱花」，MMT 说顺序正好反过来</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>垄断发行者</b><br><span style="font-size:12.5px;color:#94a3b8">Monopoly Issuer</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">发行本国货币的主权政府，花钱是「创造货币」，收税是「销毁货币」</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">政府不会「钱不够花」，它受的是资源约束，不是资金约束</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>垂直 / 水平交易</b><br><span style="font-size:12.5px;color:#94a3b8">Vertical/Horizontal</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">政府与民间交易改变货币总量（垂直）；民间彼此交易只转移货币，总量不变（水平）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">我们通常不分「钱从哪来」和「钱在谁兜里转」</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>三部门均衡</b><br><span style="font-size:12.5px;color:#94a3b8">Sectoral Balances</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">政府、民间、对外三部门的盈余赤字之和为 0；一个部门的赤字必是另一个部门的盈余</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">「国家赤字 = 民间储蓄」这种镜像关系常被忽略</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>通胀是唯一约束</b><br><span style="font-size:12.5px;color:#94a3b8">Inflation Constraint</span></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">主权货币政府唯一真正的天花板是需求拉动型通胀，出现在资源被用满（充分就业）之后</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">主流担心「财政破产」，MMT 说破产不可能，失控通胀才可能</td></tr>
+</tbody>
+</table>
+</div>
+
+    <div class="callout co-amber">
+      <span class="lbl">一个必要的前置声明</span>
+      <p>MMT 在真实世界经济学家中争议极大（2019 年一项顶尖经济学家调查里，没有一个人认同它的核心主张），现实里的「财政赤字货币化」也确实多次酿成恶性通胀。本教程<strong>借用 MMT 的分析框架来解释一套游戏设计</strong>，不等于赞同它在现实宏观政策上的全部主张。在 sandbox 式的虚拟经济体里，MMT 的抽象逻辑反而异常清晰——这正是它的价值所在。</p>
+    </div>
+
+    <h3 class="violet">货币金字塔：谁发行的「钱」最硬</h3>
+    <p>MMT 还常用「货币金字塔」说明信用等级。越靠顶端，信用越高、越「硬」。把这套层级套到梦幻也能讲通：</p>
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">货币金字塔：信用从下往上递增</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #cbd5e1;border-radius:11px;background:#ffffff;font-size:14px;text-align:left"><b style="color:#1e293b">底层 · 玩家间借条</b><br><small style="color:#475569">临时符、摆摊赊账、友情借金——信用最弱</small></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↑</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">中层 · 梦幻币</b><br><small style="color:#475569">系统发行的硬通货，玩家间通用记账单位</small></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↑</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:9px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">顶层 · 点卡 / 人民币</b><br><small style="color:#475569">锚定现金的硬通货，所有梦幻币价值的终极标尺</small></div>
+<div class="cap">梦幻想让梦幻币稳，本质就是让它在金字塔里「够硬」——既不被滥发，又能随时换成顶层的点卡与人民币。</div>
+</div>
+  </section>
+
+  <!-- ================= 03 ================= -->
+  <section id="s3">
+    <div class="sec-head">
+      <div class="badge">03</div>
+      <h2>梦幻西游经济系统全景<span class="en">The System Map</span></h2>
+    </div>
+
+    <p>在套 MMT 之前，先把梦幻西游经济这台机器的零件认全。它包含三个层面的「货币」和一个核心市场。</p>
+
+    <div class="split">
+      <div class="mini">
+        <h4>① 点卡（时间货币）</h4>
+        <p>游戏采用点卡计时收费，每小时消耗 6 点。点卡需要真金白银购买——它是整个系统里唯一和现实人民币硬挂钩的东西，也是梦幻币价值的「锚」。</p>
+      </div>
+      <div class="mini good">
+        <h4>② 梦幻币 MHB（系统货币）</h4>
+        <p>游戏内唯一通用货币，由系统通过玩法产出、通过消耗渠道回笼。它能在游戏内直接购买其他玩家寄售的点卡——这是关键设计。</p>
+      </div>
+      <div class="mini">
+        <h4>③ 藏宝阁（现金出口）</h4>
+        <p>2008 年上线的官方交易平台。玩家可以把梦幻币、角色、装备卖成人民币（抽 5% 手续费）。它是虚拟经济与现实经济唯一的合规接口。</p>
+      </div>
+    </div>
+
+    <h3>货币循环：钱从哪来，到哪去</h3>
+    <p>梦幻西游的货币循环可以用一条主链路概括：系统把梦幻币「产出」到玩家手里，玩家之间自由交易，系统再通过各类「消耗」把梦幻币「回收」，多余的部分经藏宝阁流出到现实。理解这条链，是后面所有分析的前提。</p>
+
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">梦幻西游的货币主循环</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:10px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">系统产出</b><br><small style="color:#475569">师门 / 宝图 / 押镖 / 活动 注入梦幻币</small></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:10px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">玩家持有</b><br><small style="color:#475569">角色仓库里的梦幻币存量</small></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:10px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">玩家间交易</b><br><small style="color:#475569">买装备 / 宝宝 / 材料，货币在兜里转</small></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:10px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">系统回收</b><br><small style="color:#475569">点修 / 修装备 / 学技能 销毁梦幻币</small></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:10px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">藏宝阁出口</b><br><small style="color:#475569">5% 手续费后，部分流出到人民币</small></div>
+<div class="cap">系统同时掌握「水龙头」（产出）和「下水道」（消耗）。它能不能让水位稳定，取决于两端是否平衡——这正是 MMT 里「通胀约束」的游戏版。</div>
+</div>
+
+    <div class="callout co-teal">
+      <span class="lbl">为什么这套循环稳</span>
+      <p>网易把<strong>每一处梦幻币的产出都和玩家消耗的点卡时长绑定</strong>：你在线越久、做日常越多，产出越多，但同时消耗的点卡也越多。这从根上杜绝了「挂机狂刷就能无限印钱」的可能。产出率稳定可控，是稳定货币的第一条命。</p>
+    </div>
+  </section>
+
+  <!-- ================= 04 ================= -->
+  <section id="s4">
+    <div class="sec-head">
+      <div class="badge teal">04</div>
+      <h2>概念映射总表：MMT ↔ 梦幻<span class="en">The Rosetta Stone</span></h2>
+    </div>
+
+    <p>先给一张「翻译表」，把 MMT 的术语一一对应到梦幻西游的具体机制。后面每一节都是这张表的放大讲解。</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">MMT 概念</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">梦幻西游里的对应物</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">作用是否一致</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>货币国定论</b><br>货币是发行者的借据</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">梦幻币是网易系统发行的纯数字借据，本身无任何实物背书</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">✔ 完全一致</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>税收驱动货币</b><br>缴税义务创造货币需求</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">「必须交点卡才能继续玩」这个刚性义务，逼着玩家去挣梦幻币</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">✔ 高度一致</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>垄断发行者</b><br>政府创造/销毁货币</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">网易是唯一梦幻币发行方；产出即「印钱」，消耗即「销毁」</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">✔ 完全一致</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>垂直交易</b><br>政府↔民间改变总量</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">系统与玩家之间的产出/消耗，决定梦幻币净增或净减</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">✔ 完全一致</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>水平交易</b><br>民间↔民间只转移</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">玩家之间买卖装备/宝宝/材料，梦幻币总量不变</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">✔ 完全一致</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>三部门均衡</b><br>政府/民间/对外 镜像</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">系统回收 = 玩家净持有 + 藏宝阁净流出</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">✔ 可类比</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>通胀是唯一约束</b><br>资源用满后涨</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">金价（梦幻币兑换比例）是系统的「通胀仪表盘」</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">✔ 可类比</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>功能财政 / 自动稳定器</b><br>用收支调经济</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">网易调产出/消耗、合服、设手续费，作为经济的「稳压器」</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">✔ 可类比</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>最后雇佣者 / 就业保障</b><br>保底工资锚</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">师门/宝图/押镖等日常任务，提供人人可做的「点卡自给」保底收入</td><td class="y" style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">✔ 可类比</td></tr>
+</tbody>
+</table>
+</div>
+
+    <div class="callout co-violet">
+      <span class="lbl">一句话记住这张表</span>
+      <p><strong>网易 = 政府，梦幻币 = 主权货币，点卡 = 税，藏宝阁 = 海关。</strong>把这套替换套进去，梦幻西游的经济运行逻辑就几乎是一本 MMT 习题集。</p>
+    </div>
+  </section>
+
+  <!-- ================= 05 ================= -->
+  <section id="s5">
+    <div class="sec-head">
+      <div class="badge">05</div>
+      <h2>点卡 = 税收驱动货币<span class="en">Taxes Drive Money</span></h2>
+    </div>
+
+    <p>MMT 最著名、也最反直觉的一句口号是 <strong>「税收创造对货币的需求」（Taxes drive money）</strong>。它的逻辑是：政府垄断货币发行后，人们之所以愿意接受这种「没内在价值的纸片」，不是因为它好看，而是因为<strong>政府规定你必须用它来缴税，否则违法</strong>。是先有「必须缴税」这个义务，人们才去挣这种货币；政府也才能「先花钱、后收税」。</p>
+
+    <blockquote class="quote">
+      传统故事：政府先收税，才有钱花。<br>
+      MMT 故事：政府先花钱，人们拿到钱，再用它去缴税。<b>税收的主要功能不是「给政府融资」，而是「创造货币需求」。</b>
+    </blockquote>
+
+    <h3>梦幻西游里的「税」是什么</h3>
+    <p>在梦幻西游里，这个刚性义务就是<strong>点卡</strong>。你要继续玩、要继续升级、要继续交易，就必须持续消耗点卡；而点卡要用真金白银买——或者，用梦幻币在游戏内向其他玩家购买寄售的点卡。正是后一条，构成了梦幻币价值的「税收驱动」：</p>
+
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">点卡如何「驱动」梦幻币的需求</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:11px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">① 刚性义务</b><br><small style="color:#475569">玩家必须消耗点卡才能继续游戏</small></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:11px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">② 需求产生</b><br><small style="color:#475569">为了交「点卡税」，玩家必须去挣梦幻币</small></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:11px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">③ 货币有锚</b><br><small style="color:#475569">梦幻币因此能稳定兑换点卡，进而锚定人民币</small></div>
+<div class="cap">网易不承诺「1 梦幻币 = X 人民币」，但它让梦幻币能买点卡——这个可兑换性，就是梦幻币信用的全部来源，和主权货币靠「能缴税」获得信用如出一辙。</div>
+</div>
+
+    <div class="callout co-rose">
+      <span class="lbl">关键洞察</span>
+      <p>梦幻西游的聪明之处，在于它<strong>没有用「官方直接卖梦幻币换钱」</strong>来制造需求（那样等于官方亲自下场印钱变现，必然崩）。它用一个和现实绑定的「税」（点卡），把货币需求外包给了玩家的真实游玩刚需。货币因此既有需求、又不被官方滥发——这正是货币国定论 + 税收驱动货币的组合拳。</p>
+    </div>
+
+    <h3 class="teal">一个对照：如果取消「点卡税」会怎样</h3>
+    <p>设想梦幻改成免费游玩、不消耗点卡。那么梦幻币就失去了那个强制性的「必须用它能换到什么」的锚——玩家没有理由非持有梦幻币不可。结果就是：系统无论怎么回收，梦幻币都会因为「没人非要用它」而不断贬值，最终沦为只能买系统商店破烂的废纸。现实中很多免费网游的货币就是这样烂掉的。</p>
+    <div class="card">
+      <h4>数据旁证：金价的稳定区间</h4>
+      <p>公开资料与玩家社区共识显示，老区金价长期落在「约 3000 万梦幻币 ≈ 220~240 元人民币」附近，也就是俗称的 1:10 量级，且 20 年未发生偏离量级的大崩盘。这与「点卡锚 + 系统动态平衡」的支撑作用高度吻合。具体数值随新区/老区、版本与活动波动，本教程数字为 2026 年公开市价参考，非官方定价。</p>
+    </div>
+  </section>
+
+  <!-- ================= 06 ================= -->
+  <section id="s6">
+    <div class="sec-head">
+      <div class="badge">06</div>
+      <h2>官方 = 货币的垄断发行者<span class="en">Monopoly Issuer</span></h2>
+    </div>
+
+    <p>MMT 认为，发行本国货币的主权政府是货币的<strong>垄断发行者</strong>：它「花钱」就是凭空创造货币，它「收税」就是销毁货币。政府不会因为「钱不够」而破产——它受的约束是<strong>资源约束（实际商品与服务够不够），不是资金约束</strong>。真正的天花板，是钱印太多、超出经济实际产能时爆发的通胀。</p>
+
+    <p>把这句话搬到梦幻西游：<strong>网易是唯一能「创造」和「销毁」梦幻币的主体。</strong>系统给师门任务发奖、给押镖发钱，就是「创造货币」；系统收点修费、维修费、技能学习费，就是「销毁货币」。玩家之间无论怎么倒买倒卖，都只是在转移货币，既不增也不减。</p>
+
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">系统「印钱」与「销钱」的两端阀门</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:11px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">印钱端（系统支出）</b><br><small style="color:#475569">师门 / 宝图 / 押镖 / 活动奖励 → 梦幻币净增加</small></div>
+<div style="color:#94a3b8;font-size:18px;line-height:1.3;margin:2px 0">⚖ 平衡</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:11px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">销钱端（系统税收）</b><br><small style="color:#475569">点修 / 修装备 / 学技能 → 梦幻币净销毁</small></div>
+<div class="cap">「产出 = 消耗」时，梦幻币总存量稳定；产出 &gt; 消耗，梦幻币贬值（通胀）；产出 &lt; 消耗，梦幻币升值（通缩）。系统同时握两端，就能主动维持平衡。</div>
+</div>
+
+    <div class="callout co-blue">
+      <span class="lbl">「先支后收」的类比</span>
+      <p>MMT 的「政府先花钱、后收税」在梦幻里体现为：系统先把梦幻币发到玩家手里（玩家才能拿它去交点卡、去交易），再通过各类消耗把一部分收回来。玩家手里的梦幻币净存量，恰恰等于「系统净支出」。这和「政府赤字 = 民间净金融资产」是同一个算式。</p>
+    </div>
+
+    <h3>为什么梦幻币不会「被印爆」</h3>
+    <p>传统网游崩盘的常见原因是：存在一个几乎无限、且不与点卡绑定的产出口（比如打怪必掉钱、挂机就能刷），系统的「印钱端」失控。梦幻的设计刻意堵死这条路：</p>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">防崩设计</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">具体做法</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">对应的 MMT 思想</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">产出绑定点卡</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">在线越久产出越多，但点卡消耗也越多，净增量受控</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">垄断发行者掌握印钱节奏</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">消耗渠道极多</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">点修、装备耐久维修、技能修炼、打造失败均销毁大量梦幻币</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">销钱端吸收过剩流动性</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不直接卖战力</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">官方只提供一级素材，不亲自印钱卖给玩家换现金</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">避免官方亲自下场制造通胀</td></tr>
+</tbody>
+</table>
+</div>
+  </section>
+
+  <!-- ================= 07 ================= -->
+  <section id="s7">
+    <div class="sec-head">
+      <div class="badge teal">07</div>
+      <h2>垂直交易 vs 水平交易<span class="en">Vertical &amp; Horizontal</span></h2>
+    </div>
+
+    <p>MMT 把经济交易分成两类，这个区分对理解梦幻物价至关重要：</p>
+    <div class="split">
+      <div class="mini good">
+        <h4>垂直交易 Vertical</h4>
+        <p>政府与民间之间的交易。<b>改变货币总量</b>：政府支出 → 货币净增；政府收税 → 货币净减。在梦幻里就是<strong>「系统 ↔ 玩家」</strong>：产出与消耗。</p>
+      </div>
+      <div class="mini">
+        <h4>水平交易 Horizontal</h4>
+        <p>民间彼此之间的交易。<b>只转移货币，总量不变</b>：你的收入就是别人的支出。在梦幻里就是<strong>「玩家 ↔ 玩家」</strong>：摆摊、拍卖、买卖装备。</p>
+      </div>
+    </div>
+
+    <p>很多人分析游戏经济时，会把「土豪花 10 万人民币买装备」和「系统发了一笔奖励」混为一谈。在 MMT 框架里，这两件事实质完全不同：前者是水平交易（梦幻币只是从 A 的兜转到 B 的兜，总量没变），后者才是垂直交易（货币总量真实变化）。</p>
+
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">两类交易，对货币总量的影响截然不同</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:11px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">垂直：玩家 ↔ 系统</b><br><small style="color:#475569">产出 +100 → 总量 +100</small><br><small style="color:#475569">消耗 −80 → 总量 −80</small></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">与</div>
+<div style="display:inline-block;max-width:460px;min-width:190px;padding:11px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">水平：玩家 ↔ 玩家</b><br><small style="color:#475569">A 付 100 给 B</small><br><small style="color:#475569">总量仍 = 100，只是换兜</small></div>
+<div class="cap">决定「梦幻币到底贬没贬值」的，永远只有垂直交易（系统净投放）。土豪的百万交易再热闹，也不增加一枚梦幻币。</div>
+</div>
+
+    <div class="callout co-teal">
+      <span class="lbl">为什么这个区分能救命</span>
+      <p>它帮我们看清：梦幻西游「人人皆赢家」的生态（大 R 花钱、普通玩家产出、倒爷盘活）表面上钱流得很猛，但那几乎全是<strong>水平交易</strong>。只要系统的垂直净投放被控住，再热闹的玩家间交易都不会让货币贬值。这恰恰解释了为什么别的经济全靠「大 R 养服」，而梦幻能形成自洽的内循环。</p>
+    </div>
+  </section>
+
+  <!-- ================= 08 ================= -->
+  <section id="s8">
+    <div class="sec-head">
+      <div class="badge violet">08</div>
+      <h2>三部门均衡：官方 / 玩家 / 藏宝阁<span class="en">Sectoral Balances</span></h2>
+    </div>
+
+    <p>MMT 的部门分析法（Sectoral Balances）指出：经济可分成若干部门，<strong>所有部门的盈余与赤字之和必为 0</strong>。一个部门的赤字，必然对应另一个或多个部门的盈余。经典三部门是「政府 / 民间 / 对外」，对应到梦幻可以做如下映射：</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">MMT 部门</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">梦幻对应</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">盈余 / 赤字含义</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>政府（系统）</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">游戏系统（产出 − 消耗）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">净回收（赤字侧）＝从玩家处销毁的净货币</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>民间（玩家）</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">全体玩家（持有 + 内部交易）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">净持有（盈余侧）＝玩家整体财富积累</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>对外部门</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">藏宝阁（RMT 出口到人民币）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">净流出（赤字侧）＝被提现带走的货币</td></tr>
+</tbody>
+</table>
+</div>
+
+    <p>于是得到梦幻版的部门恒等式：</p>
+    <div class="card" style="text-align:center">
+      <p style="margin:0;font-size:16px"><strong>系统净回收 ＝ 玩家净持有 ＋ 藏宝阁净流出</strong></p>
+      <p class="src" style="margin:8px 0 0">等号左边是「销钱端 − 印钱端」，右边是货币的两个去处。</p>
+    </div>
+
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">梦幻版三部门资金镜像</div>
+<div style="display:inline-block;max-width:440px;min-width:180px;padding:11px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">系统净回收（左）</b><br><small style="color:#475569">消耗 − 产出 ＝ 被销毁的净货币</small></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">＝</div>
+<div style="display:inline-block;max-width:440px;min-width:180px;padding:11px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">玩家净持有（右①）</b><br><small style="color:#475569">留在玩家仓库里的梦幻币财富</small></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">＋</div>
+<div style="display:inline-block;max-width:440px;min-width:180px;padding:11px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">藏宝阁净流出（右②）</b><br><small style="color:#475569">经 5% 手续费提现到人民币的部分</small></div>
+<div class="cap">藏宝阁既是「出口」，也是系统的「泄压阀」：当玩家整体想套现时，货币从右②流出，等于帮系统分担了一部分净回收压力。</div>
+</div>
+
+    <div class="callout co-violet">
+      <span class="lbl">一个反直觉的结论</span>
+      <p>按 MMT，民间部门的净储蓄，一定来自政府（或对外）的净赤字。对应到梦幻：<strong>玩家整体能在游戏里「攒下财富」，前提是系统净投放（净回收为负）或藏宝阁净流入为正。</strong>如果系统一边倒地超量回收，玩家手里的梦幻币就会越来越少、越来越「值钱」（通缩），反而伤害交易活跃度。平衡才是一切。</p>
+    </div>
+  </section>
+
+  <!-- ================= 09 ================= -->
+  <section id="s9">
+    <div class="sec-head">
+      <div class="badge amber">09</div>
+      <h2>通胀是唯一的硬约束：金价稳定机制<span class="en">The Inflation Constraint</span></h2>
+    </div>
+
+    <p>MMT 最核心的约束命题是：主权货币政府<strong>唯一真正的天花板是需求拉动型通胀</strong>——当经济资源（劳动力、产能、原材料）被用满（充分就业）之后，再印钱只会推高物价，而不会增加实际产出。在梦幻西游里，这个「通胀仪表盘」就是<strong>金价</strong>：梦幻币相对人民币的比值。金价持续下跌（同样人民币换到更多梦幻币），就是梦幻版的通货膨胀。</p>
+
+    <h3>金价的天平：产出与消耗的拔河</h3>
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">金价 = 梦幻币的「通胀温度计」</div>
+<div style="display:inline-block;max-width:440px;min-width:180px;padding:11px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">产出 &gt; 消耗</b><br><small style="color:#475569">梦幻币变多 → 金价下跌 → 货币贬值（通胀）</small></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">⚖</div>
+<div style="display:inline-block;max-width:440px;min-width:180px;padding:11px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">产出 &lt; 消耗</b><br><small style="color:#475569">梦幻币变少 → 金价上涨 → 货币升值（通缩）</small></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">＝</div>
+<div style="display:inline-block;max-width:440px;min-width:180px;padding:11px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">产出 ≈ 消耗</b><br><small style="color:#475569">总量稳定 → 金价稳定 → 货币信用坚挺</small></div>
+<div class="cap">系统要做的，就是让天平长期停在最后一行。任何把天平推向两头的因素（版本爆肝、活动滥发、或回收过猛），都会引发金价波动。</div>
+</div>
+
+    <p>网易用来维持这杆天平的手段，几乎全都对应 MMT 里「用财政收支作为稳定器」的思路：</p>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">过热情形</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">网易的对冲动作</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">作用（MMT 视角）</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">某服经济过热、梦幻币泛滥</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">合服，让健康服消化不良资产、吸收过剩货币</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">用「赤字部门」吃掉过剩流动性</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">版本活动导致短期产出飙升</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">小幅更新制造新消耗点，拉长膨胀过程</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">主动开大「销钱端」吸收</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">金价波动、玩家套利空间过大</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">调整产出 / 消耗比例，稳定兑换预期</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">用政策工具维持价格锚</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">大量梦幻币想套现离场</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">藏宝阁 5% 手续费 + 考察期，放缓流出节奏</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对外部门设「闸门」调控泄压</td></tr>
+</tbody>
+</table>
+</div>
+
+    <div class="callout co-amber">
+      <span class="lbl">现实 MMT 的警示同样适用</span>
+      <p>这里也要诚实：MMT 在现实中最被诟病的，就是「低估通胀失控的风险」。梦幻西游能控住，是因为它<strong>有绝对的、可编程的印钱与销钱权限</strong>，且玩家无处可逃（不能换服务器货币、不能拒绝点卡）。现实主权货币政府没有这么干净的控制权（汇率、外债、政治约束都来捣乱）。所以梦幻是 MMT 的「理想实验场」，而非现实政策的证据。</p>
+    </div>
+  </section>
+
+  <!-- ================= 10 ================= -->
+  <section id="s10">
+    <div class="sec-head">
+      <div class="badge">10</div>
+      <h2>功能财政：网易的操盘术与自动稳定器<span class="en">Functional Finance</span></h2>
+    </div>
+
+    <p>MMT 继承自勒纳（Abba Lerner）的<strong>功能财政（Functional Finance）</strong>主张：财政政策的目标不应该是「平衡预算」，而应该是「用收支调节经济」——经济冷就多花（赤字），经济热就多收（盈余）。预算本身盈亏不重要，重要的是它有没有把经济稳定在充分就业且物价平稳的状态。网易对梦幻经济的操盘，几乎是这套主张的游戏版。</p>
+
+    <h3>网易的三招「功能财政」</h3>
+    <div class="split">
+      <div class="mini good">
+        <h4>只卖一级素材</h4>
+        <p>官方不直接卖战力道具，只提供打造材料、低级资源。战力由玩家自己生产、交易、消耗而成。官方退居「收税者」而非「竞争者」。</p>
+      </div>
+      <div class="mini">
+        <h4>概率回收</h4>
+        <p>装备打造有成功率，失败即销毁材料与梦幻币；高级玩法高消耗。用「赌」把海量梦幻币悄悄销掉，且玩家心甘情愿。</p>
+      </div>
+      <div class="mini bad">
+        <h4>合服与版本微调</h4>
+        <p>经济过热的服合并消化；小幅版本更新制造新消耗点，把资源膨胀过程无限拉长，避免一次性爆雷。</p>
+      </div>
+    </div>
+
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">自动稳定器：一个自我修正的闭环</div>
+<div style="display:inline-block;max-width:440px;min-width:180px;padding:10px 16px;border:1.5px solid #a8b8f5;border-radius:11px;background:#f3f6ff;font-size:14px;text-align:left"><b style="color:#1e293b">① 监测金价</b><br><small style="color:#475569">读通胀温度计</small></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:440px;min-width:180px;padding:10px 16px;border:1.5px solid #8fd3cb;border-radius:11px;background:#f0fbf9;font-size:14px;text-align:left"><b style="color:#1e293b">② 判断偏离</b><br><small style="color:#475569">偏热（通胀）或偏冷（通缩）</small></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↓</div>
+<div style="display:inline-block;max-width:440px;min-width:180px;padding:10px 16px;border:1.5px solid #f0c48a;border-radius:11px;background:#fffaf0;font-size:14px;text-align:left"><b style="color:#1e293b">③ 调两端</b><br><small style="color:#475569">加产出 或 加消耗 / 合服 / 手续费</small></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">↺ 回到 ①</div>
+<div class="cap">这套循环不需要「每季开人大议会」，它由运营团队持续微调——是一个可编程的、近乎自动的稳定器。</div>
+</div>
+
+    <div class="callout co-blue">
+      <span class="lbl">为什么这招现实里学不会</span>
+      <p>现实政府调收支要通过立法、选举、央行独立性等层层博弈，且受汇率和外债掣肘。网易则是「一键改参数」的独裁式央行＋财政部合体。所以梦幻能做出教科书级的功能财政，而现实只能望洋兴叹。这再次说明：梦幻是 MMT 逻辑的沙盒，不是它的现实论据。</p>
+    </div>
+  </section>
+
+  <!-- ================= 11 ================= -->
+  <section id="s11">
+    <div class="sec-head">
+      <div class="badge teal">11</div>
+      <h2>日常任务 = 最后雇佣者计划<span class="en">Job Guarantee / ELR</span></h2>
+    </div>
+
+    <p>MMT 提出过一项著名的政策提案：<strong>最后雇佣者计划（Employer of Last Resort, ELR）</strong>，也叫「就业保障」。政府承诺为任何愿意工作的人提供一份固定工资的基础岗位，这份「保底工资」就像央行给利率设的「地板」一样，给整个劳动力市场价格托底，既消除非自愿失业，又锚定工资水平。梦幻西游里，师门、宝图、押镖等日常任务，恰好扮演了同一个角色。</p>
+
+    <h3>日常任务：游戏里的「保底工资」</h3>
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">日常任务</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">保底产出（参考）</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">它像 ELR 的哪一面</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>师门任务</b>（每日 20 轮）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">约 20~80 万梦幻币 + 门派贡献</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">人人可做、稳定到账的「最低工资」</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>打宝图</b>（每日 50 次）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">约 125 万梦幻币（直接卖图）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">低门槛劳动，覆盖点卡消耗</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>普通押镖</b>（每日 50 次）</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">约 75 万梦幻币 + 随机天阵</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">稳定「工资」，附小额彩票</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>活力 / 体力变现</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">炼药 / 烹饪 / 临时符，日均 40 万+</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">零额外投入的「隐性补贴」</td></tr>
+</tbody>
+</table>
+</div>
+    <p class="src">注：上述产出为公开攻略整理的 2026 年市价参考，随等级、版本、活动波动，非官方定值；且需扣除点卡、耐久等隐性成本才是净收益。</p>
+
+    <div class="callout co-teal">
+      <span class="lbl">为什么说它是「最后雇佣者」</span>
+      <p>无论你是零充的纯新手，还是退坑边缘的休闲玩家，这几个日常任务<strong>永远向你敞开、永远给一份能覆盖点卡的基础收入</strong>。它把「想留在游戏里就必须持续消耗点卡」这个义务，变成「做点日常就能自给」的可能——就像 ELR 把非自愿失业变成「想工作就有工作」。玩家因此不会被经济系统「挤」出去，长线留存才有了根基。</p>
+    </div>
+
+    <div class="diagram" style="text-align:center">
+<div class="dtitle">日常任务托住「点卡自给」底线</div>
+<div style="display:inline-block;max-width:440px;min-width:180px;padding:11px 16px;border:1.5px solid #f2aab8;border-radius:11px;background:#fff5f7;font-size:14px;text-align:left"><b style="color:#1e293b">点卡义务</b><br><small style="color:#475569">每天必须交的「税」</small></div>
+<div style="color:#94a3b8;font-size:16px;line-height:1.35;margin:2px 0">被兜底</div>
+<div style="display:inline-block;max-width:440px;min-width:180px;padding:11px 16px;border:1.5px solid #9adcae;border-radius:11px;background:#f2fdf5;font-size:14px;text-align:left"><b style="color:#1e293b">日常保底收入</b><br><small style="color:#475569">师门 / 宝图 / 押镖 稳定覆盖</small></div>
+<div class="cap">只要「保底收入 ≥ 点卡成本」，普通玩家就能在不花钱的前提下留下来——这是梦幻「人人皆赢家」生态的地基。</div>
+</div>
+  </section>
+
+  <!-- ================= 12 ================= -->
+  <section id="s12">
+    <div class="sec-head">
+      <div class="badge rose">12</div>
+      <h2>反例：哪些设计会引爆恶性通胀<span class="en">What Breaks It</span></h2>
+    </div>
+
+    <p>理解了梦幻为什么稳，反过来想「哪些设计会毁掉一个游戏经济」，会更清楚。几乎所有梦幻避开的坑，都是别的游戏踩过的雷。用 MMT 的透镜，这些坑可以统一归到「垂直交易的印钱端失控」或「货币失去硬锚」。</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">危险设计</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">为什么会崩</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">MMT 解释</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">梦幻怎么避开的</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>挂机就能无限刷钱</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">印钱端不受控，货币迅速泛滥</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">垂直净投放失控 → 通胀</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">产出绑定点卡时长</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>没有消耗渠道</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">钱只进不出，囤积后变废纸</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">销钱端缺失 → 货币无用</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">点修 / 维修 / 技能海量消耗</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>官方直接卖战力换钱</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">官方亲自印钱变现，抽走购买力</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">垄断发行者滥用印钱权</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只卖一级素材，抽佣不印钱</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>没有官方交易平台</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">私下 RMT 混乱，汇率失控、外挂横行</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">对外部门无「闸门」</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">藏宝阁合规出口 + 手续费</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere"><b>货币没有硬锚</b></td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">玩家无理由持有，必然贬值</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">缺少「税收驱动」的刚需</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">点卡刚需锚定人民币</td></tr>
+</tbody>
+</table>
+</div>
+
+    <div class="callout co-rose">
+      <span class="lbl">一句话总结反例</span>
+      <p>崩，几乎都崩在<strong>同一个地方：系统没能同时握紧「印钱端」和「销钱端」，也没给货币一个非持有不可的硬锚</strong>。梦幻西游的「奇迹」，不过是这三条全做对了，而且 22 年没松懈。</p>
+    </div>
+  </section>
+
+  <!-- ================= 13 ================= -->
+  <section id="s13">
+    <div class="sec-head">
+      <div class="badge violet">13</div>
+      <h2>结语 · 速查表与思考题<span class="en">Wrap-up</span></h2>
+    </div>
+
+    <p>把全文收成一张速查表。回头看，梦幻西游经济系统之所以稳，不是因为它多复杂，而是因为它无意间满足了 MMT 给主权货币经济开出的几条核心处方：垄断发行、税收驱动需求、垂直/水平分清、部门镜像守恒、通胀为唯一约束、用功能财政做稳定器、用就业保障托底。它是一份用代码写出来的 MMT 习题集。</p>
+
+    <div class="tblwrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border:1px solid #e2e8f0;border-radius:12px">
+<table style="width:100%;border-collapse:collapse;font-size:13.5px">
+<thead><tr><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">MMT 命题</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">梦幻西游对应</th><th style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere;background:#f1f5f9;font-weight:700;text-align:left">一句话</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">垄断发行者</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">网易独家发梦幻币</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">印钱和销钱都它说了算</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">税收驱动货币</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">点卡刚需</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">不交点卡玩不了 → 必须挣梦幻币</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">垂直 / 水平</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">系统↔玩家 / 玩家↔玩家</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">只有系统交易才改总量</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">三部门均衡</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">系统 / 玩家 / 藏宝阁</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">净回收 = 净持有 + 净流出</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">通胀唯一约束</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">金价仪表盘</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">金价是通胀温度计</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">功能财政</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">调产出/消耗/合服</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">可编程的自动稳定器</td></tr>
+<tr><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">最后雇佣者</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">师门/宝图/押镖</td><td style="padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.65;overflow-wrap:anywhere">保底收入托住点卡自给</td></tr>
+</tbody>
+</table>
+</div>
+
+    <h3 class="violet">留给你的三个思考题</h3>
+    <ul>
+      <li><strong>如果梦幻取消点卡、改纯免费，经济会怎样？</strong>——用「税收驱动货币」推演货币需求消失后的信用崩塌。</li>
+      <li><strong>藏宝阁的 5% 手续费，本质是对外部门的「关税」还是「资本管制」？</strong>——它更像 MMT 里哪种稳定工具？</li>
+      <li><strong>现实中为什么没有一个政府能像网易那样「完美执行 MMT」？</strong>——差异到底在控制权、汇率，还是政治约束？</li>
+    </ul>
+
+    <div class="callout co-blue">
+      <span class="lbl">一句话带走</span>
+      <p><strong>梦幻西游用 22 年证明了一件事：当一个经济体同时握紧印钱端、销钱端，并给货币一个非持有不可的硬锚时，通胀就能被长期驯服——哪怕它只是一个游戏。</strong> MMT 也许解释不了现实世界，但它恰好能解释梦幻西游。</p>
+    </div>
+
+    <h3>延伸阅读与资料来源</h3>
+    <ul>
+      <li>现代货币理论（MMT）核心命题：货币国定论、税收驱动货币、三部门均衡、功能财政 —— 参考中国社会科学院、人大经济论坛等公开综述与维基百科条目。</li>
+      <li>梦幻西游经济设计：点卡计时收费、藏宝阁（2008 上线）、产出绑定点卡、海量消耗渠道、合服机制 —— 参考网易官方资料与多家游戏媒体、玩家社区公开攻略（2026 年市价数据为社区共识参考，非官方定值）。</li>
+      <li>文中所有「产出参考数值」为公开攻略整理的市价，随等级、版本、活动波动，且需扣除点卡、耐久等隐性成本，仅供理解机制，不构成任何收益承诺。</li>
+    </ul>
+  </section>
+
+  <footer>
+    图解教程 · 用现代货币理论（MMT）解读《梦幻西游》游戏经济<br>
+    内容基于公开资料与 MMT 理论框架整理 · 纯静态页面，无脚本依赖<br>
+    站点：ptato.github.io
+  </footer>
+</div>
+</body>
+</html>
